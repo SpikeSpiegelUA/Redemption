@@ -482,13 +482,14 @@ void UInventoryMenu::UseButtonOnClicked()
 			else if (SupportItem->TypeOfSupport == SupportType::BOOST) {
 
 			}
+			UGameplayStatics::PlaySound2D(GetWorld(), PlayerCharacter->GetAudioManager()->UseHealOrBoostSoundCue);
 		}
 	}
 }
 
 void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 {
-	if (InventoryScrollBox->GetAllChildren().Num() > 0) {
+	if (InventoryScrollBox->GetAllChildren().Num() > 0 && PickedItem) {
 		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 		ABattleManager* BattleManager = PlayerCharacter->GetBattleManager();
 		URedemptionGameInstance* GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
@@ -542,6 +543,7 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 			else if (SupportItem->TypeOfSupport == SupportType::BOOST) {
 
 			}
+			UGameplayStatics::PlaySound2D(GetWorld(), PlayerCharacter->GetAudioManager()->UseHealOrBoostSoundCue);
 		}
 		else if (PickedItem->GetType() == ItemType::ASSAULT) {
 			AAssaultItem* AssaultItem = Cast<AAssaultItem>(PickedItem);

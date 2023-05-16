@@ -58,20 +58,25 @@ APlayerCharacter::APlayerCharacter() {
 	ForwardRayInfoClass = nullptr;
 
 	PrimaryActorTick.bTickEvenWhenPaused = true;
-
-	TArray<AActor*> BattleManagerActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABattleManager::StaticClass(), BattleManagerActors);
-	TArray<AActor*> GameManagerActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGameManager::StaticClass(), GameManagerActors);
-	if(BattleManagerActors.Num() > 0)
-	BattleManager = Cast<ABattleManager>(BattleManagerActors[0]);
-	if (GameManagerActors.Num() > 0)
-		GameManager = Cast<AGameManager>(GameManagerActors[0]);
 }
 
 void APlayerCharacter::BeginPlay() 
 {
 	Super::BeginPlay();
+
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+	TArray<AActor*> BattleManagerActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABattleManager::StaticClass(), BattleManagerActors);
+	TArray<AActor*> GameManagerActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGameManager::StaticClass(), GameManagerActors);
+	TArray<AActor*> AudioManagerActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAudioManager::StaticClass(), AudioManagerActors);
+	if (AudioManagerActors.Num() > 0)
+		AudioManager = Cast<AAudioManager>(AudioManagerActors[0]);
+	if (BattleManagerActors.Num() > 0)
+		BattleManager = Cast<ABattleManager>(BattleManagerActors[0]);
+	if (GameManagerActors.Num() > 0)
+		GameManager = Cast<AGameManager>(GameManagerActors[0]);
 
 	PlayerController = GetWorld()->GetFirstPlayerController();
 	if(PlayerController)
@@ -93,6 +98,8 @@ void APlayerCharacter::BeginPlay()
 			BattleResultsScreenWidget = CreateWidget<UBattleResultsScreen>(PlayerController, BattleResultsScreenClass);
 		if (InventoryMenuClass)
 			InventoryMenuWidget = CreateWidget<UInventoryMenu>(PlayerController, InventoryMenuClass);
+		if (PauseMenuClass)
+			PauseMenuWidget = CreateWidget<UPauseMenu>(PlayerController, PauseMenuClass);
 		if (PlayerBarsClass)
 			PlayerBarsWidget = CreateWidget<UPlayerBarsWidget>(PlayerController, PlayerBarsClass);
 		if (DialogueBoxClass)
@@ -210,7 +217,20 @@ void APlayerCharacter::InputOpenPlayerMenu()
 	if (CanInput) {
 		PlayerMenuWidget->AddToViewport();
 		PlayerController->bShowMouseCursor = true;
+		PlayerController->ActivateTouchInterface(EmptyTouchInterface);
 		PlayerController->bEnableClickEvents = true;
+		PlayerController->bEnableMouseOverEvents = true;
+		PlayerController->SetPause(true);
+	}
+}
+
+void APlayerCharacter::InputOpenPauseMenu()
+{
+	if (CanInput) {
+		PauseMenuWidget->AddToViewport();
+		PlayerController->bShowMouseCursor = true;
+		PlayerController->bEnableClickEvents = true;
+		PlayerController->ActivateTouchInterface(EmptyTouchInterface);
 		PlayerController->bEnableMouseOverEvents = true;
 		PlayerController->SetPause(true);
 	}
@@ -386,7 +406,7 @@ void APlayerCharacter::InputAction()
 void APlayerCharacter::ChangeLevel(AActor* ActorResult)
 {
 	//If ray result isn't null and is level change trigger,loading screen is set, then load level 
-	if (LoadingScreenClass) {
+	if (LoadingScreenClass && IsValid(PlayerController)) {
 		if (ActorResult->ActorHasTag(FName(TEXT("ChangeLevelToDungeon")))) {
 			UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
 			GameInstance->PlayerCurrentHP = CurrentHP;
@@ -470,6 +490,7 @@ void APlayerCharacter::DialogueInteract(AActor* ActorResult)
 		if (ActorResult->GetClass()->ImplementsInterface(UDialogueActionsInterface::StaticClass())) {
 			ATownNPC* TownNPC = Cast<ATownNPC>(ActorResult);
 			TownNPC->StartADialogue();
+			PlayerController->ActivateTouchInterface(EmptyTouchInterface);
 		}
 }
 
@@ -582,6 +603,7 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	PEI->BindAction(InputActions->InputScrollRight, ETriggerEvent::Started, this, &APlayerCharacter::InputScrollRight);
 	PEI->BindAction(InputActions->InputScrollUp, ETriggerEvent::Started, this, &APlayerCharacter::InputScrollUp);
 	PEI->BindAction(InputActions->InputScrollDown, ETriggerEvent::Started, this, &APlayerCharacter::InputScrollDown);
+	PEI->BindAction(InputActions->InputPause, ETriggerEvent::Started, this, &APlayerCharacter::InputOpenPauseMenu);
 }
 //Ray of detecting objects in front of a player
 FHitResult APlayerCharacter::ForwardRay()
@@ -611,7 +633,7 @@ void APlayerCharacter::Death()
 
 }
 
-UInventoryScrollBoxEntryWidget* APlayerCharacter::GetInventoryScrollBoxEntryWidget()
+UInventoryScrollBoxEntryWidget* APlayerCharacter::GetInventoryScrollBoxEntryWidget() const
 {
 	return InventoryScrollBoxEntryWidget;
 }
@@ -630,62 +652,67 @@ void APlayerCharacter::RestartBattleResultsScreenWidget()
 			BattleResultsScreenWidget = CreateWidget<UBattleResultsScreen>(PlayerController, BattleResultsScreenClass);
 }
 
-UForwardRayInfo* APlayerCharacter::GetForwardRayInfoWidget()
+UForwardRayInfo* APlayerCharacter::GetForwardRayInfoWidget() const
 {
 	return ForwardRayInfoWidget;
 }
 
-UDialogueBox* APlayerCharacter::GetDialogueBoxWidget()
+UDialogueBox* APlayerCharacter::GetDialogueBoxWidget() const
 {
 	return DialogueBoxWidget;
 }
 
-UPlayerMenu* APlayerCharacter::GetPlayerMenuWidget()
+UPlayerMenu* APlayerCharacter::GetPlayerMenuWidget() const
 {
 	return PlayerMenuWidget;
 }
 
-UInventoryMenu* APlayerCharacter::GetInventoryMenuWidget()
+UInventoryMenu* APlayerCharacter::GetInventoryMenuWidget() const
 {
 	return InventoryMenuWidget;
 }
 
-UBattleResultsScreen* APlayerCharacter::GetBattleResultsScreenWidget()
+UBattleResultsScreen* APlayerCharacter::GetBattleResultsScreenWidget() const
 {
 	return BattleResultsScreenWidget;
 }
 
-TSubclassOf<class UInventoryScrollBoxEntryWidget> APlayerCharacter::GetInventoryScrollBoxEntryClass()
+TSubclassOf<class UInventoryScrollBoxEntryWidget> APlayerCharacter::GetInventoryScrollBoxEntryClass() const
 {
 	return InventoryScrollBoxEntryClass;
 }
 
-TSubclassOf<class UResponseEntry> APlayerCharacter::GetResponseEntryClass()
+TSubclassOf<class UResponseEntry> APlayerCharacter::GetResponseEntryClass() const
 {
 	return ResponseEntryClass;
 }
 
-bool APlayerCharacter::GetCanInput()
+bool APlayerCharacter::GetCanInput() const
 {
 	return CanInput;
 }
 
-UBattleMenu* APlayerCharacter::GetBattleMenuWidget()
+UBattleMenu* APlayerCharacter::GetBattleMenuWidget() const
 {
 	return BattleMenuWidget;
 }
 
-ABattleManager* APlayerCharacter::GetBattleManager()
+ABattleManager* APlayerCharacter::GetBattleManager() const
 {
 	return BattleManager;
 }
 
-AGameManager* APlayerCharacter::GetGameManager()
+AGameManager* APlayerCharacter::GetGameManager() const
 {
 	return GameManager;
 }
 
-URedemptionGameInstance* APlayerCharacter::GetGameInstance()
+AAudioManager* APlayerCharacter::GetAudioManager() const
+{
+	return AudioManager;
+}
+
+URedemptionGameInstance* APlayerCharacter::GetGameInstance() const
 {
 	return GameInstance;
 }
@@ -695,11 +722,36 @@ void APlayerCharacter::SetCanInput(bool Value)
 	CanInput = Value;
 }
 
-UResponsesBox* APlayerCharacter::GetResponsesBox()
+UResponsesBox* APlayerCharacter::GetResponsesBox() const
 {
 	return ResponsesBoxWidget;
 }
 
+UTouchInterface* APlayerCharacter::GetEmptyTouchInterface() const
+{
+	return EmptyTouchInterface;
+}
+
+UTouchInterface* APlayerCharacter::GetStandardTouchInterface() const
+{
+	return StandardTouchInterface;
+}
+
 void APlayerCharacter::SetInventoryScrollBoxEntryWidget(UInventoryScrollBoxEntryWidget* NewWidget) {
 	InventoryScrollBoxEntryWidget = NewWidget;
+}
+
+void APlayerCharacter::SetGameManager(AGameManager* const &NewGameManager)
+{
+	GameManager = NewGameManager;
+}
+
+void APlayerCharacter::SetBattleManager(ABattleManager* const &NewBattleManager)
+{
+	BattleManager = NewBattleManager;
+}
+
+void APlayerCharacter::SetAudioManager(AAudioManager* const &NewAudioManager)
+{
+	AudioManager = NewAudioManager;
 }

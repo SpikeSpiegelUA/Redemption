@@ -41,6 +41,7 @@ EBTNodeResult::Type UBTTask_EndDialogue::ExecuteTask(UBehaviorTreeComponent& Own
 
 	PlayerController->bShowMouseCursor = false;
 	PlayerCharacter->EnableInput(PlayerController);
+	PlayerController->ActivateTouchInterface(PlayerCharacter->GetStandardTouchInterface());
 
 	return EBTNodeResult::Succeeded;
 }

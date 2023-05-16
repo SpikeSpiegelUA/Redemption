@@ -58,18 +58,18 @@ protected:
 public:
 	void SetEnemyName(FName Name);
 
-	UCanvasPanel* GetCenterMark();
-	UVerticalBox* GetMenuVerticalBox();
-	UVerticalBox* GetAttackMenuVerticalBox();
-	UBorder* GetMenuBorder();
-	UBorder* GetEnemyNameBorder();
-	UBorder* GetAttackMenuBorder();
-	UButton* GetAttackButton();
-	UButton* GetDefendButton();
-	UButton* GetItemButton();
-	UButton* GetAttackMenuBackButton();
-	UButton* GetAttackActionButton();
-	UTextBlock* GetEnemyNameTextBlock();
+	UCanvasPanel* GetCenterMark() const;
+	UVerticalBox* GetMenuVerticalBox() const;
+	UVerticalBox* GetAttackMenuVerticalBox() const;
+	UBorder* GetMenuBorder() const;
+	UBorder* GetEnemyNameBorder() const;
+	UBorder* GetAttackMenuBorder() const;
+	UButton* GetAttackButton() const;
+	UButton* GetDefendButton() const;
+	UButton* GetItemButton() const;
+	UButton* GetAttackMenuBackButton() const;
+	UButton* GetAttackActionButton() const;
+	UTextBlock* GetEnemyNameTextBlock() const;
 
 	bool IsPreparingToAttack = false;
 	bool IsPreparingToUseSkill = false;

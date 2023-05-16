@@ -39,7 +39,7 @@ void ACombatEnemyNPCAIController::SetDynamicSubtree()
 {
 	ACharacterInTheWorld* Chr = Cast<ACharacterInTheWorld>(GetPawn());
 	if (Chr->GetSmartObject()) {
-		FGameplayTag SubTag;
-		BehaviorTreeComponent->SetDynamicSubtree(SubTag, Chr->GetSmartObject()->GetSubTree());
+		const FGameplayTag SubTreeTag = FGameplayTag::RequestGameplayTag(FName("SubTreeTag"));
+		BehaviorTreeComponent->SetDynamicSubtree(SubTreeTag, Chr->GetSmartObject()->GetSubTree());
 	}
 }

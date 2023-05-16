@@ -47,6 +47,7 @@ void AGameManager::StartBattle(AActor* AttackingNPC)
 	PC->bShowMouseCursor = true;
 	PC->bEnableClickEvents = true;
 	PC->bEnableMouseOverEvents = true;
+	PC->ActivateTouchInterface(PlayerCharacter->GetEmptyTouchInterface());
 	PlayerCharacter->SetCanInput(false);
 	PlayerCharacter->SetActorLocation(PlayerBattleSpawn->GetActorLocation());
 	PlayerCharacter->SetActorRotation(FRotator(0, 180, 0 ));
@@ -73,6 +74,9 @@ void AGameManager::StartBattle(AActor* AttackingNPC)
 			BattleManager->BattleActors.Add(SpawnedEnemy);
 		}
 	}
+	//Background Music set
+	PlayerCharacter->GetAudioManager()->DungeonExplorationBackgroundMusicAudioComponent->SetPaused(true);
+	PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponent->SetPaused(false);
 }
 
 void AGameManager::EndBattle()
@@ -86,6 +90,7 @@ void AGameManager::EndBattle()
 	PC->bShowMouseCursor = false;
 	PC->bEnableClickEvents = false;
 	PC->bEnableMouseOverEvents = false;
+	PC->ActivateTouchInterface(PlayerCharacter->GetStandardTouchInterface());
 	PlayerCharacter->SetCanInput(true);
 	PlayerCharacter->GetBattleResultsScreenWidget()->RemoveFromParent();
 	for (int i = 0; i < BattleManager->BattleActors.Num(); i++)
@@ -94,6 +99,9 @@ void AGameManager::EndBattle()
 	PlayerCharacter->RestartBattleMenuWidget();
 	PlayerCharacter->RestartBattleResultsScreenWidget();
 	RestartBattleTransitionScreenWidget();
+	//Background Music set
+	PlayerCharacter->GetAudioManager()->DungeonBattleResultsBackgroundMusicAudioComponent->SetPaused(true);
+	PlayerCharacter->GetAudioManager()->DungeonExplorationBackgroundMusicAudioComponent->SetPaused(false);
 }
 
 void AGameManager::ToBattleTransition() 

@@ -9,10 +9,12 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\InventoryMenu.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\PauseMenu.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\PlayerMenu.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\BattleResultsScreen.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\GameManager.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\AudioManager.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\DialogueBox.h"
@@ -59,11 +61,13 @@ private:
 	void CheckForwardRayHitResult();
 	void Death();
 
-	UPROPERTY(BlueprintReadOnly, Category = "GeneralInformation", meta = (AllowPrivateAccess = true))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		ABattleManager* BattleManager;
-	UPROPERTY(BlueprintReadOnly, Category = "GeneralInformation", meta = (AllowPrivateAccess = true))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
+		AAudioManager* AudioManager;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		AGameManager* GameManager;
-	UPROPERTY(BlueprintReadOnly, Category = "GeneralInformation", meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		URedemptionGameInstance* GameInstance;
 
 	UPROPERTY()
@@ -74,6 +78,12 @@ private:
 		UPlayerCharacterAnimInstance* PlayerAnimInstance;
 	UPROPERTY()
 		AUIManager* UIManager;
+
+	//Touch interfaces
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mobile", meta = (AllowPrivateAccess = true))
+		UTouchInterface* StandardTouchInterface;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mobile", meta = (AllowPrivateAccess = true))
+		UTouchInterface* EmptyTouchInterface;
 public:
 	APlayerCharacter();
 
@@ -90,21 +100,25 @@ public:
 	virtual void BeginPlay() override;
 
 	//Access functions
-	UPlayerMenu* GetPlayerMenuWidget();
-	UInventoryMenu* GetInventoryMenuWidget();
-	UBattleResultsScreen* GetBattleResultsScreenWidget();
-	TSubclassOf<class UInventoryScrollBoxEntryWidget> GetInventoryScrollBoxEntryClass();
-	TSubclassOf<class UResponseEntry> GetResponseEntryClass();
-	bool GetCanInput();
+	UPlayerMenu* GetPlayerMenuWidget() const;
+	UInventoryMenu* GetInventoryMenuWidget() const;
+	UBattleResultsScreen* GetBattleResultsScreenWidget() const;
+	TSubclassOf<class UInventoryScrollBoxEntryWidget> GetInventoryScrollBoxEntryClass() const;
+	TSubclassOf<class UResponseEntry> GetResponseEntryClass() const;
+	bool GetCanInput() const;
 	void SetCanInput(bool Value);
-	UBattleMenu* GetBattleMenuWidget();
-	ABattleManager* GetBattleManager();
-	AGameManager* GetGameManager();
-	URedemptionGameInstance* GetGameInstance();
-	UInventoryScrollBoxEntryWidget* GetInventoryScrollBoxEntryWidget();
-	UDialogueBox* GetDialogueBoxWidget();
-	UForwardRayInfo* GetForwardRayInfoWidget();
-	UResponsesBox* GetResponsesBox();
+	UBattleMenu* GetBattleMenuWidget() const;
+	ABattleManager* GetBattleManager() const;
+	AGameManager* GetGameManager() const;
+	AAudioManager* GetAudioManager() const;
+	URedemptionGameInstance* GetGameInstance() const;
+	UInventoryScrollBoxEntryWidget* GetInventoryScrollBoxEntryWidget() const;
+	UDialogueBox* GetDialogueBoxWidget() const;
+	UForwardRayInfo* GetForwardRayInfoWidget() const;
+	UResponsesBox* GetResponsesBox() const;
+	UTouchInterface* GetEmptyTouchInterface() const;
+	UTouchInterface* GetStandardTouchInterface() const;
+
 
 	virtual void GetHit(int ValueOfAttack, EquipmentDamageType TypeOfDamage) override;
 
@@ -113,6 +127,10 @@ public:
 	void RestartBattleResultsScreenWidget();
 
 	void SetInventoryScrollBoxEntryWidget(UInventoryScrollBoxEntryWidget* NewWidget);
+	void SetGameManager(AGameManager* const &NewGameManager);
+	void SetBattleManager(ABattleManager* const &NewBattleManager);
+	void SetAudioManager(AAudioManager* const &NewAudioManager);
+
 
 	int8 MeleeAttackValue = 1;
 	int8 RangeAttackValue = 0;
@@ -160,6 +178,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class UInventoryMenu> InventoryMenuClass;
 	UPROPERTY(EditAnywhere, Category = "UI")
+		TSubclassOf<class UPauseMenu> PauseMenuClass;
+	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class UBattleMenu> BattleMenuClass;
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class UBattleResultsScreen> BattleResultsScreenClass;
@@ -180,6 +200,8 @@ protected:
 		class UInventoryScrollBoxEntryWidget* InventoryScrollBoxEntryWidget;
 	UPROPERTY()
 		UInventoryMenu* InventoryMenuWidget;
+	UPROPERTY()
+		UPauseMenu* PauseMenuWidget;
 	UPROPERTY()
 		UBattleMenu* BattleMenuWidget;
 	UPROPERTY()
@@ -245,6 +267,8 @@ private:
 
 	//Opens player menu
 	void InputOpenPlayerMenu();
+	
+	void InputOpenPauseMenu();
 
 	//Scroll Control
 	void InputScrollRight();

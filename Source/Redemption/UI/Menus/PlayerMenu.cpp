@@ -23,15 +23,17 @@ void UPlayerMenu::NativeConstruct()
 
 void UPlayerMenu::CloseMenuButtonOnClicked()
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+	APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(PlayerController->GetCharacter());
 	if(PlayerCharacter)
 	PlayerCharacter->GetPlayerMenuWidget()->RemoveFromParent();
 	APlayerController* PC = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 	if (PC) {
-		PC->bShowMouseCursor = false;
+		PC->bShowMouseCursor = true;
 		PC->bEnableClickEvents = false;
 		PC->bEnableMouseOverEvents = false;
 		PC->SetPause(false);
+		PlayerController->ActivateTouchInterface(PlayerCharacter->GetStandardTouchInterface());
 	}
 }
 

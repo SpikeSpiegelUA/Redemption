@@ -26,7 +26,7 @@ bool UBattleMenu::Initialize()
 		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 		GameInstance = PlayerCharacter->GetGameInstance();
 	}
-	if (AttackButton)
+	if (IsValid(AttackButton))
 		AttackButton->OnClicked.AddDynamic(this, &UBattleMenu::AttackButtonOnClicked);
 	if (DefendButton)
 		DefendButton->OnClicked.AddDynamic(this, &UBattleMenu::DefendButtonOnClicked);
@@ -199,62 +199,62 @@ void UBattleMenu::SetEnemyName(FName Name)
 	EnemyNameTextBlock->SetText(FText::FromName(Name));
 }
 
-UCanvasPanel* UBattleMenu::GetCenterMark()
+UCanvasPanel* UBattleMenu::GetCenterMark() const
 {
 	return CenterMark;
 }
 
-UVerticalBox* UBattleMenu::GetMenuVerticalBox()
+UVerticalBox* UBattleMenu::GetMenuVerticalBox() const
 {
 	return MenuVerticalBox;
 }
 
-UVerticalBox* UBattleMenu::GetAttackMenuVerticalBox()
+UVerticalBox* UBattleMenu::GetAttackMenuVerticalBox() const
 {
 	return AttackMenuVerticalBox;
 }
 
-UBorder* UBattleMenu::GetMenuBorder()
+UBorder* UBattleMenu::GetMenuBorder() const
 {
 	return MenuBorder;
 }
 
-UBorder* UBattleMenu::GetEnemyNameBorder()
+UBorder* UBattleMenu::GetEnemyNameBorder() const
 {
 	return EnemyNameBorder;
 }
 
-UBorder* UBattleMenu::GetAttackMenuBorder()
+UBorder* UBattleMenu::GetAttackMenuBorder() const
 {
 	return AttackMenuBorder;
 }
 
-UButton* UBattleMenu::GetAttackButton()
+UButton* UBattleMenu::GetAttackButton() const
 {
 	return AttackButton;
 }
 
-UButton* UBattleMenu::GetDefendButton()
+UButton* UBattleMenu::GetDefendButton() const
 {
 	return DefendButton;
 }
 
-UButton* UBattleMenu::GetItemButton()
+UButton* UBattleMenu::GetItemButton() const
 {
 	return ItemButton;
 }
 
-UButton* UBattleMenu::GetAttackMenuBackButton()
+UButton* UBattleMenu::GetAttackMenuBackButton() const
 {
 	return AttackMenuBackButton;
 }
 
-UButton* UBattleMenu::GetAttackActionButton()
+UButton* UBattleMenu::GetAttackActionButton() const
 {
 	return AttackActionButton;
 }
 
-UTextBlock* UBattleMenu::GetEnemyNameTextBlock()
+UTextBlock* UBattleMenu::GetEnemyNameTextBlock() const
 {
 	return EnemyNameTextBlock;
 }

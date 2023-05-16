@@ -42,5 +42,15 @@ public:
 		uint16 PlayerMaxHP = 100;
 	UPROPERTY(VisibleAnywhere, Category = "Player")
 		uint16 PlayerMaxMana = 100;
+
+	//Settings variables
+	UPROPERTY(VisibleAnywhere, Category = "Player")
+		float MasterVolume = 1.f;
+	UPROPERTY(VisibleAnywhere, Category = "Player")
+		float BackgroundVolume = 1.f;
+	UPROPERTY(VisibleAnywhere, Category = "Player")
+		float EffectsVolume = 1.f;
+	int8 GraphicsQualityInstance = 0;
+	
 };
 

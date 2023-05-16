@@ -36,4 +36,6 @@ public:
 		UInputAction* InputScrollRight;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 		UInputAction* InputBack;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		UInputAction* InputPause;
 };

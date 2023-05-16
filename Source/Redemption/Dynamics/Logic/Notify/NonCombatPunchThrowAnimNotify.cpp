@@ -12,10 +12,15 @@ void UNonCombatPunchThrowAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UA
 	TSubclassOf<AGameManager> ClassToFind;
 	ClassToFind = AGameManager::StaticClass();
 	TArray<AActor*> FoundManagers;
-	UGameplayStatics::GetAllActorsOfClass(MeshComp->GetAttachmentRootActor()->GetWorld(), ClassToFind, FoundManagers);
-	float DistanceBetweenEnemyAndPlayer = (MeshComp->GetAttachmentRootActor()->GetWorld()->GetFirstPlayerController()->GetCharacter()->GetActorLocation() - MeshComp->GetAttachmentRootActor()->GetActorLocation()).Length();
-	if (FoundManagers.Num() > 0 && DistanceBetweenEnemyAndPlayer <= 250.f) {
-		AGameManager* GameManager = Cast<AGameManager>(FoundManagers[0]);
-		GameManager->StartBattle(MeshComp->GetAttachmentRootActor());
-	}
+	if(MeshComp->GetAttachmentRootActor())
+		if (IsValid(MeshComp->GetAttachmentRootActor()->GetWorld()))
+			if(IsValid(MeshComp->GetAttachmentRootActor()->GetWorld()->GetFirstPlayerController()))
+			{
+				UGameplayStatics::GetAllActorsOfClass(MeshComp->GetAttachmentRootActor()->GetWorld(), ClassToFind, FoundManagers);
+				float DistanceBetweenEnemyAndPlayer = (MeshComp->GetAttachmentRootActor()->GetWorld()->GetFirstPlayerController()->GetCharacter()->GetActorLocation() - MeshComp->GetAttachmentRootActor()->GetActorLocation()).Length();
+				if (FoundManagers.Num() > 0 && DistanceBetweenEnemyAndPlayer <= 250.f) {
+					AGameManager* GameManager = Cast<AGameManager>(FoundManagers[0]);
+					GameManager->StartBattle(MeshComp->GetAttachmentRootActor());
+				}
+			}
 }
