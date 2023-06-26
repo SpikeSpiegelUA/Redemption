@@ -25,6 +25,6 @@ public:
 
 	virtual void BeginPlay() override;
 
-	int GetRadius();
+	int GetRadius() const;
 	
 };

@@ -18,7 +18,7 @@ void UCombatNPCAnimInstance::NativeInitializeAnimation()
 void UCombatNPCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
-	if (NPCReference)
+	if (IsValid(NPCReference))
 		UpdateAnimProperties();
 	else {
 
@@ -40,7 +40,17 @@ void UCombatNPCAnimInstance::SetIsDead(bool Value)
 	IsDead = Value;
 }
 
-bool UCombatNPCAnimInstance::GetIsDead()
+void UCombatNPCAnimInstance::SetGotHit(bool Value)
+{
+	GotHit = Value;
+}
+
+bool UCombatNPCAnimInstance::GetIsDead() const
 {
 	return IsDead;
+}
+
+bool UCombatNPCAnimInstance::GetGotHit() const
+{
+	return GotHit;
 }

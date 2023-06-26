@@ -8,9 +8,9 @@
 bool UPlayerMenu::Initialize()
 {
 	const bool bSuccess = Super::Initialize();
-	if (CloseMenuButton)
+	if (IsValid(CloseMenuButton))
 		CloseMenuButton->OnClicked.AddDynamic(this, &UPlayerMenu::CloseMenuButtonOnClicked);
-	if (InventoryButton)
+	if (IsValid(InventoryButton))
 		InventoryButton->OnClicked.AddDynamic(this, &UPlayerMenu::InventoryButtonOnClicked);
 	if (!bSuccess) return false;
 	return bSuccess;
@@ -23,25 +23,27 @@ void UPlayerMenu::NativeConstruct()
 
 void UPlayerMenu::CloseMenuButtonOnClicked()
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	if(PlayerCharacter)
-	PlayerCharacter->GetPlayerMenuWidget()->RemoveFromParent();
 	APlayerController* PC = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-	if (PC) {
-		PC->bShowMouseCursor = false;
-		PC->bEnableClickEvents = false;
-		PC->bEnableMouseOverEvents = false;
-		PC->SetPause(false);
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+	if (IsValid(PlayerCharacter)) {
+		PlayerCharacter->GetPlayerMenuWidget()->RemoveFromParent();
+		if (IsValid(PC)) {
+			PC->bShowMouseCursor = true;
+			PC->bEnableClickEvents = false;
+			PC->bEnableMouseOverEvents = false;
+			PC->SetPause(false);
+			PC->ActivateTouchInterface(PlayerCharacter->GetStandardTouchInterface());
+		}
 	}
 }
 
 void UPlayerMenu::InventoryButtonOnClicked()
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	if (PlayerCharacter)
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
 		PlayerCharacter->GetPlayerMenuWidget()->RemoveFromParent();
-	PlayerCharacter->GetInventoryMenuWidget()->AddToViewport();
-	PlayerCharacter->GetInventoryMenuWidget()->GetInventoryBorder()->SetVisibility(ESlateVisibility::Visible);
-	PlayerCharacter->GetInventoryMenuWidget()->GetNotInBattleMenuIncludedCanvasPanel()->SetVisibility(ESlateVisibility::Visible);
-	PlayerCharacter->GetInventoryMenuWidget()->GetBattleMenuButtonsForItemsBorder()->SetVisibility(ESlateVisibility::Hidden);
+		PlayerCharacter->GetInventoryMenuWidget()->AddToViewport();
+		PlayerCharacter->GetInventoryMenuWidget()->GetInventoryBorder()->SetVisibility(ESlateVisibility::Visible);
+		PlayerCharacter->GetInventoryMenuWidget()->GetNotInBattleMenuIncludedCanvasPanel()->SetVisibility(ESlateVisibility::Visible);
+		PlayerCharacter->GetInventoryMenuWidget()->GetBattleMenuButtonsForItemsBorder()->SetVisibility(ESlateVisibility::Hidden);
+	}
 }

@@ -10,16 +10,8 @@
 void UPlayerMeleeAttackEndAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
 	//Hit a selected enemy
-	TSubclassOf<APlayerCharacter> ClassToFind;
-	ClassToFind = APlayerCharacter::StaticClass();
-	TArray<AActor*> FoundPlayers;
-	UGameplayStatics::GetAllActorsOfClass(MeshComp->GetAttachmentRootActor()->GetWorld(), ClassToFind, FoundPlayers);
-	if (FoundPlayers.Num() > 0) {
-		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(FoundPlayers[0]);
-		if (PlayerCharacter)
-			PlayerCharacter->Battle_IsMovingToStartPosition = true;
-		UPlayerCharacterAnimInstance* AnimInstance = Cast<UPlayerCharacterAnimInstance>(MeshComp->GetAnimInstance());
-		if(AnimInstance)
-		    AnimInstance->SetIsAttacking(false);
-	}
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(MeshComp->GetOwner()); IsValid(PlayerCharacter))
+		PlayerCharacter->Battle_IsMovingToStartPosition = true;
+	if(UPlayerCharacterAnimInstance* AnimInstance = Cast<UPlayerCharacterAnimInstance>(MeshComp->GetAnimInstance());IsValid(AnimInstance))
+		AnimInstance->SetIsAttacking(false);
 }

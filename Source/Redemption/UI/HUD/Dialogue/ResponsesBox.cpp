@@ -15,7 +15,7 @@ void UResponsesBox::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-UVerticalBox* UResponsesBox::GetResponseVerticalBox()
+UVerticalBox* UResponsesBox::GetResponseVerticalBox() const
 {
 	return ResponseVerticalBox;
 }

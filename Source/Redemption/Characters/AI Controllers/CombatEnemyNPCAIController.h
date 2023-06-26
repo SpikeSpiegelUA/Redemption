@@ -22,5 +22,5 @@ public:
 	virtual void SetDynamicSubtree() override;
 
 private:
-	uint8 ActorsTurnKeyID;
+	uint8 ActorsTurnKeyID {};
 };

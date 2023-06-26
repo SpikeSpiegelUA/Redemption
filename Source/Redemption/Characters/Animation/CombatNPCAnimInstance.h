@@ -19,19 +19,24 @@ public:
 protected:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
-	class ACombatEnemyNPC* NPCReference;
+	UPROPERTY(BlueprintReadOnly, Category = "Animation Properties")
+		class ACombatEnemyNPC* NPCReference;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation Properties")
-		float Speed;
+		float Speed{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation Properties")
-		bool IsAttacking;
+		bool IsAttacking{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation Properties")
-		bool IsDead;
+		bool IsDead{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation Properties")
+		bool GotHit{};
 	UFUNCTION(BlueprintCallable, Category = "Animations")
 		virtual void UpdateAnimProperties();
 
 public:
 	void SetIsAttacking(bool Value);
 	void SetIsDead(bool Value);
+	void SetGotHit(bool Value);
 
-	bool GetIsDead();
+	bool GetIsDead() const;
+	bool GetGotHit() const;
 };

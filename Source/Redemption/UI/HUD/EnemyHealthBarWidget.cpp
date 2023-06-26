@@ -17,12 +17,12 @@ void UEnemyHealthBarWidget::NativeConstruct()
 	HealthBar->SynchronizeProperties();
 }
 
-float UEnemyHealthBarWidget::GetHealthPercentage()
+float UEnemyHealthBarWidget::GetHealthPercentage() const
 {
 	return HP/MaxHP;
 }
 
-UProgressBar* UEnemyHealthBarWidget::GetHealthBar()
+UProgressBar* UEnemyHealthBarWidget::GetHealthBar() const
 {
 	return HealthBar;
 }

@@ -25,13 +25,13 @@ EBTNodeResult::Type UBTTask_EndDialogue::ExecuteTask(UBehaviorTreeComponent& Own
 	UDialogueBox* DialogueBoxWidget = Cast<UDialogueBox>(MyBlackboard->GetValueAsObject(DialogueBoxWidgetKeySelector.SelectedKeyName));
 
 	if (!DialogueBoxWidget)
-		EBTNodeResult::Failed;
+		return EBTNodeResult::Failed;
 
 	APlayerCharacter* PlayerCharacter = nullptr;
 	if (GetWorld())
 		PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	if (!PlayerCharacter)
-		EBTNodeResult::Failed;
+		return EBTNodeResult::Failed;
 
 	DialogueBoxWidget->RemoveFromParent();
 
@@ -39,8 +39,10 @@ EBTNodeResult::Type UBTTask_EndDialogue::ExecuteTask(UBehaviorTreeComponent& Own
 
 	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("IsInDialogue", false);
 
-	PlayerController->bShowMouseCursor = false;
+	PlayerController->bShowMouseCursor = true;
 	PlayerCharacter->EnableInput(PlayerController);
+	PlayerController->ActivateTouchInterface(PlayerCharacter->GetStandardTouchInterface());
+	PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->ClearChildren();
 
 	return EBTNodeResult::Succeeded;
 }

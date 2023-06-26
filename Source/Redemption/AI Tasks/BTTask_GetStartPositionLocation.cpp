@@ -19,15 +19,15 @@ EBTNodeResult::Type UBTTask_GetStartPositionLocation::ExecuteTask(UBehaviorTreeC
 {
 	const UBlackboardComponent* MyBlackboard = OwnerComp.GetBlackboardComponent();
 	AAIController* MyController = OwnerComp.GetAIOwner();
-	if (!MyController || !MyBlackboard)
+	if (!IsValid(MyController) || !IsValid(MyBlackboard))
 		return EBTNodeResult::Failed;
 
 	ACombatEnemyNPC* EnemyChr = Cast<ACombatEnemyNPC>(MyController->GetPawn());
 	APlayerCharacter* PlayerChr = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	ABattleManager* BattleManager = nullptr;
-	if(PlayerChr)
+	if(IsValid(PlayerChr))
 		BattleManager = PlayerChr->GetBattleManager();
-	if (!EnemyChr || !PlayerChr || !BattleManager)
+	if (!IsValid(EnemyChr) || !IsValid(PlayerChr) || !IsValid(BattleManager))
 		return EBTNodeResult::Failed;
 
 	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Object>("TargetActor", EnemyChr->StartLocation);

@@ -20,32 +20,32 @@ EBTNodeResult::Type UBTTask_GetRandomPoint::ExecuteTask(UBehaviorTreeComponent& 
 {
 	const UBlackboardComponent* MyBlackboard = OwnerComp.GetBlackboardComponent();
 	AAIController* MyController = OwnerComp.GetAIOwner();
-	if (!MyController || !MyBlackboard) 
+	if (!IsValid(MyController) || !IsValid(MyBlackboard))
 		return EBTNodeResult::Failed;
 
 	ACharacterInTheWorld* Chr = Cast<ACharacterInTheWorld>(MyController->GetPawn());
-	if (!Chr) 
+	if (!IsValid(Chr))
 		return EBTNodeResult::Failed;
 
 	ARandomPoint* PointRef = Cast<ARandomPoint>(Chr->GetSmartObject());
 	ARandomPointAndChasing* PointChasingRef = Cast<ARandomPointAndChasing>(Chr->GetSmartObject());
-	if (!PointRef && !PointChasingRef) 
+	if (!IsValid(PointRef) && !IsValid(PointChasingRef))
 		return EBTNodeResult::Succeeded;
 
-	if(PointRef && PointRef->GetRadius()<=0)
+	if(IsValid(PointRef) && PointRef->GetRadius()<=0)
 		return EBTNodeResult::Succeeded;
 
-	if (PointChasingRef && PointChasingRef->GetRadius() <= 0)
+	if (IsValid(PointChasingRef) && PointChasingRef->GetRadius() <= 0)
 		return EBTNodeResult::Succeeded;
 
 	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
-	FNavLocation ResultPoint;
+	FNavLocation ResultPoint{};
 
 	while (true) {
 		bool FoundPoint = false;
-		if(PointRef)
+		if(IsValid(PointRef))
 			FoundPoint = NavSys->GetRandomReachablePointInRadius(Chr->GetActorLocation(), PointRef->GetRadius(), ResultPoint);
-		if (PointChasingRef)
+		if (IsValid(PointChasingRef))
 			FoundPoint = NavSys->GetRandomReachablePointInRadius(Chr->GetActorLocation(), PointChasingRef->GetRadius(), ResultPoint);
 		if (FoundPoint) {
 			OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Vector>("MoveToLocation", ResultPoint);

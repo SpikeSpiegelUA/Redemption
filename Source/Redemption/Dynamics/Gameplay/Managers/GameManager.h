@@ -21,11 +21,11 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "General Variables")
-		class APlayerCharacter* PlayerCharacter;
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "General Variables", transient)
+		class APlayerCharacter* PlayerCharacter{};
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Battle variables")
-		AActor* PlayerBattleSpawn;
+		AActor* PlayerBattleSpawn {};
 
 	// 0 - spawn 1, 1 - spawn 2, 2 - spawn 3, 3 - spawn 4
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle variables")
@@ -34,9 +34,9 @@ protected:
 	//UI Components
 	//Battle transition variables
 	UPROPERTY(EditAnywhere, Category = "UI")
-		class UToBattleTransitionScreen* ToBattleTransitionScreen;
+		class UToBattleTransitionScreen* ToBattleTransitionScreen{};
 
-	FTimerHandle ToBattleTransitionTimerHandle;
+	FTimerHandle ToBattleTransitionTimerHandle{};
 
 	UFUNCTION()
 		void ToBattleTransition();
@@ -45,24 +45,24 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void StartBattle(AActor* AttackingNPC);
+	void StartBattle(AActor* const &AttackingNPC);
 	void EndBattle();
 
-	ABattleManager* GetBattleManager();
+	ABattleManager* GetBattleManager() const;
 
-	AActor* GetPlayerBattleSpawn();
-	TArray<AActor*> GetEnemyBattleSpawns();
+	AActor* GetPlayerBattleSpawn() const;
+	TArray<AActor*> GetEnemyBattleSpawns() const;
 
 	//Restore widgets to default state
 	void RestartBattleTransitionScreenWidget();
 
 private:
-	UPROPERTY(BlueprintReadOnly, Category = "Battle", meta = (AllowPrivateAccess = true))
-		ABattleManager* BattleManager;
+	UPROPERTY(BlueprintReadOnly, Category = "Battle", meta = (AllowPrivateAccess = true), transient)
+		ABattleManager* BattleManager {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Creation", meta = (AllowPrivateAccess = true))
-		TSubclassOf<AWarzombieBattleAI> AWarzombieBattleAIClass;
+		TSubclassOf<AWarzombieBattleAI> AWarzombieBattleAIClass{};
 	
 	//End Battle variables
-	FVector PlayerLastLocation;
-	FRotator PlayerLastRotation;
+	FVector PlayerLastLocation{};
+	FRotator PlayerLastRotation{};
 };

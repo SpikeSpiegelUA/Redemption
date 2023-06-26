@@ -17,7 +17,7 @@ void UPlayerCharacterAnimInstance::NativeInitializeAnimation()
 void UPlayerCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
-	if (PlayerReference)
+	if (IsValid(PlayerReference))
 		UpdateAnimProperties();
 	else {
 
@@ -33,9 +33,24 @@ void UPlayerCharacterAnimInstance::UpdateAnimProperties()
 	IsInAir = PlayerReference->GetCharacterMovement()->IsFalling();
 }
 
-bool UPlayerCharacterAnimInstance::GetIsInAir()
+bool UPlayerCharacterAnimInstance::GetIsInAir() const
 {
 	return IsInAir;
+}
+
+bool UPlayerCharacterAnimInstance::GetIsBlocking() const
+{
+	return IsBlocking;
+}
+
+bool UPlayerCharacterAnimInstance::GetIsThrowing() const
+{
+	return IsThrowing;
+}
+
+bool UPlayerCharacterAnimInstance::GetIsAttackingWithMagic() const
+{
+	return IsAttackingWithMagic;
 }
 
 void UPlayerCharacterAnimInstance::SetIsAttacking(bool Value)
@@ -51,4 +66,24 @@ void UPlayerCharacterAnimInstance::SetSpeed(float Value)
 void UPlayerCharacterAnimInstance::SetIsDead(bool Value)
 {
 	IsDead = Value;
+}
+
+void UPlayerCharacterAnimInstance::SetIsBlocking(bool Value)
+{
+	IsBlocking = Value;
+}
+
+void UPlayerCharacterAnimInstance::SetGotHit(bool Value)
+{
+	GotHit = Value;
+}
+
+void UPlayerCharacterAnimInstance::SetIsThrowing(bool Value)
+{
+	IsThrowing = Value;
+}
+
+void UPlayerCharacterAnimInstance::SetIsAttackingWithMagic(bool Value)
+{
+	IsAttackingWithMagic = Value;
 }

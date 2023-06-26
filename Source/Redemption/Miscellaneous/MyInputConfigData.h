@@ -17,23 +17,25 @@ class REDEMPTION_API UMyInputConfigData : public UDataAsset
 
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-		UInputAction* InputMove;
+		UInputAction* InputMove {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-		UInputAction* InputLook;
+		UInputAction* InputLook {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-		UInputAction* InputJump;
+		UInputAction* InputJump {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-		UInputAction* InputAction;
+		UInputAction* InputAction {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-		UInputAction* InputOpenPlayerMenu;
+		UInputAction* InputOpenPlayerMenu {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-		UInputAction* InputScrollUp;
+		UInputAction* InputScrollUp {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-		UInputAction* InputScrollDown;
+		UInputAction* InputScrollDown {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-		UInputAction* InputScrollLeft;
+		UInputAction* InputScrollLeft {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-		UInputAction* InputScrollRight;
+		UInputAction* InputScrollRight {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-		UInputAction* InputBack;
+		UInputAction* InputBack {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		UInputAction* InputPause {};
 };

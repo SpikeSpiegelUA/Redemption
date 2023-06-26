@@ -22,25 +22,39 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory")
 		TArray<TSubclassOf<class AGameItem>> InstanceItemsInTheInventory;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-		TSubclassOf<class AEquipmentItem> InstanceEquipedMelee;
+		TSubclassOf<class AEquipmentItem> InstanceEquipedMelee{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-		TSubclassOf<class AEquipmentItem> InstanceEquipedRange;
+		TSubclassOf<class AEquipmentItem> InstanceEquipedRange{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-		TSubclassOf<class AEquipmentItem> InstanceEquipedHead;
+		TSubclassOf<class AEquipmentItem> InstanceEquipedHead{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-		TSubclassOf<class AEquipmentItem> InstanceEquipedTorse;
+		TSubclassOf<class AEquipmentItem> InstanceEquipedTorse{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-		TSubclassOf<class AEquipmentItem> InstanceEquipedHand;
+		TSubclassOf<class AEquipmentItem> InstanceEquipedHand{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-		TSubclassOf<class AEquipmentItem> InstanceEquipedLowerArmor;
+		TSubclassOf<class AEquipmentItem> InstanceEquipedLowerArmor{};
 
 	UPROPERTY(VisibleAnywhere, Category = "Player")
-		uint16 PlayerCurrentHP = 100;
+		uint16 InstancePlayerCurrentHP = 100;
 	UPROPERTY(VisibleAnywhere, Category = "Player")
-		uint16 PlayerCurrentMana = 100;
+		uint16 InstancePlayerCurrentMana = 100;
 	UPROPERTY(VisibleAnywhere, Category = "Player")
-		uint16 PlayerMaxHP = 100;
+		uint16 InstancePlayerMaxHP = 100;
 	UPROPERTY(VisibleAnywhere, Category = "Player")
-		uint16 PlayerMaxMana = 100;
+		uint16 InstancePlayerMaxMana = 100;
+	UPROPERTY(VisibleAnywhere, Category = "Player")
+		uint16 InstancePlayerArmorValue = 0;
+
+	//Settings variables
+	UPROPERTY(VisibleAnywhere, Category = "Settings")
+		float InstanceMasterVolume = 1.f;
+	UPROPERTY(VisibleAnywhere, Category = "Settings")
+		float InstanceBackgroundVolume = 1.f;
+	UPROPERTY(VisibleAnywhere, Category = "Settings")
+		float InstanceEffectsVolume = 1.f;
+	int8 InstanceGraphicsQuality = 0;
+
+	//Game Manager variables
+	int8 KilledEnemies = 0;
 };
 

@@ -49,17 +49,17 @@ protected:
 
 public:
 
-	UBorder* GetDialogueBorder();
-	UCanvasPanel* GetMainCanvasPanel();
-	USizeBox* GetMainSizeBox();
-	UTextBlock* GetDialogueTextBlock();
-	UTextBlock* GetSpeakerNameTextBlock();
-	UOverlay* GetResponseOverlay();
+	UBorder* GetDialogueBorder() const;
+	UCanvasPanel* GetMainCanvasPanel() const;
+	USizeBox* GetMainSizeBox() const;
+	UTextBlock* GetDialogueTextBlock() const;
+	UTextBlock* GetSpeakerNameTextBlock() const;
+	UOverlay* GetResponseOverlay() const;
 
 	UFUNCTION()
-	FText GetDialogueText();
+	FText GetDialogueText() const;
 	UFUNCTION()
-	FText GetSpeakerName();
+	FText GetSpeakerName() const;
 
 	void SetDialogueText(const FText& NewText);
 	void SetSpeakerName(const FText& NewText);

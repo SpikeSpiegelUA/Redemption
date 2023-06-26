@@ -20,9 +20,13 @@ private:
 	bool CanScrollInventory = false;
 
 	FTimerHandle ItemUseTimerHandle;
+	FTimerHandle HideNotificationTimerHandle;
 
 	UPROPERTY()
-		AUIManager* UIManager;
+		AUIManager* UIManager {};
+
+	UFUNCTION()
+		void HideNotificationAndClearItsTimer();
 protected:
 	//Variables for required widget components
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -57,6 +61,10 @@ protected:
 		class UBorder* LowerArmorInventoryBorder;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* EquipmentBorder;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UBorder* ItemInfoBorder;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UBorder* NotificationBorder;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UStackBox* EquipmentStackBox;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -96,6 +104,19 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* LowerArmorTextBlock;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UTextBlock* ItemNameTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UTextBlock* ItemTypeTextBlock;
+	//Attack, Armor, HP restore, Mana restore, etc...
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UTextBlock* ItemEffectValueTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UTextBlock* ItemCostTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UTextBlock* ItemDescriptionTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UTextBlock* NotificationTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UCanvasPanel* MainCanvasPanel;
 	//We use InventoryScrollBox and some buttons in battle mode for items use, so we need to disable rest of the inventory during the battle
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -134,36 +155,48 @@ protected:
 public:
 	void FillInventory();
 
-	UScrollBox* GetInventoryScrollBox();
-	UScrollBox* GetMeleeInventoryScrollBox();
-	UScrollBox* GetRangeInventoryScrollBox();
-	UScrollBox* GetHeadInventoryScrollBox();
-	UScrollBox* GetTorseInventoryScrollBox();
-	UScrollBox* GetHandInventoryScrollBox();
-	UScrollBox* GetLowerArmorInventoryScrollBox();
-	AGameItem* GetPickedItem();
-	UCanvasPanel* GetMainCanvasPanel();
-	UCanvasPanel* GetNotInBattleMenuIncludedCanvasPanel();
-	UBorder* GetBattleMenuButtonsForItemsBorder();
-	UBorder* GetInventoryBorder();
-	bool GetCanScrollInventory();
+	UScrollBox* GetInventoryScrollBox() const;
+	UScrollBox* GetMeleeInventoryScrollBox() const;
+	UScrollBox* GetRangeInventoryScrollBox() const;
+	UScrollBox* GetHeadInventoryScrollBox() const;
+	UScrollBox* GetTorseInventoryScrollBox() const;
+	UScrollBox* GetHandInventoryScrollBox() const;
+	UScrollBox* GetLowerArmorInventoryScrollBox() const;
+	AGameItem* GetPickedItem() const;
+	UCanvasPanel* GetMainCanvasPanel() const;
+	UCanvasPanel* GetNotInBattleMenuIncludedCanvasPanel() const;
+	UBorder* GetBattleMenuButtonsForItemsBorder() const;
+	UBorder* GetInventoryBorder() const;
+	UBorder* GetItemInfoBorder() const;
+	bool GetCanScrollInventory() const;
 
 	void SetPickedItem(AGameItem* NewItem);
+	void SetTextOfItemNameTextBlock(FText NewText);
+	void SetTextOfItemTypeTextBlock(FText NewText);
+	void SetTextOfItemEffectValueTextBlock(FText NewText);
+	void SetTextOfItemCostTextBlock(FText NewText);
+	void SetTextOfItemDescriptionTextBlock(FText NewText);
+
+	//Set ItemInfo for ItemInfoBorder
+	void SetItemInfo(AGameItem* const& GameItem);
+
+	void CreateNotification(FText NotificationText);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
-		AEquipmentItem* EquipedMelee;
+		AEquipmentItem* EquipedMelee {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
-		AEquipmentItem* EquipedRange;
+		AEquipmentItem* EquipedRange {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
-		AEquipmentItem* EquipedHead;
+		AEquipmentItem* EquipedHead {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
-		AEquipmentItem* EquipedTorse;
+		AEquipmentItem* EquipedTorse {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
-		AEquipmentItem* EquipedHand;
+		AEquipmentItem* EquipedHand {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
-		AEquipmentItem* EquipedLowerArmor;
+		AEquipmentItem* EquipedLowerArmor {};
 
 	//In public to let PlayerCharacter access it for E input button
 	UFUNCTION()
 		void BattleMenuItemsUseButtonOnClicked();
+
 };

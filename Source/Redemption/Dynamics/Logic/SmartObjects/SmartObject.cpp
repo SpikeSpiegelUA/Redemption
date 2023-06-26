@@ -33,17 +33,17 @@ void ASmartObject::Tick(float DeltaTime)
 
 }
 
-UBehaviorTree* ASmartObject::GetSubTree()
+UBehaviorTree* ASmartObject::GetSubTree() const
 {
 	return SubTree;
 }
 
-UBillboardComponent* ASmartObject::GetBillboard()
+UBillboardComponent* ASmartObject::GetBillboard() const
 {
 	return Billboard;
 }
 
-UArrowComponent* ASmartObject::GetFacingDirection()
+UArrowComponent* ASmartObject::GetFacingDirection() const
 {
 	return FacingDirection;
 }

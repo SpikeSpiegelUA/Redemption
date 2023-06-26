@@ -29,12 +29,12 @@ protected:
 	virtual void NativeConstruct() override;
 
 	UFUNCTION()
-		float GetHealthPercentage();
+		float GetHealthPercentage() const;
 	UFUNCTION()
-		float GetManaPercentage();
+		float GetManaPercentage() const;
 
 public:
-	UProgressBar* GetPlayerHealthBar();
-    UProgressBar* GetPlayerManaBar();
-	UCanvasPanel* GetPlayerBarsCanvasPanel();
+	UProgressBar* GetPlayerHealthBar() const;
+    UProgressBar* GetPlayerManaBar() const;
+	UCanvasPanel* GetPlayerBarsCanvasPanel() const;
 };

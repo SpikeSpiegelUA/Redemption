@@ -16,4 +16,6 @@ class REDEMPTION_API AAssaultItem : public AGameItem
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Main")
 		int AttackValue = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Main")
+		DamageKind KindOfDamage{};
 };

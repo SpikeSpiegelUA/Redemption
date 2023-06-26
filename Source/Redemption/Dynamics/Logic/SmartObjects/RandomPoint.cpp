@@ -13,7 +13,7 @@ void ARandomPoint::BeginPlay()
 	Super::BeginPlay();
 }
 
-int ARandomPoint::GetRadius()
+int ARandomPoint::GetRadius() const
 {
 	return Radius;
 }

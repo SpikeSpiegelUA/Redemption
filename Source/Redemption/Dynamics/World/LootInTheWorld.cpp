@@ -25,11 +25,12 @@ void ALootInTheWorld::Tick(float DeltaTime)
 
 }
 
-FName ALootInTheWorld::GetName() {
+FName ALootInTheWorld::GetName() const 
+{
 	return Name;
 }
 
-TArray<TSubclassOf<class AGameItem>> ALootInTheWorld::GetItemsClasses()
+TArray<TSubclassOf<class AGameItem>> ALootInTheWorld::GetItemsClasses() const
 {
 	return ItemsClasses;
 }

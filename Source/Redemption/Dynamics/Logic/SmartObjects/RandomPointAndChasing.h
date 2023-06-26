@@ -26,8 +26,8 @@ public:
 
 	virtual void BeginPlay() override;
 
-	int GetRadius();
+	int GetRadius() const;
+	bool GetCanSeePlayer() const;
 
-	bool GetCanSeePlayer();
 	void SetCanSeePlayer(bool Value);
 };

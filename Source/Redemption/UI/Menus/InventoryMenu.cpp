@@ -9,7 +9,10 @@
 #include "Components/TextBlock.h"
 #include "Components/CanvasPanel.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\AssaultItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\SupportItem.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\RestorationItem.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\BoostItem.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
 #include <Redemption/Characters/Player/PlayerCharacter.h>
 #include <Kismet/GameplayStatics.h>
@@ -21,34 +24,34 @@ bool UInventoryMenu::Initialize()
 	const bool bSuccess = Super::Initialize();
 	//InventoryMenu change level logic
 	URedemptionGameInstance* GameInstance = nullptr;
-	if (GetWorld()) 
+	if (IsValid(GetWorld()))
 		 GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
-	if (GameInstance) {
+	if (IsValid(GameInstance)) {
 		FillInventory();
 	}
-	if (BackButton)
+	if (IsValid(BackButton))
 		BackButton->OnClicked.AddDynamic(this, &UInventoryMenu::BackButtonOnClicked);
-	if (MeleeButton)
+	if (IsValid(MeleeButton))
 		MeleeButton->OnClicked.AddDynamic(this, &UInventoryMenu::MeleeButtonOnClicked);
-	if (RangeButton)
+	if (IsValid(RangeButton))
 		RangeButton->OnClicked.AddDynamic(this, &UInventoryMenu::RangeButtonOnClicked);
-	if (HeadButton)
+	if (IsValid(HeadButton))
 		HeadButton->OnClicked.AddDynamic(this, &UInventoryMenu::HeadButtonOnClicked);
-	if (TorseButton)
+	if (IsValid(TorseButton))
 		TorseButton->OnClicked.AddDynamic(this, &UInventoryMenu::TorseButtonOnClicked);
-	if (HandButton)
+	if (IsValid(HandButton))
 		HandButton->OnClicked.AddDynamic(this, &UInventoryMenu::HandButtonOnClicked);
-	if (LowerArmorButton)
+	if (IsValid(LowerArmorButton))
 		LowerArmorButton->OnClicked.AddDynamic(this, &UInventoryMenu::LowerArmorButtonOnClicked);
-	if (BackToInventoryButton)
+	if (IsValid(BackToInventoryButton))
 		BackToInventoryButton->OnClicked.AddDynamic(this, &UInventoryMenu::BackToInventoryButtonOnClicked);
-	if (EquipButton)
+	if (IsValid(EquipButton))
 		EquipButton->OnClicked.AddDynamic(this, &UInventoryMenu::EquipButtonOnClicked);
-	if (UseButton)
+	if (IsValid(UseButton))
 		UseButton->OnClicked.AddDynamic(this, &UInventoryMenu::UseButtonOnClicked);
-	if (BattleMenuItemsUseButton)
+	if (IsValid(BattleMenuItemsUseButton))
 		BattleMenuItemsUseButton->OnClicked.AddDynamic(this, &UInventoryMenu::BattleMenuItemsUseButtonOnClicked);
-	if (BattleMenuItemsBackButton)
+	if (IsValid(BattleMenuItemsBackButton))
 		BattleMenuItemsBackButton->OnClicked.AddDynamic(this, &UInventoryMenu::BattleMenuItemsBackButtonOnClicked);
 	if (!bSuccess) return false;
 	return bSuccess;
@@ -61,38 +64,40 @@ void UInventoryMenu::NativeConstruct()
 	if (GetWorld())
 		GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	if (GameInstance) {
-		if (GameInstance->InstanceEquipedMelee != NULL) {
+	if (IsValid(GameInstance)) {
+		if (IsValid(GameInstance->InstanceEquipedMelee)) {
 			AEquipmentItem* MeleeObject = NewObject<AEquipmentItem>(this, GameInstance->InstanceEquipedMelee);
 			MeleeTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Melee: "), FText::FromName(MeleeObject->GetItemName())));
 			EquipedMelee = MeleeObject;
-			PlayerCharacter->MeleeAttackValue = MeleeObject->Value;
 		}
-		if (GameInstance->InstanceEquipedRange != NULL) {
+		if (IsValid(GameInstance->InstanceEquipedRange)) {
 			AEquipmentItem* RangeObject = NewObject<AEquipmentItem>(this, GameInstance->InstanceEquipedRange);
 			RangeTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Range: "), FText::FromName(RangeObject->GetItemName())));
 			EquipedRange = RangeObject;
-			PlayerCharacter->RangeAttackValue = RangeObject->Value;
 		}
-		if (GameInstance->InstanceEquipedHead != NULL) {
+		if (IsValid(GameInstance->InstanceEquipedHead)) {
 			AEquipmentItem* HeadObject = NewObject<AEquipmentItem>(this, GameInstance->InstanceEquipedHead);
 			HeadTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Head: "), FText::FromName(HeadObject->GetItemName())));
 			EquipedHead = HeadObject;
+			PlayerCharacter->ArmorValue += EquipedHead->StatValue;
 		}
-		if (GameInstance->InstanceEquipedTorse != NULL) {
+		if (IsValid(GameInstance->InstanceEquipedTorse)) {
 			AEquipmentItem* TorseObject = NewObject<AEquipmentItem>(this, GameInstance->InstanceEquipedTorse);
 			TorseTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Torse: "), FText::FromName(TorseObject->GetItemName())));
 			EquipedTorse = TorseObject;
+			PlayerCharacter->ArmorValue += EquipedTorse->StatValue;
 		}
-		if (GameInstance->InstanceEquipedHand != NULL) {
+		if (IsValid(GameInstance->InstanceEquipedHand)) {
 			AEquipmentItem* HandObject = NewObject<AEquipmentItem>(this, GameInstance->InstanceEquipedHand);
 			HandTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Hand: "), FText::FromName(HandObject->GetItemName())));
 			EquipedHand = HandObject;
+			PlayerCharacter->ArmorValue += EquipedHand->StatValue;
 		}
-		if (GameInstance->InstanceEquipedLowerArmor != NULL) {
+		if (IsValid(GameInstance->InstanceEquipedLowerArmor)) {
 			AEquipmentItem* LowerArmorObject = NewObject<AEquipmentItem>(this, GameInstance->InstanceEquipedLowerArmor);
 			LowerArmorTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("LowerArmor: "), FText::FromName(LowerArmorObject->GetItemName())));
 			EquipedLowerArmor = LowerArmorObject;
+			PlayerCharacter->ArmorValue += EquipedLowerArmor->StatValue;
 		}
 	}
 
@@ -100,6 +105,8 @@ void UInventoryMenu::NativeConstruct()
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AUIManager::StaticClass(), UIManagerActors);
 	if (UIManagerActors.Num() > 0)
 		UIManager = Cast<AUIManager>(UIManagerActors[0]);
+	ItemInfoBorder->SetVisibility(ESlateVisibility::Hidden);
+	ItemEffectValueTextBlock->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UInventoryMenu::FillInventory()
@@ -108,30 +115,48 @@ void UInventoryMenu::FillInventory()
 	for (int i = 0; i < GameInstance->InstanceItemsInTheInventory.Num(); i++) {
 		AGameItem* GameItem = NewObject<AGameItem>(this, GameInstance->InstanceItemsInTheInventory[i]);
 		bool IsInInventory = false;
-		if (GameItem) {
+		if (IsValid(GameItem)) {
 			//Get ScrollBox corresponding to the item's type
 			UScrollBox* CurrentScrollBox = nullptr;
 			if (GameItem->GetType() == ItemType::EQUIPMENT) {
 				AEquipmentItem* EquipmentItem = Cast<AEquipmentItem>(GameItem);
-				if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::MELEE)
-					CurrentScrollBox = MeleeInventoryScrollBox;
-				else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::RANGE)
-					CurrentScrollBox = RangeInventoryScrollBox;
-				else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::HEAD)
-					CurrentScrollBox = HeadInventoryScrollBox;
-				else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::TORSE)
-					CurrentScrollBox = TorseInventoryScrollBox;
-				else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::HAND)
-					CurrentScrollBox = HandInventoryScrollBox;
-				else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::LOWERARMOR)
-					CurrentScrollBox = LowerArmorInventoryScrollBox;
+				if (IsValid(EquipmentItem)) {
+					if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::WEAPON) {
+						AWeaponItem* WeaponItem = Cast<AWeaponItem>(EquipmentItem);
+						if (IsValid(WeaponItem)) {
+							if (WeaponItem->TypeOfWeapon == WeaponType::MELEE)
+								CurrentScrollBox = MeleeInventoryScrollBox;
+							else
+								CurrentScrollBox = RangeInventoryScrollBox;
+						}
+					}
+					else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::ARMOR) {
+						AArmorItem* ArmorItem = Cast<AArmorItem>(EquipmentItem);
+						if (IsValid(ArmorItem)) {
+							switch (ArmorItem->GetTypeOfArmor()) {
+								case ArmorType::HEAD:
+									CurrentScrollBox = HeadInventoryScrollBox;
+									break;
+								case ArmorType::TORSE:
+									CurrentScrollBox = TorseInventoryScrollBox;
+									break;
+								case ArmorType::HAND:
+									CurrentScrollBox = HandInventoryScrollBox;
+									break;
+								case ArmorType::LOWERARMOR:
+									CurrentScrollBox = LowerArmorInventoryScrollBox;
+									break;
+							}
+						}
+					}
+				}
 			}
 			else
 				CurrentScrollBox = InventoryScrollBox;
 			//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
-			for (int j = 0; j < CurrentScrollBox->GetChildrenCount(); j++) {
-				UInventoryScrollBoxEntryWidget* CurrentWidget = Cast<UInventoryScrollBoxEntryWidget>(CurrentScrollBox->GetAllChildren()[j]);
-				if (CurrentWidget)
+			for (UWidget* ScrollBoxWidget : CurrentScrollBox->GetAllChildren()) {
+				UInventoryScrollBoxEntryWidget* CurrentWidget = Cast<UInventoryScrollBoxEntryWidget>(ScrollBoxWidget);
+				if (IsValid(CurrentWidget))
 					if (CurrentWidget->GetItem()->GetItemName() == GameItem->GetItemName()) {
 						IsInInventory = true;
 						CurrentWidget->AmountOfItems += 1;
@@ -142,12 +167,16 @@ void UInventoryMenu::FillInventory()
 			}
 			if (!IsInInventory) {
 				APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-				UInventoryScrollBoxEntryWidget* InventoryScrollBoxEntryWidget = CreateWidget<UInventoryScrollBoxEntryWidget>(GetWorld(), PlayerCharacter->GetInventoryScrollBoxEntryClass());
-				InventoryScrollBoxEntryWidget->GetMainTextBlock()->SetText(FText::FromName(GameItem->GetItemName()));
-				InventoryScrollBoxEntryWidget->SetItem(GameItem);
-				InventoryScrollBoxEntryWidget->AmountOfItems = 1;
-				InventoryScrollBoxEntryWidget->AddToViewport();
-				CurrentScrollBox->AddChild(InventoryScrollBoxEntryWidget);
+				UInventoryScrollBoxEntryWidget* InventoryScrollBoxEntryWidget = nullptr;
+				if(IsValid(PlayerCharacter))
+					InventoryScrollBoxEntryWidget = CreateWidget<UInventoryScrollBoxEntryWidget>(GetWorld(), PlayerCharacter->GetInventoryScrollBoxEntryClass());
+				if (IsValid(InventoryScrollBoxEntryWidget)) {
+					InventoryScrollBoxEntryWidget->GetMainTextBlock()->SetText(FText::FromName(GameItem->GetItemName()));
+					InventoryScrollBoxEntryWidget->SetItem(GameItem);
+					InventoryScrollBoxEntryWidget->AmountOfItems = 1;
+					InventoryScrollBoxEntryWidget->AddToViewport();
+					CurrentScrollBox->AddChild(InventoryScrollBoxEntryWidget);
+				}
 			}
 		}
 	}
@@ -164,14 +193,16 @@ void UInventoryMenu::BackButtonOnClicked()
 	RangeInventoryBorder->SetVisibility(ESlateVisibility::Hidden);
 	MeleeInventoryBorder->SetVisibility(ESlateVisibility::Hidden);
 	EquipButton->SetVisibility(ESlateVisibility::Hidden);
-	if (UIManager->PickedButton)
-		UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
-	UIManager->PickedButton = nullptr;
-	PickedItem = nullptr;
-	this->RemoveFromParent();
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	if (PlayerCharacter) {
-		PlayerCharacter->GetPlayerMenuWidget()->AddToViewport();
+	HideNotificationAndClearItsTimer();
+	if (IsValid(UIManager)) {
+		if (IsValid(UIManager->PickedButton))
+			UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+		UIManager->PickedButton = nullptr;
+		PickedItem = nullptr;
+		this->RemoveFromParent();
+		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+		if (IsValid(PlayerCharacter))
+			PlayerCharacter->GetPlayerMenuWidget()->AddToViewport();
 	}
 }
 
@@ -188,9 +219,11 @@ void UInventoryMenu::MeleeButtonOnClicked()
 	BackToInventoryButton->SetVisibility(ESlateVisibility::Visible);
 	MeleeInventoryBorder->SetVisibility(ESlateVisibility::Visible);
 	MeleeButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-	if(UIManager->PickedButton && UIManager->PickedButton != MeleeButton)
-		UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
-	UIManager->PickedButton = MeleeButton;
+	if (IsValid(UIManager)) {
+		if (IsValid(UIManager->PickedButton) && UIManager->PickedButton != MeleeButton)
+			UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+		UIManager->PickedButton = MeleeButton;
+	}
 	PickedItem = nullptr;
 }
 
@@ -207,9 +240,11 @@ void UInventoryMenu::RangeButtonOnClicked()
 	BackToInventoryButton->SetVisibility(ESlateVisibility::Visible);
 	EquipButton->SetVisibility(ESlateVisibility::Visible);
 	RangeButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-	if (UIManager->PickedButton && UIManager->PickedButton != RangeButton)
-		UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
-	UIManager->PickedButton = RangeButton;
+	if (IsValid(UIManager)) {
+		if (IsValid(UIManager->PickedButton) && UIManager->PickedButton != RangeButton)
+			UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+		UIManager->PickedButton = RangeButton;
+	}
 	PickedItem = nullptr;
 }
 
@@ -226,9 +261,11 @@ void UInventoryMenu::HeadButtonOnClicked()
 	BackToInventoryButton->SetVisibility(ESlateVisibility::Visible);
 	EquipButton->SetVisibility(ESlateVisibility::Visible);
 	HeadButton->SetBackgroundColor(FLinearColor(1,0,0,1));
-	if (UIManager->PickedButton && UIManager->PickedButton != HeadButton)
-		UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
-	UIManager->PickedButton = HeadButton;
+	if (IsValid(UIManager)) {
+		if (IsValid(UIManager->PickedButton) && UIManager->PickedButton != HeadButton)
+			UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+		UIManager->PickedButton = HeadButton;
+	}
 	PickedItem = nullptr;
 }
 
@@ -245,9 +282,11 @@ void UInventoryMenu::TorseButtonOnClicked()
 	BackToInventoryButton->SetVisibility(ESlateVisibility::Visible);
 	EquipButton->SetVisibility(ESlateVisibility::Visible);
 	TorseButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-	if (UIManager->PickedButton && UIManager->PickedButton != TorseButton)
-		UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
-	UIManager->PickedButton = TorseButton;
+	if (IsValid(UIManager)) {
+		if (IsValid(UIManager->PickedButton) && UIManager->PickedButton != TorseButton)
+			UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+		UIManager->PickedButton = TorseButton;
+	}
 	PickedItem = nullptr;
 }
 
@@ -264,9 +303,11 @@ void UInventoryMenu::HandButtonOnClicked()
 	BackToInventoryButton->SetVisibility(ESlateVisibility::Visible);
 	EquipButton->SetVisibility(ESlateVisibility::Visible);
 	HandButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-	if (UIManager->PickedButton && UIManager->PickedButton != HandButton)
-		UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
-	UIManager->PickedButton = HandButton;
+	if (IsValid(UIManager)) {
+		if (IsValid(UIManager->PickedButton) && UIManager->PickedButton != HandButton)
+			UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+		UIManager->PickedButton = HandButton;
+	}
 	PickedItem = nullptr;
 }
 
@@ -283,9 +324,11 @@ void UInventoryMenu::LowerArmorButtonOnClicked()
 	BackToInventoryButton->SetVisibility(ESlateVisibility::Visible);
 	EquipButton->SetVisibility(ESlateVisibility::Visible);
 	LowerArmorButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-	if (UIManager->PickedButton && UIManager->PickedButton != LowerArmorButton)
-		UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
-	UIManager->PickedButton = LowerArmorButton;
+	if (IsValid(UIManager)) {
+		if (IsValid(UIManager->PickedButton) && UIManager->PickedButton != LowerArmorButton)
+			UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+		UIManager->PickedButton = LowerArmorButton;
+	}
 	PickedItem = nullptr;
 }
 
@@ -301,9 +344,11 @@ void UInventoryMenu::BackToInventoryButtonOnClicked()
 	MeleeInventoryBorder->SetVisibility(ESlateVisibility::Hidden);
 	EquipButton->SetVisibility(ESlateVisibility::Hidden);
 	BackToInventoryButton->SetVisibility(ESlateVisibility::Hidden);
-	if (UIManager->PickedButton)
-		UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
-	UIManager->PickedButton = nullptr;
+	if (IsValid(UIManager)) {
+		if (IsValid(UIManager->PickedButton))
+			UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+		UIManager->PickedButton = nullptr;
+	}
 	PickedItem = nullptr;
 }
 
@@ -311,54 +356,63 @@ void UInventoryMenu::EquipButtonOnClicked()
 {
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	URedemptionGameInstance* GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
-	if (PickedItem){
+	if (IsValid(PickedItem)){
 		AEquipmentItem* EquipmentItem = Cast<AEquipmentItem>(PickedItem);
-		if (EquipmentItem && GameInstance) 
+		if (IsValid(EquipmentItem) && IsValid(GameInstance) && IsValid(PlayerCharacter))
 		{
 			UInventoryScrollBoxEntryWidget* WidgetOfTheItem = nullptr;
-			if (UIManager->PickedButton)
+			if (IsValid(UIManager->PickedButton))
 				WidgetOfTheItem = Cast<UInventoryScrollBoxEntryWidget>(UIManager->PickedButton->GetOuter()->GetOuter());
-			if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::MELEE) {
-				if (!EquipedMelee || EquipedMelee->GetItemName() != EquipmentItem->GetItemName()) {
-					MeleeTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Melee: "), FText::FromName(EquipmentItem->GetItemName())));
-					PlayerCharacter->MeleeAttackValue = EquipmentItem->Value;
-					EquipItem(EquipmentItem, GameInstance->InstanceEquipedMelee, EquipedMelee, WidgetOfTheItem, MeleeInventoryScrollBox, GameInstance, PlayerCharacter);
+			if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::WEAPON) {
+				AWeaponItem* WeaponItem = Cast<AWeaponItem>(EquipmentItem);
+				if (IsValid(WeaponItem)) {
+					if (WeaponItem->TypeOfWeapon == WeaponType::MELEE) {
+						if (!EquipedMelee || EquipedMelee->GetItemName() != WeaponItem->GetItemName()) {
+							MeleeTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Melee: "), FText::FromName(EquipmentItem->GetItemName())));
+							EquipItem(EquipmentItem, GameInstance->InstanceEquipedMelee, EquipedMelee, WidgetOfTheItem, MeleeInventoryScrollBox, GameInstance, PlayerCharacter);
+						}
+					}
+					else if (WeaponItem->TypeOfWeapon == WeaponType::RANGE) {
+						if (!EquipedRange || EquipedRange->GetItemName() != WeaponItem->GetItemName()) {
+							RangeTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Range: "), FText::FromName(EquipmentItem->GetItemName())));
+							EquipItem(EquipmentItem, GameInstance->InstanceEquipedRange, EquipedRange, WidgetOfTheItem, RangeInventoryScrollBox, GameInstance, PlayerCharacter);
+						}
+					}
 				}
 			}
-			else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::RANGE) {
-				if (!EquipedRange || EquipedRange->GetItemName() != EquipmentItem->GetItemName()) {
-					RangeTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Range: "), FText::FromName(EquipmentItem->GetItemName())));
-					PlayerCharacter->RangeAttackValue = EquipmentItem->Value;
-					EquipItem(EquipmentItem, GameInstance->InstanceEquipedRange, EquipedRange, WidgetOfTheItem, RangeInventoryScrollBox, GameInstance, PlayerCharacter);
-				}
-			}
-			else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::HEAD) {
-				if (!EquipedHead || EquipedHead->GetItemName() != EquipmentItem->GetItemName()) {
-					HeadTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Head: "), FText::FromName(EquipmentItem->GetItemName())));
-					EquipItem(EquipmentItem, GameInstance->InstanceEquipedHead, EquipedHead, WidgetOfTheItem, HeadInventoryScrollBox, GameInstance, PlayerCharacter);
-				}
-			}
-			else  if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::TORSE ) {
-				if (!EquipedTorse || EquipedTorse->GetItemName() != EquipmentItem->GetItemName()) {
-					TorseTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Torse: "), FText::FromName(EquipmentItem->GetItemName())));
-					EquipItem(EquipmentItem, GameInstance->InstanceEquipedTorse, EquipedTorse, WidgetOfTheItem, TorseInventoryScrollBox, GameInstance, PlayerCharacter);
-				}
-			}
-			else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::HAND) {
-				if (!EquipedHand || EquipedHand->GetItemName() != EquipmentItem->GetItemName()) {
-					HandTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Hand: "), FText::FromName(EquipmentItem->GetItemName())));
-					EquipItem(EquipmentItem, GameInstance->InstanceEquipedHand, EquipedHand, WidgetOfTheItem, HandInventoryScrollBox, GameInstance, PlayerCharacter);
-				}
-			}
-			else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::LOWERARMOR ) {
-				if (!EquipedLowerArmor || EquipedLowerArmor->GetItemName() != EquipmentItem->GetItemName()) {
-					LowerArmorTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("LowerArmor: "), FText::FromName(EquipmentItem->GetItemName())));
-					EquipItem(EquipmentItem, GameInstance->InstanceEquipedLowerArmor, EquipedLowerArmor, WidgetOfTheItem, LowerArmorInventoryScrollBox, GameInstance, PlayerCharacter);
+			else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::ARMOR) {
+				AArmorItem* ArmorItem = Cast<AArmorItem>(EquipmentItem);
+				if (IsValid(ArmorItem)) {
+					switch (ArmorItem->GetTypeOfArmor()) {
+						case ArmorType::HEAD:
+							if (!EquipedHead || EquipedHead->GetItemName() != EquipmentItem->GetItemName()) {
+								HeadTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Head: "), FText::FromName(EquipmentItem->GetItemName())));
+								EquipItem(EquipmentItem, GameInstance->InstanceEquipedHead, EquipedHead, WidgetOfTheItem, HeadInventoryScrollBox, GameInstance, PlayerCharacter);
+							}
+							break;
+						case ArmorType::TORSE:
+							if (!EquipedTorse || EquipedTorse->GetItemName() != EquipmentItem->GetItemName()) {
+								TorseTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Torse: "), FText::FromName(EquipmentItem->GetItemName())));
+								EquipItem(EquipmentItem, GameInstance->InstanceEquipedTorse, EquipedTorse, WidgetOfTheItem, TorseInventoryScrollBox, GameInstance, PlayerCharacter);
+							}
+							break;
+						case ArmorType::HAND:
+							if (!EquipedHand || EquipedHand->GetItemName() != EquipmentItem->GetItemName()) {
+								HandTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Hand: "), FText::FromName(EquipmentItem->GetItemName())));
+								EquipItem(EquipmentItem, GameInstance->InstanceEquipedHand, EquipedHand, WidgetOfTheItem, HandInventoryScrollBox, GameInstance, PlayerCharacter);
+							}
+							break;
+						case ArmorType::LOWERARMOR:
+							if (!EquipedLowerArmor || EquipedLowerArmor->GetItemName() != EquipmentItem->GetItemName()) {
+								LowerArmorTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("LowerArmor: "), FText::FromName(EquipmentItem->GetItemName())));
+								EquipItem(EquipmentItem, GameInstance->InstanceEquipedLowerArmor, EquipedLowerArmor, WidgetOfTheItem, LowerArmorInventoryScrollBox, GameInstance, PlayerCharacter);
+							}
+							break;
+					}
 				}
 			}
 		}
 	}
-
 }
 
 
@@ -373,42 +427,61 @@ void UInventoryMenu::EquipItem(AEquipmentItem*& ItemToEquip, TSubclassOf<class A
 		GameInstance->InstanceItemsInTheInventory.Add(InventoryMenuVariableToStoreThisEquipmentType->GetClass());
 		//Get ScrollBox corresponding to the item's type
 		UScrollBox* CurrentScrollBox = nullptr;
-		if (InventoryMenuVariableToStoreThisEquipmentType->GetTypeOfEquipment() == EquipmentType::MELEE)
-			CurrentScrollBox = MeleeInventoryScrollBox;
-		else if (InventoryMenuVariableToStoreThisEquipmentType->GetTypeOfEquipment() == EquipmentType::RANGE)
-			CurrentScrollBox = RangeInventoryScrollBox;
-		else if (InventoryMenuVariableToStoreThisEquipmentType->GetTypeOfEquipment() == EquipmentType::HEAD)
-			CurrentScrollBox = HeadInventoryScrollBox;
-		else if (InventoryMenuVariableToStoreThisEquipmentType->GetTypeOfEquipment() == EquipmentType::TORSE)
-			CurrentScrollBox = TorseInventoryScrollBox;
-		else if (InventoryMenuVariableToStoreThisEquipmentType->GetTypeOfEquipment() == EquipmentType::HAND)
-			CurrentScrollBox = HandInventoryScrollBox;
-		else if (InventoryMenuVariableToStoreThisEquipmentType->GetTypeOfEquipment() == EquipmentType::LOWERARMOR)
-			CurrentScrollBox = LowerArmorInventoryScrollBox;
-			//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
-		for (int j = 0; j < CurrentScrollBox->GetChildrenCount(); j++) {
-			UInventoryScrollBoxEntryWidget* CurrentWidget = Cast<UInventoryScrollBoxEntryWidget>(CurrentScrollBox->GetAllChildren()[j]);
-			if (CurrentWidget)
-				if (CurrentWidget->GetItem()->GetItemName() == InventoryMenuVariableToStoreThisEquipmentType->GetItemName()) {
-					IsInInventory = true;
-					CurrentWidget->AmountOfItems += 1;
-					FString NameString = InventoryMenuVariableToStoreThisEquipmentType->GetItemName().ToString() + FString("(" + FString::FromInt(CurrentWidget->AmountOfItems) + ")");
-					CurrentWidget->GetMainTextBlock()->SetText(FText::FromString(NameString));
+		if (InventoryMenuVariableToStoreThisEquipmentType->GetTypeOfEquipment() == EquipmentType::WEAPON) {
+			AWeaponItem* WeaponItem = Cast<AWeaponItem>(InventoryMenuVariableToStoreThisEquipmentType);
+			if (IsValid(WeaponItem)) {
+				if(WeaponItem->TypeOfWeapon == WeaponType::MELEE)
+					CurrentScrollBox = MeleeInventoryScrollBox;
+				else if(WeaponItem->TypeOfWeapon == WeaponType::RANGE)
+					CurrentScrollBox = RangeInventoryScrollBox;
+			}
+		}
+		else if (InventoryMenuVariableToStoreThisEquipmentType->GetTypeOfEquipment() == EquipmentType::ARMOR) {
+			AArmorItem* ArmorItem = Cast<AArmorItem>(InventoryMenuVariableToStoreThisEquipmentType);
+			if (IsValid(ArmorItem)) {
+				switch (ArmorItem->GetTypeOfArmor()) {
+				case ArmorType::HEAD:
+					CurrentScrollBox = HeadInventoryScrollBox;
+					break;
+				case ArmorType::TORSE:
+					CurrentScrollBox = TorseInventoryScrollBox;
+					break;
+				case ArmorType::HAND:
+					CurrentScrollBox = HandInventoryScrollBox;
+					break;
+				case ArmorType::LOWERARMOR:
+					CurrentScrollBox = LowerArmorInventoryScrollBox;
 					break;
 				}
+			}
 		}
+		//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
+		if(IsValid(CurrentScrollBox))
+			for (UWidget* ScrollBoxWidget : CurrentScrollBox->GetAllChildren()) {
+				UInventoryScrollBoxEntryWidget* CurrentWidget = Cast<UInventoryScrollBoxEntryWidget>(ScrollBoxWidget);
+				if (IsValid(CurrentWidget))
+					if (CurrentWidget->GetItem()->GetItemName() == InventoryMenuVariableToStoreThisEquipmentType->GetItemName()) {
+						IsInInventory = true;
+						CurrentWidget->AmountOfItems += 1;
+						FString NameString = InventoryMenuVariableToStoreThisEquipmentType->GetItemName().ToString() + FString("(" + FString::FromInt(CurrentWidget->AmountOfItems) + ")");
+						CurrentWidget->GetMainTextBlock()->SetText(FText::FromString(NameString));
+						break;
+					}
+			}
 		if (!IsInInventory) {
 			UInventoryScrollBoxEntryWidget* NewWidget = CreateWidget<UInventoryScrollBoxEntryWidget>(GetWorld(), PlayerCharacter->GetInventoryScrollBoxEntryClass());
-			PlayerCharacter->SetInventoryScrollBoxEntryWidget(NewWidget);
-			PlayerCharacter->GetInventoryScrollBoxEntryWidget()->GetMainTextBlock()->SetText(FText::FromName(InventoryMenuVariableToStoreThisEquipmentType->GetItemName()));
-			PlayerCharacter->GetInventoryScrollBoxEntryWidget()->SetItem(InventoryMenuVariableToStoreThisEquipmentType);
-			PlayerCharacter->GetInventoryScrollBoxEntryWidget()->AddToViewport();
-			CurrentScrollBox->AddChild(PlayerCharacter->GetInventoryScrollBoxEntryWidget());
+			if (IsValid(NewWidget)) {
+				PlayerCharacter->SetInventoryScrollBoxEntryWidget(NewWidget);
+				PlayerCharacter->GetInventoryScrollBoxEntryWidget()->GetMainTextBlock()->SetText(FText::FromName(InventoryMenuVariableToStoreThisEquipmentType->GetItemName()));
+				PlayerCharacter->GetInventoryScrollBoxEntryWidget()->SetItem(InventoryMenuVariableToStoreThisEquipmentType);
+				PlayerCharacter->GetInventoryScrollBoxEntryWidget()->AddToViewport();
+				CurrentScrollBox->AddChild(PlayerCharacter->GetInventoryScrollBoxEntryWidget());
+			}
 		}
 	}
 	GameInstanceVariableToStoreThisEquipmentType = ItemToEquip->GetClass();
 	InventoryMenuVariableToStoreThisEquipmentType = ItemToEquip;
-	if (ItemWidget) 
+	if (IsValid(ItemWidget)) {
 		if (ItemWidget->AmountOfItems <= 1) {
 			ScrollBoxWithWidget->RemoveChild(ItemWidget);
 			ItemWidget->RemoveFromParent();
@@ -420,10 +493,11 @@ void UInventoryMenu::EquipItem(AEquipmentItem*& ItemToEquip, TSubclassOf<class A
 			FString NameString = ItemToEquip->GetItemName().ToString() + FString("(" + FString::FromInt(ItemWidget->AmountOfItems) + ")");
 			ItemWidget->GetMainTextBlock()->SetText(FText::FromString(NameString));
 		}
-	for (int i = 0; i < GameInstance->InstanceItemsInTheInventory.Num(); i++) {
-		AGameItem* GameItem = Cast<AGameItem>(GameInstance->InstanceItemsInTheInventory[i]->GetDefaultObject());
+	}
+	for (TSubclassOf<AGameItem> InstanceItemsInTheInventoryGameItem : GameInstance->InstanceItemsInTheInventory) {
+		AGameItem* GameItem = Cast<AGameItem>(InstanceItemsInTheInventoryGameItem->GetDefaultObject());
 		if (GameItem->GetItemName() == ItemToEquip->GetItemName()) {
-			GameInstance->InstanceItemsInTheInventory.RemoveAt(i);
+			GameInstance->InstanceItemsInTheInventory.RemoveSingle(InstanceItemsInTheInventoryGameItem);
 			break;
 		}
 	}
@@ -434,137 +508,181 @@ void UInventoryMenu::EquipItem(AEquipmentItem*& ItemToEquip, TSubclassOf<class A
 void UInventoryMenu::UseButtonOnClicked()
 {
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	ABattleManager* BattleManager = PlayerCharacter->GetBattleManager();
 	URedemptionGameInstance* GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
-	if (PickedItem) {
-		if (PickedItem->GetType() == ItemType::SUPPORT) {
-			//Save new data in GameInstance
-			for (int i = 0; i < GameInstance->InstanceItemsInTheInventory.Num(); i++) {
-				AGameItem* GameItem = Cast<AGameItem>(GameInstance->InstanceItemsInTheInventory[i]->GetDefaultObject());
-				if (GameItem)
-					if (GameItem->GetItemName() == PickedItem->GetItemName()) {
-						GameInstance->InstanceItemsInTheInventory.RemoveAt(i);
-						break;
-					}
-			}
-			ASupportItem* SupportItem = Cast<ASupportItem>(PickedItem);
+	if (IsValid(PickedItem) && IsValid(PlayerCharacter) && IsValid(GameInstance) && IsValid(UIManager)) {
+		if (PickedItem->GetType() == ItemType::RESTORATION) {
 			//Find Item's widget in inventory
 			UInventoryScrollBoxEntryWidget* EntryWidget = nullptr;
 			for (int i = 0; i < InventoryScrollBox->GetAllChildren().Num(); i++) {
 				EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(InventoryScrollBox->GetAllChildren()[i]);
-				if (EntryWidget)
+				if (IsValid(EntryWidget))
 					if (PickedItem->GetItemName() == EntryWidget->GetItem()->GetItemName())
 						break;
 			}
-			if (SupportItem->TypeOfSupport == SupportType::HEAL) {
-				if (SupportItem->TypeOfRecovery == RecoveryType::HEALTH)
-					PlayerCharacter->CurrentHP += SupportItem->RecoveryValue;
-				else
-					PlayerCharacter->CurrentMana += SupportItem->RecoveryValue;
-				if (EntryWidget) {
-					if (EntryWidget->AmountOfItems == 1) {
-						InventoryScrollBox->RemoveChild(EntryWidget);
-						EntryWidget->RemoveFromParent();
-						EntryWidget->ConditionalBeginDestroy();
-						PickedItem = nullptr;
+			if (ARestorationItem* RestorationItem = Cast<ARestorationItem>(PickedItem); IsValid(RestorationItem)) {
+				bool ItemHasBeenUsed = false;
+				if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::HEALTH && PlayerCharacter->CurrentHP < PlayerCharacter->MaxHP) {
+					PlayerCharacter->CurrentHP += RestorationItem->GetRestorationPoints();
+					ItemHasBeenUsed = true;
+					if (PlayerCharacter->CurrentHP > PlayerCharacter->MaxHP)
+						PlayerCharacter->CurrentHP = PlayerCharacter->MaxHP;
+				}
+				else if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::MANA && PlayerCharacter->CurrentMana < PlayerCharacter->MaxMana) {
+					PlayerCharacter->CurrentMana += RestorationItem->GetRestorationPoints();
+					ItemHasBeenUsed = true;
+					if (PlayerCharacter->CurrentMana > PlayerCharacter->MaxMana)
+						PlayerCharacter->CurrentMana = PlayerCharacter->MaxMana;
+				}
+				else if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::MANA && PlayerCharacter->CurrentMana >= PlayerCharacter->MaxMana)
+					CreateNotification(FText::FromString("Your mana is already full!!!"));
+				else if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::HEALTH && PlayerCharacter->CurrentHP >= PlayerCharacter->MaxHP) 
+					CreateNotification(FText::FromString("Your health is already full!!!"));
+				if (ItemHasBeenUsed) {
+					//Save new data in GameInstance
+					for (int i = 0; i < GameInstance->InstanceItemsInTheInventory.Num(); i++) {
+						AGameItem* GameItem = Cast<AGameItem>(GameInstance->InstanceItemsInTheInventory[i]->GetDefaultObject());
+						if (IsValid(GameItem))
+							if (GameItem->GetItemName() == PickedItem->GetItemName()) {
+								GameInstance->InstanceItemsInTheInventory.RemoveAt(i);
+								break;
+							}
 					}
-					else {
-						EntryWidget->AmountOfItems--;
-						FString NameString;
-						if(EntryWidget->AmountOfItems > 1)
-							NameString = SupportItem->GetItemName().ToString() + FString("(" + FString::FromInt(EntryWidget->AmountOfItems) + ")");
-						else
-							NameString = SupportItem->GetItemName().ToString();
-						EntryWidget->GetMainTextBlock()->SetText(FText::FromString(NameString));
+					if (IsValid(EntryWidget)) {
+						if (EntryWidget->AmountOfItems == 1) {
+							InventoryScrollBox->RemoveChild(EntryWidget);
+							EntryWidget->RemoveFromParent();
+							EntryWidget->ConditionalBeginDestroy();
+							PickedItem = nullptr;
+						}
+						else {
+							EntryWidget->AmountOfItems--;
+							FString NameString;
+							if (EntryWidget->AmountOfItems > 1)
+								NameString = RestorationItem->GetItemName().ToString() + FString("(" + FString::FromInt(EntryWidget->AmountOfItems) + ")");
+							else
+								NameString = RestorationItem->GetItemName().ToString();
+							EntryWidget->GetMainTextBlock()->SetText(FText::FromString(NameString));
+						}
 					}
+					UGameplayStatics::PlaySound2D(GetWorld(), PlayerCharacter->GetAudioManager()->UseHealOrBoostSoundCue);
 				}
 			}
-			else if (SupportItem->TypeOfSupport == SupportType::BOOST) {
-
-			}
 		}
+		else if (PickedItem->GetType() == ItemType::BOOST) {
+			UGameplayStatics::PlaySound2D(GetWorld(), PlayerCharacter->GetAudioManager()->UseHealOrBoostSoundCue);
+		}
+		else if (PickedItem->GetType() == ItemType::ASSAULT) 
+			CreateNotification(FText::FromString("Assault items can be used only in a battle!!!"));
 	}
 }
 
+
 void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 {
-	if (InventoryScrollBox->GetAllChildren().Num() > 0) {
-		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-		ABattleManager* BattleManager = PlayerCharacter->GetBattleManager();
+	if (InventoryScrollBox->GetAllChildren().Num() > 0 && IsValid(PickedItem)) {
 		URedemptionGameInstance* GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
-		UBattleMenu* BattleMenu = PlayerCharacter->GetBattleMenuWidget();
-		BattleMenu->AddToViewport();
-		UIManager->PickedButtonIndex = 0;
-		UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-		if (PickedItem->GetType() == ItemType::SUPPORT) {
-			//Save new data in GameInstance
-			for (int i = 0; i < GameInstance->InstanceItemsInTheInventory.Num(); i++) {
-				AGameItem* GameItem = Cast<AGameItem>(GameInstance->InstanceItemsInTheInventory[i]->GetDefaultObject());
-				if (PickedItem && GameItem)
-					if (GameItem->GetItemName() == PickedItem->GetItemName()) {
-						GameInstance->InstanceItemsInTheInventory.RemoveAt(i);
-						break;
+		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+		ABattleManager* BattleManager = nullptr;
+		UBattleMenu* BattleMenu = nullptr;
+		if (IsValid(PlayerCharacter)) {
+			BattleManager = PlayerCharacter->GetBattleManager();
+			BattleMenu = PlayerCharacter->GetBattleMenuWidget();
+		}
+		if (IsValid(GameInstance) && IsValid(PlayerCharacter) && IsValid(BattleManager) && IsValid(BattleMenu) && IsValid(PickedItem) && IsValid(UIManager)) {
+			if (PickedItem->GetType() == ItemType::RESTORATION) {
+				//Find Item's widget in inventory
+				UInventoryScrollBoxEntryWidget* EntryWidget = nullptr;
+				for (int i = 0; i < InventoryScrollBox->GetAllChildren().Num(); i++) {
+					EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(InventoryScrollBox->GetAllChildren()[i]);
+					if (IsValid(EntryWidget))
+						if (PickedItem->GetItemName() == EntryWidget->GetItem()->GetItemName())
+							break;
+				}
+				if (ARestorationItem* RestorationItem = Cast<ARestorationItem>(PickedItem); IsValid(RestorationItem)) {
+					bool ItemHasBeenUsed = false;
+					if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::HEALTH && PlayerCharacter->CurrentHP < PlayerCharacter->MaxHP) {
+						PlayerCharacter->CurrentHP += RestorationItem->GetRestorationPoints();
+						ItemHasBeenUsed = true;
+						if (PlayerCharacter->CurrentHP > PlayerCharacter->MaxHP)
+							PlayerCharacter->CurrentHP = PlayerCharacter->MaxHP;
 					}
-			}
-			ASupportItem* SupportItem = Cast<ASupportItem>(PickedItem);
-			//Find Item's widget in inventory
-			UInventoryScrollBoxEntryWidget* EntryWidget = nullptr;
-			for (int i = 0; i < InventoryScrollBox->GetAllChildren().Num(); i++) {
-				EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(InventoryScrollBox->GetAllChildren()[i]);
-				if (EntryWidget)
-					if (PickedItem->GetItemName() == EntryWidget->GetItem()->GetItemName())
-						break;
-			}
-			if (SupportItem->TypeOfSupport == SupportType::HEAL) {
-				if (SupportItem->TypeOfRecovery == RecoveryType::HEALTH)
-					PlayerCharacter->CurrentHP += SupportItem->RecoveryValue;
-				else
-					PlayerCharacter->CurrentMana += SupportItem->RecoveryValue;
-				if (EntryWidget) 
-					if (EntryWidget->AmountOfItems == 1) {
-						InventoryScrollBox->RemoveChild(EntryWidget);
-						PickedItem = nullptr;
-						EntryWidget->RemoveFromParent();
-						EntryWidget->ConditionalBeginDestroy();
+					else if(RestorationItem->GetTypeOfRestoration() == ItemRestorationType::MANA && PlayerCharacter->CurrentMana < PlayerCharacter->MaxMana) {
+						PlayerCharacter->CurrentMana += RestorationItem->GetRestorationPoints();
+						ItemHasBeenUsed = true;
+						if (PlayerCharacter->CurrentMana > PlayerCharacter->MaxMana)
+							PlayerCharacter->CurrentMana = PlayerCharacter->MaxMana;
 					}
-					else {
-						EntryWidget->AmountOfItems--;
-						FString NameString;
-						if(EntryWidget->AmountOfItems > 1)
-							NameString = SupportItem->GetItemName().ToString() + FString("(" + FString::FromInt(EntryWidget->AmountOfItems) + ")");
-						else
-							NameString = SupportItem->GetItemName().ToString();
-						EntryWidget->GetMainTextBlock()->SetText(FText::FromString(NameString));
+					else if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::MANA && PlayerCharacter->CurrentMana >= PlayerCharacter->MaxMana)
+						CreateNotification(FText::FromString("Your mana is already full!!!"));
+					else if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::HEALTH && PlayerCharacter->CurrentHP >= PlayerCharacter->MaxHP)
+						CreateNotification(FText::FromString("Your health is already full!!!"));
+					if (ItemHasBeenUsed) {
+						BattleMenu->AddToViewport();
+						UIManager->PickedButtonIndex = 0;
+						UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+						//Save new data in GameInstance
+						for (int i = 0; i < GameInstance->InstanceItemsInTheInventory.Num(); i++) {
+							AGameItem* GameItem = Cast<AGameItem>(GameInstance->InstanceItemsInTheInventory[i]->GetDefaultObject());
+							if (IsValid(PickedItem) && IsValid(GameItem))
+								if (GameItem->GetItemName() == PickedItem->GetItemName()) {
+									GameInstance->InstanceItemsInTheInventory.RemoveAt(i);
+									break;
+								}
+						}
+						if (IsValid(EntryWidget)) {
+							if (EntryWidget->AmountOfItems == 1) {
+								InventoryScrollBox->RemoveChild(EntryWidget);
+								PickedItem = nullptr;
+								EntryWidget->RemoveFromParent();
+								EntryWidget->ConditionalBeginDestroy();
+							}
+							else {
+								EntryWidget->AmountOfItems--;
+								FString NameString;
+								if (EntryWidget->AmountOfItems > 1)
+									NameString = RestorationItem->GetItemName().ToString() + FString("(" + FString::FromInt(EntryWidget->AmountOfItems) + ")");
+								else
+									NameString = RestorationItem->GetItemName().ToString();
+								EntryWidget->GetMainTextBlock()->SetText(FText::FromString(NameString));
+							}
+						}
+						UGameplayStatics::PlaySound2D(GetWorld(), PlayerCharacter->GetAudioManager()->UseHealOrBoostSoundCue);
+						this->RemoveFromParent();
+						GetWorld()->GetTimerManager().SetTimer(ItemUseTimerHandle, BattleManager, &ABattleManager::PlayerTurnController, 1.5f, false);
+						BattleMenu->IsChoosingItem = false;
 					}
-				this->RemoveFromParent();
-				GetWorld()->GetTimerManager().SetTimer(ItemUseTimerHandle, BattleManager, &ABattleManager::PlayerTurnController, 1.5f, false);
+				}
 			}
-			else if (SupportItem->TypeOfSupport == SupportType::BOOST) {
+			else if (PickedItem->GetType() == ItemType::BOOST) {
 
 			}
-		}
-		else if (PickedItem->GetType() == ItemType::ASSAULT) {
-			AAssaultItem* AssaultItem = Cast<AAssaultItem>(PickedItem);
-			//Remove player and menu render and turn on target selection
-			BattleMenu->IsPreparingToAttack = true;
-			BattleMenu->IsChoosingItem = false;
-			BattleMenu->IsAttackingWithItem = true;
-			//PlayerCharacter->GetMesh()->bHiddenInGame = true;
-			PlayerCharacter->AttackValue = AssaultItem->AttackValue;
-			BattleManager->SelectedEnemy = PlayerCharacter->GetBattleManager()->BattleEnemies[0];
-			BattleManager->SelectedEnemyIndex = 0;
-			this->RemoveFromParent();
-			BattleMenu->GetCenterMark()->SetVisibility(ESlateVisibility::Visible);
-			BattleMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
-			BattleMenu->GetAttackMenuBorder()->SetVisibility(ESlateVisibility::Visible);
-			BattleMenu->GetAttackButton()->SetBackgroundColor(FColor(1, 1, 1, 1));
-			BattleManager->SelectedEnemy->GetEnemyHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
-			UIManager->PickedButton = BattleMenu->GetAttackActionButton();
-			UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-			UIManager->PickedButtonIndex = 0;
-			BattleManager->SetCanTurnBehindPlayerCameraToEnemy(true);
-			BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
-			BattleMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(PlayerCharacter->GetBattleManager()->BattleEnemies[0]->GetCharacterName()));
+			else if (PickedItem->GetType() == ItemType::ASSAULT) {
+				if (AAssaultItem* AssaultItem = Cast<AAssaultItem>(PickedItem); IsValid(AssaultItem)) {
+					BattleMenu->AddToViewport();
+					UIManager->PickedButtonIndex = 0;
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+					//Remove player and menu render and turn on target selection
+					BattleMenu->IsPreparingToAttack = true;
+					BattleMenu->IsChoosingItem = false;
+					BattleMenu->IsAttackingWithItem = true;
+					//PlayerCharacter->GetMesh()->bHiddenInGame = true;
+					BattleManager->SelectedEnemy = PlayerCharacter->GetBattleManager()->BattleEnemies[0];
+					BattleManager->SelectedEnemyIndex = 0;
+					this->RemoveFromParent();
+					BattleMenu->GetCenterMark()->SetVisibility(ESlateVisibility::Visible);
+					BattleMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
+					BattleMenu->GetAttackMenuBorder()->SetVisibility(ESlateVisibility::Visible);
+					BattleMenu->GetLeftRightMenuBorder()->SetVisibility(ESlateVisibility::Visible);
+					BattleMenu->GetAttackButton()->SetBackgroundColor(FColor(1, 1, 1, 1));
+					BattleManager->SelectedEnemy->GetEnemyHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
+					UIManager->PickedButton = BattleMenu->GetAttackActionButton();
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+					UIManager->PickedButtonIndex = 0;
+					BattleManager->SetCanTurnBehindPlayerCameraToEnemy(true);
+					BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
+					BattleMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(PlayerCharacter->GetBattleManager()->BattleEnemies[0]->GetCharacterName()));
+				}
+			}
 		}
 	}
 }
@@ -572,76 +690,193 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 void UInventoryMenu::BattleMenuItemsBackButtonOnClicked()
 {
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	UBattleMenu* BattleMenu = PlayerCharacter->GetBattleMenuWidget();
-	BattleMenu->AddToViewport();
-	BattleMenu->GetMenuBorder()->SetVisibility(ESlateVisibility::Visible);
-	this->RemoveFromParent();
-	BattleMenu->IsChoosingItem = false;
-	BattleMenu->IsChoosingAction = true;
-	UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-	UIManager->PickedButtonIndex = 0;
-	UIManager->PickedButton = BattleMenu->GetAttackButton();
-	UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+	UBattleMenu* BattleMenu = nullptr;
+	if(IsValid(PlayerCharacter))
+		BattleMenu = PlayerCharacter->GetBattleMenuWidget();
+	if (IsValid(BattleMenu)) {
+		BattleMenu->AddToViewport();
+		BattleMenu->GetMenuBorder()->SetVisibility(ESlateVisibility::Visible);
+		this->RemoveFromParent();
+		BattleMenu->IsChoosingItem = false;
+		BattleMenu->IsChoosingAction = true;
+		UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+		UIManager->PickedButtonIndex = 0;
+		UIManager->PickedButton = BattleMenu->GetAttackButton();
+		UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+	}
 }
 
-UScrollBox* UInventoryMenu::GetInventoryScrollBox()
+void UInventoryMenu::SetItemInfo(AGameItem* const& GameItem)
+{
+	FString ItemName = FString("Name: ").Append(GameItem->GetItemName().ToString());
+	ItemNameTextBlock->SetText(FText::FromString(ItemName));
+	switch (GameItem->GetType()) {
+	case ItemType::EQUIPMENT:
+		if (AEquipmentItem* EquipmentItem = Cast<AEquipmentItem>(GameItem); IsValid(EquipmentItem)) {
+			if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::WEAPON) {
+				ItemTypeTextBlock->SetText(FText::FromString("Type: Weapon"));
+			}
+			else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::ARMOR) {
+				if (AArmorItem* ArmorItem = Cast<AArmorItem>(EquipmentItem); IsValid(ArmorItem))
+					switch (ArmorItem->GetTypeOfArmor()) {
+					case ArmorType::HEAD:
+						ItemTypeTextBlock->SetText(FText::FromString("Type: Helmet"));
+						break;
+					case ArmorType::TORSE:
+						ItemTypeTextBlock->SetText(FText::FromString("Type: Torse Armor"));
+						break;
+					case ArmorType::HAND:
+						ItemTypeTextBlock->SetText(FText::FromString("Type: Gloves"));
+						break;
+					case ArmorType::LOWERARMOR:
+						ItemTypeTextBlock->SetText(FText::FromString("Type: Lower Armor"));
+						break;
+					}
+			}
+		}
+		break;
+	case ItemType::ASSAULT:
+		ItemTypeTextBlock->SetText(FText::FromString("Type: Assault Item"));
+		break;
+	case ItemType::MISCELLANEOUS:
+		ItemTypeTextBlock->SetText(FText::FromString("Type: Miscellaneous"));
+		break;
+	case ItemType::RESTORATION:
+		if (ARestorationItem* RestorationItem = Cast<ARestorationItem>(GameItem); IsValid(RestorationItem)) {
+			if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::HEALTH)
+				ItemTypeTextBlock->SetText(FText::FromString("Type: Healing Item"));
+			else if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::MANA)
+				ItemTypeTextBlock->SetText(FText::FromString("Type: Mana Restoration Item"));
+		}
+		break;
+	case ItemType::BOOST:
+		ItemTypeTextBlock->SetText(FText::FromString("Type: Boost Item"));
+		break;
+	}
+	if (GameItem->GetType() != ItemType::MISCELLANEOUS) {
+		ItemEffectValueTextBlock->SetVisibility(ESlateVisibility::Visible);
+		FString StringToSet = "";
+		if (AAssaultItem* AssaultItem = Cast<AAssaultItem>(GameItem); IsValid(AssaultItem)) {
+			StringToSet = FString("Damage: ");
+			StringToSet.AppendInt(AssaultItem->AttackValue);
+			ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));
+		}
+		else if (AEquipmentItem* EquipmentItem = Cast<AEquipmentItem>(GameItem); IsValid(EquipmentItem)) {
+			if (AWeaponItem* WeaponItem = Cast<AWeaponItem>(GameItem); IsValid(WeaponItem)) {
+				StringToSet = FString("Damage: ");
+				StringToSet.AppendInt(WeaponItem->StatValue);
+				ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));
+			}
+			else if (AArmorItem* ArmorItem = Cast<AArmorItem>(GameItem); IsValid(ArmorItem)) {
+				StringToSet = FString("Armor: ");
+				StringToSet.AppendInt(ArmorItem->StatValue);
+				ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));
+			}
+		}
+		else if (ARestorationItem* RestorationItem = Cast<ARestorationItem>(GameItem)) {
+			if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::HEALTH)
+				StringToSet = FString("HP: ");
+			else if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::MANA)
+				StringToSet = FString("Mana: ");
+			StringToSet.AppendInt(RestorationItem->GetRestorationPoints());
+			ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));
+		}
+		else if (ABoostItem* BoostItem = Cast<ABoostItem>(GameItem)) {
+			StringToSet = FString("Effect Multiplier: ");
+			StringToSet.AppendInt(BoostItem->GetEffectMultiplier());
+			ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));
+		}
+	}
+	else
+		ItemEffectValueTextBlock->SetVisibility(ESlateVisibility::Collapsed);
+	FString ItemCost = FString("Cost: ");
+	ItemCost.AppendInt(GameItem->GetCost());
+	ItemCostTextBlock->SetText(FText::FromString(ItemCost));
+	ItemDescriptionTextBlock->SetText(GameItem->GetDescription());
+}
+
+void UInventoryMenu::HideNotificationAndClearItsTimer()
+{
+	NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
+	NotificationTextBlock->SetText(FText::FromString(""));
+	GetWorld()->GetTimerManager().ClearTimer(HideNotificationTimerHandle);
+}
+
+void UInventoryMenu::CreateNotification(FText NotificationText)
+{
+	NotificationBorder->SetVisibility(ESlateVisibility::Visible);
+	NotificationTextBlock->SetText(NotificationText);
+	GetWorld()->GetTimerManager().SetTimer(HideNotificationTimerHandle, this, &UInventoryMenu::HideNotificationAndClearItsTimer, 3.f, false);
+}
+
+UScrollBox* UInventoryMenu::GetInventoryScrollBox() const
 {
 	return InventoryScrollBox;
 }
 
-UScrollBox* UInventoryMenu::GetMeleeInventoryScrollBox()
+UScrollBox* UInventoryMenu::GetMeleeInventoryScrollBox() const
 {
 	return MeleeInventoryScrollBox;
 }
 
-UScrollBox* UInventoryMenu::GetRangeInventoryScrollBox()
+UScrollBox* UInventoryMenu::GetRangeInventoryScrollBox() const
 {
 	return RangeInventoryScrollBox;
 }
 
-UScrollBox* UInventoryMenu::GetHeadInventoryScrollBox()
+UScrollBox* UInventoryMenu::GetHeadInventoryScrollBox() const
 {
 	return HeadInventoryScrollBox;
 }
 
-UScrollBox* UInventoryMenu::GetTorseInventoryScrollBox()
+UScrollBox* UInventoryMenu::GetTorseInventoryScrollBox() const
 {
 	return TorseInventoryScrollBox;
 }
 
-UScrollBox* UInventoryMenu::GetHandInventoryScrollBox()
+UScrollBox* UInventoryMenu::GetHandInventoryScrollBox() const
 {
 	return HandInventoryScrollBox;
 }
 
-UScrollBox* UInventoryMenu::GetLowerArmorInventoryScrollBox()
+UScrollBox* UInventoryMenu::GetLowerArmorInventoryScrollBox() const
 {
 	return LowerArmorInventoryScrollBox;
 }
 
-AGameItem* UInventoryMenu::GetPickedItem()
+AGameItem* UInventoryMenu::GetPickedItem() const
 {
 	return PickedItem;
 }
 
-UCanvasPanel* UInventoryMenu::GetMainCanvasPanel()
+UCanvasPanel* UInventoryMenu::GetMainCanvasPanel() const
 {
 	return MainCanvasPanel;
 }
 
-UCanvasPanel* UInventoryMenu::GetNotInBattleMenuIncludedCanvasPanel()
+UCanvasPanel* UInventoryMenu::GetNotInBattleMenuIncludedCanvasPanel() const
 {
 	return NotInBattleMenuIncludedCanvasPanel;
 }
 
-UBorder* UInventoryMenu::GetBattleMenuButtonsForItemsBorder()
+UBorder* UInventoryMenu::GetBattleMenuButtonsForItemsBorder() const
 {
 	return BattleMenuButtonsForItemsBorder;
 }
 
-UBorder* UInventoryMenu::GetInventoryBorder()
+UBorder* UInventoryMenu::GetInventoryBorder() const
 {
 	return InventoryBorder;
+}
+
+UBorder* UInventoryMenu::GetItemInfoBorder() const
+{
+	return ItemInfoBorder;
+}
+
+bool UInventoryMenu::GetCanScrollInventory() const
+{
+	return CanScrollInventory;
 }
 
 void UInventoryMenu::SetPickedItem(AGameItem* NewItem)
@@ -649,8 +884,28 @@ void UInventoryMenu::SetPickedItem(AGameItem* NewItem)
 	PickedItem = NewItem;
 }
 
-bool UInventoryMenu::GetCanScrollInventory()
+void UInventoryMenu::SetTextOfItemNameTextBlock(FText NewText)
 {
-	return CanScrollInventory;
+	ItemNameTextBlock->SetText(NewText);
+}
+
+void UInventoryMenu::SetTextOfItemTypeTextBlock(FText NewText)
+{
+	ItemTypeTextBlock->SetText(NewText);
+}
+
+void UInventoryMenu::SetTextOfItemEffectValueTextBlock(FText NewText)
+{
+	ItemEffectValueTextBlock->SetText(NewText);
+}
+
+void UInventoryMenu::SetTextOfItemCostTextBlock(FText NewText)
+{
+	ItemCostTextBlock->SetText(NewText);
+}
+
+void UInventoryMenu::SetTextOfItemDescriptionTextBlock(FText NewText)
+{
+	ItemDescriptionTextBlock->SetText(NewText);
 }
 

@@ -25,7 +25,7 @@ EBTNodeResult::Type UBTTask_StartADialogue::ExecuteTask(UBehaviorTreeComponent& 
 	if (GetWorld())
 		PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	if (!PlayerCharacter)
-		EBTNodeResult::Failed;
+		return EBTNodeResult::Failed;
 
 	if (!PlayerCharacter->GetDialogueBoxWidget()->IsInViewport()) {
 		PlayerCharacter->GetDialogueBoxWidget()->AddToViewport();

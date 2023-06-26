@@ -9,16 +9,23 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\InventoryMenu.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\PauseMenu.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\PlayerMenu.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SkillBattleMenu.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\BattleResultsScreen.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\GameManager.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\AudioManager.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\DialogueBox.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\ResponsesBox.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\ResponseEntry.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\ForwardRayInfo.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Notification.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\EffectsSpellsAndSkillsManager.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\DeathMenu.h"
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
@@ -59,27 +66,46 @@ private:
 	void CheckForwardRayHitResult();
 	void Death();
 
-	UPROPERTY(BlueprintReadOnly, Category = "GeneralInformation", meta = (AllowPrivateAccess = true))
-		ABattleManager* BattleManager;
-	UPROPERTY(BlueprintReadOnly, Category = "GeneralInformation", meta = (AllowPrivateAccess = true))
-		AGameManager* GameManager;
-	UPROPERTY(BlueprintReadOnly, Category = "GeneralInformation", meta = (AllowPrivateAccess = true))
-		URedemptionGameInstance* GameInstance;
+	UFUNCTION()
+		void RemoveNotification();
+	UFUNCTION()
+		void FinishGame();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
+		ABattleManager* BattleManager {};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
+		AAudioManager* AudioManager {};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
+		AGameManager* GameManager {};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
+		AEffectsSpellsAndSkillsManager* EffectsManager {};
+	UPROPERTY(BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
+		URedemptionGameInstance* GameInstance {};
 
 	UPROPERTY()
-		APlayerController* PlayerController;
+		APlayerController* PlayerController {};
 	UPROPERTY()
-		USkeletalMeshComponent* PlayerSkeletalMesh;
+		USkeletalMeshComponent* PlayerSkeletalMesh {};
 	UPROPERTY()
-		UPlayerCharacterAnimInstance* PlayerAnimInstance;
+		UPlayerCharacterAnimInstance* PlayerAnimInstance {};
 	UPROPERTY()
-		AUIManager* UIManager;
+		AUIManager* UIManager {};
+
+	//Touch interfaces
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mobile", meta = (AllowPrivateAccess = true))
+		UTouchInterface* StandardTouchInterface {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mobile", meta = (AllowPrivateAccess = true))
+		UTouchInterface* EmptyTouchInterface {};
+
+	//Timer Handles
+	FTimerHandle RemoveNotificationTimerHandle{};
+	FTimerHandle FinishGameTimerHandle{};
 public:
 	APlayerCharacter();
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate.*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Input)
-		float TurnRateGamepad;
+		float TurnRateGamepad{};
 	UPROPERTY(EditAnywhere, Category = "Player")
 		int ForwardRayRange = 300;
 
@@ -90,32 +116,41 @@ public:
 	virtual void BeginPlay() override;
 
 	//Access functions
-	UPlayerMenu* GetPlayerMenuWidget();
-	UInventoryMenu* GetInventoryMenuWidget();
-	UBattleResultsScreen* GetBattleResultsScreenWidget();
-	TSubclassOf<class UInventoryScrollBoxEntryWidget> GetInventoryScrollBoxEntryClass();
-	TSubclassOf<class UResponseEntry> GetResponseEntryClass();
-	bool GetCanInput();
+	UPlayerMenu* GetPlayerMenuWidget() const;
+	UInventoryMenu* GetInventoryMenuWidget() const;
+	UBattleResultsScreen* GetBattleResultsScreenWidget() const;
+	TSubclassOf<class UInventoryScrollBoxEntryWidget> GetInventoryScrollBoxEntryClass() const;
+	TSubclassOf<class UResponseEntry> GetResponseEntryClass() const;
+	bool GetCanInput() const;
 	void SetCanInput(bool Value);
-	UBattleMenu* GetBattleMenuWidget();
-	ABattleManager* GetBattleManager();
-	AGameManager* GetGameManager();
-	URedemptionGameInstance* GetGameInstance();
-	UInventoryScrollBoxEntryWidget* GetInventoryScrollBoxEntryWidget();
-	UDialogueBox* GetDialogueBoxWidget();
-	UForwardRayInfo* GetForwardRayInfoWidget();
-	UResponsesBox* GetResponsesBox();
+	UBattleMenu* GetBattleMenuWidget() const;
+	ABattleManager* GetBattleManager() const;
+	AUIManager* GetUIManager() const;
+	AGameManager* GetGameManager() const;
+	AAudioManager* GetAudioManager() const;
+	UDeathMenu* GetDeathMenuWidget() const;
+	USkillBattleMenu* GetSkillBattleMenuWidget() const;
+	AEffectsSpellsAndSkillsManager* GetEffectsSpellsAndSkillsManager() const;
+	URedemptionGameInstance* GetGameInstance() const;
+	UInventoryScrollBoxEntryWidget* GetInventoryScrollBoxEntryWidget() const;
+	UDialogueBox* GetDialogueBoxWidget() const;
+	UForwardRayInfo* GetForwardRayInfoWidget() const;
+	UResponsesBox* GetResponsesBox() const;
+	UTouchInterface* GetEmptyTouchInterface() const;
+	UTouchInterface* GetStandardTouchInterface() const;
 
-	virtual void GetHit(int ValueOfAttack, EquipmentDamageType TypeOfDamage) override;
+
+	virtual void GetHit(int ValueOfAttack, DamageKind KindOfDamage) override;
 
 	//Restore widgets to default state
 	void RestartBattleMenuWidget();
 	void RestartBattleResultsScreenWidget();
 
 	void SetInventoryScrollBoxEntryWidget(UInventoryScrollBoxEntryWidget* NewWidget);
+	void SetGameManager(AGameManager* const &NewGameManager);
+	void SetBattleManager(ABattleManager* const &NewBattleManager);
+	void SetAudioManager(AAudioManager* const &NewAudioManager);
 
-	int8 MeleeAttackValue = 1;
-	int8 RangeAttackValue = 0;
 protected:
 	/**Called for forwards/backward input*/
 	void MoveForward(float Value);
@@ -150,55 +185,71 @@ protected:
 	//UI
 	//Widget classes to spawn widget instances
 	UPROPERTY(EditAnywhere, Category = "UI")
-	    TSubclassOf<class UForwardRayInfo> ForwardRayInfoClass;
+		TSubclassOf<class UForwardRayInfo> ForwardRayInfoClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class ULoadingScreen> LoadingScreenClass;
+		TSubclassOf<class ULoadingScreen> LoadingScreenClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class UPlayerMenu> PlayerMenuClass;
+		TSubclassOf<class UPlayerMenu> PlayerMenuClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class UInventoryScrollBoxEntryWidget> InventoryScrollBoxEntryClass;
+		TSubclassOf<class UInventoryScrollBoxEntryWidget> InventoryScrollBoxEntryClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class UInventoryMenu> InventoryMenuClass;
+		TSubclassOf<class UInventoryMenu> InventoryMenuClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class UBattleMenu> BattleMenuClass;
+		TSubclassOf<class UPauseMenu> PauseMenuClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class UBattleResultsScreen> BattleResultsScreenClass;
+		TSubclassOf<class UBattleMenu> BattleMenuClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class UPlayerBarsWidget> PlayerBarsClass;
+		TSubclassOf<class UBattleResultsScreen> BattleResultsScreenClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class UDialogueBox> DialogueBoxClass;
+		TSubclassOf<class UPlayerBarsWidget> PlayerBarsClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class UResponsesBox> ResponsesBoxClass;
+		TSubclassOf<class UDialogueBox> DialogueBoxClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class UResponseEntry> ResponseEntryClass;
+		TSubclassOf<class UResponsesBox> ResponsesBoxClass{};
+	UPROPERTY(EditAnywhere, Category = "UI")
+		TSubclassOf<class UResponseEntry> ResponseEntryClass{};
+	UPROPERTY(EditAnywhere, Category = "UI")
+		TSubclassOf<class UNotification> NotificationClass{};
+	UPROPERTY(EditAnywhere, Category = "UI")
+		TSubclassOf<class UDeathMenu> DeathMenuClass{};
+	UPROPERTY(EditAnywhere, Category = "UI")
+		TSubclassOf<class USkillBattleMenu> SkillBattleMenuClass{};
 	//The widget instances
 	UPROPERTY()
-		class UForwardRayInfo* ForwardRayInfoWidget;
+		class UForwardRayInfo* ForwardRayInfoWidget{};
 	UPROPERTY()
-		class UPlayerMenu* PlayerMenuWidget;
+		class UPlayerMenu* PlayerMenuWidget{};
 	UPROPERTY()
-		class UInventoryScrollBoxEntryWidget* InventoryScrollBoxEntryWidget;
+		class UInventoryScrollBoxEntryWidget* InventoryScrollBoxEntryWidget{};
 	UPROPERTY()
-		UInventoryMenu* InventoryMenuWidget;
+		class UInventoryMenu* InventoryMenuWidget{};
 	UPROPERTY()
-		UBattleMenu* BattleMenuWidget;
+		class UPauseMenu* PauseMenuWidget{};
 	UPROPERTY()
-		UBattleResultsScreen* BattleResultsScreenWidget;
+		class UBattleMenu* BattleMenuWidget{};
 	UPROPERTY()
-		UPlayerBarsWidget* PlayerBarsWidget;
+		class UBattleResultsScreen* BattleResultsScreenWidget{};
 	UPROPERTY()
-		UDialogueBox* DialogueBoxWidget;
+		class UPlayerBarsWidget* PlayerBarsWidget{};
 	UPROPERTY()
-		UResponsesBox* ResponsesBoxWidget;
+		class UDialogueBox* DialogueBoxWidget{};
+	UPROPERTY()
+		class UResponsesBox* ResponsesBoxWidget{};
+	UPROPERTY()
+		class UNotification* NotificationWidget{};
+	UPROPERTY()
+		class UDeathMenu* DeathMenuWidget{};
+	UPROPERTY()
+		class USkillBattleMenu* SkillBattleMenuWidget{};
 
 	bool CanInput = true;
 
 public:
 #pragma region
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
-		class UInputMappingContext* InputMapping;
+		class UInputMappingContext* InputMapping{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
-		class UMyInputConfigData* InputActions;
+		class UMyInputConfigData* InputActions{};
 #pragma endregion
 	//Battle mode regarding variables
 	UPROPERTY(EditAnywhere, Category = "Battle")
@@ -210,9 +261,13 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Battle")
 		float MaxMana = 100;
 	UPROPERTY(EditAnywhere, Category = "Battle")
-		int8 ArmorValue;
+		int ArmorValue{};
 	UPROPERTY(EditAnywhere, Category = "Battle")
-		int16 AttackValue;
+		int AttackValue{};
+	UPROPERTY(EditAnywhere, Category = "Battle")
+		DamageKind TypeOfDamage {};
+	UPROPERTY(VisibleAnywhere, Category = "Battle")
+		TArray<AEffect*> Effects;
 	//Variables for movement in battle scene
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Battle")
 	    bool Battle_IsMovingToAttackEnemy = false;
@@ -221,7 +276,10 @@ public:
 
 	bool IsInDialogue = false;
 
-
+	//Scroll Control
+	//These are used by left/right button in battle menu
+	void InputScrollRight();
+	void InputScrollLeft();
 
 private:
 #pragma region
@@ -236,19 +294,20 @@ private:
 
 	//Action button input for binding
 	void InputAction();
-	void PickUpItem(AActor* ActorResult);
-	void DialogueInteract(AActor* ActorResult);
+	void PickUpItem(AActor* &ActorResult);
+	void DialogueInteract(AActor* const &ActorResult);
 	void ActionButtonBattleMenuInteraction();
 	void ActionButtonBattleResultsScreenInteraction();
 	void ActionButtonInventoryMenuInteraction();
-	void ChangeLevel(AActor* ActorResult);
+	void ChangeLevel(AActor* const &ActorResult);
+	void NotificationActions(AActor* const &ActorResult);
 
 	//Opens player menu
 	void InputOpenPlayerMenu();
+	
+	void InputOpenPauseMenu();
 
 	//Scroll Control
-	void InputScrollRight();
-	void InputScrollLeft();
 	void InputScrollUp();
 	void InputScrollDown();
 #pragma endregion

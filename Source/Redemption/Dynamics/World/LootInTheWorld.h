@@ -21,7 +21,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "General Information")
-	    FName Name;
+		FName Name {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gameplay")
 		TArray<TSubclassOf<class AGameItem>> ItemsClasses;
 
@@ -29,6 +29,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	FName GetName();
-	TArray<TSubclassOf<class AGameItem>> GetItemsClasses();
+	FName GetName() const;
+	TArray<TSubclassOf<class AGameItem>> GetItemsClasses() const;
 };

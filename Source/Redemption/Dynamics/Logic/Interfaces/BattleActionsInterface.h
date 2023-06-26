@@ -14,5 +14,5 @@ class IBattleActionsInterface
     GENERATED_BODY()
 
 public:
-    virtual void GetHit(int ValueOfAttack, EquipmentDamageType TypeOfDamage);
+    virtual void GetHit(int ValueOfAttack, DamageKind KindOfDamage);
 };

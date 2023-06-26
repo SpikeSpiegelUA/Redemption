@@ -19,12 +19,13 @@ class UBattleMenu : public UUserWidget
 	GENERATED_BODY()
 private:
 	UPROPERTY(BlueprintReadOnly, Category = "GeneralInformation", meta = (AllowPrivateAccess = true))
-		URedemptionGameInstance* GameInstance;
+		URedemptionGameInstance* GameInstance {};
 
-	FTimerHandle ItemUseTimerHandle;
+	FTimerHandle ItemUseTimerHandle{};
+	FTimerHandle DefendActionTimerHandle{};
 
 	UPROPERTY()
-		AUIManager* UIManager;
+		AUIManager* UIManager {};
 
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -38,11 +39,19 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* AttackActionButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UButton* LeftButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UButton* RightButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UButton* SpellButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* MenuBorder;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* EnemyNameBorder;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* AttackMenuBorder;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UBorder* LeftRightMenuBorder;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UCanvasPanel* CenterMark;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -58,26 +67,27 @@ protected:
 public:
 	void SetEnemyName(FName Name);
 
-	UCanvasPanel* GetCenterMark();
-	UVerticalBox* GetMenuVerticalBox();
-	UVerticalBox* GetAttackMenuVerticalBox();
-	UBorder* GetMenuBorder();
-	UBorder* GetEnemyNameBorder();
-	UBorder* GetAttackMenuBorder();
-	UButton* GetAttackButton();
-	UButton* GetDefendButton();
-	UButton* GetItemButton();
-	UButton* GetAttackMenuBackButton();
-	UButton* GetAttackActionButton();
-	UTextBlock* GetEnemyNameTextBlock();
+	UCanvasPanel* GetCenterMark() const;
+	UVerticalBox* GetMenuVerticalBox() const;
+	UVerticalBox* GetAttackMenuVerticalBox() const;
+	UBorder* GetMenuBorder() const;
+	UBorder* GetEnemyNameBorder() const;
+	UBorder* GetAttackMenuBorder() const;
+	UBorder* GetLeftRightMenuBorder() const;
+	UButton* GetAttackButton() const;
+	UButton* GetDefendButton() const;
+	UButton* GetItemButton() const;
+	UButton* GetAttackMenuBackButton() const;
+	UButton* GetAttackActionButton() const;
+	UTextBlock* GetEnemyNameTextBlock() const;
 
 	bool IsPreparingToAttack = false;
-	bool IsPreparingToUseSkill = false;
-	bool IsDefending = false;
-	bool IsPreparingToUseItem = false;
 	bool IsChoosingAction = false;
 	bool IsChoosingItem = false;
 	bool IsAttackingWithItem = false;
+	bool IsChoosingSpell = false;
+	bool IsAttackingWithSpell = false;
+	bool IsAttackingWithMelee = false;
 
 	UFUNCTION()
 		void AttackButtonOnClicked();
@@ -89,4 +99,10 @@ public:
 		void AttackMenuBackButtonOnClicked();
 	UFUNCTION()
 		void AttackActionButtonOnClicked();
+	UFUNCTION()
+		void LeftButtonOnClicked();
+	UFUNCTION()
+		void RightButtonOnClicked();
+	UFUNCTION()
+		void SpellButtonOnClicked();
 };

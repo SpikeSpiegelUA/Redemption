@@ -12,7 +12,7 @@ UBTDecorator_CheckResponse::UBTDecorator_CheckResponse(const FObjectInitializer&
 bool UBTDecorator_CheckResponse::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const  {
 	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
 
-	if (!BlackboardComponent)
+	if (!IsValid(BlackboardComponent))
 		return false;
 
 	if (BlackboardComponent->GetValueAsString(PlayerResponseKeySelector.SelectedKeyName) == ResponseToCheck)

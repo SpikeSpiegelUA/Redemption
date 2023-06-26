@@ -37,9 +37,9 @@ protected:
 	virtual void NativeConstruct() override;
 public:
 
-	UTextBlock* GetResponseTextBlock();
+	UTextBlock* GetResponseTextBlock() const;
 	UFUNCTION()
-	FText GetResponseText();
+	FText GetResponseText() const;
 
 	UPROPERTY(BlueprintAssignable, Category = "Test")
 		FResponseClicked OnResponseClicked;
