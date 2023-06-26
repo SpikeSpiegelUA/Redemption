@@ -10,7 +10,7 @@
 bool UBattleResultsScreen::Initialize()
 {
 	const bool bSuccess = Super::Initialize();
-	if (ContinueButton)
+	if (IsValid(ContinueButton))
 		ContinueButton->OnClicked.AddDynamic(this, &UBattleResultsScreen::ContinueButtonOnClicked);
 	if (!bSuccess) return false;
 	return bSuccess;
@@ -23,8 +23,8 @@ void UBattleResultsScreen::NativeConstruct()
 
 void UBattleResultsScreen::ContinueButtonOnClicked()
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	PlayerCharacter->GetGameManager()->EndBattle();
+	if(APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
+		PlayerCharacter->GetGameManager()->EndBattle();
 }
 
 void UBattleResultsScreen::SetAmountOfGoldTextBlock(FText TextToSet)
@@ -37,27 +37,27 @@ void UBattleResultsScreen::AddExperienceLevelUpStackBox(UUserWidget* WidgetToAdd
 	ExperienceLevelUpStackBox->AddChildToStackBox(WidgetToAdd);
 }
 
-UTextBlock* UBattleResultsScreen::GetExperienceTextBlock()
+UTextBlock* UBattleResultsScreen::GetExperienceTextBlock() const
 {
 	return ExperienceTextBlock;
 }
 
-UTextBlock* UBattleResultsScreen::GetGoldTextBlock()
+UTextBlock* UBattleResultsScreen::GetGoldTextBlock() const
 {
 	return GoldTextBlock;
 }
 
-UTextBlock* UBattleResultsScreen::GetAmountOfGoldTextBlock()
+UTextBlock* UBattleResultsScreen::GetAmountOfGoldTextBlock() const
 {
 	return AmountOfGoldTextBlock;
 }
 
-UStackBox* UBattleResultsScreen::GetExperienceLevelUPStackBox()
+UStackBox* UBattleResultsScreen::GetExperienceLevelUPStackBox() const
 {
 	return ExperienceLevelUpStackBox;
 }
 
-UButton* UBattleResultsScreen::GetContinueButton()
+UButton* UBattleResultsScreen::GetContinueButton() const
 {
 	return ContinueButton;
 }

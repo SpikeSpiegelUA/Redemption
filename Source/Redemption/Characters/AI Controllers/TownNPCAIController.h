@@ -18,7 +18,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	FTimerHandle TimerHandle;
+	FTimerHandle TimerHandle{};
 	
 	ATownNPCAIController();
 	ATownNPCAIController(const FObjectInitializer& ObjectInitializer);

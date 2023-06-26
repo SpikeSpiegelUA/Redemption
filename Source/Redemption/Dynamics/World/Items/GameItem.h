@@ -7,10 +7,19 @@
 #include "GameItem.generated.h"
 
 UENUM(BlueprintType)
+enum class DamageKind :uint8
+{
+	MELEE UMETA(DisplayName = "Melee"),
+	RANGE UMETA(DisplayName = "Range"),
+	FIRE UMETA(DisplayName = "Fire"),
+};
+
+UENUM(BlueprintType)
 enum class ItemType :uint8
 {
 	ASSAULT UMETA(DisplayName = "Assault"),
-	SUPPORT UMETA(DisplayName = "Support"),
+	RESTORATION UMETA(DisplayName = "Restoration"),
+	BOOST UMETA(DisplayName = "Boost"),
 	MISCELLANEOUS UMETA(DisplayName = "Miscellaneous"),
 	EQUIPMENT UMETA(DisplayName = "Equipment"),
 };
@@ -24,21 +33,28 @@ public:
 	// Sets default values for this actor's properties
 	AGameItem();
 
-protected:
+private:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "General Information")
-	FName Name = "";
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
+		FName Name = "";
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information");
-	ItemType Type;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information", meta = (AllowPrivateAccess = true))
+		ItemType Type{};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information", meta = (AllowPrivateAccess = true))
+		int Cost{};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information", meta = (AllowPrivateAccess = true))
+		FText Description{};
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	FName GetItemName() const;
-	ItemType GetType();
-
+	ItemType GetType() const;
+	int GetCost() const;
+	FText GetDescription() const;
 };

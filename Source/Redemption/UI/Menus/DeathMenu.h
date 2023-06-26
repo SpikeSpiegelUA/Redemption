@@ -31,9 +31,9 @@ protected:
 
 	//For CreateWidget variables
 	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class ULoadingScreen> LoadingScreenClass;
+		TSubclassOf<class ULoadingScreen> LoadingScreenClass{};
 public:
 
-	UButton* GetLoadButton();
-	UButton* GetMainMenuButton();
+	UButton* GetLoadButton() const;
+	UButton* GetMainMenuButton() const;
 };

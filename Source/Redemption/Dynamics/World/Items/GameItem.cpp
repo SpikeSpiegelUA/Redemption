@@ -31,8 +31,18 @@ FName AGameItem::GetItemName() const
 }
 
 
-ItemType AGameItem::GetType()
+ItemType AGameItem::GetType() const
 {
 	return Type;
+}
+
+int AGameItem::GetCost() const
+{
+	return Cost;
+}
+
+FText AGameItem::GetDescription() const
+{
+	return Description;
 }
 

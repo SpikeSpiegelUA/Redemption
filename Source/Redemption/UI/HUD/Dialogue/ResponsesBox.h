@@ -22,5 +22,5 @@ protected:
 	virtual void NativeConstruct() override;
 public:
 
-	UVerticalBox* GetResponseVerticalBox();
+	UVerticalBox* GetResponseVerticalBox() const;
 };

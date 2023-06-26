@@ -9,21 +9,12 @@
 /**
  * 
  */
-UENUM(BlueprintType)
-enum class EquipmentDamageType :uint8
-{
-	PHYSICAL UMETA(DisplayName = "Physical")
-};
 
 UENUM(BlueprintType)
 enum class EquipmentType :uint8
 {
-	MELEE UMETA(DisplayName = "Melee"),
-	RANGE UMETA(DisplayName = "Range"),
-	HEAD UMETA(DisplayName = "Head"),
-	TORSE UMETA(DisplayName = "Torse"),
-	HAND UMETA(DisplayName = "Hand"),
-	LOWERARMOR UMETA(DisplayName = "Lower armor")
+	WEAPON UMETA(DisplayName = "Weapon"),
+	ARMOR UMETA(DisplayName = "Armor")
 };
 
 UCLASS()
@@ -33,11 +24,12 @@ class AEquipmentItem : public AGameItem
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information");
-    EquipmentType TypeOfEquipment;
+	EquipmentType TypeOfEquipment{};
 
 public:
-	EquipmentType GetTypeOfEquipment();
+	EquipmentType GetTypeOfEquipment() const;
 
+	//If armor, then this is a ArmorValue, otherwise AttackValue
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information");
-	int Value;
+	int StatValue{};
 };

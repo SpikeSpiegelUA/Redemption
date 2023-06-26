@@ -30,10 +30,10 @@ protected:
 	float PlayerDetection = 0;
 	bool IsAttacking = false;
 	//Blackboard Keys's IDs
-	uint8 CanSeePlayerKeyID;
+	uint8 CanSeePlayerKeyID {};
 
-	FTimerHandle AddPlayerDetectionHandle;
-	FTimerHandle DeductPlayerDetectionHandle;
+	FTimerHandle AddPlayerDetectionHandle {};
+	FTimerHandle DeductPlayerDetectionHandle {};
 
 public:
 
@@ -44,9 +44,9 @@ public:
 
 	virtual void OnPossess(APawn* InPawn) override;
 
-	float GetPlayerDetection();
+	float GetPlayerDetection() const;
 
-	uint8 GetCanSeePlayerKeyID();
+	uint8 GetCanSeePlayerKeyID() const;
 
 private:
 };

@@ -22,26 +22,40 @@ ANonCombatEnemyNPCAIController::ANonCombatEnemyNPCAIController(const FObjectInit
 void ANonCombatEnemyNPCAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	ANonCombatEnemyNPC* ThisEnemy = Cast<ANonCombatEnemyNPC>(GetPawn());
-	//Get angle between player and enemy's forward vector
-	FVector FromPlayerToEnemy = GetPawn()->GetActorLocation() - PlayerCharacter->GetActorLocation();
-	FVector WorldForwardVector = ThisEnemy->GetForwardMarker()->GetComponentLocation() - ThisEnemy->GetActorLocation();
-	float AimAtAngle = ((acosf(FVector::DotProduct(FromPlayerToEnemy.GetSafeNormal(), WorldForwardVector.GetSafeNormal()))) * (180 / 3.1415926));
-
-	//Detection system
-	if (PlayerCharacter) {
-		if (AimAtAngle >= 100.f && (PlayerCharacter->GetActorLocation() - GetPawn()->GetActorLocation()).Length() <= 2000.f) {
-				if ((PlayerCharacter->GetActorLocation() - GetPawn()->GetActorLocation()).Length() <= 800)
-					PlayerDetection = 4;
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+		if (ANonCombatEnemyNPC* ThisEnemy = Cast<ANonCombatEnemyNPC>(GetPawn()); IsValid(ThisEnemy)) {
+			//Get angle between player and enemy's forward vector
+			FVector FromPlayerToEnemy = GetPawn()->GetActorLocation() - PlayerCharacter->GetActorLocation();
+			FVector WorldForwardVector = ThisEnemy->GetForwardMarker()->GetComponentLocation() - ThisEnemy->GetActorLocation();
+			float AimAtAngle = ((acosf(FVector::DotProduct(FromPlayerToEnemy.GetSafeNormal(), WorldForwardVector.GetSafeNormal()))) * (180 / 3.1415926));
+			//Detection system
+			if (AimAtAngle >= 100.f && (PlayerCharacter->GetActorLocation() - GetPawn()->GetActorLocation()).Length() <= 1600.f) {
+				FHitResult HitResult(ForceInit);
+				FCollisionQueryParams* CQP = new FCollisionQueryParams();
+				CQP->AddIgnoredActor(GetPawn());
+				GetWorld()->LineTraceSingleByChannel(HitResult, GetPawn()->GetActorLocation(), PlayerCharacter->GetActorLocation(), ECC_Visibility, *CQP);
+				if (IsValid(HitResult.GetActor()) && HitResult.GetActor()->ActorHasTag(FName("Player"))) {
+					GetWorld()->GetTimerManager().ClearTimer(DeductPlayerDetectionHandle);
+					if (!GetWorld()->GetTimerManager().IsTimerActive(AddPlayerDetectionHandle))
+						GetWorld()->GetTimerManager().SetTimer(AddPlayerDetectionHandle, this, &ANonCombatEnemyNPCAIController::AddPlayerDetection, 1.f, false);
+				}
+				else if (IsValid(HitResult.GetActor()) && !HitResult.GetActor()->ActorHasTag(FName("Player"))) {
+					GetWorld()->GetTimerManager().ClearTimer(AddPlayerDetectionHandle);
+					if (!GetWorld()->GetTimerManager().IsTimerActive(DeductPlayerDetectionHandle))
+						GetWorld()->GetTimerManager().SetTimer(DeductPlayerDetectionHandle, this, &ANonCombatEnemyNPCAIController::DeductPlayerDetection, 0.5f, false);
+				}
+			}
+			else if(AimAtAngle < 100.f || (PlayerCharacter->GetActorLocation() - GetPawn()->GetActorLocation()).Length() > 1600.f) {
+					GetWorld()->GetTimerManager().ClearTimer(AddPlayerDetectionHandle);
+					if (!GetWorld()->GetTimerManager().IsTimerActive(DeductPlayerDetectionHandle))
+						GetWorld()->GetTimerManager().SetTimer(DeductPlayerDetectionHandle, this, &ANonCombatEnemyNPCAIController::DeductPlayerDetection, 0.5f, false);
+			}
+			if ((PlayerCharacter->GetActorLocation() - GetPawn()->GetActorLocation()).Length() <= 500.f) {
+				PlayerDetection = 4;
 				GetWorld()->GetTimerManager().ClearTimer(DeductPlayerDetectionHandle);
-				if(!GetWorld()->GetTimerManager().IsTimerActive(AddPlayerDetectionHandle))
-					GetWorld()->GetTimerManager().SetTimer(AddPlayerDetectionHandle, this, &ANonCombatEnemyNPCAIController::AddPlayerDetection, 1.f, false);
-		}
-		else if(AimAtAngle < 100.f || (PlayerCharacter->GetActorLocation() - GetPawn()->GetActorLocation()).Length() > 2000.f) {
 				GetWorld()->GetTimerManager().ClearTimer(AddPlayerDetectionHandle);
-				if (!GetWorld()->GetTimerManager().IsTimerActive(DeductPlayerDetectionHandle))
-					GetWorld()->GetTimerManager().SetTimer(DeductPlayerDetectionHandle, this, &ANonCombatEnemyNPCAIController::DeductPlayerDetection, 0.5f, false);
+				AddPlayerDetection();
+			}
 		}
 	}
 }
@@ -54,7 +68,7 @@ void ANonCombatEnemyNPCAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 	ACharacterInTheWorld* Chr = Cast<ACharacterInTheWorld>(InPawn);
-	if (Chr != nullptr && Chr->GetTreeAsset() != nullptr) {
+	if (IsValid(Chr) && IsValid(Chr->GetTreeAsset())) {
 
 			//Initialize the Blackboard
 			BlackboardComponent->InitializeBlackboard(*Chr->GetTreeAsset()->BlackboardAsset);
@@ -79,7 +93,8 @@ void ANonCombatEnemyNPCAIController::AddPlayerDetection()
 	if(PlayerDetection < 4)
 	GetWorld()->GetTimerManager().SetTimer(AddPlayerDetectionHandle, this, &ANonCombatEnemyNPCAIController::AddPlayerDetection, 1.f, false);
 	ANonCombatEnemyNPC* ThisEnemy = Cast<ANonCombatEnemyNPC>(GetPawn());
-	ThisEnemy->GetNonCombatEnemyDetectionBarWidget()->Detection = PlayerDetection;
+	if(IsValid(ThisEnemy))
+		ThisEnemy->GetNonCombatEnemyDetectionBarWidget()->Detection = PlayerDetection;
 }
 
 void ANonCombatEnemyNPCAIController::DeductPlayerDetection()
@@ -93,7 +108,8 @@ void ANonCombatEnemyNPCAIController::DeductPlayerDetection()
 		GetCharacter()->GetCharacterMovement()->MaxWalkSpeed = 150.f;
 	}
 	ANonCombatEnemyNPC* ThisEnemy = Cast<ANonCombatEnemyNPC>(GetPawn());
-	ThisEnemy->GetNonCombatEnemyDetectionBarWidget()->Detection = PlayerDetection;
+	if(IsValid(ThisEnemy))
+		ThisEnemy->GetNonCombatEnemyDetectionBarWidget()->Detection = PlayerDetection;
 }
 
 void ANonCombatEnemyNPCAIController::SetBlackboardDistanceToThePlayer(float Value)
@@ -101,12 +117,12 @@ void ANonCombatEnemyNPCAIController::SetBlackboardDistanceToThePlayer(float Valu
 	BlackboardComponent->SetValue<UBlackboardKeyType_Float>("DistanceToThePlayer", Value);
 }
 
-float ANonCombatEnemyNPCAIController::GetPlayerDetection()
+float ANonCombatEnemyNPCAIController::GetPlayerDetection() const
 {
 	return PlayerDetection;
 }
 
-uint8 ANonCombatEnemyNPCAIController::GetCanSeePlayerKeyID()
+uint8 ANonCombatEnemyNPCAIController::GetCanSeePlayerKeyID() const
 {
 	return CanSeePlayerKeyID;
 }

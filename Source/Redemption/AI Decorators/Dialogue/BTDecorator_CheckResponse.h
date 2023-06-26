@@ -15,7 +15,7 @@ class REDEMPTION_API UBTDecorator_CheckResponse : public UBTDecorator_Blackboard
 	GENERATED_BODY()
 private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true))
-		FBlackboardKeySelector PlayerResponseKeySelector;
+		FBlackboardKeySelector PlayerResponseKeySelector {};
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true))
 		FString ResponseToCheck = "";
 public:

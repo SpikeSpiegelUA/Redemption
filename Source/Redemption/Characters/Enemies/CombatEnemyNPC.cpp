@@ -23,7 +23,7 @@ void ACombatEnemyNPC::BeginPlay()
 	//Set up properties for EnemyHealthBarWidget
 	EnemyHealthBarComponentWidget->SetWidgetClass(EnemyHealthBarClass);
 	EnemyHealthBarWidget = Cast<UEnemyHealthBarWidget>(EnemyHealthBarComponentWidget->GetWidget());
-	if (EnemyHealthBarWidget) {
+	if (IsValid(EnemyHealthBarWidget)) {
 		EnemyHealthBarWidget->HP = HP;
 		EnemyHealthBarWidget->MaxHP = HP;
 	}
@@ -35,21 +35,34 @@ void ACombatEnemyNPC::Tick(float DeltaTime)
 
 }
 
-void ACombatEnemyNPC::GetHit(int ValueOfAttack, EquipmentDamageType TypeOfDamage)
+void ACombatEnemyNPC::GetHit(int ValueOfAttack, DamageKind KindOfDamage)
 {
-	if (HP - (ValueOfAttack - ArmorValue) < 0)
+	int ValueOfArmor = ArmorValue;
+	int ValueOfArmorBeforeEffects = ValueOfArmor;
+	for (AEffect* Effect : Effects) {
+		if (IsValid(Effect) && Effect->GetAreaOfEffect() == EffectArea::ARMOR) {
+			if (Effect->GetTypeOfEffect() == EffectType::BUFF)
+				ValueOfArmor += ValueOfArmorBeforeEffects * (Effect->GetEffectStat() - 1);
+			else
+				ValueOfArmor -= ValueOfArmorBeforeEffects / Effect->GetEffectStat();
+		}
+	}
+	if (HP - (ValueOfAttack - ValueOfArmor/10) < 0)
 		HP = 0;
 	else
-		HP -= (ValueOfAttack - ArmorValue);
-	if (EnemyHealthBarWidget)
+		HP -= (ValueOfAttack - ValueOfArmor/10);
+	if (IsValid(EnemyHealthBarWidget))
 	EnemyHealthBarWidget->HP = HP;
 	UCombatNPCAnimInstance* AnimInstance = Cast<UCombatNPCAnimInstance>(GetMesh()->GetAnimInstance());
-	if (AnimInstance)
+	if (IsValid(AnimInstance)) {
 		if (HP <= 0)
 			AnimInstance->SetIsDead(true);
+		else
+			AnimInstance->SetGotHit(true);
+	}
 }
 
-UEnemyHealthBarWidget* ACombatEnemyNPC::GetEnemyHealthBarWidget()
+UEnemyHealthBarWidget* ACombatEnemyNPC::GetEnemyHealthBarWidget() const
 {
 	return EnemyHealthBarWidget;
 }

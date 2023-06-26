@@ -13,12 +13,12 @@ void ARandomPointAndChasing::BeginPlay()
 	Super::BeginPlay();
 }
 
-int ARandomPointAndChasing::GetRadius()
+int ARandomPointAndChasing::GetRadius() const
 {
 	return Radius;
 }
 
-bool ARandomPointAndChasing::GetCanSeePlayer() 
+bool ARandomPointAndChasing::GetCanSeePlayer()  const
 {
 	return CanSeePlayer;
 }

@@ -19,13 +19,13 @@ protected:
 	virtual void NativeConstruct() override;
 
 	UFUNCTION()
-		float GetDetectionPercentage();
+		float GetDetectionPercentage() const;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		UProgressBar* DetectionBar;
 
 public:
-	float Detection;
+	float Detection{};
 
-	UProgressBar* GetDetectionBar();
+	UProgressBar* GetDetectionBar() const;
 };

@@ -6,7 +6,6 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\PlayerCharacterAIController.h"
 #include "Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\AssaultItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\SupportItem.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/Button.h"
@@ -17,25 +16,34 @@
 #include "Components/ScrollBox.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\EnemyHealthBarWidget.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\InventoryMenu.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SkillBattleMenu.h"
 #include <Kismet/GameplayStatics.h>
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\PlayerCharacterAnimInstance.h"
 
 bool UBattleMenu::Initialize()
 {
 	const bool bSuccess = Super::Initialize();
-	if (GetWorld() && GetWorld()->GetFirstPlayerController()) {
+	if (IsValid(GetWorld()) && IsValid(GetWorld()->GetFirstPlayerController())) {
 		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+		if(IsValid(PlayerCharacter))
 		GameInstance = PlayerCharacter->GetGameInstance();
 	}
 	if (IsValid(AttackButton))
 		AttackButton->OnClicked.AddDynamic(this, &UBattleMenu::AttackButtonOnClicked);
-	if (DefendButton)
+	if (IsValid(DefendButton))
 		DefendButton->OnClicked.AddDynamic(this, &UBattleMenu::DefendButtonOnClicked);
-	if (ItemButton)
+	if (IsValid(ItemButton))
 		ItemButton->OnClicked.AddDynamic(this, &UBattleMenu::ItemButtonOnClicked);
-	if (AttackMenuBackButton)
+	if (IsValid(AttackMenuBackButton))
 		AttackMenuBackButton->OnClicked.AddDynamic(this, &UBattleMenu::AttackMenuBackButtonOnClicked);
-	if (AttackActionButton)
+	if (IsValid(AttackActionButton))
 		AttackActionButton->OnClicked.AddDynamic(this, &UBattleMenu::AttackActionButtonOnClicked);
+	if (IsValid(LeftButton))
+		LeftButton->OnClicked.AddDynamic(this, &UBattleMenu::LeftButtonOnClicked);
+	if (IsValid(RightButton))
+		RightButton->OnClicked.AddDynamic(this, &UBattleMenu::RightButtonOnClicked);
+	if (IsValid(SpellButton))
+		SpellButton->OnClicked.AddDynamic(this, &UBattleMenu::SpellButtonOnClicked);
 	if (!bSuccess) return false;
 	return bSuccess;
 }
@@ -51,33 +59,57 @@ void UBattleMenu::NativeConstruct()
 
 void UBattleMenu::AttackButtonOnClicked()
 {
-	//Remove player and menu render and turn on target selection
-	IsPreparingToAttack = true;
-	IsChoosingAction = false;
-	IsChoosingItem = false;
-	IsAttackingWithItem = false;
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	//PlayerCharacter->GetMesh()->bHiddenInGame = true;
 	ABattleManager* BattleManager = PlayerCharacter->GetBattleManager();
-	BattleManager->SelectedEnemy = PlayerCharacter->GetBattleManager()->BattleEnemies[0];
-	BattleManager->SelectedEnemyIndex = 0;
-	MenuBorder->SetVisibility(ESlateVisibility::Hidden);
-	CenterMark->SetVisibility(ESlateVisibility::Visible);
-	EnemyNameBorder->SetVisibility(ESlateVisibility::Visible);
-	AttackMenuBorder->SetVisibility(ESlateVisibility::Visible);
-	AttackButton->SetBackgroundColor(FColor(1, 1, 1, 1));
-	BattleManager->SelectedEnemy->GetEnemyHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
-	UIManager->PickedButton = AttackActionButton;
-	UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-	UIManager->PickedButtonIndex = 0;
-	BattleManager->SetCanTurnBehindPlayerCameraToEnemy(true);
-	BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
-	EnemyNameTextBlock->SetText(FText::FromName(PlayerCharacter->GetBattleManager()->BattleEnemies[0]->GetCharacterName()));
+	if (IsValid(BattleManager) && IsValid(PlayerCharacter)) {
+		//Remove player and menu render and turn on target selection
+		IsPreparingToAttack = true;
+		IsChoosingAction = false;
+		IsAttackingWithMelee = true;
+		//PlayerCharacter->GetMesh()->bHiddenInGame = true;
+		BattleManager->SelectedEnemy = PlayerCharacter->GetBattleManager()->BattleEnemies[0];
+		BattleManager->SelectedEnemyIndex = 0;
+		MenuBorder->SetVisibility(ESlateVisibility::Hidden);
+		CenterMark->SetVisibility(ESlateVisibility::Visible);
+		EnemyNameBorder->SetVisibility(ESlateVisibility::Visible);
+		LeftRightMenuBorder->SetVisibility(ESlateVisibility::Visible);
+		AttackMenuBorder->SetVisibility(ESlateVisibility::Visible);
+		AttackButton->SetBackgroundColor(FColor(1, 1, 1, 1));
+		BattleManager->SelectedEnemy->GetEnemyHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
+		UIManager->PickedButton = AttackActionButton;
+		UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+		UIManager->PickedButtonIndex = 0;
+		BattleManager->SetCanTurnBehindPlayerCameraToEnemy(true);
+		BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
+		EnemyNameTextBlock->SetText(FText::FromName(PlayerCharacter->GetBattleManager()->BattleEnemies[0]->GetCharacterName()));
+	}
 }
 
 void UBattleMenu::DefendButtonOnClicked()
 {
-
+	UPlayerCharacterAnimInstance* PlayerCharacterAnimInstance = nullptr;
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+	ABattleManager* BattleManager = nullptr;
+	if (IsValid(PlayerCharacter)) {
+		if (IsValid(PlayerCharacter->GetMesh()))
+			if (IsValid(PlayerCharacter->GetMesh()->GetAnimInstance()))
+				PlayerCharacterAnimInstance = Cast<UPlayerCharacterAnimInstance>(PlayerCharacter->GetMesh()->GetAnimInstance());
+		BattleManager = PlayerCharacter->GetBattleManager();
+	}
+	if (IsValid(PlayerCharacterAnimInstance) && IsValid(BattleManager) && IsValid(PlayerCharacter)) {
+		PlayerCharacterAnimInstance->SetIsBlocking(true);
+		FEffectsList* EffectsList{};
+		static const FString ContextString(TEXT("Effects List Context"));
+		if (AEffectsSpellsAndSkillsManager* EffectsManager = PlayerCharacter->GetEffectsSpellsAndSkillsManager(); IsValid(EffectsManager)) {
+			if (IsValid(EffectsManager->GetEffectsDataTable()))
+				EffectsList = EffectsManager->GetEffectsDataTable()->FindRow<FEffectsList>(FName(TEXT("DefendEffect")), ContextString, true);
+			if(EffectsList)
+				PlayerCharacter->Effects.Add(Cast<AEffect>(EffectsList->EffectClass->GetDefaultObject(true)));
+			GetWorld()->GetTimerManager().SetTimer(DefendActionTimerHandle, BattleManager, &ABattleManager::PlayerTurnController, 1.0f, false);
+			MenuBorder->SetVisibility(ESlateVisibility::Hidden);
+			DefendButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+		}
+	}
 }
 
 void UBattleMenu::AttackMenuBackButtonOnClicked()
@@ -86,36 +118,49 @@ void UBattleMenu::AttackMenuBackButtonOnClicked()
 	if (IsPreparingToAttack) {
 		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 		ABattleManager* BattleManager = PlayerCharacter->GetBattleManager();
-		CenterMark->SetVisibility(ESlateVisibility::Hidden);
-		EnemyNameBorder->SetVisibility(ESlateVisibility::Hidden);
-		AttackMenuBorder->SetVisibility(ESlateVisibility::Hidden);
-		BattleManager->SelectedEnemy->GetEnemyHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
-		IsPreparingToAttack = false;
-		//PlayerCharacter->GetMesh()->bHiddenInGame = false;
-		BattleManager->SetCanTurnBehindPlayerCameraToEnemy(false);
-		BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(true);
-		UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-		//If attacking with item, back to item menu, otherwise back to main menu
-		if (IsAttackingWithItem) {
-			IsChoosingItem = true;
-			IsAttackingWithItem = false;
+		if (IsValid(PlayerCharacter) && IsValid(BattleManager) && IsValid(UIManager)) {
+			CenterMark->SetVisibility(ESlateVisibility::Hidden);
+			EnemyNameBorder->SetVisibility(ESlateVisibility::Hidden);
+			AttackMenuBorder->SetVisibility(ESlateVisibility::Hidden);
+			LeftRightMenuBorder->SetVisibility(ESlateVisibility::Hidden);
+			BattleManager->SelectedEnemy->GetEnemyHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
+			IsPreparingToAttack = false;
+			//PlayerCharacter->GetMesh()->bHiddenInGame = false;
+			BattleManager->SetCanTurnBehindPlayerCameraToEnemy(false);
+			BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(true);
+			UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+			//If attacking with item, back to item menu, otherwise back to main menu
 			UInventoryMenu* Inventory = PlayerCharacter->GetInventoryMenuWidget();
-			this->RemoveFromParent();
-			Inventory->AddToViewport();
-			Inventory->GetNotInBattleMenuIncludedCanvasPanel()->SetVisibility(ESlateVisibility::Hidden);
-			if (Inventory->GetInventoryScrollBox()->GetAllChildren().Num() > 0) {
+			USkillBattleMenu* SkillBattleMenu = PlayerCharacter->GetSkillBattleMenuWidget();
+			if (IsAttackingWithItem && IsValid(Inventory)) {
+				IsChoosingItem = true;
+				IsAttackingWithItem = false;
+				this->RemoveFromParent();
+				Inventory->AddToViewport();
+				Inventory->GetNotInBattleMenuIncludedCanvasPanel()->SetVisibility(ESlateVisibility::Hidden);
 				UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(Inventory->GetInventoryScrollBox()->GetAllChildren()[0]);
-				EntryWidget->GetMainButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-				UIManager->PickedButton = EntryWidget->GetMainButton();
+				if (Inventory->GetInventoryScrollBox()->GetAllChildren().Num() > 0 && IsValid(EntryWidget)) {
+					EntryWidget->GetMainButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+					UIManager->PickedButton = EntryWidget->GetMainButton();
+					UIManager->PickedButtonIndex = 0;
+				}
+			}
+			else if (IsAttackingWithSpell && IsValid(SkillBattleMenu)) {
+				IsChoosingSpell = true;
+				IsAttackingWithSpell = false;
+				this->RemoveFromParent();
+				SkillBattleMenu->AddToViewport();
+				UIManager->PickedButton = nullptr;
 				UIManager->PickedButtonIndex = 0;
 			}
-		}
-		else {
-			MenuBorder->SetVisibility(ESlateVisibility::Visible);
-			IsChoosingAction = true;
-			UIManager->PickedButton = AttackButton;
-			UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-			UIManager->PickedButtonIndex = 0;
+			else if(!IsAttackingWithItem && !IsAttackingWithSpell) {
+				MenuBorder->SetVisibility(ESlateVisibility::Visible);
+				IsChoosingAction = true;
+				IsAttackingWithMelee = false;
+				UIManager->PickedButton = AttackButton;
+				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				UIManager->PickedButtonIndex = 0;
+			}
 		}
 	}
 }
@@ -123,13 +168,13 @@ void UBattleMenu::AttackMenuBackButtonOnClicked()
 void UBattleMenu::AttackActionButtonOnClicked()
 {
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	if (PlayerCharacter) {
-		if (IsAttackingWithItem) {
-			UInventoryMenu* Inventory = PlayerCharacter->GetInventoryMenuWidget();
+	if (IsValid(PlayerCharacter)) {
+		UInventoryMenu* Inventory = PlayerCharacter->GetInventoryMenuWidget();
+		if (IsAttackingWithItem && IsValid(Inventory)) {
 			//Save data to game instance
 			for (int i = 0; i < GameInstance->InstanceItemsInTheInventory.Num(); i++) {
 				AGameItem* GameItem = Cast<AGameItem>(GameInstance->InstanceItemsInTheInventory[i]->GetDefaultObject());
-				if (Inventory->GetPickedItem() && GameItem)
+				if (Inventory->GetPickedItem() && IsValid(GameItem))
 					if (GameItem->GetItemName() == Inventory->GetPickedItem()->GetItemName()) {
 						GameInstance->InstanceItemsInTheInventory.RemoveAt(i);
 						break;
@@ -139,35 +184,79 @@ void UBattleMenu::AttackActionButtonOnClicked()
 			UInventoryScrollBoxEntryWidget* EntryWidget = nullptr;
 			for (int i = 0; i < Inventory->GetInventoryScrollBox()->GetAllChildren().Num(); i++) {
 				EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(Inventory->GetInventoryScrollBox()->GetAllChildren()[i]);
-					if (EntryWidget)
+					if (IsValid(EntryWidget))
 						if (Inventory->GetPickedItem()->GetItemName() == EntryWidget->GetItem()->GetItemName())
 							break;
 			}
-			if (EntryWidget)
+			if (IsValid(EntryWidget)) {
 				if (EntryWidget->AmountOfItems == 1) {
 					Inventory->GetInventoryScrollBox()->RemoveChild(EntryWidget);
-					Inventory->SetPickedItem(nullptr);
 					EntryWidget->RemoveFromParent();
 					EntryWidget->ConditionalBeginDestroy();
 				}
 				else {
 					AAssaultItem* AssaultItem = Cast<AAssaultItem>(Inventory->GetPickedItem());
-					EntryWidget->AmountOfItems--;
-					FString NameString;
-					if(EntryWidget->AmountOfItems > 1)
-						NameString = AssaultItem->GetItemName().ToString() + FString("(" + FString::FromInt(EntryWidget->AmountOfItems) + ")");
-					else
-						NameString = AssaultItem->GetItemName().ToString();
-					EntryWidget->GetMainTextBlock()->SetText(FText::FromString(NameString));
+					if (IsValid(AssaultItem)) {
+						EntryWidget->AmountOfItems--;
+						FString NameString;
+						if (EntryWidget->AmountOfItems > 1)
+							NameString = AssaultItem->GetItemName().ToString() + FString("(" + FString::FromInt(EntryWidget->AmountOfItems) + ")");
+						else
+							NameString = AssaultItem->GetItemName().ToString();
+						EntryWidget->GetMainTextBlock()->SetText(FText::FromString(NameString));
+					}
 				}
+			}
 		}
-		PlayerCharacter->Battle_IsMovingToAttackEnemy = true;
+		if(IsAttackingWithSpell)
+			if (USkillBattleMenu* SkillBattleMenu = PlayerCharacter->GetSkillBattleMenuWidget(); IsValid(SkillBattleMenu)) {
+				PlayerCharacter->CurrentMana -= SkillBattleMenu->GetCreatedSpell()->GetManaCost();
+				if (PlayerCharacter->CurrentMana < 0)
+					PlayerCharacter->CurrentMana = 0;
+				if (UPlayerCharacterAnimInstance* AnimInstance = Cast<UPlayerCharacterAnimInstance>(PlayerCharacter->GetMesh()->GetAnimInstance()); IsValid(AnimInstance))
+					AnimInstance->SetIsAttackingWithMagic(true);
+			}
+		if (IsAttackingWithMelee) {
+			PlayerCharacter->Battle_IsMovingToAttackEnemy = true;
+		}
 		AttackMenuBorder->SetVisibility(ESlateVisibility::Hidden);
+		LeftRightMenuBorder->SetVisibility(ESlateVisibility::Hidden);
 		CenterMark->SetVisibility(ESlateVisibility::Hidden);
 		IsPreparingToAttack = false;
-		UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+		if(IsValid(UIManager->PickedButton))
+			UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 		UIManager->PickedButton = AttackButton;
 		UIManager->PickedButtonIndex = 0;
+	}
+}
+
+void UBattleMenu::LeftButtonOnClicked()
+{
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
+		PlayerCharacter->InputScrollLeft();
+}
+
+void UBattleMenu::RightButtonOnClicked()
+{
+	if(APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
+		PlayerCharacter->InputScrollRight();
+}
+
+void UBattleMenu::SpellButtonOnClicked()
+{
+	IsChoosingSpell = true;
+	IsChoosingAction = false;
+	IsAttackingWithSpell = false;
+	IsPreparingToAttack = false;
+	MenuBorder->SetVisibility(ESlateVisibility::Hidden);
+	SpellButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+		if (USkillBattleMenu* SkillBattleMenu = PlayerCharacter->GetSkillBattleMenuWidget(); IsValid(SkillBattleMenu)) {
+			SkillBattleMenu->AddToViewport();
+			UIManager->PickedButton = nullptr;
+			UIManager->PickedButtonIndex = 0;
+			this->RemoveFromParent();
+		}
 	}
 }
 
@@ -175,23 +264,29 @@ void UBattleMenu::ItemButtonOnClicked()
 {
 	IsChoosingItem = true;
 	IsChoosingAction = false;
-	IsAttackingWithItem = true;
+	IsAttackingWithItem = false;
 	IsPreparingToAttack = false;
 	MenuBorder->SetVisibility(ESlateVisibility::Hidden);
 	ItemButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	UInventoryMenu* Inventory = PlayerCharacter->GetInventoryMenuWidget();
-	Inventory->AddToViewport();
-	Inventory->GetNotInBattleMenuIncludedCanvasPanel()->SetVisibility(ESlateVisibility::Hidden);
-	PlayerCharacter->GetInventoryMenuWidget()->GetInventoryBorder()->SetVisibility(ESlateVisibility::Visible);
-	PlayerCharacter->GetInventoryMenuWidget()->GetBattleMenuButtonsForItemsBorder()->SetVisibility(ESlateVisibility::Visible);
-	if (Inventory->GetInventoryScrollBox()->GetAllChildren().Num() > 0) {
-		UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(Inventory->GetInventoryScrollBox()->GetAllChildren()[0]);
-		EntryWidget->GetMainButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-		UIManager->PickedButton = EntryWidget->GetMainButton();
-		UIManager->PickedButtonIndex = 0;
+	
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+		if (UInventoryMenu* Inventory = PlayerCharacter->GetInventoryMenuWidget(); IsValid(Inventory)) {
+			Inventory->AddToViewport();
+			Inventory->GetNotInBattleMenuIncludedCanvasPanel()->SetVisibility(ESlateVisibility::Hidden);
+			PlayerCharacter->GetInventoryMenuWidget()->GetInventoryBorder()->SetVisibility(ESlateVisibility::Visible);
+			PlayerCharacter->GetInventoryMenuWidget()->GetBattleMenuButtonsForItemsBorder()->SetVisibility(ESlateVisibility::Visible);
+			if (Inventory->GetInventoryScrollBox()->GetAllChildren().Num() > 0) {
+				UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(Inventory->GetInventoryScrollBox()->GetAllChildren()[0]);
+				EntryWidget->GetMainButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				UIManager->PickedButton = EntryWidget->GetMainButton();
+				UIManager->PickedButtonIndex = 0;
+				Inventory->SetPickedItem(EntryWidget->GetItem());
+				Inventory->GetItemInfoBorder()->SetVisibility(ESlateVisibility::Visible);
+				Inventory->SetItemInfo(Inventory->GetPickedItem());
+			}
+			this->RemoveFromParent();
+		}
 	}
-	this->RemoveFromParent();
 }
 
 void UBattleMenu::SetEnemyName(FName Name)
@@ -227,6 +322,11 @@ UBorder* UBattleMenu::GetEnemyNameBorder() const
 UBorder* UBattleMenu::GetAttackMenuBorder() const
 {
 	return AttackMenuBorder;
+}
+
+UBorder* UBattleMenu::GetLeftRightMenuBorder() const
+{
+	return LeftRightMenuBorder;
 }
 
 UButton* UBattleMenu::GetAttackButton() const

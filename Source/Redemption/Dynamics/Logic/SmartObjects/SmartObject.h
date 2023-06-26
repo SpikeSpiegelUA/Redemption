@@ -26,13 +26,13 @@ protected:
 		class UArrowComponent* FacingDirection;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
-		class UBehaviorTree* SubTree;
+		class UBehaviorTree* SubTree{};
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UArrowComponent* GetFacingDirection();
-	UBillboardComponent* GetBillboard();
-	UBehaviorTree* GetSubTree();
+	UArrowComponent* GetFacingDirection() const;
+	UBillboardComponent* GetBillboard() const;
+	UBehaviorTree* GetSubTree() const;
 };

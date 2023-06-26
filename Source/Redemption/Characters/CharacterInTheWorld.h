@@ -22,10 +22,10 @@ protected:
 		FName CharacterName = "Unassigned";
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
-		class UBehaviorTree* TreeAsset;
+		class UBehaviorTree* TreeAsset{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
-		class ASmartObject* SmartObject;
+		class ASmartObject* SmartObject{};
 
 public:	
 	// Called every frame
@@ -39,9 +39,9 @@ public:
 
 	FName GetCharacterName() const;
 
-	UBehaviorTree* GetTreeAsset();
+	UBehaviorTree* GetTreeAsset() const;
 
-	ASmartObject* GetSmartObject();
+	ASmartObject* GetSmartObject() const;
 	
 	void SetSmartObject(ASmartObject* Object);
 };

@@ -19,14 +19,14 @@ protected:
 	virtual void NativeConstruct() override;
 
 	UFUNCTION()
-	float GetHealthPercentage();
+	float GetHealthPercentage() const;
 	
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		UProgressBar* HealthBar;
 
 public:
-	float HP;
-	float MaxHP;
+	float HP{};
+	float MaxHP{};
 
-	UProgressBar* GetHealthBar();
+	UProgressBar* GetHealthBar() const;
 };

@@ -15,7 +15,7 @@ bool UPlayerBarsWidget::Initialize()
 void UPlayerBarsWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	if(GetWorld())
+	if(IsValid(GetWorld()))
 	PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	PlayerHealthBar->PercentDelegate.BindUFunction(this, "GetHealthPercentage");
 	PlayerHealthBar->SynchronizeProperties();
@@ -23,34 +23,34 @@ void UPlayerBarsWidget::NativeConstruct()
 	PlayerManaBar->SynchronizeProperties();
 }
 
-float UPlayerBarsWidget::GetHealthPercentage()
+float UPlayerBarsWidget::GetHealthPercentage() const
 {
-	if (PlayerCharacter) {
+	if (IsValid(PlayerCharacter)) {
 		return PlayerCharacter->CurrentHP / PlayerCharacter->MaxHP;
 	}
 	else
 		return 0;
 }
 
-float UPlayerBarsWidget::GetManaPercentage()
+float UPlayerBarsWidget::GetManaPercentage() const
 {
-	if (PlayerCharacter)
+	if (IsValid(PlayerCharacter))
 		return PlayerCharacter->CurrentMana / PlayerCharacter->MaxMana;
 	else
 		return 0;
 }
 
-UProgressBar* UPlayerBarsWidget::GetPlayerHealthBar()
+UProgressBar* UPlayerBarsWidget::GetPlayerHealthBar() const
 {
 	return PlayerHealthBar;
 }
 
-UProgressBar* UPlayerBarsWidget::GetPlayerManaBar()
+UProgressBar* UPlayerBarsWidget::GetPlayerManaBar() const
 {
 	return PlayerManaBar;
 }
 
-UCanvasPanel* UPlayerBarsWidget::GetPlayerBarsCanvasPanel()
+UCanvasPanel* UPlayerBarsWidget::GetPlayerBarsCanvasPanel() const
 {
 	return PlayerBarsCanvasPanel;
 }

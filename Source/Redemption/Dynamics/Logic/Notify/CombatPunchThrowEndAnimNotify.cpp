@@ -6,13 +6,12 @@
 
 void UCombatPunchThrowEndAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	UCombatNPCAnimInstance* AnimInstance = NULL;
-	if(MeshComp->GetAnimClass())
-	AnimInstance = Cast<UCombatNPCAnimInstance>(MeshComp->GetAnimClass());
-	else
-		UE_LOG(LogTemp, Warning, TEXT("No Anim Class"));
-	if(AnimInstance)
-	AnimInstance->SetIsAttacking(false);
-	else
-		UE_LOG(LogTemp, Warning, TEXT("No Anim Instance"));
+	UCombatNPCAnimInstance* AnimInstance{};
+	if (IsValid(MeshComp)) {
+		if (IsValid(MeshComp->GetAnimClass()))
+			AnimInstance = Cast<UCombatNPCAnimInstance>(MeshComp->GetAnimClass());
+		if (IsValid(AnimInstance))
+			AnimInstance->SetIsAttacking(false);
+	}
+
 }

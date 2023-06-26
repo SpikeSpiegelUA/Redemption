@@ -16,7 +16,7 @@ public:
 	AUIManager();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
-		class UButton* PickedButton;
+		class UButton* PickedButton{};
 
 	int8 PickedButtonIndex = 0;
 

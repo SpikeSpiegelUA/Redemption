@@ -27,27 +27,31 @@ public:
 
 	//SoundCues variables
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Effects")
-		USoundCue* UseHealOrBoostSoundCue;
+		USoundCue* UseHealOrBoostSoundCue {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Effects")
-		USoundCue* DungeonCombatBackgroundMusicSoundCue;
+		USoundCue* DungeonCombatBackgroundMusicSoundCue {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Effects")
-		USoundCue* DungeonExplorationBackgroundMusicSoundCue;
+		USoundCue* DungeonExplorationBackgroundMusicSoundCue {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Effects")
-		USoundCue* DungeonBattleResultsBackgroundMusicSoundCue;
+		USoundCue* DungeonBattleResultsBackgroundMusicSoundCue {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Effects")
-		USoundCue* TownExplorationBackgroundMusicSoundCue;
+		USoundCue* TownExplorationBackgroundMusicSoundCue {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Effects")
-		USoundCue* MainMenuBackgroundMusicSoundCue;
+		USoundCue* MainMenuBackgroundMusicSoundCue {};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Effects")
+		USoundCue* DeathMenuBackgroundMusicSoundCue {};
 
 	//AudioComponent variables
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound Effects")
-		UAudioComponent* DungeonCombatBackgroundMusicAudioComponent;
+		UAudioComponent* DungeonCombatBackgroundMusicAudioComponent {};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound Effects")
-		UAudioComponent* DungeonExplorationBackgroundMusicAudioComponent;
+		UAudioComponent* DungeonExplorationBackgroundMusicAudioComponent {};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound Effects")
-		UAudioComponent* DungeonBattleResultsBackgroundMusicAudioComponent;
+		UAudioComponent* DungeonBattleResultsBackgroundMusicAudioComponent {};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound Effects")
-		UAudioComponent* TownExplorationBackgroundMusicAudioComponent;
+		UAudioComponent* TownExplorationBackgroundMusicAudioComponent {};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound Effects")
-		UAudioComponent* MainMenuBackgroundMusicAudioComponent;
+		UAudioComponent* MainMenuBackgroundMusicAudioComponent {};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sound Effects")
+		UAudioComponent* DeathMenuBackgroundMusicAudioComponent {};
 };

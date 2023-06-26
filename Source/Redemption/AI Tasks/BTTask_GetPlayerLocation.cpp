@@ -20,20 +20,20 @@ EBTNodeResult::Type UBTTask_GetPlayerLocation::ExecuteTask(UBehaviorTreeComponen
 {
 	const UBlackboardComponent* MyBlackboard = OwnerComp.GetBlackboardComponent();
 	AAIController* MyController = OwnerComp.GetAIOwner();
-	if (!MyController || !MyBlackboard)
+	if (!IsValid(MyController) || !IsValid(MyBlackboard))
 		return EBTNodeResult::Failed;
 
 	ACharacterInTheWorld* Chr = Cast<ACharacterInTheWorld>(MyController->GetPawn());
-	if (!Chr)
+	if (!IsValid(Chr))
 		return EBTNodeResult::Failed;
 
 	ARandomPointAndChasing* PointRef = Cast<ARandomPointAndChasing>(Chr->GetSmartObject());
-	if(PointRef)
+	if(IsValid(PointRef))
 		if (PointRef->GetRadius() <= 0)
 			return EBTNodeResult::Succeeded;
 
 	ASmartObject* SmartObject = Cast<ASmartObject>(Chr->GetSmartObject());
-	if (!SmartObject)
+	if (!IsValid(SmartObject))
 		return EBTNodeResult::Succeeded;
 
 

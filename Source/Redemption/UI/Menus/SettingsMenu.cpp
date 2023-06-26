@@ -27,14 +27,16 @@ bool USettingsMenu::Initialize()
 void USettingsMenu::NativeConstruct()
 {
 	Super::NativeConstruct();
-	URedemptionGameInstance* GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
-	MasterSlider->SetValue(GameInstance->MasterVolume);
-	EffectsSlider->SetValue(GameInstance->EffectsVolume);
-	BackgroundMusicSlider->SetValue(GameInstance->BackgroundVolume);
-	if (GameInstance->GraphicsQualityInstance == 0)
-		GraphicsQualityComboBoxString->SetSelectedOption("Low");
-	else
-		GraphicsQualityComboBoxString->SetSelectedOption("Medium");
+	if (URedemptionGameInstance* GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(GameInstance)) 
+		if (IsValid(MasterSlider) && IsValid(EffectsSlider) && IsValid(BackgroundMusicSlider)) {
+			MasterSlider->SetValue(GameInstance->InstanceMasterVolume);
+			EffectsSlider->SetValue(GameInstance->InstanceEffectsVolume);
+			BackgroundMusicSlider->SetValue(GameInstance->InstanceBackgroundVolume);
+			if (GameInstance->InstanceGraphicsQuality == 0)
+				GraphicsQualityComboBoxString->SetSelectedOption("Low");
+			else
+				GraphicsQualityComboBoxString->SetSelectedOption("Medium");
+		}
 }
 
 
@@ -47,7 +49,7 @@ void USettingsMenu::GraphicsQualityComboBoxStringOnSelectionChanged(FString Sele
 		else if (SelectedItem.Equals("Medium"))
 			UGameUserSettings::GetGameUserSettings()->ScalabilityQuality.SetFromSingleQualityLevel(1);
 		UGameUserSettings::GetGameUserSettings()->ApplySettings(true);
-		GameInstance->GraphicsQualityInstance = UGameUserSettings::GetGameUserSettings()->ScalabilityQuality.GetSingleQualityLevel();
+		GameInstance->InstanceGraphicsQuality = UGameUserSettings::GetGameUserSettings()->ScalabilityQuality.GetSingleQualityLevel();
 	}
 }
 
@@ -57,7 +59,7 @@ void USettingsMenu::MasterSliderOnValueChanged(float Value)
 	if (IsValid(MainSoundMix) && IsValid(MasterSoundClass) && IsValid(GameInstance)) {
 		UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MainSoundMix, MasterSoundClass, Value, 1.f, 0.f, true);
 		UGameplayStatics::PushSoundMixModifier(GetWorld(), MainSoundMix);
-		GameInstance->MasterVolume = Value;
+		GameInstance->InstanceMasterVolume = Value;
 	}
 }
 
@@ -67,7 +69,7 @@ void USettingsMenu::EffectsSliderOnValueChanged(float Value)
 	if (IsValid(MainSoundMix) && IsValid(EffectsSoundClass) && IsValid(GameInstance)) {
 		UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MainSoundMix, EffectsSoundClass, Value, 1.f, 0.f, true);
 		UGameplayStatics::PushSoundMixModifier(GetWorld(), MainSoundMix);
-		GameInstance->EffectsVolume = Value;
+		GameInstance->InstanceEffectsVolume = Value;
 	}
 }
 
@@ -77,7 +79,7 @@ void USettingsMenu::BackgroundMusicSliderOnValueChanged(float Value)
 	if (IsValid(MainSoundMix) && IsValid(BackgroundMusicSoundClass) && IsValid(GameInstance)) {
 		UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MainSoundMix, BackgroundMusicSoundClass, Value, 1.f, 0.f, true);
 		UGameplayStatics::PushSoundMixModifier(GetWorld(), MainSoundMix);
-		GameInstance->BackgroundVolume = Value;
+		GameInstance->InstanceBackgroundVolume = Value;
 	}
 }
 
@@ -89,24 +91,25 @@ void USettingsMenu::BackButtonOnClicked()
 		FString MapName = GetWorld()->GetMapName();
 		UMainMenu* MainMenuWidget = nullptr;
 		UPauseMenu* PauseMenuWidget = nullptr;
-		UE_LOG(LogTemp, Warning, TEXT("Map name: %s"), *MapName )
 		if (MapName == "UEDPIE_0_MainMenu") {
 			MainMenuWidget = CreateWidget<UMainMenu>(PlayerController, MainMenuClass);
-			MainMenuWidget->AddToViewport();
+			if(IsValid(MainMenuWidget))
+				MainMenuWidget->AddToViewport();
 		}
 		else if (MapName == "UEDPIE_0_Town" || MapName == "UEDPIE_0_Dungeon") {
 			PauseMenuWidget = CreateWidget<UPauseMenu>(PlayerController, PauseMenuClass);
-			PauseMenuWidget->AddToViewport();
+			if(IsValid(PauseMenuWidget))
+				PauseMenuWidget->AddToViewport();
 		}
 	}
 }
 
-UButton* USettingsMenu::GetBackButton()
+UButton* USettingsMenu::GetBackButton() const
 {
 	return BackButton;
 }
 
-UComboBoxString* USettingsMenu::GetGraphicsQualityComboBoxString()
+UComboBoxString* USettingsMenu::GetGraphicsQualityComboBoxString() const
 {
 	return GraphicsQualityComboBoxString;
 }

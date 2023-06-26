@@ -31,7 +31,7 @@ void UMainMenu::NativeConstruct()
 	URedemptionGameInstance* GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
 	UGameUserSettings* GameUserSettings = UGameUserSettings::GetGameUserSettings();
 	if (IsValid(GameUserSettings) && IsValid(GameInstance)) {
-		GameUserSettings->ScalabilityQuality.SetFromSingleQualityLevel(GameInstance->GraphicsQualityInstance);
+		GameUserSettings->ScalabilityQuality.SetFromSingleQualityLevel(GameInstance->InstanceGraphicsQuality);
 	}
 }
 
@@ -49,10 +49,10 @@ void UMainMenu::NewGameButtonOnClicked()
 		GameInstance->InstanceEquipedTorse = nullptr;
 		GameInstance->InstanceEquipedHand = nullptr;
 		GameInstance->InstanceEquipedLowerArmor = nullptr;
-		GameInstance->PlayerMaxHP = 100;
-		GameInstance->PlayerMaxMana = 100;
-		GameInstance->PlayerCurrentHP = GameInstance->PlayerMaxHP;
-		GameInstance->PlayerCurrentMana = GameInstance->PlayerMaxMana;
+		GameInstance->InstancePlayerMaxHP = 100;
+		GameInstance->InstancePlayerMaxMana = 100;
+		GameInstance->InstancePlayerCurrentHP = GameInstance->InstancePlayerMaxHP;
+		GameInstance->InstancePlayerCurrentMana = GameInstance->InstancePlayerMaxMana;
 		ULoadingScreen* LoadingScreen = CreateWidget<ULoadingScreen>(PlayerController, LoadingScreenClass);
 		LoadingScreen->AddToViewport();
 		UGameplayStatics::OpenLevel(GetWorld(), "Town");
@@ -70,7 +70,8 @@ void UMainMenu::SettingsButtonOnClicked()
 	this->RemoveFromParent();
 	if (IsValid(SettingsMenuClass) && IsValid(PlayerController)) {
 		SettingsMenuWidget = CreateWidget<USettingsMenu>(PlayerController, SettingsMenuClass);
-		SettingsMenuWidget->AddToViewport();
+		if(IsValid(SettingsMenuWidget))
+			SettingsMenuWidget->AddToViewport();
 	}
 }
 
@@ -78,26 +79,27 @@ void UMainMenu::ExitButtonOnClicked()
 {
 	if (IsValid(GetWorld())) {
 		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-		UKismetSystemLibrary::QuitGame(GetWorld(), PlayerController, EQuitPreference::Quit, true);
+		if(IsValid(PlayerController))
+			UKismetSystemLibrary::QuitGame(GetWorld(), PlayerController, EQuitPreference::Quit, true);
 	}
 }
 
-UButton* UMainMenu::GetNewGameButton()
+UButton* UMainMenu::GetNewGameButton() const
 {
 	return NewGameButton;
 }
 
-UButton* UMainMenu::GetLoadGameButton()
+UButton* UMainMenu::GetLoadGameButton() const
 {
 	return LoadGameButton;
 }
 
-UButton* UMainMenu::GetSettingsButton()
+UButton* UMainMenu::GetSettingsButton() const
 {
 	return SettingsButton;
 }
 
-UButton* UMainMenu::GetExitButton()
+UButton* UMainMenu::GetExitButton() const
 {
 	return ExitButton;
 }

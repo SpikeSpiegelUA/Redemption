@@ -18,17 +18,20 @@ class ANonCombatEnemyNPC : public AEnemyNPC
 {
 	GENERATED_BODY()
 private:
-	AActor* Player;
+	UPROPERTY()
+		AActor* Player {};
 	//Marker for angle between Enemy and Player search
-	UBoxComponent* ForwardMarker;
-	ANonCombatEnemyNPCAIController* NonCombatEnemyNPCAIController;
+	UPROPERTY()
+		class UBoxComponent* ForwardMarker{};
+	UPROPERTY()
+		ANonCombatEnemyNPCAIController* NonCombatEnemyNPCAIController {};
 
 	UPROPERTY(EditAnywhere, Category = "UI", meta = (AllowPrivateAccess))
-		TSubclassOf<class UNonCombatEnemyDetectionBarWidget> NonCombatEnemyDetectionBarClass;
+		TSubclassOf<class UNonCombatEnemyDetectionBarWidget> NonCombatEnemyDetectionBarClass{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess))
-		UNonCombatEnemyDetectionBarWidget* NonCombatEnemyDetectionBarWidget;
+		UNonCombatEnemyDetectionBarWidget* NonCombatEnemyDetectionBarWidget {};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess))
-		UWidgetComponent* NonCombatEnemyDetectionBarComponentWidget;
+		UWidgetComponent* NonCombatEnemyDetectionBarComponentWidget {};
 protected:
 	ANonCombatEnemyNPC();
 	// Called when the game starts or when spawned
@@ -40,8 +43,8 @@ protected:
 	TArray<TSubclassOf<ACombatEnemyNPC>> BattleEnemies;
 
 public:
-	TArray<TSubclassOf<ACombatEnemyNPC>> GetBattleEnemies();
+	TArray<TSubclassOf<ACombatEnemyNPC>> GetBattleEnemies() const;
 
-	UBoxComponent* GetForwardMarker();
-	UNonCombatEnemyDetectionBarWidget* GetNonCombatEnemyDetectionBarWidget();
+	UBoxComponent* GetForwardMarker() const;
+	UNonCombatEnemyDetectionBarWidget* GetNonCombatEnemyDetectionBarWidget() const;
 };

@@ -24,7 +24,7 @@ void ACombatEnemyNPCAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 	ACharacterInTheWorld* Chr = Cast<ACharacterInTheWorld>(InPawn);
-	if (Chr != nullptr && Chr->GetTreeAsset() != nullptr) {
+	if (IsValid(Chr) && IsValid(Chr->GetTreeAsset())) {
 
 		//Initialize the Blackboard
 		BlackboardComponent->InitializeBlackboard(*Chr->GetTreeAsset()->BlackboardAsset);
@@ -38,7 +38,7 @@ void ACombatEnemyNPCAIController::OnPossess(APawn* InPawn)
 void ACombatEnemyNPCAIController::SetDynamicSubtree()
 {
 	ACharacterInTheWorld* Chr = Cast<ACharacterInTheWorld>(GetPawn());
-	if (Chr->GetSmartObject()) {
+	if (IsValid(Chr->GetSmartObject())) {
 		const FGameplayTag SubTreeTag = FGameplayTag::RequestGameplayTag(FName("SubTreeTag"));
 		BehaviorTreeComponent->SetDynamicSubtree(SubTreeTag, Chr->GetSmartObject()->GetSubTree());
 	}

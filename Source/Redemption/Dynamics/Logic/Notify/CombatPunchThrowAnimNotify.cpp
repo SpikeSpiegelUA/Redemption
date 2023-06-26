@@ -7,11 +7,10 @@
 
 void UCombatPunchThrowAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	if (MeshComp != NULL && MeshComp->GetAttachmentRootActor() != NULL && MeshComp->GetAttachmentRootActor()->GetWorld() != NULL
-		&& MeshComp->GetAttachmentRootActor()->GetWorld()->GetFirstPlayerController() != NULL) {
-		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(MeshComp->GetAttachmentRootActor()->GetWorld()->GetFirstPlayerController()->GetCharacter());
+	if (IsValid(MeshComp) && IsValid(MeshComp->GetOwner())) {
+		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(MeshComp->GetOwner());
 		ACombatEnemyNPC* Owner = Cast<ACombatEnemyNPC>(MeshComp->GetOwner());
-		if (PlayerCharacter && Owner)
-			PlayerCharacter->GetHit(Owner->AttackValue, Owner->CurrentDamageType);
+		if (IsValid(PlayerCharacter) && IsValid(Owner))
+			PlayerCharacter->GetHit(Owner->AttackValue, Owner->CurrentDamageKind);
 	}
 }

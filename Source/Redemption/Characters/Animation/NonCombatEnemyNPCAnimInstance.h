@@ -24,11 +24,13 @@ protected:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-	class ANonCombatEnemyNPC* NPCReference;
+	UPROPERTY(BlueprintReadOnly, Category = "Animation Properties")
+		class ANonCombatEnemyNPC* NPCReference;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation Properties")
-		float Speed;
+		float Speed{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation Properties")
-		bool IsAttacking;
+		bool IsAttacking{};
+
 	UFUNCTION(BlueprintCallable, Category = "Animations")
 		virtual void UpdateAnimProperties();
 

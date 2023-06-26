@@ -15,14 +15,14 @@ void ATownNPCAIController::BeginPlay()
 	Super::BeginPlay();
 	//Default Behavior Tree initialization
 	ACharacterInTheWorld* Chr = Cast<ACharacterInTheWorld>(GetPawn());
-	if (Chr)
-		if (Chr->GetSmartObject()) {
+	if (IsValid(Chr))
+		if (IsValid(Chr->GetSmartObject())) {
 			const FGameplayTag SubTreeTag = FGameplayTag::RequestGameplayTag(FName("SubTreeTag"));
 			BehaviorTreeComponent->SetDynamicSubtree(SubTreeTag, Chr->GetSmartObject()->GetSubTree());
 		}
 	//Dialogue Dynamic Tree initialization
 	ATownNPC* TownNPC = Cast<ATownNPC>(GetPawn());
-	if (TownNPC != nullptr && TownNPC->GetDialogueTree() != nullptr) {
+	if (IsValid(TownNPC) && IsValid(TownNPC->GetDialogueTree())) {
 		const FGameplayTag DialogueTreeTag = FGameplayTag::RequestGameplayTag(FName("DialogueTreeTag"));
 		BehaviorTreeComponent->SetDynamicSubtree(DialogueTreeTag, TownNPC->GetDialogueTree());
 	}

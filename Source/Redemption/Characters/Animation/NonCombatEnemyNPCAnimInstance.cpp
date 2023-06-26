@@ -18,7 +18,7 @@ void UNonCombatEnemyNPCAnimInstance::NativeInitializeAnimation()
 void UNonCombatEnemyNPCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
-	if (NPCReference)
+	if (IsValid(NPCReference))
 		UpdateAnimProperties();
 	else {
 

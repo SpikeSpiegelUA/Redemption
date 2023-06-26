@@ -29,6 +29,8 @@ void AAudioManager::BeginPlay()
 			TownExplorationBackgroundMusicAudioComponent = UGameplayStatics::SpawnSound2D(GetWorld(), TownExplorationBackgroundMusicSoundCue);
 		if (IsValid(MainMenuBackgroundMusicSoundCue))
 			MainMenuBackgroundMusicAudioComponent = UGameplayStatics::SpawnSound2D(GetWorld(), MainMenuBackgroundMusicSoundCue);
+		if (IsValid(DeathMenuBackgroundMusicSoundCue))
+			DeathMenuBackgroundMusicAudioComponent = UGameplayStatics::SpawnSound2D(GetWorld(), DeathMenuBackgroundMusicSoundCue);
 		if (IsValid(DungeonBattleResultsBackgroundMusicAudioComponent))
 			DungeonBattleResultsBackgroundMusicAudioComponent->SetPaused(true);
 		if (IsValid(DungeonCombatBackgroundMusicAudioComponent))
@@ -39,22 +41,28 @@ void AAudioManager::BeginPlay()
 			TownExplorationBackgroundMusicAudioComponent->SetPaused(true);
 		if (IsValid(MainMenuBackgroundMusicAudioComponent))
 			MainMenuBackgroundMusicAudioComponent->SetPaused(true);
+		if (IsValid(DeathMenuBackgroundMusicAudioComponent))
+			DeathMenuBackgroundMusicAudioComponent->SetPaused(true);
 
 		//Turn on background music, depends on the level
-		APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(PlayerController->GetCharacter());
 		FString MapName = GetWorld()->GetMapName();
 		if (MapName == "UEDPIE_0_MainMenu") {
-				if (IsValid(MainMenuBackgroundMusicAudioComponent))
-					MainMenuBackgroundMusicAudioComponent->SetPaused(false);
+			if (IsValid(MainMenuBackgroundMusicAudioComponent)) {
+				MainMenuBackgroundMusicAudioComponent->Play(0.0f);
+				MainMenuBackgroundMusicAudioComponent->SetPaused(false);
+			}
 		}
 		else if (MapName == "UEDPIE_0_Dungeon") {
-				if (IsValid(DungeonExplorationBackgroundMusicAudioComponent))
-					DungeonExplorationBackgroundMusicAudioComponent->SetPaused(false);
+			if (IsValid(DungeonExplorationBackgroundMusicAudioComponent)) {
+				DungeonExplorationBackgroundMusicAudioComponent->Play(0.0f);
+				DungeonExplorationBackgroundMusicAudioComponent->SetPaused(false);
+			}
 		}
 		else if (MapName == "UEDPIE_0_Town")
-				if (IsValid(TownExplorationBackgroundMusicAudioComponent))
-					TownExplorationBackgroundMusicAudioComponent->SetPaused(false);
+			if (IsValid(TownExplorationBackgroundMusicAudioComponent)) {
+				TownExplorationBackgroundMusicAudioComponent->Play(0.0f);
+				TownExplorationBackgroundMusicAudioComponent->SetPaused(false);
+			}
 	}
 }
 
@@ -62,6 +70,5 @@ void AAudioManager::BeginPlay()
 void AAudioManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 

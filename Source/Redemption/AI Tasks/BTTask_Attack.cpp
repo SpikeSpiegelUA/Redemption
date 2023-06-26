@@ -18,24 +18,24 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 {
 	const UBlackboardComponent* MyBlackboard = OwnerComp.GetBlackboardComponent();
 	AAIController* MyController = OwnerComp.GetAIOwner();
-	if (!MyController || !MyBlackboard)
+	if (!IsValid(MyController) || !IsValid(MyBlackboard))
 		return EBTNodeResult::Failed;
 
 	AEnemyNPC* Chr = Cast<AEnemyNPC>(MyController->GetPawn());
-	if (!Chr)
+	if (!IsValid(Chr))
 		return EBTNodeResult::Failed;
 
 	USkeletalMeshComponent* SkeletalMesh = MyController->GetPawn()->FindComponentByClass<USkeletalMeshComponent>();
 	UNonCombatEnemyNPCAnimInstance* NonCombatAnimInstance = nullptr;
 	UCombatNPCAnimInstance* CombatAnimInstance = nullptr;
 	//NonCombat set
-	if (SkeletalMesh)
+	if (IsValid(SkeletalMesh))
 		NonCombatAnimInstance = Cast<UNonCombatEnemyNPCAnimInstance>(SkeletalMesh->GetAnimInstance());
-	if (NonCombatAnimInstance)
+	if (IsValid(NonCombatAnimInstance))
 		NonCombatAnimInstance->SetIsAttacking(true);
 	//Combat set
 	CombatAnimInstance = Cast<UCombatNPCAnimInstance>(OwnerComp.GetAIOwner()->GetCharacter()->GetMesh()->GetAnimInstance());
-	if (CombatAnimInstance)
+	if (IsValid(CombatAnimInstance))
 		CombatAnimInstance->SetIsAttacking(true);
 
 	return EBTNodeResult::Succeeded;

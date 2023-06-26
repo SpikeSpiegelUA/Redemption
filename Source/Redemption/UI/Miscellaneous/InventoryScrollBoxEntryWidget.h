@@ -27,7 +27,7 @@ protected:
 		class UButton* MainButton;
 
 	UPROPERTY()
-		AGameItem* Item;
+		AGameItem* Item {};
 
 	UFUNCTION()
 		void InventoryEntryWidgetButtonOnClicked();
@@ -37,9 +37,9 @@ protected:
 
 
 public:
-	AGameItem* GetItem();
-	UTextBlock* GetMainTextBlock();
-	UButton* GetMainButton();
+	AGameItem* GetItem() const;
+	UTextBlock* GetMainTextBlock() const;
+	UButton* GetMainButton() const;
 
 	void SetItem(AGameItem* Item);
 

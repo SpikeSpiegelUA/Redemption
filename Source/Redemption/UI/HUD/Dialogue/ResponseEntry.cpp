@@ -7,7 +7,7 @@ bool UResponseEntry::Initialize()
 {
 	const bool bSuccess = Super::Initialize();
 	ResponseTextBlock->TextDelegate.BindUFunction(this, "GetResponseText");
-	if (ResponseButton) {
+	if (IsValid(ResponseButton)) {
 		ResponseButton->OnClicked.AddDynamic(this, &UResponseEntry::ResponseButtonOnClicked);
 		ResponseButton->OnHovered.AddDynamic(this, &UResponseEntry::ResponseButtonOnHovered);
 		ResponseButton->OnUnhovered.AddDynamic(this, &UResponseEntry::ResponseButtonOnUnhovered);
@@ -23,7 +23,6 @@ void UResponseEntry::NativeConstruct()
 
 void UResponseEntry::ResponseButtonOnClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("BUTTON CLICK IS OK!!!"));
 	OnResponseClicked.Broadcast(ResponseText);
 }
 
@@ -37,12 +36,12 @@ void UResponseEntry::ResponseButtonOnUnhovered()
 	ResponseButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
 }
 
-UTextBlock* UResponseEntry::GetResponseTextBlock()
+UTextBlock* UResponseEntry::GetResponseTextBlock() const
 {
 	return ResponseTextBlock;
 }
 
-FText UResponseEntry::GetResponseText()
+FText UResponseEntry::GetResponseText() const
 {
 	return ResponseText;
 }

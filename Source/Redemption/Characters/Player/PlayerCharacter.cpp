@@ -9,6 +9,9 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\LootInTheWorld.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\Interfaces\DialogueActionsInterface.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Other\TownNPC.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
+#include "GameFramework/TouchInterface.h"
 #include "Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include <Kismet/GameplayStatics.h>
@@ -58,12 +61,15 @@ APlayerCharacter::APlayerCharacter() {
 	ForwardRayInfoClass = nullptr;
 
 	PrimaryActorTick.bTickEvenWhenPaused = true;
+
+
 }
 
 void APlayerCharacter::BeginPlay() 
 {
 	Super::BeginPlay();
 
+	//Find managers in the world and set corresponding variables
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	TArray<AActor*> BattleManagerActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABattleManager::StaticClass(), BattleManagerActors);
@@ -71,51 +77,62 @@ void APlayerCharacter::BeginPlay()
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGameManager::StaticClass(), GameManagerActors);
 	TArray<AActor*> AudioManagerActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAudioManager::StaticClass(), AudioManagerActors);
+	TArray<AActor*> EffectsManagerActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEffectsSpellsAndSkillsManager::StaticClass(), EffectsManagerActors);
 	if (AudioManagerActors.Num() > 0)
 		AudioManager = Cast<AAudioManager>(AudioManagerActors[0]);
 	if (BattleManagerActors.Num() > 0)
 		BattleManager = Cast<ABattleManager>(BattleManagerActors[0]);
 	if (GameManagerActors.Num() > 0)
 		GameManager = Cast<AGameManager>(GameManagerActors[0]);
+	if (EffectsManagerActors.Num() > 0)
+		EffectsManager = Cast<AEffectsSpellsAndSkillsManager>(EffectsManagerActors[0]);
 
 	PlayerController = GetWorld()->GetFirstPlayerController();
-	if(PlayerController)
+	if(IsValid(PlayerController))
 		PlayerSkeletalMesh = PlayerController->GetPawn()->FindComponentByClass<USkeletalMeshComponent>();
-	if (PlayerSkeletalMesh)
+	if (IsValid(PlayerSkeletalMesh))
 		PlayerAnimInstance = Cast<UPlayerCharacterAnimInstance>(PlayerSkeletalMesh->GetAnimInstance());
 	GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
 	//Creating UI widgets...
-	if (PlayerController) {
-		if (ForwardRayInfoClass)
+	if (IsValid(PlayerController)) {
+		if (IsValid(ForwardRayInfoClass))
 			ForwardRayInfoWidget = CreateWidget<UForwardRayInfo>(PlayerController, ForwardRayInfoClass);
-		if (PlayerMenuClass)
+		if (IsValid(PlayerMenuClass))
 			PlayerMenuWidget = CreateWidget<UPlayerMenu>(PlayerController, PlayerMenuClass);
-		if (InventoryScrollBoxEntryClass)
+		if (IsValid(InventoryScrollBoxEntryClass))
 			InventoryScrollBoxEntryWidget = CreateWidget<UInventoryScrollBoxEntryWidget>(PlayerController, InventoryScrollBoxEntryClass);
-		if (BattleMenuClass)
+		if (IsValid(BattleMenuClass))
 			BattleMenuWidget = CreateWidget<UBattleMenu>(PlayerController, BattleMenuClass);
-		if (BattleResultsScreenClass)
+		if (IsValid(BattleResultsScreenClass))
 			BattleResultsScreenWidget = CreateWidget<UBattleResultsScreen>(PlayerController, BattleResultsScreenClass);
-		if (InventoryMenuClass)
+		if (IsValid(InventoryMenuClass))
 			InventoryMenuWidget = CreateWidget<UInventoryMenu>(PlayerController, InventoryMenuClass);
-		if (PauseMenuClass)
+		if (IsValid(PauseMenuClass))
 			PauseMenuWidget = CreateWidget<UPauseMenu>(PlayerController, PauseMenuClass);
-		if (PlayerBarsClass)
+		if (IsValid(PlayerBarsClass))
 			PlayerBarsWidget = CreateWidget<UPlayerBarsWidget>(PlayerController, PlayerBarsClass);
-		if (DialogueBoxClass)
+		if (IsValid(DialogueBoxClass))
 			DialogueBoxWidget = CreateWidget<UDialogueBox>(PlayerController, DialogueBoxClass);
-		if (ResponsesBoxClass)
+		if (IsValid(ResponsesBoxClass))
 			ResponsesBoxWidget = CreateWidget<UResponsesBox>(PlayerController, ResponsesBoxClass);
+		if (IsValid(NotificationClass))
+			NotificationWidget = CreateWidget<UNotification>(PlayerController, NotificationClass);
+		if (IsValid(DeathMenuClass))
+			DeathMenuWidget = CreateWidget<UDeathMenu>(PlayerController, DeathMenuClass);
+		if (IsValid(SkillBattleMenuClass))
+			SkillBattleMenuWidget = CreateWidget<USkillBattleMenu>(PlayerController, SkillBattleMenuClass);
 	}
 	//Level change logic
-	if (GameInstance) {
-		CurrentHP = GameInstance->PlayerCurrentHP;
-		CurrentMana = GameInstance->PlayerCurrentMana;
-		MaxHP = GameInstance->PlayerMaxHP;
-		MaxMana = GameInstance->PlayerMaxMana;
+	if (IsValid(GameInstance)) {
+		CurrentHP = GameInstance->InstancePlayerCurrentHP;
+		CurrentMana = GameInstance->InstancePlayerCurrentMana;
+		MaxHP = GameInstance->InstancePlayerMaxHP;
+		MaxMana = GameInstance->InstancePlayerMaxMana;
+		ArmorValue = GameInstance->InstancePlayerArmorValue;
 	}
 	if (GetWorld()->GetName() == "Dungeon")
-		PlayerBarsWidget->AddToViewport();
+		PlayerBarsWidget->AddToViewport(5);
 
 	TArray<AActor*> UIManagerActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AUIManager::StaticClass(), UIManagerActors);
@@ -128,6 +145,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if(!IsInDialogue)
 	CheckForwardRayHitResult();
+	//Need to move player in battle scene, when input is disable. Use Interp in Tick(). Not the best solution, but this's the only one I came up with
 	//Move player to enemy in Battle scene
 	if (Battle_IsMovingToAttackEnemy) {
 		FVector DistanceVector;
@@ -138,13 +156,13 @@ void APlayerCharacter::Tick(float DeltaTime)
 			FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), BattleManager->SelectedEnemy->GetActorLocation());
 			Rotation = FRotator(this->GetActorRotation().Pitch, Rotation.Yaw, this->GetActorRotation().Roll);
 			this->SetActorRotation(Rotation);
-			if (PlayerAnimInstance)
+			if (IsValid(PlayerAnimInstance))
 				PlayerAnimInstance->SetSpeedToActualSpeed = false;
 		}
 		//If distance between player and selected enemy is less than 160, turn on animation
 		if (DistanceVector.Length() <= 160) {
 			Battle_IsMovingToAttackEnemy = false;
-			if (PlayerAnimInstance) {
+			if (IsValid(PlayerAnimInstance)) {
 				PlayerAnimInstance->SetIsAttacking(true);
 				PlayerAnimInstance->SetSpeedToActualSpeed = true;
 			}
@@ -152,15 +170,15 @@ void APlayerCharacter::Tick(float DeltaTime)
 	}
 	//Move player back to his start position
 	else if (Battle_IsMovingToStartPosition) {
-		FVector DistanceVector;
-		if (GameManager->GetPlayerBattleSpawn()) {
+		FVector DistanceVector{};
+		if (IsValid(GameManager->GetPlayerBattleSpawn())) {
 			DistanceVector = FVector(GameManager->GetPlayerBattleSpawn()->GetActorLocation() - this->GetActorLocation());
 			FVector NewPosition = FMath::VInterpTo(this->GetActorLocation(), GameManager->GetPlayerBattleSpawn()->GetActorLocation(), DeltaTime, 0.6f);
 			this->SetActorLocation(NewPosition);
 			FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), GameManager->GetPlayerBattleSpawn()->GetActorLocation());
 			Rotation = FRotator(this->GetActorRotation().Pitch, Rotation.Yaw, this->GetActorRotation().Roll);
 			this->SetActorRotation(Rotation);
-			if (PlayerAnimInstance)
+			if (IsValid(PlayerAnimInstance))
 				PlayerAnimInstance->SetSpeedToActualSpeed = false;
 		}
 		//If distance between player and start position is less than 100, stop
@@ -168,7 +186,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 			BattleMenuWidget->GetCenterMark()->SetVisibility(ESlateVisibility::Hidden);
 			Battle_IsMovingToStartPosition = false;
 			this->SetActorRotation(FRotator(0, 180, 0));
-			if (PlayerAnimInstance)
+			if (IsValid(PlayerAnimInstance))
 				PlayerAnimInstance->SetSpeedToActualSpeed = true;
 			BattleManager->PlayerTurnController();
 		}
@@ -195,7 +213,7 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 }
 void APlayerCharacter::Look(const FInputActionValue& Value) {
 	if (CanInput) {
-		if (Controller != nullptr) {
+		if (IsValid(Controller)) {
 			const FVector2D LookValue = Value.Get<FVector2D>();
 			if (LookValue.X != 0.f) {
 				AddControllerYawInput(LookValue.X);
@@ -208,7 +226,7 @@ void APlayerCharacter::Look(const FInputActionValue& Value) {
 }
 void APlayerCharacter::InputJump()
 {
-	if(CanInput)
+	if (CanInput)
 		Jump();
 }
 
@@ -238,7 +256,7 @@ void APlayerCharacter::InputOpenPauseMenu()
 
 void APlayerCharacter::InputScrollLeft()
 {
-	if (Controller != nullptr) {
+	if (IsValid(Controller)) {
 		if (!Battle_IsMovingToAttackEnemy) {
 			if (BattleMenuWidget->IsPreparingToAttack) {
 				TArray<ACombatEnemyNPC*> BattleEnemies = BattleManager->BattleEnemies;
@@ -256,7 +274,7 @@ void APlayerCharacter::InputScrollLeft()
 
 void APlayerCharacter::InputScrollRight()
 {
-	if (Controller != nullptr) {
+	if (IsValid(Controller)) {
 		if(!Battle_IsMovingToAttackEnemy){
 			if (BattleMenuWidget->IsPreparingToAttack) {
 				TArray<ACombatEnemyNPC*> BattleEnemies = BattleManager->BattleEnemies;
@@ -274,56 +292,62 @@ void APlayerCharacter::InputScrollRight()
 
 void APlayerCharacter::InputScrollUp()
 {
-	if (Controller != nullptr) {
+	if (IsValid(Controller) && IsValid(UIManager) && IsValid(BattleMenuWidget)) {
 		//Get 
 		if (BattleMenuWidget->IsChoosingAction) {
 			TArray<UWidget*> MenuVerticalBoxChildrens = BattleMenuWidget->GetMenuVerticalBox()->GetAllChildren();
-			if (UIManager->PickedButtonIndex == 0) {
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-				UIManager->PickedButton = Cast<UButton>(MenuVerticalBoxChildrens[MenuVerticalBoxChildrens.Num() - 1]);
-				UIManager->PickedButtonIndex = MenuVerticalBoxChildrens.Num() - 1;
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-			}
-			else {
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-				UIManager->PickedButton = Cast<UButton>(MenuVerticalBoxChildrens[UIManager->PickedButtonIndex - 1]);
-				UIManager->PickedButtonIndex = UIManager->PickedButtonIndex - 1;
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			if (MenuVerticalBoxChildrens.Num() > 0) {
+				if (UIManager->PickedButtonIndex == 0) {
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+					UIManager->PickedButton = Cast<UButton>(MenuVerticalBoxChildrens[MenuVerticalBoxChildrens.Num() - 1]);
+					UIManager->PickedButtonIndex = MenuVerticalBoxChildrens.Num() - 1;
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				}
+				else {
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+					UIManager->PickedButton = Cast<UButton>(MenuVerticalBoxChildrens[UIManager->PickedButtonIndex - 1]);
+					UIManager->PickedButtonIndex = UIManager->PickedButtonIndex - 1;
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				}
 			}
 		}
 		else if (BattleMenuWidget->IsChoosingItem && !BattleMenuWidget->IsPreparingToAttack) {
 			TArray<UWidget*> InventoryScrollBoxChildrens = InventoryMenuWidget->GetInventoryScrollBox()->GetAllChildren();
-			if (UIManager->PickedButtonIndex == 0) {
-				UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(InventoryScrollBoxChildrens[InventoryScrollBoxChildrens.Num() - 1]);
-				InventoryMenuWidget->GetInventoryScrollBox()->ScrollToEnd();
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
-				UIManager->PickedButtonIndex = InventoryScrollBoxChildrens.Num() - 1;
-				UIManager->PickedButton = EntryWidget->GetMainButton();
-				InventoryMenuWidget->SetPickedItem(EntryWidget->GetItem());
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-			}
-			else {
-				UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(InventoryScrollBoxChildrens[UIManager->PickedButtonIndex - 1]);
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
-				UIManager->PickedButtonIndex--;
-				UIManager-> PickedButton = EntryWidget->GetMainButton();
-				InventoryMenuWidget->SetPickedItem(EntryWidget->GetItem());
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			if (InventoryScrollBoxChildrens.Num() > 0) {
+				if (UIManager->PickedButtonIndex == 0) {
+					UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(InventoryScrollBoxChildrens[InventoryScrollBoxChildrens.Num() - 1]);
+					InventoryMenuWidget->GetInventoryScrollBox()->ScrollToEnd();
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+					UIManager->PickedButtonIndex = InventoryScrollBoxChildrens.Num() - 1;
+					UIManager->PickedButton = EntryWidget->GetMainButton();
+					InventoryMenuWidget->SetPickedItem(EntryWidget->GetItem());
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				}
+				else {
+					UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(InventoryScrollBoxChildrens[UIManager->PickedButtonIndex - 1]);
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+					UIManager->PickedButtonIndex--;
+					UIManager->PickedButton = EntryWidget->GetMainButton();
+					InventoryMenuWidget->SetPickedItem(EntryWidget->GetItem());
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				}
 			}
 		}
 		else if (BattleMenuWidget->IsPreparingToAttack) {
 			TArray<UWidget*> AttackMenuVerticalBoxChildrens = BattleMenuWidget->GetAttackMenuVerticalBox()->GetAllChildren();
-			if (UIManager->PickedButtonIndex == 0) {
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-				UIManager->PickedButton = Cast<UButton>(AttackMenuVerticalBoxChildrens[AttackMenuVerticalBoxChildrens.Num() - 1]);
-				UIManager->PickedButtonIndex = AttackMenuVerticalBoxChildrens.Num() - 1;
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-			}
-			else {
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-				UIManager->PickedButton = Cast<UButton>(AttackMenuVerticalBoxChildrens[UIManager->PickedButtonIndex - 1]);
-				UIManager->PickedButtonIndex = UIManager->PickedButtonIndex - 1;
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			if (AttackMenuVerticalBoxChildrens.Num() > 0) {
+				if (UIManager->PickedButtonIndex == 0) {
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+					UIManager->PickedButton = Cast<UButton>(AttackMenuVerticalBoxChildrens[AttackMenuVerticalBoxChildrens.Num() - 1]);
+					UIManager->PickedButtonIndex = AttackMenuVerticalBoxChildrens.Num() - 1;
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				}
+				else {
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+					UIManager->PickedButton = Cast<UButton>(AttackMenuVerticalBoxChildrens[UIManager->PickedButtonIndex - 1]);
+					UIManager->PickedButtonIndex = UIManager->PickedButtonIndex - 1;
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				}
 			}
 		}
 	}
@@ -331,55 +355,61 @@ void APlayerCharacter::InputScrollUp()
 
 void APlayerCharacter::InputScrollDown()
 {
-	if (Controller != nullptr) {
+	if (IsValid(Controller) && IsValid(UIManager) && IsValid(BattleMenuWidget)) {
 		if (BattleMenuWidget->IsChoosingAction) {
 			TArray<UWidget*> MenuVerticalBoxChildrens = BattleMenuWidget->GetMenuVerticalBox()->GetAllChildren();
-			if (UIManager->PickedButtonIndex == MenuVerticalBoxChildrens.Num() - 1) {
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-				UIManager->PickedButton = Cast<UButton>(MenuVerticalBoxChildrens[0]);
-				UIManager->PickedButtonIndex = 0;
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-			}
-			else {
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-				UIManager->PickedButton = Cast<UButton>(MenuVerticalBoxChildrens[UIManager->PickedButtonIndex + 1]);
-				UIManager->PickedButtonIndex = UIManager->PickedButtonIndex + 1;
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			if (MenuVerticalBoxChildrens.Num() > 0) {
+				if (UIManager->PickedButtonIndex == MenuVerticalBoxChildrens.Num() - 1) {
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+					UIManager->PickedButton = Cast<UButton>(MenuVerticalBoxChildrens[0]);
+					UIManager->PickedButtonIndex = 0;
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				}
+				else {
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+					UIManager->PickedButton = Cast<UButton>(MenuVerticalBoxChildrens[UIManager->PickedButtonIndex + 1]);
+					UIManager->PickedButtonIndex = UIManager->PickedButtonIndex + 1;
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				}
 			}
 		}
 		else if (BattleMenuWidget->IsChoosingItem && !BattleMenuWidget->IsPreparingToAttack && InventoryMenuWidget->GetInventoryScrollBox()->GetAllChildren().Num() > 0) {
 			TArray<UWidget*> InventoryScrollBoxChildrens = InventoryMenuWidget->GetInventoryScrollBox()->GetAllChildren();
-			if (UIManager->PickedButtonIndex == InventoryScrollBoxChildrens.Num() - 1) {
-				UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(InventoryScrollBoxChildrens[0]);
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
-				UIManager->PickedButtonIndex = 0;
-				UIManager->PickedButton = EntryWidget->GetMainButton();
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-				InventoryMenuWidget->SetPickedItem(EntryWidget->GetItem());
-				InventoryMenuWidget->GetInventoryScrollBox()->ScrollToStart();
-			}
-			else {
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
-				UIManager->PickedButtonIndex++;
-				UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(InventoryScrollBoxChildrens[UIManager->PickedButtonIndex]);
-				UIManager->PickedButton = EntryWidget->GetMainButton();
-				InventoryMenuWidget->SetPickedItem(EntryWidget->GetItem());
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			if (InventoryScrollBoxChildrens.Num() > 0) {
+				if (UIManager->PickedButtonIndex == InventoryScrollBoxChildrens.Num() - 1) {
+					UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(InventoryScrollBoxChildrens[0]);
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+					UIManager->PickedButtonIndex = 0;
+					UIManager->PickedButton = EntryWidget->GetMainButton();
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+					InventoryMenuWidget->SetPickedItem(EntryWidget->GetItem());
+					InventoryMenuWidget->GetInventoryScrollBox()->ScrollToStart();
+				}
+				else {
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+					UIManager->PickedButtonIndex++;
+					UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(InventoryScrollBoxChildrens[UIManager->PickedButtonIndex]);
+					UIManager->PickedButton = EntryWidget->GetMainButton();
+					InventoryMenuWidget->SetPickedItem(EntryWidget->GetItem());
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				}
 			}
 		}
 		else if (BattleMenuWidget->IsPreparingToAttack) {
 			TArray<UWidget*> AttackMenuVerticalBoxChildrens = BattleMenuWidget->GetAttackMenuVerticalBox()->GetAllChildren();
-			if (UIManager->PickedButtonIndex == AttackMenuVerticalBoxChildrens.Num() - 1) {
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-				UIManager->PickedButton = Cast<UButton>(AttackMenuVerticalBoxChildrens[0]);
-				UIManager->PickedButtonIndex = 0;
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-			}
-			else {
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-				UIManager->PickedButton = Cast<UButton>(AttackMenuVerticalBoxChildrens[UIManager->PickedButtonIndex + 1]);
-				UIManager->PickedButtonIndex = UIManager->PickedButtonIndex + 1;
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			if (AttackMenuVerticalBoxChildrens.Num() > 0) {
+				if (UIManager->PickedButtonIndex == AttackMenuVerticalBoxChildrens.Num() - 1) {
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+					UIManager->PickedButton = Cast<UButton>(AttackMenuVerticalBoxChildrens[0]);
+					UIManager->PickedButtonIndex = 0;
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				}
+				else {
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+					UIManager->PickedButton = Cast<UButton>(AttackMenuVerticalBoxChildrens[UIManager->PickedButtonIndex + 1]);
+					UIManager->PickedButtonIndex = UIManager->PickedButtonIndex + 1;
+					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				}
 			}
 		}
 	}
@@ -389,36 +419,37 @@ void APlayerCharacter::InputAction()
 {
 	if (CanInput) {
 		AActor* ActorResult = ForwardRay().GetActor();
-		if (ActorResult) {
+		if (IsValid(ActorResult)) {
 			ChangeLevel(ActorResult);
 			PickUpItem(ActorResult);
 			DialogueInteract(ActorResult);
+			NotificationActions(ActorResult);
 		}
 	}
-	if (BattleMenuWidget->IsInViewport())
+	if (IsValid(BattleMenuWidget) && BattleMenuWidget->IsInViewport())
 		ActionButtonBattleMenuInteraction();
-	if (InventoryMenuWidget->IsInViewport())
+	if (IsValid(InventoryMenuWidget) && InventoryMenuWidget->IsInViewport())
 		ActionButtonInventoryMenuInteraction();
-	if(BattleResultsScreenWidget->IsInViewport())
+	if (IsValid(BattleResultsScreenWidget) && BattleResultsScreenWidget->IsInViewport())
 		ActionButtonBattleResultsScreenInteraction();
 }
 
-void APlayerCharacter::ChangeLevel(AActor* ActorResult)
+void APlayerCharacter::ChangeLevel(AActor* const &ActorResult)
 {
 	//If ray result isn't null and is level change trigger,loading screen is set, then load level 
-	if (LoadingScreenClass && IsValid(PlayerController)) {
+	if (IsValid(LoadingScreenClass) && IsValid(PlayerController) && IsValid(GameInstance)) {
 		if (ActorResult->ActorHasTag(FName(TEXT("ChangeLevelToDungeon")))) {
 			UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
-			GameInstance->PlayerCurrentHP = CurrentHP;
-			GameInstance->PlayerCurrentMana = CurrentMana;
+			GameInstance->InstancePlayerCurrentHP = CurrentHP;
+			GameInstance->InstancePlayerCurrentMana = CurrentMana;
 			ULoadingScreen* LoadingScreen = CreateWidget<ULoadingScreen>(PlayerController, LoadingScreenClass);
 			LoadingScreen->AddToViewport();
 			UGameplayStatics::OpenLevel(GetWorld(), "Dungeon");
 		}
 		else if (ActorResult->ActorHasTag(FName(TEXT("ChangeLevelToTown")))) {
 			UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
-			GameInstance->PlayerCurrentHP = CurrentHP;
-			GameInstance->PlayerCurrentMana = CurrentMana;
+			GameInstance->InstancePlayerCurrentHP = CurrentHP;
+			GameInstance->InstancePlayerCurrentMana = CurrentMana;
 			ULoadingScreen* LoadingScreen = CreateWidget<ULoadingScreen>(PlayerController, LoadingScreenClass);
 			LoadingScreen->AddToViewport();
 			UGameplayStatics::OpenLevel(GetWorld(), "Town");
@@ -426,40 +457,75 @@ void APlayerCharacter::ChangeLevel(AActor* ActorResult)
 	}
 }
 
-void APlayerCharacter::PickUpItem(AActor* ActorResult)
+void APlayerCharacter::NotificationActions(AActor* const& ActorResult)
+{
+	if (ActorResult->ActorHasTag(FName(TEXT("FinishGame"))) && IsValid(GameInstance) && IsValid(NotificationWidget)) {
+		if (GameInstance->KilledEnemies < 3) {
+			GetWorld()->GetTimerManager().ClearTimer(RemoveNotificationTimerHandle);
+			NotificationWidget->AddToViewport(); 
+			NotificationWidget->SetNotificationTextBlockText(FText::FromString("You need to kill all enemies before proceeding!"));
+			GetWorld()->GetTimerManager().SetTimer(RemoveNotificationTimerHandle, this, &APlayerCharacter::RemoveNotification, 3, false);
+		}
+		else if(GameInstance->KilledEnemies >= 3 && !GetWorld()->GetTimerManager().IsTimerActive(FinishGameTimerHandle)) {
+			NotificationWidget->AddToViewport();
+			NotificationWidget->SetNotificationTextBlockText(FText::FromString("Congratulations!!!"));
+			GetWorld()->GetTimerManager().SetTimer(FinishGameTimerHandle, this, &APlayerCharacter::FinishGame, 3, false);
+		}
+	}
+}
+
+void APlayerCharacter::PickUpItem(AActor* &ActorResult)
 {
 		if (ActorResult->ActorHasTag(FName(TEXT("Loot")))) {
 			ALootInTheWorld* LootInTheWorld = Cast<ALootInTheWorld>(ActorResult);
 			bool IsInInventory = false;
-			if (LootInTheWorld) {
+			if (IsValid(LootInTheWorld)) {
 				for (int i = 0; i < LootInTheWorld->GetItemsClasses().Num(); i++) {
 					AGameItem* GameItem = NewObject<AGameItem>(this, LootInTheWorld->GetItemsClasses()[i]);
 					GameInstance->InstanceItemsInTheInventory.Add(LootInTheWorld->GetItemsClasses()[i]);
-					if (GameItem) {
+					if (IsValid(GameItem)) {
 						IsInInventory = false;
 						//Get ScrollBox corresponding to the item's type
 						UScrollBox* CurrentScrollBox = nullptr;
 						if (GameItem->GetType() == ItemType::EQUIPMENT) {
 							AEquipmentItem* EquipmentItem = Cast<AEquipmentItem>(GameItem);
-							if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::MELEE)
-								CurrentScrollBox = InventoryMenuWidget->GetMeleeInventoryScrollBox();
-							else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::RANGE)
-								CurrentScrollBox = InventoryMenuWidget->GetRangeInventoryScrollBox();
-							else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::HEAD)
-								CurrentScrollBox = InventoryMenuWidget->GetHeadInventoryScrollBox();
-							else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::TORSE)
-								CurrentScrollBox = InventoryMenuWidget->GetTorseInventoryScrollBox();
-							else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::HAND)
-								CurrentScrollBox = InventoryMenuWidget->GetHandInventoryScrollBox();
-							else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::LOWERARMOR)
-								CurrentScrollBox = InventoryMenuWidget->GetLowerArmorInventoryScrollBox();
+							if (IsValid(EquipmentItem)) {
+								if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::WEAPON) {
+									AWeaponItem* WeaponItem = Cast<AWeaponItem>(EquipmentItem);
+									if (IsValid(WeaponItem)) {
+										if (WeaponItem->TypeOfWeapon == WeaponType::MELEE)
+											CurrentScrollBox = InventoryMenuWidget->GetMeleeInventoryScrollBox();
+										else if (WeaponItem->TypeOfWeapon == WeaponType::RANGE)
+											CurrentScrollBox = InventoryMenuWidget->GetRangeInventoryScrollBox();
+									}
+								}
+								else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::ARMOR) {
+									AArmorItem* ArmorItem = Cast<AArmorItem>(EquipmentItem);
+									if (IsValid(ArmorItem)) {
+										switch (ArmorItem->GetTypeOfArmor()) {
+										case ArmorType::HEAD:
+											CurrentScrollBox = InventoryMenuWidget->GetHeadInventoryScrollBox();
+											break;
+										case ArmorType::TORSE:
+											CurrentScrollBox = InventoryMenuWidget->GetTorseInventoryScrollBox();
+											break;
+										case ArmorType::HAND:
+											CurrentScrollBox = InventoryMenuWidget->GetHandInventoryScrollBox();
+											break;
+										case ArmorType::LOWERARMOR:
+											CurrentScrollBox = InventoryMenuWidget->GetLowerArmorInventoryScrollBox();
+											break;
+										}
+									}
+								}
+							}
 						}
 						else
 							CurrentScrollBox = InventoryMenuWidget->GetInventoryScrollBox();
 						//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
 						for (int j = 0; j < CurrentScrollBox->GetChildrenCount(); j++) {
 							UInventoryScrollBoxEntryWidget* CurrentWidget = Cast<UInventoryScrollBoxEntryWidget>(CurrentScrollBox->GetAllChildren()[j]);
-							if (CurrentWidget)
+							if (IsValid(CurrentWidget))
 								if (CurrentWidget->GetItem()->GetItemName() == GameItem->GetItemName()) {
 									IsInInventory = true;
 									CurrentWidget->AmountOfItems += 1;
@@ -483,103 +549,92 @@ void APlayerCharacter::PickUpItem(AActor* ActorResult)
 		}
 }
 
-void APlayerCharacter::DialogueInteract(AActor* ActorResult)
+void APlayerCharacter::DialogueInteract(AActor* const &ActorResult)
 {
 	//If hit result from forward vector is NPC with a dialogue, start the dialogue 
-	if (ActorResult) 
+	if (IsValid(ActorResult))
 		if (ActorResult->GetClass()->ImplementsInterface(UDialogueActionsInterface::StaticClass())) {
-			ATownNPC* TownNPC = Cast<ATownNPC>(ActorResult);
-			TownNPC->StartADialogue();
-			PlayerController->ActivateTouchInterface(EmptyTouchInterface);
+			if(ATownNPC* TownNPC = Cast<ATownNPC>(ActorResult); IsValid(TownNPC))
+				TownNPC->StartADialogue();
+			if(IsValid(PlayerController))
+				PlayerController->ActivateTouchInterface(EmptyTouchInterface);
 		}
 }
 
 void APlayerCharacter::ActionButtonBattleMenuInteraction()
 {
-	if (BattleMenuWidget->IsChoosingAction) {
-		if (UIManager->PickedButton == BattleMenuWidget->GetAttackButton())
-			BattleMenuWidget->AttackButtonOnClicked();
-		else if (UIManager->PickedButton == BattleMenuWidget->GetDefendButton())
-			BattleMenuWidget->DefendButtonOnClicked();
-		else if (UIManager->PickedButton == BattleMenuWidget->GetItemButton())
-			BattleMenuWidget->ItemButtonOnClicked();
-	}
-	else if (BattleMenuWidget->IsPreparingToAttack) {
-		if (UIManager->PickedButton == BattleMenuWidget->GetAttackMenuBackButton())
-			BattleMenuWidget->AttackMenuBackButtonOnClicked();
-		else if (UIManager->PickedButton == BattleMenuWidget->GetAttackActionButton())
-			BattleMenuWidget->AttackActionButtonOnClicked();
+	if (IsValid(BattleMenuWidget) && IsValid(UIManager)) {
+		if (BattleMenuWidget->IsChoosingAction) {
+			if (UIManager->PickedButton == BattleMenuWidget->GetAttackButton())
+				BattleMenuWidget->AttackButtonOnClicked();
+			else if (UIManager->PickedButton == BattleMenuWidget->GetDefendButton())
+				BattleMenuWidget->DefendButtonOnClicked();
+			else if (UIManager->PickedButton == BattleMenuWidget->GetItemButton())
+				BattleMenuWidget->ItemButtonOnClicked();
+		}
+		else if (BattleMenuWidget->IsPreparingToAttack) {
+			if (UIManager->PickedButton == BattleMenuWidget->GetAttackMenuBackButton())
+				BattleMenuWidget->AttackMenuBackButtonOnClicked();
+			else if (UIManager->PickedButton == BattleMenuWidget->GetAttackActionButton())
+				BattleMenuWidget->AttackActionButtonOnClicked();
+		}
 	}
 }
 
 void APlayerCharacter::ActionButtonInventoryMenuInteraction() {
-	if (BattleMenuWidget->IsChoosingItem && !BattleMenuWidget->IsPreparingToAttack) {
-		UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(UIManager->PickedButton->GetOuter()->GetOuter());
-		if(EntryWidget)
-			InventoryMenuWidget->BattleMenuItemsUseButtonOnClicked();
-	}
+	if(IsValid(BattleMenuWidget))
+		if (BattleMenuWidget->IsChoosingItem && !BattleMenuWidget->IsPreparingToAttack) {
+			UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(UIManager->PickedButton->GetOuter()->GetOuter());
+			if(IsValid(EntryWidget))
+				InventoryMenuWidget->BattleMenuItemsUseButtonOnClicked();
+		}
 }
 
 void APlayerCharacter::ActionButtonBattleResultsScreenInteraction()
 {
-	BattleResultsScreenWidget->ContinueButtonOnClicked();
+	if(IsValid(BattleResultsScreenWidget))
+		BattleResultsScreenWidget->ContinueButtonOnClicked();
 }
 
 void APlayerCharacter::CheckForwardRayHitResult()
 {
 	//If hit result from forward vector is NPC or interactive object, add its name to the viewport
 	AActor* ActorResult = ForwardRay().GetActor();
-	if (ActorResult) {
+	if (IsValid(ActorResult) && IsValid(ForwardRayInfoWidget)) {
 		if (ActorResult->ActorHasTag(FName(TEXT("NPC")))) {
-			if (ForwardRayInfoWidget) 
-			{
-				if (!ForwardRayInfoWidget->IsInViewport()) {
-					ForwardRayInfoWidget->AddToViewport(0);
-					ForwardRayInfoWidget->SetMainTextBlockText(FText::FromName(Cast<ACharacterInTheWorld>(ActorResult)->GetCharacterName()));
-				}
+			if (!ForwardRayInfoWidget->IsInViewport()) {
+				ForwardRayInfoWidget->AddToViewport(0);
+				ForwardRayInfoWidget->SetMainTextBlockText(FText::FromName(Cast<ACharacterInTheWorld>(ActorResult)->GetCharacterName()));
 			}
 		}
 		else if (ActorResult->ActorHasTag(FName(TEXT("ChangeLevelToDungeon")))) {
-			if (ForwardRayInfoWidget)
-			{
-				if (!ForwardRayInfoWidget->IsInViewport()) {
-					ForwardRayInfoWidget->AddToViewport(0);
-					ForwardRayInfoWidget->SetMainTextBlockText(FText::FromString("Enter the dungeon"));
-				}
+			if (!ForwardRayInfoWidget->IsInViewport()) {
+				ForwardRayInfoWidget->AddToViewport(0);
+				ForwardRayInfoWidget->SetMainTextBlockText(FText::FromString("Enter the dungeon"));
 			}
 		}
 		else if (ActorResult->ActorHasTag(FName(TEXT("ChangeLevelToTown")))) {
-			if (ForwardRayInfoWidget)
-			{
-				if (!ForwardRayInfoWidget->IsInViewport()) {
-					ForwardRayInfoWidget->AddToViewport(0);
-					ForwardRayInfoWidget->SetMainTextBlockText(FText::FromString("Enter the town"));
-				}
+			if (!ForwardRayInfoWidget->IsInViewport()) {
+				ForwardRayInfoWidget->AddToViewport(0);
+				ForwardRayInfoWidget->SetMainTextBlockText(FText::FromString("Enter the town"));
 			}
 		}
 		else if (ActorResult->ActorHasTag(FName(TEXT("Loot")))) {
-			if (ForwardRayInfoWidget)
-			{
-				ALootInTheWorld* LootInTheWorld = Cast<ALootInTheWorld>(ActorResult);
-				if (LootInTheWorld)
-					if (!ForwardRayInfoWidget->IsInViewport()) {
-						ForwardRayInfoWidget->AddToViewport(0);
-						ForwardRayInfoWidget->SetMainTextBlockText(FText::FromName(LootInTheWorld->GetName()));
-				}
+			ALootInTheWorld* LootInTheWorld = Cast<ALootInTheWorld>(ActorResult);
+			if (IsValid(LootInTheWorld))
+				if (!ForwardRayInfoWidget->IsInViewport()) {
+					ForwardRayInfoWidget->AddToViewport(0);
+					ForwardRayInfoWidget->SetMainTextBlockText(FText::FromName(LootInTheWorld->GetName()));
 			}
 		}
 		//Remove from viewport, if ray didn't hit NPC or interactive object
-		else {
-			if(ForwardRayInfoWidget)
-				if(ForwardRayInfoWidget->IsInViewport())
-			ForwardRayInfoWidget->RemoveFromParent();
-		}	
+		else if(ForwardRayInfoWidget->IsInViewport())
+				ForwardRayInfoWidget->RemoveFromParent();	
 	}
 	//Remove from viewport, if ray hit nothing
-	else {
-		if (ForwardRayInfoWidget)
-			if(ForwardRayInfoWidget->IsInViewport())
-			ForwardRayInfoWidget->RemoveFromParent();
+	else if(!IsValid(ActorResult) && IsValid(ForwardRayInfoWidget)) {
+		if(ForwardRayInfoWidget->IsInViewport())
+		ForwardRayInfoWidget->RemoveFromParent();
 	}
 }
 
@@ -594,16 +649,19 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	// Get the EnhancedInputComponent
 	UEnhancedInputComponent* PEI = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	// Bind the actions
-	PEI->BindAction(InputActions->InputMove, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
-	PEI->BindAction(InputActions->InputLook, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
-	PEI->BindAction(InputActions->InputJump, ETriggerEvent::Started, this, &APlayerCharacter::InputJump);
-	PEI->BindAction(InputActions->InputAction, ETriggerEvent::Started, this, &APlayerCharacter::InputAction);
-	PEI->BindAction(InputActions->InputOpenPlayerMenu, ETriggerEvent::Started, this, &APlayerCharacter::InputOpenPlayerMenu);
-	PEI->BindAction(InputActions->InputScrollLeft, ETriggerEvent::Started, this, &APlayerCharacter::InputScrollLeft);
-	PEI->BindAction(InputActions->InputScrollRight, ETriggerEvent::Started, this, &APlayerCharacter::InputScrollRight);
-	PEI->BindAction(InputActions->InputScrollUp, ETriggerEvent::Started, this, &APlayerCharacter::InputScrollUp);
-	PEI->BindAction(InputActions->InputScrollDown, ETriggerEvent::Started, this, &APlayerCharacter::InputScrollDown);
-	PEI->BindAction(InputActions->InputPause, ETriggerEvent::Started, this, &APlayerCharacter::InputOpenPauseMenu);
+	if(IsValid(PEI))
+	{
+		PEI->BindAction(InputActions->InputMove, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
+		PEI->BindAction(InputActions->InputLook, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
+		PEI->BindAction(InputActions->InputJump, ETriggerEvent::Started, this, &APlayerCharacter::InputJump);
+		PEI->BindAction(InputActions->InputAction, ETriggerEvent::Started, this, &APlayerCharacter::InputAction);
+		PEI->BindAction(InputActions->InputOpenPlayerMenu, ETriggerEvent::Started, this, &APlayerCharacter::InputOpenPlayerMenu);
+		PEI->BindAction(InputActions->InputScrollLeft, ETriggerEvent::Started, this, &APlayerCharacter::InputScrollLeft);
+		PEI->BindAction(InputActions->InputScrollRight, ETriggerEvent::Started, this, &APlayerCharacter::InputScrollRight);
+		PEI->BindAction(InputActions->InputScrollUp, ETriggerEvent::Started, this, &APlayerCharacter::InputScrollUp);
+		PEI->BindAction(InputActions->InputScrollDown, ETriggerEvent::Started, this, &APlayerCharacter::InputScrollDown);
+		PEI->BindAction(InputActions->InputPause, ETriggerEvent::Started, this, &APlayerCharacter::InputOpenPauseMenu);
+	}
 }
 //Ray of detecting objects in front of a player
 FHitResult APlayerCharacter::ForwardRay()
@@ -613,24 +671,63 @@ FHitResult APlayerCharacter::ForwardRay()
 	FVector ForwardVector = GetActorForwardVector();
 	FVector EndTrace = (ForwardVector * ForwardRayRange) + StartTrace;
 	FCollisionQueryParams* CQP = new FCollisionQueryParams();
+	CQP->AddIgnoredActor(this);
 	GetWorld()->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, ECC_Visibility, *CQP);
 	return HitResult;
 }
 
-void APlayerCharacter::GetHit(int ValueOfAttack, EquipmentDamageType TypeOfDamage)
+void APlayerCharacter::GetHit(int ValueOfAttack, DamageKind KindOfDamage)
 {
-	if (CurrentHP - (ValueOfAttack - ArmorValue) <= 0)
+	int ValueOfArmor = 0;
+	if(IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedHead))
+		ValueOfArmor += InventoryMenuWidget->EquipedHead->StatValue;
+	if (IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedTorse))
+		ValueOfArmor += InventoryMenuWidget->EquipedTorse->StatValue;
+	if (IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedHand))
+		ValueOfArmor += InventoryMenuWidget->EquipedHand->StatValue;
+	if (IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedLowerArmor))
+		ValueOfArmor += InventoryMenuWidget->EquipedLowerArmor->StatValue;
+	int ValueOfArmorBeforeEffects = ValueOfArmor;
+	for (AEffect* Effect : Effects) {
+		if (IsValid(Effect) && Effect->GetAreaOfEffect() == EffectArea::ARMOR) {
+			if (Effect->GetTypeOfEffect() == EffectType::BUFF)
+				ValueOfArmor += ValueOfArmorBeforeEffects * (Effect->GetEffectStat() - 1);
+			else 
+				ValueOfArmor -= ValueOfArmorBeforeEffects/ Effect->GetEffectStat();
+		}
+	}
+	if (CurrentHP - (ValueOfAttack - ValueOfArmor /10) <= 0)
 		CurrentHP = 0;
 	else
-		CurrentHP -= (ValueOfAttack - ArmorValue);
-	if (PlayerAnimInstance)
+		CurrentHP -= (ValueOfAttack - ValueOfArmor /10);
+	if (IsValid(PlayerAnimInstance)) {
 		if (CurrentHP <= 0)
 			PlayerAnimInstance->SetIsDead(true);
+		else if(!PlayerAnimInstance->GetIsBlocking() && CurrentHP > 0)
+			PlayerAnimInstance->SetGotHit(true);
+	}
 }
 
 void APlayerCharacter::Death()
 {
 
+}
+
+void APlayerCharacter::RemoveNotification()
+{
+	if(IsValid(NotificationWidget))
+		NotificationWidget->RemoveFromParent();
+}
+
+void APlayerCharacter::FinishGame()
+{
+	if (IsValid(PlayerController) && IsValid(LoadingScreenClass)) {
+		UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
+		ULoadingScreen* LoadingScreen = CreateWidget<ULoadingScreen>(PlayerController, LoadingScreenClass);
+		if(IsValid(LoadingScreen))
+			LoadingScreen->AddToViewport();
+		UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
+	}
 }
 
 UInventoryScrollBoxEntryWidget* APlayerCharacter::GetInventoryScrollBoxEntryWidget() const
@@ -640,15 +737,13 @@ UInventoryScrollBoxEntryWidget* APlayerCharacter::GetInventoryScrollBoxEntryWidg
 
 void APlayerCharacter::RestartBattleMenuWidget()
 {
-	if (BattleMenuClass)
-		if (PlayerController)
+	if (IsValid(BattleMenuClass) && IsValid(PlayerController))
 			BattleMenuWidget = CreateWidget<UBattleMenu>(PlayerController, BattleMenuClass);
 }
 
 void APlayerCharacter::RestartBattleResultsScreenWidget()
 {
-	if (BattleResultsScreenClass)
-		if (PlayerController)
+	if (IsValid(BattleResultsScreenClass) && IsValid(PlayerController))
 			BattleResultsScreenWidget = CreateWidget<UBattleResultsScreen>(PlayerController, BattleResultsScreenClass);
 }
 
@@ -702,6 +797,11 @@ ABattleManager* APlayerCharacter::GetBattleManager() const
 	return BattleManager;
 }
 
+AUIManager* APlayerCharacter::GetUIManager() const
+{
+	return UIManager;
+}
+
 AGameManager* APlayerCharacter::GetGameManager() const
 {
 	return GameManager;
@@ -712,14 +812,24 @@ AAudioManager* APlayerCharacter::GetAudioManager() const
 	return AudioManager;
 }
 
+UDeathMenu* APlayerCharacter::GetDeathMenuWidget() const
+{
+	return DeathMenuWidget;
+}
+
+USkillBattleMenu* APlayerCharacter::GetSkillBattleMenuWidget() const
+{
+	return SkillBattleMenuWidget;
+}
+
+AEffectsSpellsAndSkillsManager* APlayerCharacter::GetEffectsSpellsAndSkillsManager() const
+{
+	return EffectsManager;
+}
+
 URedemptionGameInstance* APlayerCharacter::GetGameInstance() const
 {
 	return GameInstance;
-}
-
-void APlayerCharacter::SetCanInput(bool Value)
-{
-	CanInput = Value;
 }
 
 UResponsesBox* APlayerCharacter::GetResponsesBox() const
@@ -737,8 +847,14 @@ UTouchInterface* APlayerCharacter::GetStandardTouchInterface() const
 	return StandardTouchInterface;
 }
 
-void APlayerCharacter::SetInventoryScrollBoxEntryWidget(UInventoryScrollBoxEntryWidget* NewWidget) {
+void APlayerCharacter::SetInventoryScrollBoxEntryWidget(UInventoryScrollBoxEntryWidget* NewWidget) 
+{
 	InventoryScrollBoxEntryWidget = NewWidget;
+}
+
+void APlayerCharacter::SetCanInput(bool Value)
+{
+	CanInput = Value;
 }
 
 void APlayerCharacter::SetGameManager(AGameManager* const &NewGameManager)

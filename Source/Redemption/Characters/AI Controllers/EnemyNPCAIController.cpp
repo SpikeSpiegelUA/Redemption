@@ -24,7 +24,7 @@ void AEnemyNPCAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 	ACharacterInTheWorld* Chr = Cast<ACharacterInTheWorld>(InPawn);
-	if (Chr != nullptr && Chr->GetTreeAsset() != nullptr) {
+	if (IsValid(Chr) && IsValid(Chr->GetTreeAsset())) {
 
 		//Initialize the Blackboard
 		BlackboardComponent->InitializeBlackboard(*Chr->GetTreeAsset()->BlackboardAsset);

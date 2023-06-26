@@ -18,7 +18,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class UMainMenu> MainMenuClass;
 	UPROPERTY()
-		class UMainMenu* MainMenuWidget;
+		class UMainMenu* MainMenuWidget{};
 
 	ARedemptionGameModeBase();
 	virtual void BeginPlay() override;

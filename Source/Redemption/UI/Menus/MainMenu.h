@@ -45,8 +45,8 @@ protected:
 
 public:
 
-	UButton* GetNewGameButton();
-	UButton* GetLoadGameButton();
-	UButton* GetSettingsButton();
-	UButton* GetExitButton();
+	UButton* GetNewGameButton() const;
+	UButton* GetLoadGameButton() const;
+	UButton* GetSettingsButton() const;
+	UButton* GetExitButton() const;
 };

@@ -9,7 +9,7 @@ ANonCombatEnemyNPC::ANonCombatEnemyNPC()
 {
 	//Create widget for NonCombatEnemyDetectionBarWidget
 	NonCombatEnemyDetectionBarComponentWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Health Bar"));
-	NonCombatEnemyDetectionBarComponentWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	NonCombatEnemyDetectionBarComponentWidget->SetWidgetSpace(EWidgetSpace::World);
 	NonCombatEnemyDetectionBarComponentWidget->SetupAttachment(RootComponent);
 }
 
@@ -23,7 +23,7 @@ void ANonCombatEnemyNPC::BeginPlay()
 	//Set up properties for NonCombatEnemyDetectionBarWidget
 	NonCombatEnemyDetectionBarComponentWidget->SetWidgetClass(NonCombatEnemyDetectionBarClass);
 	NonCombatEnemyDetectionBarWidget = Cast<UNonCombatEnemyDetectionBarWidget>(NonCombatEnemyDetectionBarComponentWidget->GetWidget());
-	if (NonCombatEnemyDetectionBarWidget) {
+	if (IsValid(NonCombatEnemyDetectionBarWidget)) {
 		NonCombatEnemyDetectionBarWidget->Detection = NonCombatEnemyNPCAIController->GetPlayerDetection();
 	}
 }
@@ -31,7 +31,7 @@ void ANonCombatEnemyNPC::BeginPlay()
 void ANonCombatEnemyNPC::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (NonCombatEnemyNPCAIController) {
+	if (IsValid(NonCombatEnemyNPCAIController)) {
 		NonCombatEnemyNPCAIController->SetBlackboardDistanceToThePlayer((Player->GetActorLocation() - GetActorLocation()).Length());
 		if (NonCombatEnemyNPCAIController->GetBlackboardComponent()->GetValueAsBool(FName("CanSeePlayer")) && (Player->GetActorLocation()-this->GetActorLocation()).Length() <= 200.f) {
 			FVector FacingVector = Player->GetActorLocation() - this->GetActorLocation();
@@ -40,19 +40,23 @@ void ANonCombatEnemyNPC::Tick(float DeltaTime)
 			this->SetActorRotation(FacingRotator, ETeleportType::None);
 		}
 	}
+	if (IsValid(NonCombatEnemyDetectionBarComponentWidget)) {
+		FRotator ComponentRotation = NonCombatEnemyDetectionBarComponentWidget->GetComponentRotation();
+		NonCombatEnemyDetectionBarComponentWidget->SetWorldRotation(FRotator(ComponentRotation.Pitch, 90, 0));
+	}
 }
 
-TArray<TSubclassOf<ACombatEnemyNPC>> ANonCombatEnemyNPC::GetBattleEnemies()
+TArray<TSubclassOf<ACombatEnemyNPC>> ANonCombatEnemyNPC::GetBattleEnemies() const
 {
 	return BattleEnemies;
 }
 
-UBoxComponent* ANonCombatEnemyNPC::GetForwardMarker()
+UBoxComponent* ANonCombatEnemyNPC::GetForwardMarker() const
 {
 	return ForwardMarker;
 }
 
-UNonCombatEnemyDetectionBarWidget* ANonCombatEnemyNPC::GetNonCombatEnemyDetectionBarWidget()
+UNonCombatEnemyDetectionBarWidget* ANonCombatEnemyNPC::GetNonCombatEnemyDetectionBarWidget() const
 {
 	return NonCombatEnemyDetectionBarWidget;
 }

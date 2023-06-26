@@ -9,10 +9,10 @@
 
 void UNonCombatPunchThrowAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	TSubclassOf<AGameManager> ClassToFind;
+	TSubclassOf<AGameManager> ClassToFind{};
 	ClassToFind = AGameManager::StaticClass();
 	TArray<AActor*> FoundManagers;
-	if(MeshComp->GetAttachmentRootActor())
+	if(IsValid(MeshComp->GetAttachmentRootActor()))
 		if (IsValid(MeshComp->GetAttachmentRootActor()->GetWorld()))
 			if(IsValid(MeshComp->GetAttachmentRootActor()->GetWorld()->GetFirstPlayerController()))
 			{
@@ -20,7 +20,8 @@ void UNonCombatPunchThrowAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UA
 				float DistanceBetweenEnemyAndPlayer = (MeshComp->GetAttachmentRootActor()->GetWorld()->GetFirstPlayerController()->GetCharacter()->GetActorLocation() - MeshComp->GetAttachmentRootActor()->GetActorLocation()).Length();
 				if (FoundManagers.Num() > 0 && DistanceBetweenEnemyAndPlayer <= 250.f) {
 					AGameManager* GameManager = Cast<AGameManager>(FoundManagers[0]);
-					GameManager->StartBattle(MeshComp->GetAttachmentRootActor());
+					if(IsValid(GameManager))
+						GameManager->StartBattle(MeshComp->GetAttachmentRootActor());
 				}
 			}
 }

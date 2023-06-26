@@ -29,7 +29,7 @@ EBTNodeResult::Type UBTTask_DisplayLine::ExecuteTask(UBehaviorTreeComponent& Own
 	UDialogueBox* DialogueBoxWidget = Cast<UDialogueBox>(MyBlackboard->GetValueAsObject(DialogueBoxWidgetKeySelector.SelectedKeyName));
 
 	if (!DialogueBoxWidget)
-		EBTNodeResult::Failed;
+		return EBTNodeResult::Failed;
 
 	DialogueBoxWidget->SetDialogueText(TextToDisplay);
 

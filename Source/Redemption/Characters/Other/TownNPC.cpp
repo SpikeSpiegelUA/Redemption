@@ -19,7 +19,7 @@ void ATownNPC::BeginPlay()
 void ATownNPC::StartADialogue()
 {
 	ATownNPCAIController* AIController = Cast<ATownNPCAIController>(GetController());
-	if (AIController) 
+	if (IsValid(AIController)) 
 		AIController->StartADialogue();
 }
 

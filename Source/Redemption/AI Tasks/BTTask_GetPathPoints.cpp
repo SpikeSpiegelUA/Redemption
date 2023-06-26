@@ -19,15 +19,15 @@ EBTNodeResult::Type UBTTask_GetPathPoints::ExecuteTask(UBehaviorTreeComponent& O
 {
 	const UBlackboardComponent* MyBlackboard = OwnerComp.GetBlackboardComponent();
 	AAIController* MyController = OwnerComp.GetAIOwner();
-	if (!MyController || !MyBlackboard)
+	if (!IsValid(MyController) || !IsValid(MyBlackboard))
 		return EBTNodeResult::Failed;
 
 	ACharacterInTheWorld* Chr = Cast<ACharacterInTheWorld>(MyController->GetPawn());
-	if (!Chr)
+	if (!IsValid(Chr))
 		return EBTNodeResult::Failed;
 
 	APatrolPath* PathRef = Cast<APatrolPath>(Chr->GetSmartObject());
-	if (!PathRef || PathRef->GetLocations().Num() < 1)
+	if (!IsValid(PathRef) || PathRef->GetLocations().Num() < 1)
 		return EBTNodeResult::Succeeded;
 
 	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Vector>("MoveToLocation", PathRef->GetLocations()[Index]);

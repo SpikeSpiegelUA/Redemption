@@ -47,21 +47,21 @@ protected:
 
 	//For CreateWidget variables
 	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class UMainMenu> MainMenuClass;
+		TSubclassOf<class UMainMenu> MainMenuClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class UPauseMenu> PauseMenuClass;
+		TSubclassOf<class UPauseMenu> PauseMenuClass{};
 
 	//Sound settings variables
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
-		USoundMix* MainSoundMix;
+		USoundMix* MainSoundMix {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
-		USoundClass* MasterSoundClass;
+		USoundClass* MasterSoundClass {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
-		USoundClass* BackgroundMusicSoundClass;
+		USoundClass* BackgroundMusicSoundClass {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
-		USoundClass* EffectsSoundClass;
+		USoundClass* EffectsSoundClass {};
 public:
 
-	UButton* GetBackButton();
-	UComboBoxString* GetGraphicsQualityComboBoxString();
+	UButton* GetBackButton() const;
+	UComboBoxString* GetGraphicsQualityComboBoxString() const;
 };

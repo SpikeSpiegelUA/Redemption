@@ -3,7 +3,7 @@
 
 #include "EquipmentItem.h"
 
-EquipmentType AEquipmentItem::GetTypeOfEquipment()
+EquipmentType AEquipmentItem::GetTypeOfEquipment() const
 {
     return TypeOfEquipment;
 }

@@ -18,7 +18,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, Category = "Dialogue")
-		UBehaviorTree* DialogueTree;
+		UBehaviorTree* DialogueTree {};
 public:
 
 	// Sets default values for this character's properties

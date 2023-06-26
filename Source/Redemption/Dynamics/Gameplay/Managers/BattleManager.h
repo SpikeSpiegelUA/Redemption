@@ -21,23 +21,23 @@ public:
 
 	//Array that stores spawned enemies and is used in a gameplay logic
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
-	TArray<ACombatEnemyNPC*> BattleEnemies;
+		TArray<ACombatEnemyNPC*> BattleEnemies;
 	//Array that stores spawned enemies and don't change all the way until the end of a battle
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 		TArray<ACombatEnemyNPC*> BattleActors;
 
-	UPROPERTY(BlueprintReadOnly)
-		ACombatEnemyNPC* SelectedEnemy;
-	int SelectedEnemyIndex;
+	UPROPERTY(BlueprintReadOnly, transient)
+		ACombatEnemyNPC* SelectedEnemy {};
+	int SelectedEnemyIndex{};
 
 	void SetCanTurnBehindPlayerCameraToEnemy(bool Value);
 	void SetCanTurnBehindPlayerCameraToStartPosition(bool Value);
 	void SetActorNumberOfTheCurrentTurn(uint8 Value);
 	void AddEnemyTurnQueue(int Value);
 
-	uint8 GetActorNumberOfTheCurrentTurn();
-	TArray<int> GetEnemyTurnQueue();
-	ACameraActor* GetBehindPlayerCamera();
+	uint8 GetActorNumberOfTheCurrentTurn() const;
+	TArray<int> GetEnemyTurnQueue() const;
+	ACameraActor* GetBehindPlayerCamera() const;
 
 	void SelectNewEnemy(ACombatEnemyNPC* Target, int Index);
 
@@ -52,7 +52,7 @@ protected:
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle", meta = (AllowPrivateAccess = true))
-		ACameraActor* BehindPlayerCamera;
+		ACameraActor* BehindPlayerCamera {};
 
 	bool CanTurnBehindPlayerCameraToEnemy = false;
 	bool CanTurnBehindPlayerCameraToStartPosition = false;
@@ -68,11 +68,11 @@ private:
 
 
 	//Timer Handles
-	FTimerHandle ShowExperienceTextTimerHandle;
-	FTimerHandle ShowContinueButtonTimerHandle;
-	FTimerHandle ShowGoldTextTimerHandle;
-	FTimerHandle SetExperienceLevelUpStackTimerHandle;
-	FTimerHandle SetAmountOfGoldTextTimerHandle;
+	FTimerHandle ShowExperienceTextTimerHandle{};
+	FTimerHandle ShowContinueButtonTimerHandle{};
+	FTimerHandle ShowGoldTextTimerHandle{};
+	FTimerHandle SetExperienceLevelUpStackTimerHandle{};
+	FTimerHandle SetAmountOfGoldTextTimerHandle{};
 
 	//Timer Functions
 	UFUNCTION()

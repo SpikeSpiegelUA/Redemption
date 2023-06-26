@@ -63,22 +63,22 @@ void UPauseMenu::MainMenuButtonOnClicked()
 	}
 }
 
-UButton* UPauseMenu::GetResumeButton()
+UButton* UPauseMenu::GetResumeButton() const
 {
 	return ResumeButton;
 }
 
-UButton* UPauseMenu::GetLoadButton()
+UButton* UPauseMenu::GetLoadButton() const
 {
 	return LoadButton;
 }
 
-UButton* UPauseMenu::GetSettingsButton()
+UButton* UPauseMenu::GetSettingsButton() const
 {
 	return SettingsButton;
 }
 
-UButton* UPauseMenu::GetMainMenuButton()
+UButton* UPauseMenu::GetMainMenuButton() const
 {
 	return MainMenuButton;
 }

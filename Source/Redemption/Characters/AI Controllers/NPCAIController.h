@@ -30,8 +30,8 @@ public:
 
 	virtual void OnPossess(APawn* InPawn) override;
 
-	UBehaviorTreeComponent* GetBehaviorTreeComponent();
-	UBlackboardComponent* GetBlackboardComponent();
+	UBehaviorTreeComponent* GetBehaviorTreeComponent() const;
+	UBlackboardComponent* GetBlackboardComponent() const;
 	//SmartObject is spawned later than this object, so conditions for Set in BeginPlay won't be met. Use this function
 	virtual void SetDynamicSubtree();
 };

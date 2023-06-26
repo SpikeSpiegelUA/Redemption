@@ -38,12 +38,12 @@ FName ACharacterInTheWorld::GetCharacterName() const
 	return CharacterName;
 }
 
-UBehaviorTree* ACharacterInTheWorld::GetTreeAsset()
+UBehaviorTree* ACharacterInTheWorld::GetTreeAsset() const
 {
 	return TreeAsset;
 }
 
-ASmartObject* ACharacterInTheWorld::GetSmartObject()
+ASmartObject* ACharacterInTheWorld::GetSmartObject() const
 {
 	return SmartObject;
 }

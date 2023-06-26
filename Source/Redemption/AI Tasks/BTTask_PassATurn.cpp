@@ -13,11 +13,11 @@ EBTNodeResult::Type UBTTask_PassATurn::ExecuteTask(UBehaviorTreeComponent& Owner
 {
 	const UBlackboardComponent* MyBlackboard = OwnerComp.GetBlackboardComponent();
 	AAIController* MyController = OwnerComp.GetAIOwner();
-	if (!MyController || !MyBlackboard)
+	if (!IsValid(MyController) || !IsValid(MyBlackboard))
 		return EBTNodeResult::Failed;
 	
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	if(!PlayerCharacter)
+	if(!IsValid(PlayerCharacter))
 		return EBTNodeResult::Failed;
 
 	ABattleManager* BattleManager = PlayerCharacter->GetBattleManager();

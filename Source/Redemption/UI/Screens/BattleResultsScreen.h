@@ -31,11 +31,11 @@ public:
 	void SetAmountOfGoldTextBlock(FText TargetName);
 	void AddExperienceLevelUpStackBox(UUserWidget* WidgetToAdd);
 
-	UTextBlock* GetExperienceTextBlock();
-	UTextBlock* GetGoldTextBlock();
-	UTextBlock* GetAmountOfGoldTextBlock();
-	UStackBox* GetExperienceLevelUPStackBox();
-	UButton* GetContinueButton();
+	UTextBlock* GetExperienceTextBlock() const;
+	UTextBlock* GetGoldTextBlock() const;
+	UTextBlock* GetAmountOfGoldTextBlock() const;
+	UStackBox* GetExperienceLevelUPStackBox() const;
+	UButton* GetContinueButton() const;
 
 	UFUNCTION()
 		void ContinueButtonOnClicked();

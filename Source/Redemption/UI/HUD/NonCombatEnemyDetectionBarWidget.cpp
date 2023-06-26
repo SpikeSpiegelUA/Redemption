@@ -17,12 +17,12 @@ void UNonCombatEnemyDetectionBarWidget::NativeConstruct()
 	DetectionBar->SynchronizeProperties();
 }
 
-float UNonCombatEnemyDetectionBarWidget::GetDetectionPercentage()
+float UNonCombatEnemyDetectionBarWidget::GetDetectionPercentage() const
 {
 	return Detection / 4.f;
 }
 
-UProgressBar* UNonCombatEnemyDetectionBarWidget::GetDetectionBar()
+UProgressBar* UNonCombatEnemyDetectionBarWidget::GetDetectionBar() const
 {
 	return DetectionBar;
 }

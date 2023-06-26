@@ -30,20 +30,21 @@ void UDeathMenu::LoadButtonOnClicked()
 void UDeathMenu::MainMenuButtonOnClicked()
 {
 	APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-	if (LoadingScreenClass && IsValid(PlayerController)) {
+	if (IsValid(LoadingScreenClass) && IsValid(PlayerController)) {
 		UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
 		ULoadingScreen* LoadingScreen = CreateWidget<ULoadingScreen>(PlayerController, LoadingScreenClass);
+		if(IsValid(LoadingScreen))
 		LoadingScreen->AddToViewport();
-		UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
+			UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
 	}
 }
 
-UButton* UDeathMenu::GetLoadButton()
+UButton* UDeathMenu::GetLoadButton() const
 {
 	return LoadButton;
 }
 
-UButton* UDeathMenu::GetMainMenuButton()
+UButton* UDeathMenu::GetMainMenuButton() const
 {
 	return MainMenuButton;
 }

@@ -21,11 +21,12 @@ protected:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-	class ATownNPC* NPCReference;
+	UPROPERTY(BlueprintReadOnly, Category = "Animation Properties")
+		class ATownNPC* NPCReference;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation Properties")
-		float Speed;
+		float Speed{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation Properties")
-		bool IsAlive;
+		bool IsAlive{};
 	UFUNCTION(BlueprintCallable, Category = "Animations")
 		virtual void UpdateAnimProperties();
 
