@@ -1,9 +1,10 @@
 #pragma once
 
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "BattleActionsInterface.generated.h"
 
-UINTERFACE(MinimalAPI, Blueprintable)
+UINTERFACE(MinimalAPI, Blueprintable, BlueprintType)
 class UBattleActionsInterface : public UInterface
 {
     GENERATED_BODY()
@@ -14,5 +15,11 @@ class IBattleActionsInterface
     GENERATED_BODY()
 
 public:
-    virtual void GetHit(int ValueOfAttack, DamageKind KindOfDamage);
+    
+    //Function to call, when an enemy got hit. Parameters for a standard attack.
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+        void GetHit(int ValueOfAttack, EDamageKind KindOfDamage);
+    //Function to call, when an enemy got hit. Parameters for a buff/debuff attack.
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+        void GetHitWithBuffOrDebuff(class AEffect* const& Effect);
 };

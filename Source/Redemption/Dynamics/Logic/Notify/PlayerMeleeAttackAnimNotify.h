@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
 #include "PlayerMeleeAttackAnimNotify.generated.h"
 
 /**
@@ -13,7 +14,10 @@ UCLASS()
 class REDEMPTION_API UPlayerMeleeAttackAnimNotify : public UAnimNotify
 {
 	GENERATED_BODY()
-	
+
+private:
+	//Calculate how effects affect attack value
+	int CalculateAttackValueAfterEffects(int AttackValue, const APlayerCharacter* const& PlayerCharacter);
 public:
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 };

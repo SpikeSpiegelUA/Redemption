@@ -22,7 +22,6 @@ void AEffectsSpellsAndSkillsManager::BeginPlay()
 void AEffectsSpellsAndSkillsManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 UDataTable* AEffectsSpellsAndSkillsManager::GetEffectsDataTable() const

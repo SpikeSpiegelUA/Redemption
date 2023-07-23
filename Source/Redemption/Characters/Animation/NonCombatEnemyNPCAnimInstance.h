@@ -5,11 +5,21 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Enemies\NonCombatEnemyNPC.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\BitmapsActions.h"
 #include "NonCombatEnemyNPCAnimInstance.generated.h"
 
 /**
  * 
  */
+UENUM(BlueprintType, meta = (BitFlags, UseEnumValuesAsMaskValuesInEditor = "true"))
+enum ENonCombatEnemyNPCAnimationState
+{
+	NonCombatEnemyNPCNone = 0x0000,
+	NonCombatEnemyNPCIsAttacking = 0x0001,
+};
+
+ENUM_CLASS_FLAGS(ENonCombatEnemyNPCAnimationState)
+
 UCLASS()
 class UNonCombatEnemyNPCAnimInstance : public UAnimInstance
 {
@@ -18,7 +28,7 @@ class UNonCombatEnemyNPCAnimInstance : public UAnimInstance
 public:
 	UNonCombatEnemyNPCAnimInstance();
 
-	void SetIsAttacking(bool Value);
+	void SetNonCombatEnemyNPCIsAttacking(bool Value);
 
 protected:
 	virtual void NativeInitializeAnimation() override;
@@ -28,10 +38,12 @@ protected:
 		class ANonCombatEnemyNPC* NPCReference;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation Properties")
 		float Speed{};
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation Properties")
-		bool IsAttacking{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Bitmask, BitmaskEnum = "ENonCombatEnemyNPCAnimationState"), Category = "General Information")
+		int32 NonCombatEnemyNPCAnimationStateBitmaskCode {};
 
 	UFUNCTION(BlueprintCallable, Category = "Animations")
 		virtual void UpdateAnimProperties();
+
+
 
 };

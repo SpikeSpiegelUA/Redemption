@@ -39,7 +39,7 @@ void AGameManager::Tick(float DeltaTime)
 }
 
 //Set up battle stage
-void AGameManager::StartBattle(AActor* const &AttackingNPC)
+void AGameManager::StartBattle(AActor* const& AttackingNPC)
 {
 	if (IsValid(PlayerCharacter)) {
 		UE_LOG(LogTemp, Warning, TEXT("The Actor's name is %s"), *AttackingNPC->GetName());

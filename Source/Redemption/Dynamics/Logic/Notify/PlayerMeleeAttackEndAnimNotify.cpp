@@ -13,5 +13,5 @@ void UPlayerMeleeAttackEndAnimNotify::Notify(USkeletalMeshComponent* MeshComp, U
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(MeshComp->GetOwner()); IsValid(PlayerCharacter))
 		PlayerCharacter->Battle_IsMovingToStartPosition = true;
 	if(UPlayerCharacterAnimInstance* AnimInstance = Cast<UPlayerCharacterAnimInstance>(MeshComp->GetAnimInstance());IsValid(AnimInstance))
-		AnimInstance->SetIsAttacking(false);
+		AnimInstance->SetPlayerIsAttacking(false);
 }

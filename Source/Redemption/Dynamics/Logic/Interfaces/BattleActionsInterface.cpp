@@ -3,7 +3,3 @@
 
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\Interfaces\BattleActionsInterface.h"
 
-void IBattleActionsInterface::GetHit(int ValueOfAttack, DamageKind TypeOfDamage)
-{
-
-}

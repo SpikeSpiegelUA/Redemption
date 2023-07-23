@@ -27,7 +27,7 @@ void UBattleResultsScreen::ContinueButtonOnClicked()
 		PlayerCharacter->GetGameManager()->EndBattle();
 }
 
-void UBattleResultsScreen::SetAmountOfGoldTextBlock(FText TextToSet)
+void UBattleResultsScreen::SetAmountOfGoldTextBlock(const FText& TextToSet)
 {
 	AmountOfGoldTextBlock->SetText(TextToSet);
 }

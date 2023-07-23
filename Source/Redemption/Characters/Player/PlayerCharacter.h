@@ -46,6 +46,8 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\Interfaces\BattleActionsInterface.h"
+#include "Containers/EnumAsByte.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\PlayerBarsWidget.h"
 #include "PlayerCharacter.generated.h"
 
 /**
@@ -116,6 +118,7 @@ public:
 	virtual void BeginPlay() override;
 
 	//Access functions
+	class UPlayerBarsWidget* GetPlayerBarsWidget() const;
 	UPlayerMenu* GetPlayerMenuWidget() const;
 	UInventoryMenu* GetInventoryMenuWidget() const;
 	UBattleResultsScreen* GetBattleResultsScreenWidget() const;
@@ -129,7 +132,7 @@ public:
 	AGameManager* GetGameManager() const;
 	AAudioManager* GetAudioManager() const;
 	UDeathMenu* GetDeathMenuWidget() const;
-	USkillBattleMenu* GetSkillBattleMenuWidget() const;
+	class USkillBattleMenu* GetSkillBattleMenuWidget() const;
 	AEffectsSpellsAndSkillsManager* GetEffectsSpellsAndSkillsManager() const;
 	URedemptionGameInstance* GetGameInstance() const;
 	UInventoryScrollBoxEntryWidget* GetInventoryScrollBoxEntryWidget() const;
@@ -139,8 +142,12 @@ public:
 	UTouchInterface* GetEmptyTouchInterface() const;
 	UTouchInterface* GetStandardTouchInterface() const;
 
-
-	virtual void GetHit(int ValueOfAttack, DamageKind KindOfDamage) override;
+	//Function to call, when an enemy got hit. Parameters for a standard attack.
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+		void GetHit(int ValueOfAttack, EDamageKind KindOfDamage); virtual void GetHit_Implementation(int ValueOfAttack, EDamageKind KindOfDamage) override;
+	//Function to call, when an enemy got hit. Parameters for a buff/debuff attack.
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+		void GetHitWithBuffOrDebuff(class AEffect* const& Effect); virtual void GetHitWithBuffOrDebuff_Implementation(class AEffect* const& Effect) override;
 
 	//Restore widgets to default state
 	void RestartBattleMenuWidget();
@@ -265,7 +272,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Battle")
 		int AttackValue{};
 	UPROPERTY(EditAnywhere, Category = "Battle")
-		DamageKind TypeOfDamage {};
+		EDamageKind TypeOfDamage {};
 	UPROPERTY(VisibleAnywhere, Category = "Battle")
 		TArray<AEffect*> Effects;
 	//Variables for movement in battle scene
@@ -294,13 +301,13 @@ private:
 
 	//Action button input for binding
 	void InputAction();
-	void PickUpItem(AActor* &ActorResult);
+	void PickUpItem(AActor* const& ActorResult);
 	void DialogueInteract(AActor* const &ActorResult);
 	void ActionButtonBattleMenuInteraction();
 	void ActionButtonBattleResultsScreenInteraction();
 	void ActionButtonInventoryMenuInteraction();
-	void ChangeLevel(AActor* const &ActorResult);
-	void NotificationActions(AActor* const &ActorResult);
+	void ChangeLevel(const AActor* const &ActorResult);
+	void NotificationActions(const AActor* const &ActorResult);
 
 	//Opens player menu
 	void InputOpenPlayerMenu();

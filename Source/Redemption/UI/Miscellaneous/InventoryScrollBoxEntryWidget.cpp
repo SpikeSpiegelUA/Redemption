@@ -44,15 +44,15 @@ void UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnClicked()
 		//Set picked button index
 		UScrollBox* CurrentScrollBox = nullptr;
 		if (IsValid(Item)) {
-			if (Item->GetType() == ItemType::EQUIPMENT) {
+			if (Item->GetItemType() == EItemType::EQUIPMENT) {
 				AEquipmentItem* EquipmentItem = Cast<AEquipmentItem>(Item);
 				if (IsValid(EquipmentItem)) {
 					if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::WEAPON) {
 						AWeaponItem* WeaponItem = Cast<AWeaponItem>(EquipmentItem);
 						if (IsValid(WeaponItem)) {
-							if (WeaponItem->TypeOfWeapon == WeaponType::MELEE)
+							if (WeaponItem->TypeOfWeapon == EWeaponType::MELEE)
 								CurrentScrollBox = PlayerCharacter->GetInventoryMenuWidget()->GetMeleeInventoryScrollBox();
-							else if (WeaponItem->TypeOfWeapon == WeaponType::RANGE)
+							else if (WeaponItem->TypeOfWeapon == EWeaponType::RANGE)
 								CurrentScrollBox = PlayerCharacter->GetInventoryMenuWidget()->GetRangeInventoryScrollBox();
 						}
 					}
@@ -60,16 +60,16 @@ void UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnClicked()
 						AArmorItem* ArmorItem = Cast<AArmorItem>(EquipmentItem);
 						if (IsValid(ArmorItem)) {
 							switch (ArmorItem->GetTypeOfArmor()) {
-							case ArmorType::HEAD:
+							case EArmorType::HEAD:
 								CurrentScrollBox = PlayerCharacter->GetInventoryMenuWidget()->GetHeadInventoryScrollBox();
 								break;
-							case ArmorType::TORSE:
+							case EArmorType::TORSE:
 								CurrentScrollBox = PlayerCharacter->GetInventoryMenuWidget()->GetTorseInventoryScrollBox();
 								break;
-							case ArmorType::HAND:
+							case EArmorType::HAND:
 								CurrentScrollBox = PlayerCharacter->GetInventoryMenuWidget()->GetHandInventoryScrollBox();
 								break;
-							case ArmorType::LOWERARMOR:
+							case EArmorType::LOWERARMOR:
 								CurrentScrollBox = PlayerCharacter->GetInventoryMenuWidget()->GetLowerArmorInventoryScrollBox();
 								break;
 							}

@@ -8,7 +8,8 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\RestorationSpell.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\AssaultSpell.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\BoostSpell.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\BuffSpell.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\DebuffSpell.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
@@ -81,7 +82,7 @@ private:
 	UPROPERTY()
 		ASpell* CreatedSpell = nullptr;
 
-	TArray<SpellElement> SelectedSpellElements;
+	TArray<ESpellElement> SelectedSpellElements;
 
 	FTimerHandle UseSpellTimerHandle{};
 	FTimerHandle HideNotificationTimerHandle{};
@@ -117,7 +118,7 @@ private:
 		void HideNotificationAndClearItsTimer();
 
 	//Elements selection logic. Create widget and add them to a dedicated horizontal box.
-	void CreateSelectedElementWidgetAndAddToHorizontalBox(FString Filepath, SpellElement Element);
+	void CreateSelectedElementWidgetAndAddToHorizontalBox(FString Filepath, ESpellElement Element);
 
 	//Check EffectsSpellsAndSkillsManager for created spell. Find and return. Set CreatedSpell variable.
 	ASpell* CheckAndSetCreatedSpell(TArray<TSubclassOf<ASpell>> ArrayWhereToSearchForSpell);
@@ -125,22 +126,24 @@ private:
 	void ShowCreatedSpellInformation(ASpell* const &SpellToShow);
 
 
-	void AssaultSpellUse(AAssaultSpell* const& SpellToUser, ABattleManager* const& BattleManager, 
-		UBattleMenu* const& BattleMenu, AUIManager* const& UIManager);
-	void RestorationSpellUse(ARestorationSpell* const& SpellToUse, ABattleManager* const& BattleManager, 
-		UBattleMenu* const& BattleMenu, AUIManager* const& UIManager);
-	void BoostSpellUse(ABoostSpell* const& SpellToUse, ABattleManager* const& BattleManager, 
-		UBattleMenu* const& BattleMenu, AUIManager* const& UIManager);
+	void AssaultSpellUse(const class AAssaultSpell* const& SpellToUser, class ABattleManager* const& BattleManager, 
+		class UBattleMenu* const& BattleMenu, class AUIManager* const& UIManager);
+	void RestorationSpellUse(const class ARestorationSpell* const& SpellToUse, class ABattleManager* const& BattleManager, 
+		class UBattleMenu* const& BattleMenu, class AUIManager* const& UIManager);
+	void BuffSpellUse(const class ABuffSpell* const& SpellToUse, class ABattleManager* const& BattleManager, 
+		class UBattleMenu* const& BattleMenu, class AUIManager* const& UIManager);
+	void DebuffSpellUse(const class ADebuffSpell* const& SpellToUse, class ABattleManager* const& BattleManager,
+		class UBattleMenu* const& BattleMenu, class AUIManager* const& UIManager);
 protected:
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
 
 public:
 	UHorizontalBox* GetSelectedElementsHorizontalBox() const;
-	TArray<SpellElement> GetSelectedSpellElements() const;
+	TArray<ESpellElement> GetSelectedSpellElements() const;
 	ASpell* GetCreatedSpell() const;
 
-	void SelectedSpellElementsRemoveSingleItem(SpellElement ElementToRemove);
+	void SelectedSpellElementsRemoveSingleItem(ESpellElement ElementToRemove);
 	void SetCreatedSpell(ASpell* NewSpell);
-	void CreateNotification(FText NotificationText);
+	void CreateNotification(const FText& NotificationText);
 };

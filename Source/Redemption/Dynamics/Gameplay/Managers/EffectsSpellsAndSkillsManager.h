@@ -8,6 +8,7 @@
 #include "Engine/DataTable.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Skill.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
 #include "EffectsSpellsAndSkillsManager.generated.h"
 
 USTRUCT(BlueprintType)
@@ -24,9 +25,8 @@ class REDEMPTION_API AEffectsSpellsAndSkillsManager : public AActor
 {
 	GENERATED_BODY()
 private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = true))
-		class UDataTable* EffectsDataTable{};
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = true))
+		UDataTable* EffectsDataTable;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = true))
 		TArray<TSubclassOf<ASpell>> ThreeElementsSpells;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = true))
@@ -36,7 +36,6 @@ private:
 public:	
 	// Sets default values for this actor's properties
 	AEffectsSpellsAndSkillsManager();
-
 
 	TArray<TSubclassOf<ASpell>> GetThreeElementsSpells() const;
 	TArray<TSubclassOf<ASpell>> GetFourElementsSpells() const;

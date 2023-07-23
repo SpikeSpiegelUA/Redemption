@@ -30,27 +30,36 @@ void UCombatNPCAnimInstance::UpdateAnimProperties()
 	Speed = NPCReference->GetVelocity().Size();
 }
 
-void UCombatNPCAnimInstance::SetIsAttacking(bool Value)
+void UCombatNPCAnimInstance::SetCombatEnemyNPCIsAttacking(bool Value)
 {
-	IsAttacking = Value;
+	if (Value)
+		BitmapsActions::SetBit(CombatEnemyNPCAnimationStateBitmaskCode, static_cast<int32>(ECombatEnemyNPCAnimationState::CombatEnemyNPCIsAttacking));
+	else
+		BitmapsActions::ClearBit(CombatEnemyNPCAnimationStateBitmaskCode, static_cast<int32>(ECombatEnemyNPCAnimationState::CombatEnemyNPCIsAttacking));
 }
 
-void UCombatNPCAnimInstance::SetIsDead(bool Value)
+void UCombatNPCAnimInstance::SetCombatEnemyNPCIsDead(bool Value)
 {
-	IsDead = Value;
+	if (Value)
+		BitmapsActions::SetBit(CombatEnemyNPCAnimationStateBitmaskCode, static_cast<int32>(ECombatEnemyNPCAnimationState::CombatEnemyNPCIsDead));
+	else
+		BitmapsActions::ClearBit(CombatEnemyNPCAnimationStateBitmaskCode, static_cast<int32>(ECombatEnemyNPCAnimationState::CombatEnemyNPCIsDead));
 }
 
-void UCombatNPCAnimInstance::SetGotHit(bool Value)
+void UCombatNPCAnimInstance::SetCombatEnemyNPCGotHit(bool Value)
 {
-	GotHit = Value;
+	if (Value)
+		BitmapsActions::SetBit(CombatEnemyNPCAnimationStateBitmaskCode, static_cast<int32>(ECombatEnemyNPCAnimationState::CombatEnemyNPCGotHit));
+	else
+		BitmapsActions::ClearBit(CombatEnemyNPCAnimationStateBitmaskCode, static_cast<int32>(ECombatEnemyNPCAnimationState::CombatEnemyNPCGotHit));
 }
 
-bool UCombatNPCAnimInstance::GetIsDead() const
+bool UCombatNPCAnimInstance::GetCombatEnemyNPCIsDead() const
 {
-	return IsDead;
+	return BitmapsActions::TestBit(CombatEnemyNPCAnimationStateBitmaskCode, static_cast<int32>(ECombatEnemyNPCAnimationState::CombatEnemyNPCIsDead));
 }
 
-bool UCombatNPCAnimInstance::GetGotHit() const
+bool UCombatNPCAnimInstance::GetCombatEnemyNPCGotHit() const
 {
-	return GotHit;
+	return BitmapsActions::TestBit(CombatEnemyNPCAnimationStateBitmaskCode, static_cast<int32>(ECombatEnemyNPCAnimationState::CombatEnemyNPCGotHit));
 }

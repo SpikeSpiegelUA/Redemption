@@ -46,7 +46,7 @@ void ABattleManager::Tick(float DeltaTime)
 
 }
 
-void ABattleManager::SelectNewEnemy(ACombatEnemyNPC* Target, int Index)
+void ABattleManager::SelectNewEnemy(ACombatEnemyNPC* const& Target, int Index)
 {
 	if (IsValid(SelectedEnemy) && IsValid(Target)) {
 		if (SelectedEnemy->GetEnemyHealthBarWidget())
@@ -118,13 +118,14 @@ void ABattleManager::TurnChange()
 					UIManager->PickedButton = BattleMenu->GetAttackButton();
 					BattleMenu->GetAttackButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 				}
-				//Check Effects array in PlayerCharacter. If CurrentDuration>=Duration, delete the effect
-				for (int i = 0; i < PlayerCharacter->Effects.Num(); i++) {
-					AEffect*& Effect = PlayerCharacter->Effects[i];
-					if (IsValid(Effect)) {
-						Effect->CurrentDuration++;
-						if (Effect->CurrentDuration >= Effect->GetDuration()) 
+				//Check Effects array in PlayerCharacter. If CurrentDuration>=Duration, add index to special array and then delete in separate loop
+				for (int i = PlayerCharacter->Effects.Num() - 1; i >= 0; i--) {
+					if (IsValid(PlayerCharacter->Effects[i])) {
+						PlayerCharacter->Effects[i]->CurrentDuration += 1;
+						if (PlayerCharacter->Effects[i]->CurrentDuration >= PlayerCharacter->Effects[i]->GetDuration()) {
+							PlayerCharacter->Effects[i]->ConditionalBeginDestroy();
 							PlayerCharacter->Effects.RemoveAt(i);
+						}
 					}
 				}
 				//Set animation variables
@@ -134,8 +135,8 @@ void ABattleManager::TurnChange()
 						if (IsValid(PlayerCharacter->GetMesh()->GetAnimInstance()))
 							PlayerCharacterAnimInstance = Cast<UPlayerCharacterAnimInstance>(PlayerCharacter->GetMesh()->GetAnimInstance());
 				if (IsValid(PlayerCharacterAnimInstance))
-					if (PlayerCharacterAnimInstance->GetIsBlocking())
-						PlayerCharacterAnimInstance->SetIsBlocking(false);
+					if (PlayerCharacterAnimInstance->GetPlayerIsBlock())
+						PlayerCharacterAnimInstance->SetPlayerIsBlock(false);
 			}
 			else {
 				if (ActorNumberOfTheCurrentTurn >= 0) {
@@ -161,6 +162,12 @@ void ABattleManager::TurnChange()
 				PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponent->SetPaused(true);
 				PlayerCharacter->GetAudioManager()->DungeonBattleResultsBackgroundMusicAudioComponent->Play(0.0f);
 				PlayerCharacter->GetAudioManager()->DungeonBattleResultsBackgroundMusicAudioComponent->SetPaused(false);
+				for (int i = PlayerCharacter->Effects.Num() - 1; i >= 0; i--) {
+					if (IsValid(PlayerCharacter->Effects[i])) {
+						PlayerCharacter->Effects[i]->ConditionalBeginDestroy();
+						PlayerCharacter->Effects.RemoveAt(i);
+					}
+				}
 			}
 		}
 	}
@@ -175,9 +182,20 @@ void ABattleManager::TurnChange()
 		PlayerCharacter->GetAudioManager()->DeathMenuBackgroundMusicAudioComponent->SetPaused(false);
 		PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponent->SetPaused(true);
 		APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+		for (int i = PlayerCharacter->Effects.Num() - 1; i >= 0; i--) {
+			if (IsValid(PlayerCharacter->Effects[i])) {
+				PlayerCharacter->Effects[i]->ConditionalBeginDestroy();
+				PlayerCharacter->Effects.RemoveAt(i);
+			}
+		}
 		if (IsValid(PlayerController))
 			PlayerController->SetPause(true);
 	}
+}
+
+void ABattleManager::SetTimerForPlayerTurnController()
+{
+	GetWorld()->GetTimerManager().SetTimer(PlayerTurnControllerTimerHandle, this, &ABattleManager::PlayerTurnController, 2.1f, false);
 }
 
 void ABattleManager::PlayerTurnController()
@@ -260,6 +278,11 @@ void ABattleManager::SetActorNumberOfTheCurrentTurn(uint8 Value)
 ACameraActor* ABattleManager::GetBehindPlayerCamera() const
 {
 	return BehindPlayerCamera;
+}
+
+FTimerHandle ABattleManager::GetPlayerTurnControllerTimerHandle() const
+{
+	return PlayerTurnControllerTimerHandle;
 }
 
 uint8 ABattleManager::GetActorNumberOfTheCurrentTurn() const

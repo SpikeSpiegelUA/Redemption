@@ -65,8 +65,8 @@ protected:
 	virtual void NativeConstruct() override;
 
 public:
-	void SetEnemyName(FName Name);
-
+	void SetEnemyName(const FName& Name);
+	
 	UCanvasPanel* GetCenterMark() const;
 	UVerticalBox* GetMenuVerticalBox() const;
 	UVerticalBox* GetAttackMenuVerticalBox() const;

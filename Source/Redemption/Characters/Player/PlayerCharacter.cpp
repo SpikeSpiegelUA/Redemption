@@ -5,7 +5,6 @@
 
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\LoadingScreen.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\PlayerBarsWidget.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\LootInTheWorld.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\Interfaces\DialogueActionsInterface.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Other\TownNPC.h"
@@ -163,7 +162,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		if (DistanceVector.Length() <= 160) {
 			Battle_IsMovingToAttackEnemy = false;
 			if (IsValid(PlayerAnimInstance)) {
-				PlayerAnimInstance->SetIsAttacking(true);
+				PlayerAnimInstance->SetPlayerIsAttacking(true);
 				PlayerAnimInstance->SetSpeedToActualSpeed = true;
 			}
 		}
@@ -239,6 +238,7 @@ void APlayerCharacter::InputOpenPlayerMenu()
 		PlayerController->bEnableClickEvents = true;
 		PlayerController->bEnableMouseOverEvents = true;
 		PlayerController->SetPause(true);
+		PlayerBarsWidget->AddToViewport(5);
 	}
 }
 
@@ -434,7 +434,7 @@ void APlayerCharacter::InputAction()
 		ActionButtonBattleResultsScreenInteraction();
 }
 
-void APlayerCharacter::ChangeLevel(AActor* const &ActorResult)
+void APlayerCharacter::ChangeLevel(const AActor* const &ActorResult)
 {
 	//If ray result isn't null and is level change trigger,loading screen is set, then load level 
 	if (IsValid(LoadingScreenClass) && IsValid(PlayerController) && IsValid(GameInstance)) {
@@ -457,7 +457,7 @@ void APlayerCharacter::ChangeLevel(AActor* const &ActorResult)
 	}
 }
 
-void APlayerCharacter::NotificationActions(AActor* const& ActorResult)
+void APlayerCharacter::NotificationActions(const AActor* const& ActorResult)
 {
 	if (ActorResult->ActorHasTag(FName(TEXT("FinishGame"))) && IsValid(GameInstance) && IsValid(NotificationWidget)) {
 		if (GameInstance->KilledEnemies < 3) {
@@ -474,7 +474,7 @@ void APlayerCharacter::NotificationActions(AActor* const& ActorResult)
 	}
 }
 
-void APlayerCharacter::PickUpItem(AActor* &ActorResult)
+void APlayerCharacter::PickUpItem(AActor* const& ActorResult)
 {
 		if (ActorResult->ActorHasTag(FName(TEXT("Loot")))) {
 			ALootInTheWorld* LootInTheWorld = Cast<ALootInTheWorld>(ActorResult);
@@ -487,15 +487,15 @@ void APlayerCharacter::PickUpItem(AActor* &ActorResult)
 						IsInInventory = false;
 						//Get ScrollBox corresponding to the item's type
 						UScrollBox* CurrentScrollBox = nullptr;
-						if (GameItem->GetType() == ItemType::EQUIPMENT) {
+						if (GameItem->GetItemType() == EItemType::EQUIPMENT) {
 							AEquipmentItem* EquipmentItem = Cast<AEquipmentItem>(GameItem);
 							if (IsValid(EquipmentItem)) {
 								if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::WEAPON) {
 									AWeaponItem* WeaponItem = Cast<AWeaponItem>(EquipmentItem);
 									if (IsValid(WeaponItem)) {
-										if (WeaponItem->TypeOfWeapon == WeaponType::MELEE)
+										if (WeaponItem->TypeOfWeapon == EWeaponType::MELEE)
 											CurrentScrollBox = InventoryMenuWidget->GetMeleeInventoryScrollBox();
-										else if (WeaponItem->TypeOfWeapon == WeaponType::RANGE)
+										else if (WeaponItem->TypeOfWeapon == EWeaponType::RANGE)
 											CurrentScrollBox = InventoryMenuWidget->GetRangeInventoryScrollBox();
 									}
 								}
@@ -503,16 +503,16 @@ void APlayerCharacter::PickUpItem(AActor* &ActorResult)
 									AArmorItem* ArmorItem = Cast<AArmorItem>(EquipmentItem);
 									if (IsValid(ArmorItem)) {
 										switch (ArmorItem->GetTypeOfArmor()) {
-										case ArmorType::HEAD:
+										case EArmorType::HEAD:
 											CurrentScrollBox = InventoryMenuWidget->GetHeadInventoryScrollBox();
 											break;
-										case ArmorType::TORSE:
+										case EArmorType::TORSE:
 											CurrentScrollBox = InventoryMenuWidget->GetTorseInventoryScrollBox();
 											break;
-										case ArmorType::HAND:
+										case EArmorType::HAND:
 											CurrentScrollBox = InventoryMenuWidget->GetHandInventoryScrollBox();
 											break;
-										case ArmorType::LOWERARMOR:
+										case EArmorType::LOWERARMOR:
 											CurrentScrollBox = InventoryMenuWidget->GetLowerArmorInventoryScrollBox();
 											break;
 										}
@@ -676,7 +676,7 @@ FHitResult APlayerCharacter::ForwardRay()
 	return HitResult;
 }
 
-void APlayerCharacter::GetHit(int ValueOfAttack, DamageKind KindOfDamage)
+void APlayerCharacter::GetHit_Implementation(int ValueOfAttack, EDamageKind KindOfDamage)
 {
 	int ValueOfArmor = 0;
 	if(IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedHead))
@@ -689,8 +689,8 @@ void APlayerCharacter::GetHit(int ValueOfAttack, DamageKind KindOfDamage)
 		ValueOfArmor += InventoryMenuWidget->EquipedLowerArmor->StatValue;
 	int ValueOfArmorBeforeEffects = ValueOfArmor;
 	for (AEffect* Effect : Effects) {
-		if (IsValid(Effect) && Effect->GetAreaOfEffect() == EffectArea::ARMOR) {
-			if (Effect->GetTypeOfEffect() == EffectType::BUFF)
+		if (IsValid(Effect) && Effect->GetAreaOfEffect() == EEffectArea::ARMOR) {
+			if (Effect->GetTypeOfEffect() == EEffectType::BUFF)
 				ValueOfArmor += ValueOfArmorBeforeEffects * (Effect->GetEffectStat() - 1);
 			else 
 				ValueOfArmor -= ValueOfArmorBeforeEffects/ Effect->GetEffectStat();
@@ -702,10 +702,15 @@ void APlayerCharacter::GetHit(int ValueOfAttack, DamageKind KindOfDamage)
 		CurrentHP -= (ValueOfAttack - ValueOfArmor /10);
 	if (IsValid(PlayerAnimInstance)) {
 		if (CurrentHP <= 0)
-			PlayerAnimInstance->SetIsDead(true);
-		else if(!PlayerAnimInstance->GetIsBlocking() && CurrentHP > 0)
-			PlayerAnimInstance->SetGotHit(true);
+			PlayerAnimInstance->SetPlayerIsDead(true);
+		else if(!PlayerAnimInstance->GetPlayerIsBlock() && CurrentHP > 0)
+			PlayerAnimInstance->SetPlayerGotHit(true);
 	}
+}
+
+void APlayerCharacter::GetHitWithBuffOrDebuff_Implementation(class AEffect* const& Effect)
+{
+	Effects.Add(Effect);
 }
 
 void APlayerCharacter::Death()
@@ -817,7 +822,7 @@ UDeathMenu* APlayerCharacter::GetDeathMenuWidget() const
 	return DeathMenuWidget;
 }
 
-USkillBattleMenu* APlayerCharacter::GetSkillBattleMenuWidget() const
+class USkillBattleMenu* APlayerCharacter::GetSkillBattleMenuWidget() const
 {
 	return SkillBattleMenuWidget;
 }
@@ -845,6 +850,11 @@ UTouchInterface* APlayerCharacter::GetEmptyTouchInterface() const
 UTouchInterface* APlayerCharacter::GetStandardTouchInterface() const
 {
 	return StandardTouchInterface;
+}
+
+class UPlayerBarsWidget* APlayerCharacter::GetPlayerBarsWidget() const
+{
+	return PlayerBarsWidget;
 }
 
 void APlayerCharacter::SetInventoryScrollBoxEntryWidget(UInventoryScrollBoxEntryWidget* NewWidget) 

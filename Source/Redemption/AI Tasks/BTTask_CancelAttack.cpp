@@ -32,12 +32,12 @@ EBTNodeResult::Type UBTTask_CancelAttack::ExecuteTask(UBehaviorTreeComponent& Ow
 	if (IsValid(SkeletalMesh))
 		NonCombatAnimInstance = Cast<UNonCombatEnemyNPCAnimInstance>(SkeletalMesh->GetAnimInstance());
 	if (IsValid(NonCombatAnimInstance))
-		NonCombatAnimInstance->SetIsAttacking(false);
+		NonCombatAnimInstance->SetNonCombatEnemyNPCIsAttacking(false);
 	//Combat set
 	if (IsValid(SkeletalMesh))
 		CombatAnimInstance = Cast<UCombatNPCAnimInstance>(SkeletalMesh->GetAnimInstance());
 	if (IsValid(CombatAnimInstance))
-		CombatAnimInstance->SetIsAttacking(false);
+		CombatAnimInstance->SetCombatEnemyNPCIsAttacking(false);
 
 	return EBTNodeResult::Succeeded;
 }

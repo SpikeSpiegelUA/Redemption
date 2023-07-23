@@ -7,20 +7,20 @@
 #include "Effect.generated.h"
 
 UENUM(BlueprintType)
-enum class EffectArea :uint8
+enum class EEffectArea :uint8
 {
 	DAMAGE UMETA(DisplayName = "Damage"),
 	ARMOR UMETA(DisplayName = "Armor"),
-	EVASION UMETA(DisplayName = "Evasion"),
+	AGILITY UMETA(DisplayName = "Agility"),
 };
 
 UENUM(BlueprintType)
-enum class SpellElement :uint8
+enum class ESpellElement :uint8
 {
 	FIRE UMETA(DisplayName = "Fire"),
 	WATER UMETA(DisplayName = "Water"),
 	WIND UMETA(DisplayName = "Wind"),
-	EARTH UMETA(DisplayName = "Wind"),
+	EARTH UMETA(DisplayName = "Earth"),
 	LIGHTNING UMETA(DisplayName = "Lightning"),
 	HOLY UMETA(DisplayName = "Holy"),
 	DARK UMETA(DisplayName = "Dark"),
@@ -28,7 +28,7 @@ enum class SpellElement :uint8
 };
 
 UENUM(BlueprintType)
-enum class EffectType :uint8
+enum class EEffectType :uint8
 {
 	BUFF UMETA(DisplayName = "Buff"),
 	DEBUFF UMETA(DisplayName = "Debuff"),
@@ -48,9 +48,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "General Information")
-		EffectArea AreaOfEffect {};
+		EEffectArea AreaOfEffect {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "General Information")
-		EffectType TypeOfEffect {};
+		EEffectType TypeOfEffect {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "General Information")
 		FName EffectName {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "General Information")
@@ -62,8 +62,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	EffectArea GetAreaOfEffect() const;
-	EffectType GetTypeOfEffect() const;
+	EEffectArea GetAreaOfEffect() const;
+	EEffectType GetTypeOfEffect() const;
 	FName GetEffectName() const;
 	int GetEffectStat() const;
 	int GetDuration() const;

@@ -30,7 +30,7 @@ FName ASpell::GetSpellName() const
 	return SpellName;
 }
 
-TArray<SpellElement> ASpell::GetRequiredElements() const
+TArray<ESpellElement> ASpell::GetRequiredElements() const
 {
 	return RequiredElements;
 }
@@ -40,7 +40,7 @@ int ASpell::GetManaCost() const
 	return ManaCost;
 }
 
-SpellType ASpell::GetTypeOfSpell() const
+ESpellType ASpell::GetTypeOfSpell() const
 {
 	return TypeOfSpell;
 }

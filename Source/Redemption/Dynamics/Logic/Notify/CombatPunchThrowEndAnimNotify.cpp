@@ -11,7 +11,7 @@ void UCombatPunchThrowEndAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UA
 		if (IsValid(MeshComp->GetAnimClass()))
 			AnimInstance = Cast<UCombatNPCAnimInstance>(MeshComp->GetAnimClass());
 		if (IsValid(AnimInstance))
-			AnimInstance->SetIsAttacking(false);
+			AnimInstance->SetCombatEnemyNPCIsAttacking(false);
 	}
 
 }

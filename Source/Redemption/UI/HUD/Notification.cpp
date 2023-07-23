@@ -15,7 +15,7 @@ void UNotification::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UNotification::SetNotificationTextBlockText(FText const& NewText)
+void UNotification::SetNotificationTextBlockText(const FText& NewText)
 {
 	NotificationTextBlock->SetText(NewText);
 }

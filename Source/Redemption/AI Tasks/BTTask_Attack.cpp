@@ -32,11 +32,11 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	if (IsValid(SkeletalMesh))
 		NonCombatAnimInstance = Cast<UNonCombatEnemyNPCAnimInstance>(SkeletalMesh->GetAnimInstance());
 	if (IsValid(NonCombatAnimInstance))
-		NonCombatAnimInstance->SetIsAttacking(true);
+		NonCombatAnimInstance->SetNonCombatEnemyNPCIsAttacking(true);
 	//Combat set
 	CombatAnimInstance = Cast<UCombatNPCAnimInstance>(OwnerComp.GetAIOwner()->GetCharacter()->GetMesh()->GetAnimInstance());
 	if (IsValid(CombatAnimInstance))
-		CombatAnimInstance->SetIsAttacking(true);
+		CombatAnimInstance->SetCombatEnemyNPCIsAttacking(true);
 
 	return EBTNodeResult::Succeeded;
 }

@@ -38,14 +38,17 @@ public:
 	uint8 GetActorNumberOfTheCurrentTurn() const;
 	TArray<int> GetEnemyTurnQueue() const;
 	ACameraActor* GetBehindPlayerCamera() const;
+	FTimerHandle GetPlayerTurnControllerTimerHandle() const;
 
-	void SelectNewEnemy(ACombatEnemyNPC* Target, int Index);
-
+	void SelectNewEnemy(ACombatEnemyNPC* const& Target, int Index);
+	
 	//Function, that controls whether player's turn continues or passes to enemies
 	UFUNCTION()
 	void PlayerTurnController();
 	//Turn change controller function
 	void TurnChange();
+	
+	void SetTimerForPlayerTurnController();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -73,6 +76,7 @@ private:
 	FTimerHandle ShowGoldTextTimerHandle{};
 	FTimerHandle SetExperienceLevelUpStackTimerHandle{};
 	FTimerHandle SetAmountOfGoldTextTimerHandle{};
+	FTimerHandle PlayerTurnControllerTimerHandle{};
 
 	//Timer Functions
 	UFUNCTION()
