@@ -30,60 +30,81 @@ void UPlayerCharacterAnimInstance::UpdateAnimProperties()
 		Speed = PlayerReference->GetVelocity().Size();
 	else 
 		Speed = 300.f;
-	IsInAir = PlayerReference->GetCharacterMovement()->IsFalling();
+	if (PlayerReference->GetCharacterMovement()->IsFalling())
+		BitmapsActions::SetBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsInAir));
+	else
+		BitmapsActions::ClearBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsInAir));
 }
 
-bool UPlayerCharacterAnimInstance::GetIsInAir() const
+bool UPlayerCharacterAnimInstance::GetPlayerIsInAir() const
 {
-	return IsInAir;
+	return BitmapsActions::TestBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsInAir));
 }
 
-bool UPlayerCharacterAnimInstance::GetIsBlocking() const
+bool UPlayerCharacterAnimInstance::GetPlayerIsBlock() const
 {
-	return IsBlocking;
+	return BitmapsActions::TestBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsBlock));
 }
 
-bool UPlayerCharacterAnimInstance::GetIsThrowing() const
+bool UPlayerCharacterAnimInstance::GetPlayerIsThrowing() const
 {
-	return IsThrowing;
+	return BitmapsActions::TestBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsThrowing));
 }
 
-bool UPlayerCharacterAnimInstance::GetIsAttackingWithMagic() const
+bool UPlayerCharacterAnimInstance::GetPlayerIsAttackingWithMagic() const
 {
-	return IsAttackingWithMagic;
+	return BitmapsActions::TestBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsAttackingWithMagic));
 }
 
-void UPlayerCharacterAnimInstance::SetIsAttacking(bool Value)
-{
-	IsAttacking = Value;
-}
-
-void UPlayerCharacterAnimInstance::SetSpeed(float Value)
+void UPlayerCharacterAnimInstance::SetPlayerSpeed(float Value)
 {
 	Speed = Value;
 }
 
-void UPlayerCharacterAnimInstance::SetIsDead(bool Value)
+void UPlayerCharacterAnimInstance::SetPlayerIsAttacking(bool Value)
 {
-	IsDead = Value;
+	if (Value)
+		BitmapsActions::SetBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsAttacking));
+	else
+		BitmapsActions::ClearBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsAttacking));
 }
 
-void UPlayerCharacterAnimInstance::SetIsBlocking(bool Value)
+void UPlayerCharacterAnimInstance::SetPlayerIsDead(bool Value)
 {
-	IsBlocking = Value;
+	if (Value)
+		BitmapsActions::SetBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsDead));
+	else
+		BitmapsActions::ClearBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsDead));
 }
 
-void UPlayerCharacterAnimInstance::SetGotHit(bool Value)
+void UPlayerCharacterAnimInstance::SetPlayerIsBlock(bool Value)
 {
-	GotHit = Value;
+	if (Value)
+		BitmapsActions::SetBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsBlock));
+	else
+		BitmapsActions::ClearBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsBlock));
 }
 
-void UPlayerCharacterAnimInstance::SetIsThrowing(bool Value)
+void UPlayerCharacterAnimInstance::SetPlayerGotHit(bool Value)
 {
-	IsThrowing = Value;
+	if (Value)
+		BitmapsActions::SetBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerGotHit));
+	else
+		BitmapsActions::ClearBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerGotHit));
 }
 
-void UPlayerCharacterAnimInstance::SetIsAttackingWithMagic(bool Value)
+void UPlayerCharacterAnimInstance::SetPlayerIsThrowing(bool Value)
 {
-	IsAttackingWithMagic = Value;
+	if (Value)
+		BitmapsActions::SetBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsThrowing));
+	else
+		BitmapsActions::ClearBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsThrowing));
+}
+
+void UPlayerCharacterAnimInstance::SetPlayerIsAttackingWithMagic(bool Value)
+{
+	if (Value)
+		BitmapsActions::SetBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsAttackingWithMagic));
+	else
+		BitmapsActions::ClearBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsAttackingWithMagic));
 }

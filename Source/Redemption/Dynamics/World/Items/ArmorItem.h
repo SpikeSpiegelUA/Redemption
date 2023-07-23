@@ -11,7 +11,7 @@
  */
 
 UENUM(BlueprintType)
-enum class ArmorType :uint8
+enum class EArmorType :uint8
 {
 	HEAD UMETA(DisplayName = "Head"),
 	TORSE UMETA(DisplayName = "Torse"),
@@ -26,8 +26,8 @@ class REDEMPTION_API AArmorItem : public AEquipmentItem
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information");
-		ArmorType TypeOfArmor{};
+		EArmorType TypeOfArmor{};
 
 public:
-	ArmorType GetTypeOfArmor() const;
+	EArmorType GetTypeOfArmor() const;
 };

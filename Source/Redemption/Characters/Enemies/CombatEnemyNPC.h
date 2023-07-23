@@ -8,6 +8,7 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\EnemyHealthBarWidget.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include <Components/WidgetComponent.h>
+#include "Containers/EnumAsByte.h"
 #include "CombatEnemyNPC.generated.h"
 
 /**
@@ -30,7 +31,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Battle")
 		AActor* StartLocation {};
 	UPROPERTY(EditAnywhere, Category = "Battle")
-		DamageKind CurrentDamageKind {};
+		EDamageKind CurrentDamageKind {};
 	UPROPERTY(VisibleAnywhere, Category = "Battle")
 		AActor* Target {};
 	UPROPERTY(VisibleAnywhere, Category = "Battle")
@@ -41,7 +42,12 @@ public:
 	// Sets default values for this character's properties
 	ACombatEnemyNPC();
 
-	virtual void GetHit(int ValueOfAttack, DamageKind KindOfDamage) override;
+	//Function to call, when an enemy got hit. Parameters for a standard attack.
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+		void GetHit(int ValueOfAttack, EDamageKind KindOfDamage); virtual void GetHit_Implementation(int ValueOfAttack, EDamageKind KindOfDamage) override;
+	//Function to call, when an enemy got hit. Parameters for a buff/debuff attack.
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+		void GetHitWithBuffOrDebuff(class AEffect* const& Effect); virtual void GetHitWithBuffOrDebuff_Implementation(class AEffect* const& Effect) override;
 
 	UEnemyHealthBarWidget* GetEnemyHealthBarWidget() const;
 

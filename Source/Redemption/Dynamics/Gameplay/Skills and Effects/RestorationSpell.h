@@ -24,8 +24,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 		SpellRestorationType TypeOfRestoration;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		int RestorationValue;
+		int RestorationValuePercent;
 public:
 	SpellRestorationType GetTypeOfRestoration() const;
-	int GetRestorationValue() const;
+	int GetRestorationValuePercent() const;
 };

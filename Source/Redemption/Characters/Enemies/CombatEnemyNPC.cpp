@@ -35,30 +35,35 @@ void ACombatEnemyNPC::Tick(float DeltaTime)
 
 }
 
-void ACombatEnemyNPC::GetHit(int ValueOfAttack, DamageKind KindOfDamage)
+void ACombatEnemyNPC::GetHitWithBuffOrDebuff_Implementation(class AEffect* const& Effect) 
+{
+	Effects.Add(Effect);
+}
+
+void ACombatEnemyNPC::GetHit_Implementation(int ValueOfAttack, EDamageKind KindOfDamage) 
 {
 	int ValueOfArmor = ArmorValue;
 	int ValueOfArmorBeforeEffects = ValueOfArmor;
 	for (AEffect* Effect : Effects) {
-		if (IsValid(Effect) && Effect->GetAreaOfEffect() == EffectArea::ARMOR) {
-			if (Effect->GetTypeOfEffect() == EffectType::BUFF)
+		if (IsValid(Effect) && Effect->GetAreaOfEffect() == EEffectArea::ARMOR) {
+			if (Effect->GetTypeOfEffect() == EEffectType::BUFF)
 				ValueOfArmor += ValueOfArmorBeforeEffects * (Effect->GetEffectStat() - 1);
 			else
 				ValueOfArmor -= ValueOfArmorBeforeEffects / Effect->GetEffectStat();
 		}
 	}
-	if (HP - (ValueOfAttack - ValueOfArmor/10) < 0)
+	if (HP - (ValueOfAttack - ValueOfArmor / 10) < 0)
 		HP = 0;
 	else
-		HP -= (ValueOfAttack - ValueOfArmor/10);
+		HP -= (ValueOfAttack - ValueOfArmor / 10);
 	if (IsValid(EnemyHealthBarWidget))
-	EnemyHealthBarWidget->HP = HP;
+		EnemyHealthBarWidget->HP = HP;
 	UCombatNPCAnimInstance* AnimInstance = Cast<UCombatNPCAnimInstance>(GetMesh()->GetAnimInstance());
 	if (IsValid(AnimInstance)) {
 		if (HP <= 0)
-			AnimInstance->SetIsDead(true);
+			AnimInstance->SetCombatEnemyNPCIsDead(true);
 		else
-			AnimInstance->SetGotHit(true);
+			AnimInstance->SetCombatEnemyNPCGotHit(true);
 	}
 }
 

@@ -5,11 +5,20 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Other\TownNPC.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\BitmapsActions.h"
 #include "TownNPCAnimInstance.generated.h"
 
 /**
  * 
  */
+enum ETownNPCAnimationState
+{
+	TownNPCNone = 0x0000,
+	TownNPCIsAlive = 0x0001,
+};
+
+ENUM_CLASS_FLAGS(ETownNPCAnimationState)
+
 UCLASS()
 class UTownNPCAnimInstance : public UAnimInstance
 {
@@ -25,8 +34,9 @@ protected:
 		class ATownNPC* NPCReference;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation Properties")
 		float Speed{};
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation Properties")
-		bool IsAlive{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Bitmask, BitmaskEnum = "ETownNPCAnimationState"), Category = "General Information")
+		int32 TownNPCAnimationStateBitmaskCode {};
+
 	UFUNCTION(BlueprintCallable, Category = "Animations")
 		virtual void UpdateAnimProperties();
 

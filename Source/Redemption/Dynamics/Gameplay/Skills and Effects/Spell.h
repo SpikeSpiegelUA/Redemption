@@ -8,11 +8,12 @@
 #include "Spell.generated.h"
 
 UENUM(BlueprintType)
-enum class SpellType :uint8
+enum class ESpellType :uint8
 {
 	ASSAULT UMETA(DisplayName = "Assault"),
-	BOOST UMETA(DisplayName = "Boost"),
+	BUFF UMETA(DisplayName = "Buff"),
 	RESTORATION UMETA(DisplayName = "Restoration"),
+	DEBUFF UMETA(DisplayName = "Debuff"),
 };
 
 UCLASS()
@@ -24,11 +25,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
 		FName SpellName {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
-		TArray<SpellElement> RequiredElements;
+		TArray<ESpellElement> RequiredElements;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
 		int ManaCost{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
-		SpellType TypeOfSpell {};
+		ESpellType TypeOfSpell {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
 		FText Description {};
 
@@ -37,9 +38,9 @@ public:
 	ASpell();
 
 	FName GetSpellName() const;
-	TArray<SpellElement> GetRequiredElements() const;
+	TArray<ESpellElement> GetRequiredElements() const;
 	int GetManaCost() const;
-	SpellType GetTypeOfSpell() const;
+	ESpellType GetTypeOfSpell() const;
 	FText GetDescription() const;
 
 protected:

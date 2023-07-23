@@ -97,14 +97,16 @@ void UBattleMenu::DefendButtonOnClicked()
 		BattleManager = PlayerCharacter->GetBattleManager();
 	}
 	if (IsValid(PlayerCharacterAnimInstance) && IsValid(BattleManager) && IsValid(PlayerCharacter)) {
-		PlayerCharacterAnimInstance->SetIsBlocking(true);
+		PlayerCharacterAnimInstance->SetPlayerIsBlock(true);
 		FEffectsList* EffectsList{};
 		static const FString ContextString(TEXT("Effects List Context"));
 		if (AEffectsSpellsAndSkillsManager* EffectsManager = PlayerCharacter->GetEffectsSpellsAndSkillsManager(); IsValid(EffectsManager)) {
 			if (IsValid(EffectsManager->GetEffectsDataTable()))
 				EffectsList = EffectsManager->GetEffectsDataTable()->FindRow<FEffectsList>(FName(TEXT("DefendEffect")), ContextString, true);
-			if(EffectsList)
-				PlayerCharacter->Effects.Add(Cast<AEffect>(EffectsList->EffectClass->GetDefaultObject(true)));
+			if (EffectsList) {
+				AEffect* NewEffect = NewObject<AEffect>(this, EffectsList->EffectClass);
+				PlayerCharacter->Effects.Add(NewEffect);
+			}
 			GetWorld()->GetTimerManager().SetTimer(DefendActionTimerHandle, BattleManager, &ABattleManager::PlayerTurnController, 1.0f, false);
 			MenuBorder->SetVisibility(ESlateVisibility::Hidden);
 			DefendButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
@@ -169,44 +171,10 @@ void UBattleMenu::AttackActionButtonOnClicked()
 {
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	if (IsValid(PlayerCharacter)) {
-		UInventoryMenu* Inventory = PlayerCharacter->GetInventoryMenuWidget();
-		if (IsAttackingWithItem && IsValid(Inventory)) {
-			//Save data to game instance
-			for (int i = 0; i < GameInstance->InstanceItemsInTheInventory.Num(); i++) {
-				AGameItem* GameItem = Cast<AGameItem>(GameInstance->InstanceItemsInTheInventory[i]->GetDefaultObject());
-				if (Inventory->GetPickedItem() && IsValid(GameItem))
-					if (GameItem->GetItemName() == Inventory->GetPickedItem()->GetItemName()) {
-						GameInstance->InstanceItemsInTheInventory.RemoveAt(i);
-						break;
-					}
-			}
-			//Find Item's widget in inventory
-			UInventoryScrollBoxEntryWidget* EntryWidget = nullptr;
-			for (int i = 0; i < Inventory->GetInventoryScrollBox()->GetAllChildren().Num(); i++) {
-				EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(Inventory->GetInventoryScrollBox()->GetAllChildren()[i]);
-					if (IsValid(EntryWidget))
-						if (Inventory->GetPickedItem()->GetItemName() == EntryWidget->GetItem()->GetItemName())
-							break;
-			}
-			if (IsValid(EntryWidget)) {
-				if (EntryWidget->AmountOfItems == 1) {
-					Inventory->GetInventoryScrollBox()->RemoveChild(EntryWidget);
-					EntryWidget->RemoveFromParent();
-					EntryWidget->ConditionalBeginDestroy();
-				}
-				else {
-					AAssaultItem* AssaultItem = Cast<AAssaultItem>(Inventory->GetPickedItem());
-					if (IsValid(AssaultItem)) {
-						EntryWidget->AmountOfItems--;
-						FString NameString;
-						if (EntryWidget->AmountOfItems > 1)
-							NameString = AssaultItem->GetItemName().ToString() + FString("(" + FString::FromInt(EntryWidget->AmountOfItems) + ")");
-						else
-							NameString = AssaultItem->GetItemName().ToString();
-						EntryWidget->GetMainTextBlock()->SetText(FText::FromString(NameString));
-					}
-				}
-			}
+		if (UInventoryMenu* Inventory = PlayerCharacter->GetInventoryMenuWidget(); IsAttackingWithItem && IsValid(Inventory)) {
+			UInventoryScrollBoxEntryWidget* EntryWidget = Inventory->FindItemsInventoryEntryWidget(Inventory->GetPickedItem());
+			Inventory->SaveInventoryDataToGameInstance(GameInstance);
+			Inventory->ChangeInventoryAfterItemUse(EntryWidget, Inventory->GetPickedItem());
 		}
 		if(IsAttackingWithSpell)
 			if (USkillBattleMenu* SkillBattleMenu = PlayerCharacter->GetSkillBattleMenuWidget(); IsValid(SkillBattleMenu)) {
@@ -214,7 +182,7 @@ void UBattleMenu::AttackActionButtonOnClicked()
 				if (PlayerCharacter->CurrentMana < 0)
 					PlayerCharacter->CurrentMana = 0;
 				if (UPlayerCharacterAnimInstance* AnimInstance = Cast<UPlayerCharacterAnimInstance>(PlayerCharacter->GetMesh()->GetAnimInstance()); IsValid(AnimInstance))
-					AnimInstance->SetIsAttackingWithMagic(true);
+					AnimInstance->SetPlayerIsAttackingWithMagic(true);
 			}
 		if (IsAttackingWithMelee) {
 			PlayerCharacter->Battle_IsMovingToAttackEnemy = true;
@@ -289,7 +257,7 @@ void UBattleMenu::ItemButtonOnClicked()
 	}
 }
 
-void UBattleMenu::SetEnemyName(FName Name)
+void UBattleMenu::SetEnemyName(const FName& Name)
 {
 	EnemyNameTextBlock->SetText(FText::FromName(Name));
 }

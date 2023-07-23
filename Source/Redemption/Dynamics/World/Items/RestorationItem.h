@@ -26,9 +26,9 @@ private:
 		ItemRestorationType TypeOfRestoration {};
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
-		int RestorationPoints{};
+		int RestorationValuePercent{};
 
 public:
 	ItemRestorationType GetTypeOfRestoration() const;
-	int GetRestorationPoints() const;
+	int GetRestorationValuePercent() const;
 };

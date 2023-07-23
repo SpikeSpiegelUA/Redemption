@@ -28,7 +28,7 @@ protected:
 		class UButton* ContinueButton;
 
 public:
-	void SetAmountOfGoldTextBlock(FText TargetName);
+	void SetAmountOfGoldTextBlock(const FText& TextToSet);
 	void AddExperienceLevelUpStackBox(UUserWidget* WidgetToAdd);
 
 	UTextBlock* GetExperienceTextBlock() const;

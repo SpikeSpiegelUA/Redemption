@@ -2,13 +2,19 @@
 
 
 #include "AssaultSpell.h"
+#include "Redemption/Dynamics/World/Items/GameItem.h"
 
 int AAssaultSpell::GetAttackValue() const
 {
 	return AttackValue;
 }
 
-TSubclassOf<ASpellObject> AAssaultSpell::GetSpellObjectClass() const
+EDamageKind AAssaultSpell::GetSpellDamageKind() const
+{
+	return SpellDamageKind;
+}
+
+class TSubclassOf<ASpellObject> AAssaultSpell::GetSpellObjectClass() const
 {
 	return SpellObjectClass;
 }

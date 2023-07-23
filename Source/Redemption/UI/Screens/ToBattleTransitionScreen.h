@@ -21,7 +21,7 @@ protected:
 		class UBackgroundBlur* Blur;
 
 public:
-	void SetMainTextBlockText(FText TargetName);
+	void SetMainTextBlockText(const FText& TargetName);
 protected:
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;

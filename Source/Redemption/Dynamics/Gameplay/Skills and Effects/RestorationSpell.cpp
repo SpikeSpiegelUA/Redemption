@@ -8,7 +8,7 @@ SpellRestorationType ARestorationSpell::GetTypeOfRestoration() const
     return TypeOfRestoration;
 }
 
-int ARestorationSpell::GetRestorationValue() const
+int ARestorationSpell::GetRestorationValuePercent() const
 {
-    return RestorationValue;
+    return RestorationValuePercent;
 }

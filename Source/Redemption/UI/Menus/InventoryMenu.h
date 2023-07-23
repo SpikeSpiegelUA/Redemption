@@ -171,16 +171,16 @@ public:
 	bool GetCanScrollInventory() const;
 
 	void SetPickedItem(AGameItem* NewItem);
-	void SetTextOfItemNameTextBlock(FText NewText);
-	void SetTextOfItemTypeTextBlock(FText NewText);
-	void SetTextOfItemEffectValueTextBlock(FText NewText);
-	void SetTextOfItemCostTextBlock(FText NewText);
-	void SetTextOfItemDescriptionTextBlock(FText NewText);
+	void SetTextOfItemNameTextBlock(const FText& NewText);
+	void SetTextOfItemTypeTextBlock(const FText& NewText);
+	void SetTextOfItemEffectValueTextBlock(const FText& NewText);
+	void SetTextOfItemCostTextBlock(const FText& NewText);
+	void SetTextOfItemDescriptionTextBlock(const FText& NewText);
 
 	//Set ItemInfo for ItemInfoBorder
 	void SetItemInfo(AGameItem* const& GameItem);
 
-	void CreateNotification(FText NotificationText);
+	void CreateNotification(const FText& NotificationText);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
 		AEquipmentItem* EquipedMelee {};
@@ -199,4 +199,12 @@ public:
 	UFUNCTION()
 		void BattleMenuItemsUseButtonOnClicked();
 
+	//After we use an item, we need to reflect changes in the game instance
+	void SaveInventoryDataToGameInstance(URedemptionGameInstance* const& GameInstance);
+	//After we use an item, we need to reflect changes in inventory scroll box
+	void ChangeInventoryAfterItemUse(UInventoryScrollBoxEntryWidget* const& EntryWidget, const AGameItem* const& GameItem);
+	//After we use an item, we need to do some stuff for the game to actually work properly. No shit
+	void ItemHasBeenUsedActions(class UBattleMenu* const& BattleMenu, const APlayerCharacter* const& PlayerCharacter, class ABattleManager* const& BattleManager);
+	//Return item's inventory entry widget in the inventory
+	 UInventoryScrollBoxEntryWidget* FindItemsInventoryEntryWidget(const AGameItem* const& GameItemToSearchFor);
 };

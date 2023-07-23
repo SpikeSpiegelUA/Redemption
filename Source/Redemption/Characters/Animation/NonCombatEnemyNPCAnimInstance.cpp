@@ -4,6 +4,7 @@
 #include "NonCombatEnemyNPCAnimInstance.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\NonCombatEnemyNPCAIController.h"
 
+
 UNonCombatEnemyNPCAnimInstance::UNonCombatEnemyNPCAnimInstance()
 {
 
@@ -30,7 +31,10 @@ void UNonCombatEnemyNPCAnimInstance::UpdateAnimProperties()
 	Speed = NPCReference->GetVelocity().Size();
 }
 
-void UNonCombatEnemyNPCAnimInstance::SetIsAttacking(bool Value)
+void UNonCombatEnemyNPCAnimInstance::SetNonCombatEnemyNPCIsAttacking(bool Value)
 {
-	IsAttacking = Value;
+	if (Value)
+		BitmapsActions::SetBit(NonCombatEnemyNPCAnimationStateBitmaskCode, static_cast<int32>(ENonCombatEnemyNPCAnimationState::NonCombatEnemyNPCIsAttacking));
+	else
+		BitmapsActions::ClearBit(NonCombatEnemyNPCAnimationStateBitmaskCode, static_cast<int32>(ENonCombatEnemyNPCAnimationState::NonCombatEnemyNPCIsAttacking));
 }

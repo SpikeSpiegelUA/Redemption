@@ -3,7 +3,7 @@
 
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
 
-ArmorType AArmorItem::GetTypeOfArmor() const
+EArmorType AArmorItem::GetTypeOfArmor() const
 {
     return TypeOfArmor;
 }

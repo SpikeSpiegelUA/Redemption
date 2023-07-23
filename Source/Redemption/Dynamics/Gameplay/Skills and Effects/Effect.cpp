@@ -25,12 +25,12 @@ void AEffect::Tick(float DeltaTime)
 
 }
 
-EffectArea AEffect::GetAreaOfEffect() const
+EEffectArea AEffect::GetAreaOfEffect() const
 {
 	return AreaOfEffect;
 }
 
- EffectType AEffect::GetTypeOfEffect() const
+ EEffectType AEffect::GetTypeOfEffect() const
 {
 	return TypeOfEffect;
 }

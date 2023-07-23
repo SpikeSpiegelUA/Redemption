@@ -24,5 +24,5 @@ protected:
 
 public:
 
-	void SetNotificationTextBlockText(FText const& NewText);
+	void SetNotificationTextBlockText(const FText& NewText);
 };

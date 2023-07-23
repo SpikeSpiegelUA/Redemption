@@ -10,8 +10,8 @@ void UGotHitEndAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenc
 	if (IsValid(MeshComp) && IsValid(MeshComp->GetAnimInstance()))
 	{
 		if (UCombatNPCAnimInstance* CombatEnemyAnimInstance = Cast<UCombatNPCAnimInstance>(MeshComp->GetAnimInstance()); IsValid(CombatEnemyAnimInstance))
-			CombatEnemyAnimInstance->SetGotHit(false);
+			CombatEnemyAnimInstance->SetCombatEnemyNPCGotHit(false);
 		else if (UPlayerCharacterAnimInstance* PlayerAnimInstance = Cast<UPlayerCharacterAnimInstance>(MeshComp->GetAnimInstance()); IsValid(PlayerAnimInstance)) 
-			PlayerAnimInstance->SetGotHit(false);
+			PlayerAnimInstance->SetPlayerGotHit(false);
 	}
 }

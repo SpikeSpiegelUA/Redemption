@@ -31,7 +31,7 @@ FName AGameItem::GetItemName() const
 }
 
 
-ItemType AGameItem::GetType() const
+EItemType AGameItem::GetItemType() const
 {
 	return Type;
 }

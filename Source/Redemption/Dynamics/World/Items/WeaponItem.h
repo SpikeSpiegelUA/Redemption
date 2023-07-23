@@ -10,7 +10,7 @@
  * 
  */
 UENUM(BlueprintType)
-enum class WeaponType :uint8
+enum class EWeaponType :uint8
 {
 	MELEE UMETA(DisplayName = "Melee"),
 	RANGE UMETA(DisplayName = "Range")
@@ -23,5 +23,5 @@ class REDEMPTION_API AWeaponItem : public AEquipmentItem
 	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information");
-	WeaponType TypeOfWeapon{};
+	EWeaponType TypeOfWeapon{};
 };

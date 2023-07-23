@@ -17,7 +17,7 @@ void UToBattleTransitionScreen::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UToBattleTransitionScreen::SetMainTextBlockText(FText TargetName)
+void UToBattleTransitionScreen::SetMainTextBlockText(const FText& TargetName)
 {
 	MainTextBlock->SetText(TargetName);
 }

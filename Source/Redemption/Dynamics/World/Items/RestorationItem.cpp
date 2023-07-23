@@ -8,7 +8,7 @@ ItemRestorationType ARestorationItem::GetTypeOfRestoration() const
     return TypeOfRestoration;
 }
 
-int ARestorationItem::GetRestorationPoints() const
+int ARestorationItem::GetRestorationValuePercent() const
 {
-    return RestorationPoints;
+    return RestorationValuePercent;
 }
