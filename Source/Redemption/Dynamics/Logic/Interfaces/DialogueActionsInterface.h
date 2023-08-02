@@ -23,5 +23,6 @@ class REDEMPTION_API IDialogueActionsInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	virtual void StartADialogue();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Dialogue")
+		void StartADialogue();
 };

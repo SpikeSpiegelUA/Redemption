@@ -11,6 +11,8 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\InventoryActions.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\InventoryMenu.h"
 
 bool UInventoryScrollBoxEntryWidget::Initialize()
 {
@@ -32,7 +34,8 @@ void UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnClicked()
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AUIManager::StaticClass(), UIManagerActors);
 	if (UIManagerActors.Num() > 0)
 		UIManager = Cast<AUIManager>(UIManagerActors[0]);
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter) && IsValid(UIManager)) {
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+		IsValid(PlayerCharacter) && IsValid(UIManager) && IsValid(Item)) {
 		PlayerCharacter->GetInventoryMenuWidget()->SetPickedItem(Item);
 		PlayerCharacter->GetInventoryMenuWidget()->GetItemInfoBorder()->SetVisibility(ESlateVisibility::Visible);
 		PlayerCharacter->GetInventoryMenuWidget()->SetItemInfo(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem());
@@ -42,44 +45,7 @@ void UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnClicked()
 				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
 		UIManager->PickedButton = MainButton;
 		//Set picked button index
-		UScrollBox* CurrentScrollBox = nullptr;
-		if (IsValid(Item)) {
-			if (Item->GetItemType() == EItemType::EQUIPMENT) {
-				AEquipmentItem* EquipmentItem = Cast<AEquipmentItem>(Item);
-				if (IsValid(EquipmentItem)) {
-					if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::WEAPON) {
-						AWeaponItem* WeaponItem = Cast<AWeaponItem>(EquipmentItem);
-						if (IsValid(WeaponItem)) {
-							if (WeaponItem->TypeOfWeapon == EWeaponType::MELEE)
-								CurrentScrollBox = PlayerCharacter->GetInventoryMenuWidget()->GetMeleeInventoryScrollBox();
-							else if (WeaponItem->TypeOfWeapon == EWeaponType::RANGE)
-								CurrentScrollBox = PlayerCharacter->GetInventoryMenuWidget()->GetRangeInventoryScrollBox();
-						}
-					}
-					else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::ARMOR) {
-						AArmorItem* ArmorItem = Cast<AArmorItem>(EquipmentItem);
-						if (IsValid(ArmorItem)) {
-							switch (ArmorItem->GetTypeOfArmor()) {
-							case EArmorType::HEAD:
-								CurrentScrollBox = PlayerCharacter->GetInventoryMenuWidget()->GetHeadInventoryScrollBox();
-								break;
-							case EArmorType::TORSE:
-								CurrentScrollBox = PlayerCharacter->GetInventoryMenuWidget()->GetTorseInventoryScrollBox();
-								break;
-							case EArmorType::HAND:
-								CurrentScrollBox = PlayerCharacter->GetInventoryMenuWidget()->GetHandInventoryScrollBox();
-								break;
-							case EArmorType::LOWERARMOR:
-								CurrentScrollBox = PlayerCharacter->GetInventoryMenuWidget()->GetLowerArmorInventoryScrollBox();
-								break;
-							}
-						}
-					}
-				}
-			}
-			else
-				CurrentScrollBox = PlayerCharacter->GetInventoryMenuWidget()->GetInventoryScrollBox();
-		}
+		UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(PlayerCharacter->GetInventoryMenuWidget(), Item);
 		for (int i = 0; i < CurrentScrollBox->GetAllChildren().Num(); i++)
 			if (CurrentScrollBox->GetAllChildren()[i] == this) {
 				UIManager->PickedButtonIndex = i;
@@ -103,7 +69,7 @@ UButton* UInventoryScrollBoxEntryWidget::GetMainButton() const
 	return MainButton;
 }
 
-void UInventoryScrollBoxEntryWidget::SetItem(AGameItem* NewItem)
+void UInventoryScrollBoxEntryWidget::SetItem(AGameItem* const& NewItem)
 {
 	Item = NewItem;
 }

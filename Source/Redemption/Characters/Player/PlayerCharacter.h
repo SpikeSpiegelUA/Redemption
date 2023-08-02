@@ -26,6 +26,7 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\EffectsSpellsAndSkillsManager.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\DeathMenu.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\LearnedSpellsJournalMenu.h"
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
@@ -80,7 +81,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		AGameManager* GameManager {};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
-		AEffectsSpellsAndSkillsManager* EffectsManager {};
+		class AEffectsSpellsAndSkillsManager* EffectsManager {};
 	UPROPERTY(BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		URedemptionGameInstance* GameInstance {};
 
@@ -127,13 +128,14 @@ public:
 	bool GetCanInput() const;
 	void SetCanInput(bool Value);
 	UBattleMenu* GetBattleMenuWidget() const;
+	ULearnedSpellsJournalMenu* GetLearnedSpellsJournalMenu() const;
 	ABattleManager* GetBattleManager() const;
 	AUIManager* GetUIManager() const;
 	AGameManager* GetGameManager() const;
 	AAudioManager* GetAudioManager() const;
 	UDeathMenu* GetDeathMenuWidget() const;
 	class USkillBattleMenu* GetSkillBattleMenuWidget() const;
-	AEffectsSpellsAndSkillsManager* GetEffectsSpellsAndSkillsManager() const;
+	class AEffectsSpellsAndSkillsManager* GetEffectsSpellsAndSkillsManager() const;
 	URedemptionGameInstance* GetGameInstance() const;
 	UInventoryScrollBoxEntryWidget* GetInventoryScrollBoxEntryWidget() const;
 	UDialogueBox* GetDialogueBoxWidget() const;
@@ -143,11 +145,9 @@ public:
 	UTouchInterface* GetStandardTouchInterface() const;
 
 	//Function to call, when an enemy got hit. Parameters for a standard attack.
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
-		void GetHit(int ValueOfAttack, EDamageKind KindOfDamage); virtual void GetHit_Implementation(int ValueOfAttack, EDamageKind KindOfDamage) override;
+	void GetHit_Implementation(int ValueOfAttack, const TArray<ESpellElements>& ContainedElements) override;
 	//Function to call, when an enemy got hit. Parameters for a buff/debuff attack.
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
-		void GetHitWithBuffOrDebuff(class AEffect* const& Effect); virtual void GetHitWithBuffOrDebuff_Implementation(class AEffect* const& Effect) override;
+	void GetHitWithBuffOrDebuff_Implementation(class AEffect* const& Effect) override;
 
 	//Restore widgets to default state
 	void RestartBattleMenuWidget();
@@ -221,6 +221,8 @@ protected:
 		TSubclassOf<class UDeathMenu> DeathMenuClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class USkillBattleMenu> SkillBattleMenuClass{};
+	UPROPERTY(EditAnywhere, Category = "UI")
+		TSubclassOf<class ULearnedSpellsJournalMenu> LearnedSpellsJournalMenuClass{};
 	//The widget instances
 	UPROPERTY()
 		class UForwardRayInfo* ForwardRayInfoWidget{};
@@ -248,6 +250,8 @@ protected:
 		class UDeathMenu* DeathMenuWidget{};
 	UPROPERTY()
 		class USkillBattleMenu* SkillBattleMenuWidget{};
+	UPROPERTY()
+		class ULearnedSpellsJournalMenu* LearnedSpellsJournalMenuWidget{};
 
 	bool CanInput = true;
 
@@ -271,8 +275,6 @@ public:
 		int ArmorValue{};
 	UPROPERTY(EditAnywhere, Category = "Battle")
 		int AttackValue{};
-	UPROPERTY(EditAnywhere, Category = "Battle")
-		EDamageKind TypeOfDamage {};
 	UPROPERTY(VisibleAnywhere, Category = "Battle")
 		TArray<AEffect*> Effects;
 	//Variables for movement in battle scene
@@ -282,6 +284,23 @@ public:
 		bool Battle_IsMovingToStartPosition = false;
 
 	bool IsInDialogue = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+		int Strength = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+		int Perception = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+		int Endurance = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+		int Charisma = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+		int Intelligence = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+		int Will = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+		int Agility = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+		int Luck = 1;
 
 	//Scroll Control
 	//These are used by left/right button in battle menu

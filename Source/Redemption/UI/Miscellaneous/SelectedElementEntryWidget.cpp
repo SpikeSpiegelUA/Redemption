@@ -35,12 +35,12 @@ void USelectedElementEntryWidget::MainButtonOnClicked()
 					}
 }
 
-void USelectedElementEntryWidget::SetElement(ESpellElement NewElement)
+void USelectedElementEntryWidget::SetElement(ESpellElements NewElement)
 {
 	Element = NewElement;
 }
 
-ESpellElement USelectedElementEntryWidget::GetElement() const
+ESpellElements USelectedElementEntryWidget::GetElement() const
 {
 	return Element;
 }

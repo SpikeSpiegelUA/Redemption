@@ -24,7 +24,7 @@ public:
 	// Sets default values for this character's properties
 	ATownNPC();
 
-	virtual void StartADialogue() override;
+	void StartADialogue_Implementation() override;
 
 	UBehaviorTree* GetDialogueTree();
 };

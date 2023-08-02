@@ -285,6 +285,11 @@ FTimerHandle ABattleManager::GetPlayerTurnControllerTimerHandle() const
 	return PlayerTurnControllerTimerHandle;
 }
 
+TSubclassOf<ACombatFloatingInformationActor> ABattleManager::GetCombatFloatingInformationActorClass() const
+{
+	return CombatFloatingInformationActorClass;
+}
+
 uint8 ABattleManager::GetActorNumberOfTheCurrentTurn() const
 {
 	return ActorNumberOfTheCurrentTurn;

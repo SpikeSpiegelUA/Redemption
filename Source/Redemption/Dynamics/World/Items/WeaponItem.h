@@ -4,24 +4,31 @@
 
 #include "CoreMinimal.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
+#include "Redemption/Dynamics/Gameplay/Skills and Effects/Effect.h"
 #include "WeaponItem.generated.h"
 
 /**
  * 
  */
+
 UENUM(BlueprintType)
 enum class EWeaponType :uint8
 {
 	MELEE UMETA(DisplayName = "Melee"),
-	RANGE UMETA(DisplayName = "Range")
+	RANGE UMETA(DisplayName = "Range"),
 };
 
 UCLASS()
 class REDEMPTION_API AWeaponItem : public AEquipmentItem
 {
 	GENERATED_BODY()
-	
+private:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information", meta = (AllowPrivateAccess = true));
+	TArray<ESpellElements> ContainedElements{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information", meta = (AllowPrivateAccess = true));
+	EWeaponType WeaponType{};
+
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information");
-	EWeaponType TypeOfWeapon{};
+	TArray<ESpellElements> GetContainedElements() const;
+	EWeaponType GetWeaponType() const;
 };

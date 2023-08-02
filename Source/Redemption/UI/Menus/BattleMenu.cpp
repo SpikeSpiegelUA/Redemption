@@ -6,6 +6,7 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\PlayerCharacterAIController.h"
 #include "Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\AssaultItem.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/Button.h"
@@ -17,8 +18,11 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\EnemyHealthBarWidget.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\InventoryMenu.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SkillBattleMenu.h"
-#include <Kismet/GameplayStatics.h>
+#include "Kismet/GameplayStatics.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\PlayerCharacterAnimInstance.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\InventoryActions.h"
+
 
 bool UBattleMenu::Initialize()
 {
@@ -172,9 +176,10 @@ void UBattleMenu::AttackActionButtonOnClicked()
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	if (IsValid(PlayerCharacter)) {
 		if (UInventoryMenu* Inventory = PlayerCharacter->GetInventoryMenuWidget(); IsAttackingWithItem && IsValid(Inventory)) {
-			UInventoryScrollBoxEntryWidget* EntryWidget = Inventory->FindItemsInventoryEntryWidget(Inventory->GetPickedItem());
-			Inventory->SaveInventoryDataToGameInstance(GameInstance);
-			Inventory->ChangeInventoryAfterItemUse(EntryWidget, Inventory->GetPickedItem());
+			UInventoryScrollBoxEntryWidget* EntryWidget = InventoryActions::FindItemInventoryEntryWidget(Inventory->GetPickedItem(), Inventory->GetInventoryScrollBox());
+			InventoryActions::RemoveItemFromGameInstance(GameInstance, Inventory->GetPickedItem());
+			InventoryActions::ItemAmountInInventoryLogic(EntryWidget, Inventory->GetInventoryScrollBox(), Inventory->GetPickedItem());
+			PlayerCharacter->Battle_IsMovingToAttackEnemy = true;
 		}
 		if(IsAttackingWithSpell)
 			if (USkillBattleMenu* SkillBattleMenu = PlayerCharacter->GetSkillBattleMenuWidget(); IsValid(SkillBattleMenu)) {

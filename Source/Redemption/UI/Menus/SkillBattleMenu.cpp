@@ -29,6 +29,14 @@ bool USkillBattleMenu::Initialize()
 		HolyElementButton->OnClicked.AddDynamic(this, &USkillBattleMenu::HolyElementButtonOnClicked);
 	if (IsValid(DarkElementButton))
 		DarkElementButton->OnClicked.AddDynamic(this, &USkillBattleMenu::DarkElementButtonOnClicked);
+	if (IsValid(AssaultSpellTypeButton))
+		AssaultSpellTypeButton->OnClicked.AddDynamic(this, &USkillBattleMenu::AssaultSpellTypeButtonOnClicked);
+	if (IsValid(DebuffSpellTypeButton))
+		DebuffSpellTypeButton->OnClicked.AddDynamic(this, &USkillBattleMenu::DebuffSpellTypeButtonOnClicked);
+	if (IsValid(RestorationSpellTypeButton))
+		RestorationSpellTypeButton->OnClicked.AddDynamic(this, &USkillBattleMenu::RestorationSpellTypeButtonOnClicked);
+	if (IsValid(BuffSpellTypeButton))
+		BuffSpellTypeButton->OnClicked.AddDynamic(this, &USkillBattleMenu::BuffSpellTypeButtonOnClicked);
 	if (IsValid(ShowResultSpellButton))
 		ShowResultSpellButton->OnClicked.AddDynamic(this, &USkillBattleMenu::ShowResultSpellButtonOnClicked);
 	if (IsValid(BackToSpellCreationButton))
@@ -50,59 +58,257 @@ void USkillBattleMenu::NativeConstruct()
 
 void USkillBattleMenu::FireElementButtonOnClicked()
 {
-	CreateSelectedElementWidgetAndAddToHorizontalBox(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/Elements/PNG/FireElementIcon.PNG"), ESpellElement::FIRE);
+	CreateSelectedElementWidgetAndAddToHorizontalBox(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/Elements/PNG/FireElementIcon.PNG"), ESpellElements::FIRE);
 }
 
 void USkillBattleMenu::WaterElementButtonOnClicked()
 {
-	CreateSelectedElementWidgetAndAddToHorizontalBox(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/Elements/PNG/WaterElementImage.PNG"), ESpellElement::WATER);
+	CreateSelectedElementWidgetAndAddToHorizontalBox(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/Elements/PNG/WaterElementImage.PNG"), ESpellElements::WATER);
 }
 
 void USkillBattleMenu::WindElementButtonOnClicked()
 {
-	CreateSelectedElementWidgetAndAddToHorizontalBox(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/Elements/PNG/WindElementImage.PNG"), ESpellElement::WIND);
+	CreateSelectedElementWidgetAndAddToHorizontalBox(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/Elements/PNG/WindElementImage.PNG"), ESpellElements::WIND);
 }
 
 void USkillBattleMenu::EarthElementButtonOnClicked()
 {
-	CreateSelectedElementWidgetAndAddToHorizontalBox(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/Elements/PNG/EarthElementImage.PNG"), ESpellElement::EARTH);
+	CreateSelectedElementWidgetAndAddToHorizontalBox(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/Elements/PNG/EarthElementImage.PNG"), ESpellElements::EARTH);
 }
 
 void USkillBattleMenu::LightningElementButtonOnClicked()
 {
-	CreateSelectedElementWidgetAndAddToHorizontalBox(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/Elements/PNG/LightningElementImage.PNG"), ESpellElement::LIGHTNING);
+	CreateSelectedElementWidgetAndAddToHorizontalBox(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/Elements/PNG/LightningElementImage.PNG"), ESpellElements::LIGHTNING);
 }
 
 void USkillBattleMenu::BloodElementButtonOnClicked()
 {
-	CreateSelectedElementWidgetAndAddToHorizontalBox(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/Elements/PNG/BloodElementImage.PNG"), ESpellElement::BLOOD);
+	CreateSelectedElementWidgetAndAddToHorizontalBox(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/Elements/PNG/BloodElementImage.PNG"), ESpellElements::BLOOD);
 }
 
 void USkillBattleMenu::HolyElementButtonOnClicked()
 {
-	CreateSelectedElementWidgetAndAddToHorizontalBox(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/Elements/PNG/HolyElementImage.PNG"), ESpellElement::HOLY);
+	CreateSelectedElementWidgetAndAddToHorizontalBox(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/Elements/PNG/HolyElementImage.PNG"), ESpellElements::HOLY);
 }
 
 void USkillBattleMenu::DarkElementButtonOnClicked()
 {
-	CreateSelectedElementWidgetAndAddToHorizontalBox(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/Elements/PNG/DarkElementImage.PNG"), ESpellElement::DARK);
+	CreateSelectedElementWidgetAndAddToHorizontalBox(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/Elements/PNG/DarkElementImage.PNG"), ESpellElements::DARK);
+}
+
+void USkillBattleMenu::AssaultSpellTypeButtonOnClicked()
+{
+	CreateSelectedSpellTypeWidgetAndAddToBorder(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/SpellsTypes/PNG/AssaultSpellTypeIcon.PNG"), ESpellType::ASSAULT);
+	ShowElementsButtonsHideSpellTypesButtons();
+}
+
+void USkillBattleMenu::DebuffSpellTypeButtonOnClicked()
+{
+	CreateSelectedSpellTypeWidgetAndAddToBorder(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/SpellsTypes/PNG/DebuffSpellTypeIcon.PNG"), ESpellType::DEBUFF);
+	ShowElementsButtonsHideSpellTypesButtons();
+}
+
+void USkillBattleMenu::RestorationSpellTypeButtonOnClicked()
+{
+	CreateSelectedSpellTypeWidgetAndAddToBorder(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/SpellsTypes/PNG/HealSpellTypeIcon.PNG"), ESpellType::RESTORATION);
+	ShowElementsButtonsHideSpellTypesButtons();
+}
+
+void USkillBattleMenu::BuffSpellTypeButtonOnClicked()
+{
+	CreateSelectedSpellTypeWidgetAndAddToBorder(TEXT("D:/UnrealEngineProjects/Redemption/Content/Images/SpellsTypes/PNG/RestorationSpellTypeIcon.PNG"), ESpellType::BUFF);
+	ShowElementsButtonsHideSpellTypesButtons();
 }
 
 void USkillBattleMenu::ShowResultSpellButtonOnClicked()
 {
+	if (SelectedSpellType != ESpellType::NONE && SelectedElementsHorizontalBox->GetAllChildren().Num() > 0) {
+		CreateSpellAndSetCreatedSpell(SelectedSpellType);
+		ShowCreatedSpellInformation(CreatedSpell);
+	}
+}
+
+class ASpell* USkillBattleMenu::CreateBasicSpell(ESpellType SpellType, const TArray<ESpellElements>& SpellElements)
+{
+	ASpell* CreatedBasicSpell = NewObject<ASpell>();
+	FString NameOfTheSpell{};
+	if (SpellElements.Num() == 1)
+		NameOfTheSpell.Append("Light ");
+	else if (SpellElements.Num() > 1 && SpellElements.Num() < 4)
+		NameOfTheSpell.Append("Pushy ");
+	else if (SpellElements.Num() == 4)
+		NameOfTheSpell.Append("Powerful ");
+	else if (SpellElements.Num() == 5)
+		NameOfTheSpell.Append("Severe ");
+	if (SpellType != ESpellType::RESTORATION)
+		NameOfTheSpell.Append(GetSpellElementName(FindSpellsMainElement()).ToString());
+	switch (SpellType) {
+	case ESpellType::ASSAULT:
+		NameOfTheSpell.Append("assault spell");
+		break;
+	case ESpellType::DEBUFF:
+		NameOfTheSpell.Append("resistance debuff spell");
+		break;
+	case ESpellType::BUFF:
+		NameOfTheSpell.Append("resistance buff spell");
+		break;
+	case ESpellType::RESTORATION:
+		NameOfTheSpell.Append("health restoration spell");
+		break;
+	}
+	CreatedBasicSpell->SetSpellName(FText::FromString(NameOfTheSpell));
+	CreatedBasicSpell->SetSpellElements(SpellElements);
+	//Calculate mana cost;
+	int16 BasicManaCost = 0;
+	float CostModifier{};
+	switch (SpellType) {
+	case ESpellType::ASSAULT:
+		CostModifier = 1.f;
+		break;
+	case ESpellType::DEBUFF:
+		CostModifier = 2.f;
+		break;
+	case ESpellType::BUFF:
+		CostModifier = 2.f;
+		break;
+	case ESpellType::RESTORATION:
+		CostModifier = 1.5f;
+		break;
+	}
+	for (int8 i = 0; i < SpellElements.Num(); i++)
+		if(SpellElements[i] == ESpellElements::BLOOD)
+			BasicManaCost += 10 * CostModifier;
+		else
+			BasicManaCost += 5 * CostModifier;
+	CreatedBasicSpell->SetManaCost(BasicManaCost);
+	CreatedBasicSpell->SetTypeOfSpell(SpellType);
+	FString DescriptionOfTheSpell{};
+	switch (SpellType) {
+	case ESpellType::ASSAULT:
+		DescriptionOfTheSpell.Append("Assault spell. Costs ");
+		DescriptionOfTheSpell.AppendInt(BasicManaCost);
+		DescriptionOfTheSpell.Append(" mana points.");
+		break;
+	case ESpellType::DEBUFF:
+		DescriptionOfTheSpell.Append("Assault spell. Costs ");
+		DescriptionOfTheSpell.AppendInt(BasicManaCost);
+		DescriptionOfTheSpell.Append(" mana points.");
+		break;
+	case ESpellType::RESTORATION:
+		DescriptionOfTheSpell.Append("Assault spell. Costs ");
+		DescriptionOfTheSpell.AppendInt(BasicManaCost);
+		DescriptionOfTheSpell.Append(" mana points. ");
+		break;
+	}
+	CreatedBasicSpell->SetDescription(FText::FromString(DescriptionOfTheSpell));
+	return CreatedBasicSpell;
+}
+
+class AAssaultSpell* USkillBattleMenu::CreateAssaultSpell(const TArray<ESpellElements>& SpellElements)
+{
+	AAssaultSpell* CreatedAssaultSpell = NewObject<AAssaultSpell>();
+	*CreatedAssaultSpell = *CreateBasicSpell(SelectedSpellType, SelectedSpellElements);
+	//Calculate damage
+	int16 CreatedAssaultSpellDamage = 0;
+	for (int8 i = 0; i < SpellElements.Num(); i++)
+		if (SpellElements[i] == ESpellElements::BLOOD)
+			CreatedAssaultSpellDamage += 20;
+		else
+			CreatedAssaultSpellDamage += 10;
+	CreatedAssaultSpell->SetAttackValue(CreatedAssaultSpellDamage);
+	CreatedAssaultSpell->SetContainedElements(SpellElements);
+	CreatedAssaultSpell->SetSpellObjectClass(FindSpellObject(FindSpellsMainElement()));
+	FString DescriptionOfTheSpell = CreatedAssaultSpell->GetDescription().ToString();
+	DescriptionOfTheSpell.Append("Spell's damage: ");
+	DescriptionOfTheSpell.AppendInt(CreatedAssaultSpell->GetAttackValue());
+	return CreatedAssaultSpell;
+}
+
+class ADebuffSpell* USkillBattleMenu::CreateDebuffSpell(const TArray<ESpellElements>& SpellElements)
+{
+	return nullptr;
+}
+
+class ARestorationSpell* USkillBattleMenu::CreateRestorationSpell(const TArray<ESpellElements>& SpellElements)
+{
+	return nullptr;
+}
+
+class ABuffSpell* USkillBattleMenu::CreateBuffSpell(const TArray<ESpellElements>& SpellElements)
+{
+	return nullptr;
+}
+
+TSubclassOf<ASpellObject> USkillBattleMenu::FindSpellObject(ESpellElements MainSpellElement)
+{
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-		if (AEffectsSpellsAndSkillsManager* EffectsSpellsAndSkillsManager = PlayerCharacter->GetEffectsSpellsAndSkillsManager(); IsValid(EffectsSpellsAndSkillsManager))
-			switch (SelectedSpellElements.Num()) {
-			case 3:
-				ShowCreatedSpellInformation(CheckAndSetCreatedSpell(EffectsSpellsAndSkillsManager->GetThreeElementsSpells()));
-				break;
-			case 4:
-				ShowCreatedSpellInformation(CheckAndSetCreatedSpell(EffectsSpellsAndSkillsManager->GetFourElementsSpells()));
-				break;
-			case 5:
-				ShowCreatedSpellInformation(CheckAndSetCreatedSpell(EffectsSpellsAndSkillsManager->GetFiveElementsSpells()));
-				break;
-			}
+		if (AEffectsSpellsAndSkillsManager* EffectsSpellsAndSkillsManager = PlayerCharacter->GetEffectsSpellsAndSkillsManager(); IsValid(EffectsSpellsAndSkillsManager)) {
+			if (MainSpellElement == ESpellElements::FIRE)
+				return EffectsSpellsAndSkillsManager->GetFireMainElementSpellObjectClass();
+			else if (MainSpellElement == ESpellElements::BLOOD)
+				return EffectsSpellsAndSkillsManager->GetBloodMainElementSpellObjectClass();
+			else if (MainSpellElement == ESpellElements::DARK)
+				return EffectsSpellsAndSkillsManager->GetDarkMainElementSpellObjectClass();
+			else if (MainSpellElement == ESpellElements::EARTH)
+				return EffectsSpellsAndSkillsManager->GetEarthMainElementSpellObjectClass();
+			else if (MainSpellElement == ESpellElements::HOLY)
+				return EffectsSpellsAndSkillsManager->GetHolyMainElementSpellObjectClass();
+			else if (MainSpellElement == ESpellElements::LIGHTNING)
+				return EffectsSpellsAndSkillsManager->GetLightningMainElementSpellObjectClass();
+			else if (MainSpellElement == ESpellElements::WATER)
+				return EffectsSpellsAndSkillsManager->GetWaterMainElementSpellObjectClass();
+			else if (MainSpellElement == ESpellElements::WIND)
+				return EffectsSpellsAndSkillsManager->GetWindMainElementSpellObjectClass();
+			else if (MainSpellElement == ESpellElements::MULTIELEMENTAL)
+				return EffectsSpellsAndSkillsManager->GetMultielementalMainElementSpellObjectClass();
+		}
+	return nullptr;
+}
+
+ESpellElements USkillBattleMenu::FindSpellsMainElement()
+{
+	//Count elements
+	TArray<int8> Counts{};
+	TArray<ESpellElements> CountCorrespondingElement{};
+	TArray<ESpellElements> CopyOfSelectedSpellElements = SelectedSpellElements;
+	for (int8 j = 0; j < SelectedSpellElements.Num(); j++) {
+		ESpellElements CurrentElement{};
+		int8 CurrentCount = 0;
+		for (int8 i = 0; i < CopyOfSelectedSpellElements.Num(); i++) {
+			if (i == 0)
+				CurrentElement = SelectedSpellElements[i];
+			if (CopyOfSelectedSpellElements[i] == CurrentElement)
+				CurrentCount++;
+		}
+		Counts.Add(CurrentCount);
+		CountCorrespondingElement.Add(CurrentElement);
+		CopyOfSelectedSpellElements.Remove(CurrentElement);
+		if (CopyOfSelectedSpellElements.Num() == 0)
+			break;
+	}
+	//Find the highest element count
+	int8 HighestCount = 0;
+	int8 HighestCountIndex{};
+	for (int8 i = 0; i < Counts.Num(); i++) {
+		if (Counts[i] > HighestCount) {
+			HighestCount = Counts[i];
+			HighestCountIndex = i;
+		}
+		//If there are elements with the same count, then return Multielemental.
+		if (Counts[i] == HighestCount)
+			return ESpellElements::MULTIELEMENTAL;
+	}
+	if (HighestCountIndex < CountCorrespondingElement.Num())
+		return CountCorrespondingElement[HighestCountIndex];
+	return ESpellElements::NONE;
+}
+
+FText USkillBattleMenu::GetSpellElementName(ESpellElements MainSpellElement)
+{
+	TEnumAsByte<ESpellElements> EnumVar = MainSpellElement;
+	FText MyEnumValueText;
+	UEnum::GetDisplayValueAsText(EnumVar, MyEnumValueText);
+	return MyEnumValueText;
 }
 
 void USkillBattleMenu::BackToSpellCreationButtonOnClicked()
@@ -145,17 +351,29 @@ void USkillBattleMenu::BackButtonOnClicked()
 	}
 }
 
+void USkillBattleMenu::LearnedSpellsJournalButtonOnClicked()
+{
+	this->RemoveFromParent();
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
+		PlayerCharacter->GetLearnedSpellsJournalMenu()->AddToViewport();
+}
+
 void USkillBattleMenu::ResetButtonOnClicked()
 {
 	for (UWidget* Child : SelectedElementsHorizontalBox->GetAllChildren())
 		Child->ConditionalBeginDestroy();
 	SelectedElementsHorizontalBox->ClearChildren();
 	SelectedSpellElements.Empty();
+	for (UWidget* Child : SelectedSpellTypeBorder->GetAllChildren())
+		Child->ConditionalBeginDestroy();
+	SelectedSpellTypeBorder->ClearChildren();
+	SelectedSpellType = ESpellType::NONE;
+	ShowSpellTypesButtonsHideElementsButtons();
 	CreatedSpell = nullptr;
 	HideNotificationAndClearItsTimer();
 }
 
-void USkillBattleMenu::CreateSelectedElementWidgetAndAddToHorizontalBox(FString Filepath, ESpellElement Element)
+void USkillBattleMenu::CreateSelectedElementWidgetAndAddToHorizontalBox(FString Filepath, ESpellElements Element)
 {
 	if (SelectedElementsHorizontalBox->GetAllChildren().Num() < 5) {
 		if (IsValid(SelectedElementEntryWidgetClass))
@@ -174,31 +392,36 @@ void USkillBattleMenu::CreateSelectedElementWidgetAndAddToHorizontalBox(FString 
 		}
 	}
 }
- 
-ASpell* USkillBattleMenu::CheckAndSetCreatedSpell(TArray<TSubclassOf<ASpell>> ArrayWhereToSearchForSpell)
+
+void USkillBattleMenu::CreateSelectedSpellTypeWidgetAndAddToBorder(FString Filepath, ESpellType SpellType)
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-		if (AEffectsSpellsAndSkillsManager* EffectsSpellsAndSkillsManager = PlayerCharacter->GetEffectsSpellsAndSkillsManager(); IsValid(EffectsSpellsAndSkillsManager)) {
-			for (TSubclassOf<ASpell> SpellClass : ArrayWhereToSearchForSpell)
-				if(IsValid(SpellClass))
-					if (ASpell* Spell = Cast<ASpell>(SpellClass->GetDefaultObject()); IsValid(Spell)) {
-						TArray<ESpellElement> TemporarySpellElementsArray = SelectedSpellElements;
-						int SameElements = 0;
-						for(int i = 0; i < Spell->GetRequiredElements().Num(); i++)
-							for (int c = 0; c < TemporarySpellElementsArray.Num(); c++)
-								if (Spell->GetRequiredElements()[i] == TemporarySpellElementsArray[c]) {
-									SameElements++;
-									TemporarySpellElementsArray.RemoveAt(c);
-									break;
-								}
-						if (SameElements == Spell->GetRequiredElements().Num()) {
-							CreatedSpell = Spell;
-							return Spell;
-						}
-					}
+	if (!SelectedSpellTypeBorder->HasAnyChildren()) {
+		if (IsValid(SelectedSpellTypeEntryWidgetClass))
+			SelectedSpellTypeEntryWidget = CreateWidget<USelectedSpellTypeEntryWidget>(GetWorld(), SelectedSpellTypeEntryWidgetClass);
+		if (IsValid(SelectedSpellTypeEntryWidget)) {
+			SelectedSpellTypeEntryWidget->SetSpellType(SpellType);
+			UTexture2D* MyAsset = UKismetRenderingLibrary::ImportFileAsTexture2D(GetWorld(), Filepath);
+			if (IsValid(MyAsset))
+				SelectedSpellTypeEntryWidget->GetMainImage()->Brush.SetResourceObject(MyAsset);
+			SelectedSpellTypeEntryWidget->GetMainImage()->Brush.SetImageSize(FVector2D(120, 100));
+			SelectedSpellTypeEntryWidget->AddToViewport();
+			SelectedSpellTypeBorder->AddChild(SelectedSpellTypeEntryWidget);
+			SelectedSpellTypeEntryWidget->SetPadding(FMargin(20.f, 0.f, 0.f, 0.f));
+			SelectedSpellType = SpellType;
 		}
-	CreatedSpell = nullptr;
-	return nullptr;
+	}
+}
+
+void USkillBattleMenu::CreateSpellAndSetCreatedSpell(ESpellType TypeOfTheSpell)
+{
+	if (TypeOfTheSpell == ESpellType::ASSAULT)
+		CreatedSpell = CreateAssaultSpell(SelectedSpellElements);
+	else if (TypeOfTheSpell == ESpellType::DEBUFF)
+		CreatedSpell = CreateDebuffSpell(SelectedSpellElements);
+	else if (TypeOfTheSpell == ESpellType::RESTORATION)
+		CreatedSpell = CreateRestorationSpell(SelectedSpellElements);
+	else if (TypeOfTheSpell == ESpellType::BUFF)
+		CreatedSpell = CreateBuffSpell(SelectedSpellElements);
 }
 
 void USkillBattleMenu::ShowCreatedSpellInformation(ASpell* const& SpellToShow)
@@ -292,54 +515,76 @@ void USkillBattleMenu::ShowCreatedSpellInformation(ASpell* const& SpellToShow)
 	}
 }
 
+void USkillBattleMenu::ShowSpellTypesButtonsHideElementsButtons()
+{
+	AssaultSpellTypeButton->SetVisibility(ESlateVisibility::Visible);
+	DebuffSpellTypeButton->SetVisibility(ESlateVisibility::Visible);
+	RestorationSpellTypeButton->SetVisibility(ESlateVisibility::Visible);
+	BuffSpellTypeButton->SetVisibility(ESlateVisibility::Visible);
+	FireElementButton->SetVisibility(ESlateVisibility::Hidden);
+	WaterElementButton->SetVisibility(ESlateVisibility::Hidden);
+	WindElementButton->SetVisibility(ESlateVisibility::Hidden);
+	EarthElementButton->SetVisibility(ESlateVisibility::Hidden);
+	LightningElementButton->SetVisibility(ESlateVisibility::Hidden);
+	BloodElementButton->SetVisibility(ESlateVisibility::Hidden);
+	HolyElementButton->SetVisibility(ESlateVisibility::Hidden);
+	DarkElementButton->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void USkillBattleMenu::ShowElementsButtonsHideSpellTypesButtons()
+{
+	FireElementButton->SetVisibility(ESlateVisibility::Visible);
+	WaterElementButton->SetVisibility(ESlateVisibility::Visible);
+	WindElementButton->SetVisibility(ESlateVisibility::Visible);
+	EarthElementButton->SetVisibility(ESlateVisibility::Visible);
+	LightningElementButton->SetVisibility(ESlateVisibility::Visible);
+	BloodElementButton->SetVisibility(ESlateVisibility::Visible);
+	HolyElementButton->SetVisibility(ESlateVisibility::Visible);
+	DarkElementButton->SetVisibility(ESlateVisibility::Visible);
+	AssaultSpellTypeButton->SetVisibility(ESlateVisibility::Hidden);
+	DebuffSpellTypeButton->SetVisibility(ESlateVisibility::Hidden);
+	RestorationSpellTypeButton->SetVisibility(ESlateVisibility::Hidden);
+	BuffSpellTypeButton->SetVisibility(ESlateVisibility::Hidden);
+}
+
 void USkillBattleMenu::UseButtonOnClicked()
 {
-	if(!IsValid(CreatedSpell))
-		if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-			if (AEffectsSpellsAndSkillsManager* EffectsSpellsAndSkillsManager = PlayerCharacter->GetEffectsSpellsAndSkillsManager(); IsValid(EffectsSpellsAndSkillsManager))
-				switch (SelectedSpellElements.Num()) {
-				case 3:
-					CheckAndSetCreatedSpell(EffectsSpellsAndSkillsManager->GetThreeElementsSpells());
+	if (SelectedSpellType != ESpellType::NONE && SelectedElementsHorizontalBox->GetAllChildren().Num() > 0) {
+		if (!IsValid(CreatedSpell))
+			CreateSpellAndSetCreatedSpell(SelectedSpellType);
+		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+		ABattleManager* BattleManager{};
+		UBattleMenu* BattleMenu{};
+		AUIManager* UIManager{};
+		if (IsValid(PlayerCharacter)) {
+			BattleManager = PlayerCharacter->GetBattleManager();
+			BattleMenu = PlayerCharacter->GetBattleMenuWidget();
+			UIManager = PlayerCharacter->GetUIManager();
+		}
+		if (IsValid(CreatedSpell) && IsValid(BattleManager) && IsValid(BattleMenu) && IsValid(UIManager) && IsValid(PlayerCharacter)) {
+			if (PlayerCharacter->CurrentMana >= CreatedSpell->GetManaCost()) {
+				switch (CreatedSpell->GetTypeOfSpell()) {
+				case ESpellType::ASSAULT:
+					if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(CreatedSpell); IsValid(AssaultSpell))
+						AssaultSpellUse(AssaultSpell, BattleManager, BattleMenu, UIManager);
 					break;
-				case 4:
-					CheckAndSetCreatedSpell(EffectsSpellsAndSkillsManager->GetFourElementsSpells());
+				case ESpellType::RESTORATION:
+					if (ARestorationSpell* RestorationSpell = Cast<ARestorationSpell>(CreatedSpell); IsValid(RestorationSpell))
+						RestorationSpellUse(RestorationSpell, BattleManager, BattleMenu, UIManager);
 					break;
-				case 5:
-					CheckAndSetCreatedSpell(EffectsSpellsAndSkillsManager->GetFiveElementsSpells());
+				case ESpellType::BUFF:
+					if (ABuffSpell* BuffSpell = Cast<ABuffSpell>(CreatedSpell); IsValid(BuffSpell))
+						BuffSpellUse(BuffSpell, BattleManager, BattleMenu, UIManager);
+					break;
+				case ESpellType::DEBUFF:
+					if (ADebuffSpell* DebuffSpell = Cast<ADebuffSpell>(CreatedSpell); IsValid(DebuffSpell))
+						DebuffSpellUse(DebuffSpell, BattleManager, BattleMenu, UIManager);
 					break;
 				}
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	ABattleManager* BattleManager{};
-	UBattleMenu* BattleMenu{};
-	AUIManager* UIManager{};
-	if (IsValid(PlayerCharacter)) {
-		BattleManager = PlayerCharacter->GetBattleManager();
-		BattleMenu = PlayerCharacter->GetBattleMenuWidget();
-		UIManager = PlayerCharacter->GetUIManager();
-	}
-	if (IsValid(CreatedSpell) && IsValid(BattleManager) && IsValid(BattleMenu) && IsValid(UIManager) && IsValid(PlayerCharacter)) {
-		if (PlayerCharacter->CurrentMana >= CreatedSpell->GetManaCost()) {
-			switch (CreatedSpell->GetTypeOfSpell()) {
-			case ESpellType::ASSAULT:
-				if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(CreatedSpell); IsValid(AssaultSpell))
-					AssaultSpellUse(AssaultSpell, BattleManager, BattleMenu, UIManager);
-				break;
-			case ESpellType::RESTORATION:
-				if (ARestorationSpell* RestorationSpell = Cast<ARestorationSpell>(CreatedSpell); IsValid(RestorationSpell))
-					RestorationSpellUse(RestorationSpell, BattleManager, BattleMenu, UIManager);
-				break;
-			case ESpellType::BUFF:
-				if (ABuffSpell* BuffSpell = Cast<ABuffSpell>(CreatedSpell); IsValid(BuffSpell))
-					BuffSpellUse(BuffSpell, BattleManager, BattleMenu, UIManager);
-				break;
-			case ESpellType::DEBUFF:
-				if (ADebuffSpell* DebuffSpell = Cast<ADebuffSpell>(CreatedSpell); IsValid(DebuffSpell))
-					DebuffSpellUse(DebuffSpell, BattleManager, BattleMenu, UIManager);
-				break;
 			}
+			else
+				CreateNotification(FText::FromString("Not enough mana!!!"));
 		}
-		else
-			CreateNotification(FText::FromString("Not enough mana!!!"));
 	}
 }
 
@@ -417,7 +662,7 @@ void USkillBattleMenu::BuffSpellUse(const class ABuffSpell* const& SpellToUse, c
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
 		bool SpellHasBeenUsed = false;
-		AEffect* NewEffect = NewObject<AEffect>(this, SpellToUse->GetEffect()->StaticClass());
+		AEffect* NewEffect = NewObject<AEffect>(this, SpellToUse->GetEffectClass());
 		PlayerCharacter->Effects.Add(NewEffect);
 		BattleMenu->AddToViewport();
 		UIManager->PickedButtonIndex = 0;
@@ -478,9 +723,14 @@ void USkillBattleMenu::HideNotificationAndClearItsTimer()
 	GetWorld()->GetTimerManager().ClearTimer(HideNotificationTimerHandle);
 }
 
-void USkillBattleMenu::SelectedSpellElementsRemoveSingleItem(ESpellElement ElementToRemove)
+void USkillBattleMenu::SelectedSpellElementsRemoveSingleItem(ESpellElements ElementToRemove)
 {
 	SelectedSpellElements.RemoveSingle(ElementToRemove);
+}
+
+void USkillBattleMenu::SetSelectedSpellType(ESpellType NewSpellType)
+{
+	SelectedSpellType = NewSpellType;
 }
 
 void USkillBattleMenu::SetCreatedSpell(ASpell* NewSpell)
@@ -493,7 +743,12 @@ UHorizontalBox* USkillBattleMenu::GetSelectedElementsHorizontalBox() const
 	return SelectedElementsHorizontalBox;
 }
 
-TArray<ESpellElement> USkillBattleMenu::GetSelectedSpellElements() const
+UBorder* USkillBattleMenu::GetSelectedSpellTypeBorder() const
+{
+	return SelectedSpellTypeBorder;
+}
+
+TArray<ESpellElements> USkillBattleMenu::GetSelectedSpellElements() const
 {
 	return SelectedSpellElements;
 }

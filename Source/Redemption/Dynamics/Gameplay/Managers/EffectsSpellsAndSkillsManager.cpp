@@ -7,7 +7,7 @@
 AEffectsSpellsAndSkillsManager::AEffectsSpellsAndSkillsManager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 }
 
@@ -29,18 +29,48 @@ UDataTable* AEffectsSpellsAndSkillsManager::GetEffectsDataTable() const
 	return EffectsDataTable;
 }
 
-TArray<TSubclassOf<ASpell>> AEffectsSpellsAndSkillsManager::GetThreeElementsSpells() const
+TSubclassOf<ASpellObject> AEffectsSpellsAndSkillsManager::GetFireMainElementSpellObjectClass() const
 {
-	return ThreeElementsSpells;
+	return FireMainElementSpellObjectClass;
 }
 
-TArray<TSubclassOf<ASpell>> AEffectsSpellsAndSkillsManager::GetFourElementsSpells() const
+TSubclassOf<ASpellObject> AEffectsSpellsAndSkillsManager::GetBloodMainElementSpellObjectClass() const
 {
-	return FourElementsSpells;
+	return BloodMainElementSpellObjectClass;
 }
 
-TArray<TSubclassOf<ASpell>> AEffectsSpellsAndSkillsManager::GetFiveElementsSpells() const
+TSubclassOf<ASpellObject> AEffectsSpellsAndSkillsManager::GetDarkMainElementSpellObjectClass() const
 {
-	return FiveElementsSpells;
+	return DarkMainElementSpellObjectClass;
+}
+
+TSubclassOf<ASpellObject> AEffectsSpellsAndSkillsManager::GetEarthMainElementSpellObjectClass() const
+{
+	return EarthMainElementSpellObjectClass;
+}
+
+TSubclassOf<ASpellObject> AEffectsSpellsAndSkillsManager::GetHolyMainElementSpellObjectClass() const
+{
+	return HolyMainElementSpellObjectClass;
+}
+
+TSubclassOf<ASpellObject> AEffectsSpellsAndSkillsManager::GetLightningMainElementSpellObjectClass() const
+{
+	return LightningMainElementSpellObjectClass;
+}
+
+TSubclassOf<ASpellObject> AEffectsSpellsAndSkillsManager::GetWaterMainElementSpellObjectClass() const
+{
+	return WaterMainElementSpellObjectClass;
+}
+
+TSubclassOf<ASpellObject> AEffectsSpellsAndSkillsManager::GetWindMainElementSpellObjectClass() const
+{
+	return WindMainElementSpellObjectClass;
+}
+
+TSubclassOf<ASpellObject> AEffectsSpellsAndSkillsManager::GetMultielementalMainElementSpellObjectClass() const
+{
+	return MultiElementalMainElementSpellObjectClass;
 }
 

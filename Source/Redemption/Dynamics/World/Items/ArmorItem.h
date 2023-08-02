@@ -26,8 +26,8 @@ class REDEMPTION_API AArmorItem : public AEquipmentItem
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information");
-		EArmorType TypeOfArmor{};
+		EArmorType ArmorType{};
 
 public:
-	EArmorType GetTypeOfArmor() const;
+	EArmorType GetArmorType() const;
 };

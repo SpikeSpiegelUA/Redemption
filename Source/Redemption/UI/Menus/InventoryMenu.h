@@ -7,6 +7,9 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
+#include "Components/ScrollBox.h"
 #include "InventoryMenu.generated.h"
 
 /**
@@ -142,8 +145,11 @@ protected:
 	UFUNCTION()
 		void EquipButtonOnClicked();
 	UFUNCTION()
-		void EquipItem(AEquipmentItem*& ItemToEquip, TSubclassOf<class AEquipmentItem>& GameInstanceVariableToStoreThisEquipmentType,
-			AEquipmentItem*& InventoryMenuVariableToStoreThisEquipmentType, UInventoryScrollBoxEntryWidget*& ItemWidget, UScrollBox*& ScrollBoxWithWidget, URedemptionGameInstance*& GameInstance
+	void EquipItem(AEquipmentItem*& ItemToEquip, TSubclassOf<class AWeaponItem>& GameInstanceVariableToStoreThisEquipmentType,
+		AWeaponItem*& InventoryMenuVariableToStoreThisEquipmentType, UInventoryScrollBoxEntryWidget*& ItemWidget, UScrollBox*& ScrollBoxWithWidget, URedemptionGameInstance*& GameInstance
+		, APlayerCharacter*& PlayerCharacter);
+	void EquipItem(AEquipmentItem*& ItemToEquip, TSubclassOf<class AArmorItem>& GameInstanceVariableToStoreThisEquipmentType,
+		AArmorItem*& InventoryMenuVariableToStoreThisEquipmentType, UInventoryScrollBoxEntryWidget*& ItemWidget, UScrollBox*& ScrollBoxWithWidget, URedemptionGameInstance*& GameInstance
 		, APlayerCharacter*& PlayerCharacter);
 	UFUNCTION()
 		void UseButtonOnClicked();
@@ -183,28 +189,22 @@ public:
 	void CreateNotification(const FText& NotificationText);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
-		AEquipmentItem* EquipedMelee {};
+		AWeaponItem* EquipedMelee {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
-		AEquipmentItem* EquipedRange {};
+		AWeaponItem* EquipedRange {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
-		AEquipmentItem* EquipedHead {};
+		AArmorItem* EquipedHead {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
-		AEquipmentItem* EquipedTorse {};
+		AArmorItem* EquipedTorse {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
-		AEquipmentItem* EquipedHand {};
+		AArmorItem* EquipedHand {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
-		AEquipmentItem* EquipedLowerArmor {};
+		AArmorItem* EquipedLowerArmor {};
 
 	//In public to let PlayerCharacter access it for E input button
 	UFUNCTION()
 		void BattleMenuItemsUseButtonOnClicked();
 
-	//After we use an item, we need to reflect changes in the game instance
-	void SaveInventoryDataToGameInstance(URedemptionGameInstance* const& GameInstance);
-	//After we use an item, we need to reflect changes in inventory scroll box
-	void ChangeInventoryAfterItemUse(UInventoryScrollBoxEntryWidget* const& EntryWidget, const AGameItem* const& GameItem);
 	//After we use an item, we need to do some stuff for the game to actually work properly. No shit
 	void ItemHasBeenUsedActions(class UBattleMenu* const& BattleMenu, const APlayerCharacter* const& PlayerCharacter, class ABattleManager* const& BattleManager);
-	//Return item's inventory entry widget in the inventory
-	 UInventoryScrollBoxEntryWidget* FindItemsInventoryEntryWidget(const AGameItem* const& GameItemToSearchFor);
 };

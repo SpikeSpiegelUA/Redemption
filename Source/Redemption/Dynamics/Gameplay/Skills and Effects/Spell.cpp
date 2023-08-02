@@ -7,32 +7,64 @@
 ASpell::ASpell()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+	PrimaryActorTick.bCanEverTick = false;
 }
 
 // Called when the game starts or when spawned
 void ASpell::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void ASpell::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
-FName ASpell::GetSpellName() const
+void ASpell::SetSpellName(FText& NewSpellName)
+{
+	SpellName = NewSpellName;
+}
+
+void ASpell::SetSpellName(FText NewSpellName)
+{
+	SpellName = NewSpellName;
+}
+
+void ASpell::SetSpellElements(TArray<ESpellElements> NewSpellElements)
+{
+	SpellElements = NewSpellElements;
+}
+
+void ASpell::SetManaCost(int NewManaCost)
+{
+	ManaCost = NewManaCost;
+}
+
+void ASpell::SetTypeOfSpell(ESpellType NewTypeOfSpell)
+{
+	TypeOfSpell = NewTypeOfSpell;
+}
+
+void ASpell::SetDescription(FText& NewDescription)
+{
+	Description = NewDescription;
+}
+
+void ASpell::SetDescription(FText NewDescription)
+{
+	Description = NewDescription;
+}
+
+FText ASpell::GetSpellName() const
 {
 	return SpellName;
 }
 
-TArray<ESpellElement> ASpell::GetRequiredElements() const
+TArray<ESpellElements> ASpell::GetSpellElements() const
 {
-	return RequiredElements;
+	return SpellElements;
 }
 
 int ASpell::GetManaCost() const

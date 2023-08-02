@@ -6,7 +6,6 @@
 #include "Blueprint/UserWidget.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Enemies\CombatEnemyNPC.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
 #include "BattleMenu.generated.h"
 

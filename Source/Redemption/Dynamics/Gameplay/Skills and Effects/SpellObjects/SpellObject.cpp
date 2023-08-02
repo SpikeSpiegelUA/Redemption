@@ -51,11 +51,12 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
 		if (ACombatEnemyNPC* CombatEnemyNPC = Cast<ACombatEnemyNPC>(OtherActor); IsValid(CombatEnemyNPC) && IsValid(PlayerCharacter->GetSkillBattleMenuWidget()->GetCreatedSpell())) {
 			if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(Spell); IsValid(AssaultSpell)) {
-				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedEnemy, AssaultSpell->GetAttackValue(), AssaultSpell->GetSpellDamageKind());
+				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedEnemy, AssaultSpell->GetAttackValue(), AssaultSpell->GetContainedElements());
 				OnOverlapBeginsActions(PlayerCharacter);
 			}
 			else if (ADebuffSpell* DebuffSpell = Cast<ADebuffSpell>(Spell); IsValid(DebuffSpell)) {
-				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedEnemy, DebuffSpell->GetEffect());
+				AEffect* NewEffect = NewObject<AEffect>(this, DebuffSpell->GetEffectClass());
+				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedEnemy, NewEffect);
 				OnOverlapBeginsActions(PlayerCharacter);
 			}
 		}

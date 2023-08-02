@@ -10,6 +10,7 @@
 UENUM(BlueprintType)
 enum class ESpellType :uint8
 {
+	NONE UMETA(Hidden),
 	ASSAULT UMETA(DisplayName = "Assault"),
 	BUFF UMETA(DisplayName = "Buff"),
 	RESTORATION UMETA(DisplayName = "Restoration"),
@@ -23,9 +24,9 @@ class REDEMPTION_API ASpell : public AActor
 	
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
-		FName SpellName {};
+		FText SpellName {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
-		TArray<ESpellElement> RequiredElements;
+		TArray<ESpellElements> SpellElements;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
 		int ManaCost{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
@@ -37,12 +38,19 @@ public:
 	// Sets default values for this actor's properties
 	ASpell();
 
-	FName GetSpellName() const;
-	TArray<ESpellElement> GetRequiredElements() const;
+	FText GetSpellName() const;
+	TArray<ESpellElements> GetSpellElements() const;
 	int GetManaCost() const;
 	ESpellType GetTypeOfSpell() const;
 	FText GetDescription() const;
 
+	void SetSpellName(FText& NewSpellName);
+	void SetSpellName(FText NewSpellName);
+	void SetSpellElements(TArray<ESpellElements> NewSpellElements);
+	void SetManaCost(int NewManaCost);
+	void SetTypeOfSpell(ESpellType NewTypeOfSpell);
+	void SetDescription(FText& NewDescription);
+	void SetDescription(FText NewDescription);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -50,5 +58,4 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 };

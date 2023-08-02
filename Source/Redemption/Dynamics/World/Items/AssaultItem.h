@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "Containers/EnumAsByte.h"
 #include "AssaultItem.generated.h"
 
@@ -18,5 +19,5 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Main")
 		int AttackValue = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Main")
-		EDamageKind KindOfDamage{};
+		TArray<ESpellElements> ContainedElements{};
 };

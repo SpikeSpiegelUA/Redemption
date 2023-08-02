@@ -16,7 +16,7 @@ void ATownNPC::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ATownNPC::StartADialogue()
+void ATownNPC::StartADialogue_Implementation()
 {
 	ATownNPCAIController* AIController = Cast<ATownNPCAIController>(GetController());
 	if (IsValid(AIController)) 

@@ -10,10 +10,14 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Other\TownNPC.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\EffectWithPlainModifier.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ElementsActions.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "GameFramework/TouchInterface.h"
 #include "Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
-#include <Kismet/GameplayStatics.h>
+#include "Kismet/GameplayStatics.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\InventoryActions.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 
 
@@ -121,6 +125,8 @@ void APlayerCharacter::BeginPlay()
 			DeathMenuWidget = CreateWidget<UDeathMenu>(PlayerController, DeathMenuClass);
 		if (IsValid(SkillBattleMenuClass))
 			SkillBattleMenuWidget = CreateWidget<USkillBattleMenu>(PlayerController, SkillBattleMenuClass);
+		if (IsValid(LearnedSpellsJournalMenuClass))
+			LearnedSpellsJournalMenuWidget = CreateWidget<ULearnedSpellsJournalMenu>(PlayerController, LearnedSpellsJournalMenuClass);
 	}
 	//Level change logic
 	if (IsValid(GameInstance)) {
@@ -129,6 +135,13 @@ void APlayerCharacter::BeginPlay()
 		MaxHP = GameInstance->InstancePlayerMaxHP;
 		MaxMana = GameInstance->InstancePlayerMaxMana;
 		ArmorValue = GameInstance->InstancePlayerArmorValue;
+		Strength = GameInstance->InstancePlayerStrength;
+		Perception = GameInstance->InstancePlayerPerception;
+		Endurance = GameInstance->InstancePlayerEndurance;
+		Charisma = GameInstance->InstancePlayerCharisma;
+		Intelligence = GameInstance->InstancePlayerIntelligence;
+		Agility = GameInstance->InstancePlayerAgility;
+		Luck = GameInstance->InstancePlayerLuck;
 	}
 	if (GetWorld()->GetName() == "Dungeon")
 		PlayerBarsWidget->AddToViewport(5);
@@ -484,63 +497,10 @@ void APlayerCharacter::PickUpItem(AActor* const& ActorResult)
 					AGameItem* GameItem = NewObject<AGameItem>(this, LootInTheWorld->GetItemsClasses()[i]);
 					GameInstance->InstanceItemsInTheInventory.Add(LootInTheWorld->GetItemsClasses()[i]);
 					if (IsValid(GameItem)) {
-						IsInInventory = false;
 						//Get ScrollBox corresponding to the item's type
-						UScrollBox* CurrentScrollBox = nullptr;
-						if (GameItem->GetItemType() == EItemType::EQUIPMENT) {
-							AEquipmentItem* EquipmentItem = Cast<AEquipmentItem>(GameItem);
-							if (IsValid(EquipmentItem)) {
-								if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::WEAPON) {
-									AWeaponItem* WeaponItem = Cast<AWeaponItem>(EquipmentItem);
-									if (IsValid(WeaponItem)) {
-										if (WeaponItem->TypeOfWeapon == EWeaponType::MELEE)
-											CurrentScrollBox = InventoryMenuWidget->GetMeleeInventoryScrollBox();
-										else if (WeaponItem->TypeOfWeapon == EWeaponType::RANGE)
-											CurrentScrollBox = InventoryMenuWidget->GetRangeInventoryScrollBox();
-									}
-								}
-								else if (EquipmentItem->GetTypeOfEquipment() == EquipmentType::ARMOR) {
-									AArmorItem* ArmorItem = Cast<AArmorItem>(EquipmentItem);
-									if (IsValid(ArmorItem)) {
-										switch (ArmorItem->GetTypeOfArmor()) {
-										case EArmorType::HEAD:
-											CurrentScrollBox = InventoryMenuWidget->GetHeadInventoryScrollBox();
-											break;
-										case EArmorType::TORSE:
-											CurrentScrollBox = InventoryMenuWidget->GetTorseInventoryScrollBox();
-											break;
-										case EArmorType::HAND:
-											CurrentScrollBox = InventoryMenuWidget->GetHandInventoryScrollBox();
-											break;
-										case EArmorType::LOWERARMOR:
-											CurrentScrollBox = InventoryMenuWidget->GetLowerArmorInventoryScrollBox();
-											break;
-										}
-									}
-								}
-							}
-						}
-						else
-							CurrentScrollBox = InventoryMenuWidget->GetInventoryScrollBox();
+						UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(InventoryMenuWidget, GameItem);
 						//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
-						for (int j = 0; j < CurrentScrollBox->GetChildrenCount(); j++) {
-							UInventoryScrollBoxEntryWidget* CurrentWidget = Cast<UInventoryScrollBoxEntryWidget>(CurrentScrollBox->GetAllChildren()[j]);
-							if (IsValid(CurrentWidget))
-								if (CurrentWidget->GetItem()->GetItemName() == GameItem->GetItemName()) {
-									IsInInventory = true;
-									CurrentWidget->AmountOfItems += 1;
-									FString NameString = GameItem->GetItemName().ToString() + FString("(" + FString::FromInt(CurrentWidget->AmountOfItems) + ")");
-									CurrentWidget->GetMainTextBlock()->SetText(FText::FromString(NameString));
-									break;
-								}
-						}
-						if (!IsInInventory) {
-							InventoryScrollBoxEntryWidget = CreateWidget<UInventoryScrollBoxEntryWidget>(GetWorld(), InventoryScrollBoxEntryClass);
-							InventoryScrollBoxEntryWidget->GetMainTextBlock()->SetText(FText::FromName(GameItem->GetItemName()));
-							InventoryScrollBoxEntryWidget->SetItem(GameItem);
-							InventoryScrollBoxEntryWidget->AddToViewport();
-							CurrentScrollBox->AddChild(InventoryScrollBoxEntryWidget);
-						}
+						InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, GameItem);
 					}
 				}
 				//Destroy container with loot
@@ -555,7 +515,7 @@ void APlayerCharacter::DialogueInteract(AActor* const &ActorResult)
 	if (IsValid(ActorResult))
 		if (ActorResult->GetClass()->ImplementsInterface(UDialogueActionsInterface::StaticClass())) {
 			if(ATownNPC* TownNPC = Cast<ATownNPC>(ActorResult); IsValid(TownNPC))
-				TownNPC->StartADialogue();
+				TownNPC->Execute_StartADialogue(TownNPC);
 			if(IsValid(PlayerController))
 				PlayerController->ActivateTouchInterface(EmptyTouchInterface);
 		}
@@ -676,7 +636,7 @@ FHitResult APlayerCharacter::ForwardRay()
 	return HitResult;
 }
 
-void APlayerCharacter::GetHit_Implementation(int ValueOfAttack, EDamageKind KindOfDamage)
+void APlayerCharacter::GetHit_Implementation (int ValueOfAttack, const TArray<ESpellElements>& ContainedElements)
 {
 	int ValueOfArmor = 0;
 	if(IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedHead))
@@ -690,10 +650,18 @@ void APlayerCharacter::GetHit_Implementation(int ValueOfAttack, EDamageKind Kind
 	int ValueOfArmorBeforeEffects = ValueOfArmor;
 	for (AEffect* Effect : Effects) {
 		if (IsValid(Effect) && Effect->GetAreaOfEffect() == EEffectArea::ARMOR) {
-			if (Effect->GetTypeOfEffect() == EEffectType::BUFF)
-				ValueOfArmor += ValueOfArmorBeforeEffects * (Effect->GetEffectStat() - 1);
-			else 
-				ValueOfArmor -= ValueOfArmorBeforeEffects/ Effect->GetEffectStat();
+			if (AEffectWithPlainModifier* EffectWithPlainModifier = Cast<AEffectWithPlainModifier>(Effect); IsValid(EffectWithPlainModifier)) {
+				if (Effect->GetTypeOfEffect() == EEffectType::BUFF)
+					ValueOfArmor += ValueOfArmorBeforeEffects + Effect->GetEffectStat();
+				else
+					ValueOfArmor += ValueOfArmorBeforeEffects - Effect->GetEffectStat();
+			}
+			else {
+				if (Effect->GetTypeOfEffect() == EEffectType::BUFF)
+					ValueOfArmor += ValueOfArmorBeforeEffects * (Effect->GetEffectStat() - 1);
+				else
+					ValueOfArmor -= ValueOfArmorBeforeEffects / Effect->GetEffectStat();
+			}
 		}
 	}
 	if (CurrentHP - (ValueOfAttack - ValueOfArmor /10) <= 0)
@@ -797,6 +765,11 @@ UBattleMenu* APlayerCharacter::GetBattleMenuWidget() const
 	return BattleMenuWidget;
 }
 
+ULearnedSpellsJournalMenu* APlayerCharacter::GetLearnedSpellsJournalMenu() const
+{
+	return LearnedSpellsJournalMenuWidget;
+}
+
 ABattleManager* APlayerCharacter::GetBattleManager() const
 {
 	return BattleManager;
@@ -827,7 +800,7 @@ class USkillBattleMenu* APlayerCharacter::GetSkillBattleMenuWidget() const
 	return SkillBattleMenuWidget;
 }
 
-AEffectsSpellsAndSkillsManager* APlayerCharacter::GetEffectsSpellsAndSkillsManager() const
+class AEffectsSpellsAndSkillsManager* APlayerCharacter::GetEffectsSpellsAndSkillsManager() const
 {
 	return EffectsManager;
 }

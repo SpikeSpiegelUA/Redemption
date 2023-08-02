@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.FElementAndItsPercentStruct
 
 #pragma once
 
@@ -7,7 +7,9 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\Interfaces\BattleActionsInterface.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\EnemyHealthBarWidget.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
-#include <Components/WidgetComponent.h>
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
+#include "Components/WidgetComponent.h"
 #include "Containers/EnumAsByte.h"
 #include "CombatEnemyNPC.generated.h"
 
@@ -20,22 +22,39 @@ class ACombatEnemyNPC : public AEnemyNPC, public IBattleActionsInterface
 	GENERATED_BODY()
 public:
     //Battle mode regarding variables
-	UPROPERTY(EditAnywhere, Category = "Battle")
-		int16 HP {};
-	UPROPERTY(EditAnywhere, Category = "Battle")
-		int8 ArmorValue {};
-	UPROPERTY(EditAnywhere, Category = "Battle")
-		int8 AttackValue {};
-	UPROPERTY(EditAnywhere, Category = "Battle")
-		int16 GoldReward {};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle")
+		int HP {};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle")
+		int ArmorValue {};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle")
+		int AttackValue {};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle")
+		int GoldReward {};
 	UPROPERTY(EditAnywhere, Category = "Battle")
 		AActor* StartLocation {};
-	UPROPERTY(EditAnywhere, Category = "Battle")
-		EDamageKind CurrentDamageKind {};
 	UPROPERTY(VisibleAnywhere, Category = "Battle")
 		AActor* Target {};
 	UPROPERTY(VisibleAnywhere, Category = "Battle")
 		TArray<AEffect*> Effects;
+	TArray<ESpellElements> SpellElements;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+		int Strength = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+		int Perception = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+		int Endurance = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+		int Charisma = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+		int Intelligence = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+		int Will = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+		int Agility = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+		int Luck = 1;
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -43,11 +62,9 @@ public:
 	ACombatEnemyNPC();
 
 	//Function to call, when an enemy got hit. Parameters for a standard attack.
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
-		void GetHit(int ValueOfAttack, EDamageKind KindOfDamage); virtual void GetHit_Implementation(int ValueOfAttack, EDamageKind KindOfDamage) override;
+	void GetHit_Implementation(int ValueOfAttack, const TArray<ESpellElements>& ContainedElements) override;
 	//Function to call, when an enemy got hit. Parameters for a buff/debuff attack.
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
-		void GetHitWithBuffOrDebuff(class AEffect* const& Effect); virtual void GetHitWithBuffOrDebuff_Implementation(class AEffect* const& Effect) override;
+	void GetHitWithBuffOrDebuff_Implementation(class AEffect* const& Effect) override;
 
 	UEnemyHealthBarWidget* GetEnemyHealthBarWidget() const;
 
@@ -63,4 +80,10 @@ protected:
 		UWidgetComponent* EnemyHealthBarComponentWidget;
 
 private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
+		TArray<ESpellElements> MagicResistances;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
+		TArray<int> MagicResistancesPercent;
+	UPROPERTY(EditAnywhere, Category = "Battle", meta = (AllowPrivateAccess = true))
+		TArray<FElementAndItsPercentageStruct> ElementsAndItsPercentStructs {};
 };
