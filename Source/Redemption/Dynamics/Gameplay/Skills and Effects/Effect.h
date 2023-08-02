@@ -9,14 +9,16 @@
 UENUM(BlueprintType)
 enum class EEffectArea :uint8
 {
+	NONE UMETA(Hidden),
 	DAMAGE UMETA(DisplayName = "Damage"),
 	ARMOR UMETA(DisplayName = "Armor"),
 	AGILITY UMETA(DisplayName = "Agility"),
 };
 
 UENUM(BlueprintType)
-enum class ESpellElement :uint8
+enum class ESpellElements :uint8
 {
+	NONE UMETA(Hidden),
 	FIRE UMETA(DisplayName = "Fire"),
 	WATER UMETA(DisplayName = "Water"),
 	WIND UMETA(DisplayName = "Wind"),
@@ -25,6 +27,8 @@ enum class ESpellElement :uint8
 	HOLY UMETA(DisplayName = "Holy"),
 	DARK UMETA(DisplayName = "Dark"),
 	BLOOD UMETA(DisplayName = "Blood"),
+	//Need this for some logic. Basically spell/weapon has different elements with the same count
+	MULTIELEMENTAL UMETA(DisplayName = "Multielemental"),
 };
 
 UENUM(BlueprintType)

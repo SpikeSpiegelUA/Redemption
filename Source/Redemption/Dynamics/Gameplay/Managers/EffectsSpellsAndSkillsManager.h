@@ -9,6 +9,7 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Skill.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\SpellObjects\SpellObject.h"
 #include "EffectsSpellsAndSkillsManager.generated.h"
 
 USTRUCT(BlueprintType)
@@ -26,20 +27,30 @@ class REDEMPTION_API AEffectsSpellsAndSkillsManager : public AActor
 	GENERATED_BODY()
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = true))
-		UDataTable* EffectsDataTable;
+		UDataTable* EffectsDataTable {};
+	//Spell's "object" classes. For example, player is throwind red rectangle(well, this is a spell's object) when using a fire arrow.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = true))
-		TArray<TSubclassOf<ASpell>> ThreeElementsSpells;
+		TSubclassOf<class ASpellObject> FireMainElementSpellObjectClass {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = true))
-		TArray<TSubclassOf<ASpell>> FourElementsSpells;
+		TSubclassOf<class ASpellObject> BloodMainElementSpellObjectClass {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = true))
-		TArray<TSubclassOf<ASpell>> FiveElementsSpells;
+		TSubclassOf<class ASpellObject> DarkMainElementSpellObjectClass {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = true))
+		TSubclassOf<class ASpellObject> EarthMainElementSpellObjectClass {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = true))
+		TSubclassOf<class ASpellObject> HolyMainElementSpellObjectClass {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = true))
+		TSubclassOf<class ASpellObject> LightningMainElementSpellObjectClass {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = true))
+		TSubclassOf<class ASpellObject> WaterMainElementSpellObjectClass {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = true))
+		TSubclassOf<class ASpellObject> WindMainElementSpellObjectClass {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = true))
+		TSubclassOf<class ASpellObject> MultiElementalMainElementSpellObjectClass {};
 public:	
 	// Sets default values for this actor's properties
 	AEffectsSpellsAndSkillsManager();
 
-	TArray<TSubclassOf<ASpell>> GetThreeElementsSpells() const;
-	TArray<TSubclassOf<ASpell>> GetFourElementsSpells() const;
-	TArray<TSubclassOf<ASpell>> GetFiveElementsSpells() const;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -48,4 +59,13 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UDataTable* GetEffectsDataTable() const;
+	TSubclassOf<ASpellObject> GetFireMainElementSpellObjectClass() const;
+	TSubclassOf<ASpellObject> GetBloodMainElementSpellObjectClass() const;
+	TSubclassOf<ASpellObject> GetDarkMainElementSpellObjectClass() const;
+	TSubclassOf<ASpellObject> GetEarthMainElementSpellObjectClass() const;
+	TSubclassOf<ASpellObject> GetHolyMainElementSpellObjectClass() const;
+	TSubclassOf<ASpellObject> GetLightningMainElementSpellObjectClass() const;
+	TSubclassOf<ASpellObject> GetWaterMainElementSpellObjectClass() const;
+	TSubclassOf<ASpellObject> GetWindMainElementSpellObjectClass() const;
+	TSubclassOf<ASpellObject> GetMultielementalMainElementSpellObjectClass() const;
 };

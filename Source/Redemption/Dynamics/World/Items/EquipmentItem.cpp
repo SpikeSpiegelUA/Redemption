@@ -2,8 +2,3 @@
 
 
 #include "EquipmentItem.h"
-
-EquipmentType AEquipmentItem::GetTypeOfEquipment() const
-{
-    return TypeOfEquipment;
-}

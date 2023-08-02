@@ -30,12 +30,6 @@ FName AGameItem::GetItemName() const
 	return Name;
 }
 
-
-EItemType AGameItem::GetItemType() const
-{
-	return Type;
-}
-
 int AGameItem::GetCost() const
 {
 	return Cost;

@@ -18,8 +18,8 @@ public:
     
     //Function to call, when an enemy got hit. Parameters for a standard attack.
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
-        void GetHit(int ValueOfAttack, EDamageKind KindOfDamage);
+       void GetHit(int ValueOfAttack, const TArray<ESpellElements>& ContainedElements);
     //Function to call, when an enemy got hit. Parameters for a buff/debuff attack.
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
-        void GetHitWithBuffOrDebuff(class AEffect* const& Effect);
+       void GetHitWithBuffOrDebuff(class AEffect* const& Effect);
 };

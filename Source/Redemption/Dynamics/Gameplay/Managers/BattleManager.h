@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Enemies\CombatEnemyNPC.h"
 #include "Camera/CameraActor.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Combat\CombatFloatingInformationActor.h"
 #include "BattleManager.generated.h"
 
 UCLASS()
@@ -21,13 +22,13 @@ public:
 
 	//Array that stores spawned enemies and is used in a gameplay logic
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
-		TArray<ACombatEnemyNPC*> BattleEnemies;
+		TArray<class ACombatEnemyNPC*> BattleEnemies;
 	//Array that stores spawned enemies and don't change all the way until the end of a battle
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
-		TArray<ACombatEnemyNPC*> BattleActors;
+		TArray<class ACombatEnemyNPC*> BattleActors;
 
 	UPROPERTY(BlueprintReadOnly, transient)
-		ACombatEnemyNPC* SelectedEnemy {};
+		class ACombatEnemyNPC* SelectedEnemy {};
 	int SelectedEnemyIndex{};
 
 	void SetCanTurnBehindPlayerCameraToEnemy(bool Value);
@@ -39,8 +40,9 @@ public:
 	TArray<int> GetEnemyTurnQueue() const;
 	ACameraActor* GetBehindPlayerCamera() const;
 	FTimerHandle GetPlayerTurnControllerTimerHandle() const;
+	TSubclassOf<ACombatFloatingInformationActor> GetCombatFloatingInformationActorClass() const;
 
-	void SelectNewEnemy(ACombatEnemyNPC* const& Target, int Index);
+	void SelectNewEnemy(class ACombatEnemyNPC* const& Target, int Index);
 	
 	//Function, that controls whether player's turn continues or passes to enemies
 	UFUNCTION()
@@ -49,6 +51,7 @@ public:
 	void TurnChange();
 	
 	void SetTimerForPlayerTurnController();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -56,6 +59,9 @@ protected:
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle", meta = (AllowPrivateAccess = true))
 		ACameraActor* BehindPlayerCamera {};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Classes", meta = (AllowPrivateAccess = true))
+		TSubclassOf<ACombatFloatingInformationActor> CombatFloatingInformationActorClass {};
 
 	bool CanTurnBehindPlayerCameraToEnemy = false;
 	bool CanTurnBehindPlayerCameraToStartPosition = false;

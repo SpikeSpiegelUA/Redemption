@@ -49,7 +49,6 @@ EBTNodeResult::Type UBTTask_AskQuestion::PrepareResponses(APlayerController*& Pl
 
 void UBTTask_AskQuestion::ResponseReceived_Implementation(const FText& ResponseReceived)
 {
-	UE_LOG(LogTemp, Warning, TEXT("IMPLEMENTATION IS OK!!!"));
 	BehaviorTreeComponent->GetBlackboardComponent()->SetValueAsString(PlayerResponseKeySelector.SelectedKeyName, *ResponseReceived.ToString());
 	APlayerCharacter* PlayerCharacter = nullptr;
 	if(GetWorld())

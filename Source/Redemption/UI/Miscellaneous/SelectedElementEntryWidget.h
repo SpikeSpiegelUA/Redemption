@@ -27,14 +27,14 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UButton* MainButton;
 
-	ESpellElement Element{};
+	ESpellElements Element{};
 
 	UFUNCTION()
 		void MainButtonOnClicked();
 
 public:
-	void SetElement(ESpellElement NewElement);
+	void SetElement(ESpellElements NewElement);
 
-	ESpellElement GetElement() const;
+	ESpellElements GetElement() const;
 	UImage* GetMainImage() const;
 };

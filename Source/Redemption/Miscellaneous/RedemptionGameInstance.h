@@ -6,6 +6,8 @@
 #include "Engine/GameInstance.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
 #include "RedemptionGameInstance.generated.h"
 
 /**
@@ -22,17 +24,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory")
 		TArray<TSubclassOf<class AGameItem>> InstanceItemsInTheInventory;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-		TSubclassOf<class AEquipmentItem> InstanceEquipedMelee{};
+		TSubclassOf<class AWeaponItem> InstanceEquipedMelee{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-		TSubclassOf<class AEquipmentItem> InstanceEquipedRange{};
+		TSubclassOf<class AWeaponItem> InstanceEquipedRange{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-		TSubclassOf<class AEquipmentItem> InstanceEquipedHead{};
+		TSubclassOf<class AArmorItem> InstanceEquipedHead{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-		TSubclassOf<class AEquipmentItem> InstanceEquipedTorse{};
+		TSubclassOf<class AArmorItem> InstanceEquipedTorse{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-		TSubclassOf<class AEquipmentItem> InstanceEquipedHand{};
+		TSubclassOf<class AArmorItem> InstanceEquipedHand{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-		TSubclassOf<class AEquipmentItem> InstanceEquipedLowerArmor{};
+		TSubclassOf<class AArmorItem> InstanceEquipedLowerArmor{};
 
 	UPROPERTY(VisibleAnywhere, Category = "Player")
 		uint16 InstancePlayerCurrentHP = 100;
@@ -43,7 +45,23 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Player")
 		uint16 InstancePlayerMaxMana = 100;
 	UPROPERTY(VisibleAnywhere, Category = "Player")
-		uint16 InstancePlayerArmorValue = 0;
+		uint16 InstancePlayerArmorValue = 1;
+	UPROPERTY(VisibleAnywhere, Category = "Player")
+		int8 InstancePlayerStrength = 1;
+	UPROPERTY(VisibleAnywhere, Category = "Player")
+		int8 InstancePlayerPerception = 1;
+	UPROPERTY(VisibleAnywhere, Category = "Player")
+		int8 InstancePlayerEndurance = 1;
+	UPROPERTY(VisibleAnywhere, Category = "Player")
+		int8 InstancePlayerCharisma = 1;
+	UPROPERTY(VisibleAnywhere, Category = "Player")
+		int8 InstancePlayerIntelligence = 1;
+	UPROPERTY(VisibleAnywhere, Category = "Player")
+		int8 InstancePlayerWill = 1;
+	UPROPERTY(VisibleAnywhere, Category = "Player")
+		int8 InstancePlayerAgility = 1;
+	UPROPERTY(VisibleAnywhere, Category = "Player")
+		int8 InstancePlayerLuck = 1;
 
 	//Settings variables
 	UPROPERTY(VisibleAnywhere, Category = "Settings")

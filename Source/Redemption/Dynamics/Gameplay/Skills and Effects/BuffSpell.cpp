@@ -18,7 +18,7 @@ class TSubclassOf<class ASpellObject> ABuffSpell::GetSpellObjectClass() const
 	return SpellObjectClass;
 }
 
-AEffect* ABuffSpell::GetEffect() const
+TSubclassOf<AEffect> ABuffSpell::GetEffectClass() const
 {
-	return Effect;
+	return EffectClass;
 }

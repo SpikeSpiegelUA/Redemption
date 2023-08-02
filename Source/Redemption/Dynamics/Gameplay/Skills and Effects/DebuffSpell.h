@@ -30,7 +30,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 		int DebuffValue{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		AEffect* Effect{};
+		TSubclassOf<AEffect> EffectClass{};
 	//Spell's "object" class. For example, player is throwind red rectangle(well, this is a spell's object) when using a fire arrow.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
 		class TSubclassOf<class ASpellObject> SpellObjectClass;
@@ -39,5 +39,5 @@ public:
 	EDebuffType GetTypeOfDebuff() const;
 	int GetDebuffValue() const;
 	class TSubclassOf<class ASpellObject> GetSpellObjectClass() const;
-	AEffect* GetEffect() const;
+	TSubclassOf<AEffect> GetEffectClass() const;
 };

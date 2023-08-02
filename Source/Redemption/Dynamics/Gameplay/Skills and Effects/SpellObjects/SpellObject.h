@@ -9,6 +9,7 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
 #include "SpellObject.generated.h"
 
+//Spell's "object" class. For example, player is throwind red rectangle(well, this is a spell's object) when using a fire arrow.
 UCLASS()
 class ASpellObject : public AActor
 {
