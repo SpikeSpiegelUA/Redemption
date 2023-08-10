@@ -19,20 +19,26 @@ void UPlayerMeleeAttackAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAni
 		&& IsValid(PlayerCharacter->GetInventoryMenuWidget()) && IsValid(PlayerCharacter->GetSkillBattleMenuWidget())) {
 		if (PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem && IsValid(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem())) {
 			if (AAssaultItem* AssaultItem = Cast<AAssaultItem>(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem()); IsValid(AssaultItem)) {
-				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedEnemy, CalculateAttackValueAfterEffects(AssaultItem->AttackValue, PlayerCharacter), AssaultItem->ContainedElements);
+				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedEnemy, CalculateAttackValueAfterEffects(AssaultItem->GetAttackValue(), PlayerCharacter), AssaultItem->GetElementsAndTheirPercentagesStructs());
 				PlayerCharacter->GetInventoryMenuWidget()->SetPickedItem(nullptr);
 				PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem = false;
 			}
 		}
 		else if (PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell && IsValid(PlayerCharacter->GetSkillBattleMenuWidget()->GetCreatedSpell())) {
 			if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(PlayerCharacter->GetSkillBattleMenuWidget()->GetCreatedSpell()); IsValid(AssaultSpell)) {
-				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedEnemy, CalculateAttackValueAfterEffects(AssaultSpell->GetAttackValue(), PlayerCharacter), AssaultSpell->GetContainedElements());
+				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedEnemy, CalculateAttackValueAfterEffects(AssaultSpell->GetAttackValue(), PlayerCharacter), AssaultSpell->GetElementsAndTheirPercentagesStructs());
 				PlayerCharacter->GetSkillBattleMenuWidget()->SetCreatedSpell(nullptr);
 				PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell = false;
 			}
 		}
 		else if (!PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem && !PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell) {
-			PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedEnemy, CalculateAttackValueAfterEffects(PlayerCharacter->AttackValue, PlayerCharacter), PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee->GetContainedElements());
+			if(IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee))
+				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedEnemy, 
+					CalculateAttackValueAfterEffects(PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee->GetAttackValue(), PlayerCharacter),
+					PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee->GetElementsAndTheirPercentagesStructs());
+			else
+				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedEnemy, 
+					CalculateAttackValueAfterEffects(15, PlayerCharacter), TArray<FElementAndItsPercentageStruct>());
 			PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithMelee = false;
 		}
 	}

@@ -134,7 +134,6 @@ void APlayerCharacter::BeginPlay()
 		CurrentMana = GameInstance->InstancePlayerCurrentMana;
 		MaxHP = GameInstance->InstancePlayerMaxHP;
 		MaxMana = GameInstance->InstancePlayerMaxMana;
-		ArmorValue = GameInstance->InstancePlayerArmorValue;
 		Strength = GameInstance->InstancePlayerStrength;
 		Perception = GameInstance->InstancePlayerPerception;
 		Endurance = GameInstance->InstancePlayerEndurance;
@@ -636,17 +635,17 @@ FHitResult APlayerCharacter::ForwardRay()
 	return HitResult;
 }
 
-void APlayerCharacter::GetHit_Implementation (int ValueOfAttack, const TArray<ESpellElements>& ContainedElements)
+void APlayerCharacter::GetHit_Implementation (int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements)
 {
 	int ValueOfArmor = 0;
 	if(IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedHead))
-		ValueOfArmor += InventoryMenuWidget->EquipedHead->StatValue;
+		ValueOfArmor += InventoryMenuWidget->EquipedHead->GetArmorValue();
 	if (IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedTorse))
-		ValueOfArmor += InventoryMenuWidget->EquipedTorse->StatValue;
+		ValueOfArmor += InventoryMenuWidget->EquipedTorse->GetArmorValue();
 	if (IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedHand))
-		ValueOfArmor += InventoryMenuWidget->EquipedHand->StatValue;
+		ValueOfArmor += InventoryMenuWidget->EquipedHand->GetArmorValue();
 	if (IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedLowerArmor))
-		ValueOfArmor += InventoryMenuWidget->EquipedLowerArmor->StatValue;
+		ValueOfArmor += InventoryMenuWidget->EquipedLowerArmor->GetArmorValue();
 	int ValueOfArmorBeforeEffects = ValueOfArmor;
 	for (AEffect* Effect : Effects) {
 		if (IsValid(Effect) && Effect->GetAreaOfEffect() == EEffectArea::ARMOR) {
@@ -676,9 +675,10 @@ void APlayerCharacter::GetHit_Implementation (int ValueOfAttack, const TArray<ES
 	}
 }
 
-void APlayerCharacter::GetHitWithBuffOrDebuff_Implementation(class AEffect* const& Effect)
+void APlayerCharacter::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects)
 {
-	Effects.Add(Effect);
+	for(AEffect* Effect : HitEffects)
+		Effects.Add(Effect);
 }
 
 void APlayerCharacter::Death()

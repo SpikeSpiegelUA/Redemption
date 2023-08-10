@@ -3,7 +3,17 @@
 
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
 
-EArmorType AArmorItem::GetArmorType() const
+const EArmorType AArmorItem::GetArmorType() const
 {
     return ArmorType;
+}
+
+TArray<FElementAndItsPercentageStruct> AArmorItem::GetElementsAndTheirPercentagesStructs() const
+{
+    return ElementsAndTheirPercentagesStructs;
+}
+
+int AArmorItem::GetArmorValue() const
+{
+    return ArmorValue;
 }

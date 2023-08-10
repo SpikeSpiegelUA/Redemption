@@ -3,14 +3,9 @@
 
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\DebuffSpell.h"
 
-EDebuffType ADebuffSpell::GetTypeOfDebuff() const
+EBuffDebuffType ADebuffSpell::GetTypeOfDebuff() const
 {
 	return TypeOfDebuff;
-}
-
-int ADebuffSpell::GetDebuffValue() const
-{
-	return DebuffValue;
 }
 
 class TSubclassOf<ASpellObject> ADebuffSpell::GetSpellObjectClass() const
@@ -18,7 +13,22 @@ class TSubclassOf<ASpellObject> ADebuffSpell::GetSpellObjectClass() const
 	return SpellObjectClass;
 }
 
-TSubclassOf<AEffect> ADebuffSpell::GetEffectClass() const
+void ADebuffSpell::SetSpellObjectClass(const TSubclassOf<class ASpellObject>& NewSpellObjectClass)
 {
-	return EffectClass;
+	SpellObjectClass = NewSpellObjectClass;
+}
+
+void ADebuffSpell::SetTypeOfDebuff(EBuffDebuffType NewTypeOfDebuff)
+{
+	TypeOfDebuff = NewTypeOfDebuff;
+}
+
+ADebuffSpell& ADebuffSpell::operator=(const ASpell& Spell)
+{
+	SetSpellName(Spell.GetSpellName());
+	SetManaCost(Spell.GetManaCost());
+	SetElementsAndTheirPercentagesStructs(Spell.GetElementsAndTheirPercentagesStructs());
+	SetTypeOfSpell(Spell.GetTypeOfSpell());
+	SetDescription(Spell.GetDescription());
+	return *this;
 }

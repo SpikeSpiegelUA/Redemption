@@ -11,7 +11,7 @@ void UCombatPunchThrowAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnim
 		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(MeshComp->GetWorld()->GetFirstPlayerController()->GetCharacter());
 		ACombatEnemyNPC* Owner = Cast<ACombatEnemyNPC>(MeshComp->GetOwner());
 		if (IsValid(PlayerCharacter) && IsValid(Owner))
-			PlayerCharacter->Execute_GetHit(PlayerCharacter, CalculateAttackValueAfterEffects(Owner->AttackValue, Owner), Owner->SpellElements);
+			PlayerCharacter->Execute_GetHit(PlayerCharacter, CalculateAttackValueAfterEffects(Owner->AttackValue, Owner), Owner->GetMeleeWeaponElements());
 	}
 }
 

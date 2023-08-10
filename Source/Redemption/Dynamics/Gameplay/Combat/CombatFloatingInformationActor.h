@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\CombatFloatingInformation.h"
 #include "Components/WidgetComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "CombatFloatingInformationActor.generated.h"
 
 UCLASS()
@@ -25,15 +26,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void SetCombatFloatingInformationText(FText& NewCombatFloatingInformationText);
+	void SetCombatFloatingInformationText(const FText& NewCombatFloatingInformationText);
 
 private:
-	UPROPERTY(EditAnywhere, Category = "UI", meta = (AllowPrivateAccess = true))
-		TSubclassOf<class UCombatFloatingInformation> CombatFloatingInformationClass{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess = true))
 		UCombatFloatingInformation* CombatFloatingInformationWidget {};
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess = true))
-		UWidgetComponent* CombatFloatingInformationComponentWidget;
 
-	FText CombatFloatingInformationText{};
+	UFUNCTION()
+		void DestroyThisActor();
+	FTimerHandle ActorDestroyTimerHandle;
 };

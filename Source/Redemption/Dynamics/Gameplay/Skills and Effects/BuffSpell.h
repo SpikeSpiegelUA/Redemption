@@ -4,21 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\SpellObjects\SpellObject.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "BuffSpell.generated.h"
 
 /**
  * 
  */
-
-UENUM(BlueprintType)
-enum class EBuffType :uint8
-{
-	ATTACK UMETA(DisplayName = "Attack"),
-	ARMOR UMETA(DisplayName = "Armor"),
-	AGILITY UMETA(DisplayName = "Agility"),
-};
 
 UCLASS()
 class REDEMPTION_API ABuffSpell : public ASpell
@@ -27,17 +19,13 @@ class REDEMPTION_API ABuffSpell : public ASpell
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		EBuffType TypeOfBuff {};
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		int BuffValue {};
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		TSubclassOf<AEffect> EffectClass{};
+		EBuffDebuffType TypeOfBuff {};
 	//Spell's "object" class. For example, player is throwind red rectangle(well, this is a spell's object) when using a fire arrow.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
 		TSubclassOf<class ASpellObject> SpellObjectClass;
 public:
-	EBuffType GetTypeOfBuff() const;
-	int GetBuffValue() const;
+	EBuffDebuffType GetTypeOfBuff() const;
 	TSubclassOf<class ASpellObject> GetSpellObjectClass() const;
-	TSubclassOf<AEffect> GetEffectClass() const;
+
+	ABuffSpell& ABuffSpell::operator =(const ASpell& Spell);
 };

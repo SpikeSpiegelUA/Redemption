@@ -11,13 +11,6 @@
 /**
  * 
  */
-UENUM(BlueprintType)
-enum class EDebuffType :uint8
-{
-	ATTACK UMETA(DisplayName = "Attack"),
-	ARMOR UMETA(DisplayName = "Armor"),
-	AGILITY UMETA(DisplayName = "Agility"),
-};
 
 UCLASS()
 class REDEMPTION_API ADebuffSpell : public ASpell
@@ -25,19 +18,17 @@ class REDEMPTION_API ADebuffSpell : public ASpell
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		EDebuffType TypeOfDebuff {};
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		int DebuffValue{};
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		TSubclassOf<AEffect> EffectClass{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
+		EBuffDebuffType TypeOfDebuff {};
 	//Spell's "object" class. For example, player is throwind red rectangle(well, this is a spell's object) when using a fire arrow.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		class TSubclassOf<class ASpellObject> SpellObjectClass;
 
 public:
-	EDebuffType GetTypeOfDebuff() const;
-	int GetDebuffValue() const;
+	EBuffDebuffType GetTypeOfDebuff() const;
 	class TSubclassOf<class ASpellObject> GetSpellObjectClass() const;
-	TSubclassOf<AEffect> GetEffectClass() const;
+
+	void SetSpellObjectClass(const class TSubclassOf<class ASpellObject>& NewSpellObjectClass);
+	void SetTypeOfDebuff(EBuffDebuffType NewTypeOfDebuff);
+	ADebuffSpell& ADebuffSpell::operator =(const ASpell& Spell);
 };

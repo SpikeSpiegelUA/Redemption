@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
 #include "Redemption/Dynamics/Gameplay/Skills and Effects/Effect.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "WeaponItem.generated.h"
 
 /**
@@ -18,17 +19,28 @@ enum class EWeaponType :uint8
 	RANGE UMETA(DisplayName = "Range"),
 };
 
+UENUM(BlueprintType)
+enum class EPhysicalType :uint8
+{
+	SLASHING UMETA(DisplayName = "Slashing"),
+	CRUSHING UMETA(DisplayName = "Crushing"),
+	PIERCING UMETA(DisplayName = "PIERCING"),
+};
+
 UCLASS()
 class REDEMPTION_API AWeaponItem : public AEquipmentItem
 {
 	GENERATED_BODY()
 private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information", meta = (AllowPrivateAccess = true));
-	TArray<ESpellElements> ContainedElements{};
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information", meta = (AllowPrivateAccess = true));
-	EWeaponType WeaponType{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information", meta = (AllowPrivateAccess = true))
+		TArray<FElementAndItsPercentageStruct> ElementsAndTheirPercentagesStructs {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information", meta = (AllowPrivateAccess = true))
+		const EWeaponType WeaponType{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information", meta = (AllowPrivateAccess = true))
+		int AttackValue{};
 
 public:
-	TArray<ESpellElements> GetContainedElements() const;
-	EWeaponType GetWeaponType() const;
+	const EWeaponType GetWeaponType() const;
+	TArray<FElementAndItsPercentageStruct> GetElementsAndTheirPercentagesStructs() const;
+	int GetAttackValue() const;
 };

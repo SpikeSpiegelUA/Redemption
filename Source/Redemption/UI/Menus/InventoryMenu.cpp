@@ -19,6 +19,7 @@
 #include <Kismet/GameplayStatics.h>
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\InventoryActions.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\SkillsSpellsAndEffectsActions.h"
 #include <Redemption/Dynamics/World/Items/DebuffItem.h>
 
 
@@ -26,10 +27,7 @@ bool UInventoryMenu::Initialize()
 {
 	const bool bSuccess = Super::Initialize();
 	//InventoryMenu change level logic
-	URedemptionGameInstance* GameInstance = nullptr;
-	if (IsValid(GetWorld()))
-		 GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(GameInstance) && IsValid(PlayerCharacter)) {
+	if (URedemptionGameInstance* GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(GameInstance)) {
 		FillInventory();
 		if (IsValid(GameInstance->InstanceEquipedMelee)) {
 			AWeaponItem* MeleeObject = NewObject<AWeaponItem>(this, GameInstance->InstanceEquipedMelee);
@@ -45,25 +43,21 @@ bool UInventoryMenu::Initialize()
 			AArmorItem* HeadObject = NewObject<AArmorItem>(this, GameInstance->InstanceEquipedHead);
 			HeadTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Head: "), FText::FromName(HeadObject->GetItemName())));
 			EquipedHead = HeadObject;
-			PlayerCharacter->ArmorValue += EquipedHead->StatValue;
 		}
 		if (IsValid(GameInstance->InstanceEquipedTorse)) {
 			AArmorItem* TorseObject = NewObject<AArmorItem>(this, GameInstance->InstanceEquipedTorse);
 			TorseTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Torse: "), FText::FromName(TorseObject->GetItemName())));
 			EquipedTorse = TorseObject;
-			PlayerCharacter->ArmorValue += EquipedTorse->StatValue;
 		}
 		if (IsValid(GameInstance->InstanceEquipedHand)) {
 			AArmorItem* HandObject = NewObject<AArmorItem>(this, GameInstance->InstanceEquipedHand);
 			HandTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Hand: "), FText::FromName(HandObject->GetItemName())));
 			EquipedHand = HandObject;
-			PlayerCharacter->ArmorValue += EquipedHand->StatValue;
 		}
 		if (IsValid(GameInstance->InstanceEquipedLowerArmor)) {
 			AArmorItem* LowerArmorObject = NewObject<AArmorItem>(this, GameInstance->InstanceEquipedLowerArmor);
 			LowerArmorTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("LowerArmor: "), FText::FromName(LowerArmorObject->GetItemName())));
 			EquipedLowerArmor = LowerArmorObject;
-			PlayerCharacter->ArmorValue += EquipedLowerArmor->StatValue;
 		}
 	}
 	if (IsValid(BackButton))
@@ -463,8 +457,10 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 				}
 			}
 			if (ABuffItem* BuffItem = Cast<ABuffItem>(PickedItem); IsValid(BuffItem) && IsValid(EntryWidget)) {
-				AEffect* NewEffect = NewObject<AEffect>(this, BuffItem->GetEffect()->StaticClass());
-				PlayerCharacter->Effects.Add(NewEffect);
+				for (TSubclassOf<AEffect> EffectClass : BuffItem->GetEffectsClasses()) {
+					AEffect* NewEffect = NewObject<AEffect>(this, EffectClass);
+					PlayerCharacter->Effects.Add(NewEffect);
+				}
 				InventoryActions::RemoveItemFromGameInstance(GameInstance, PickedItem);
 				InventoryActions::ItemAmountInInventoryLogic(EntryWidget, InventoryScrollBox, PickedItem);
 				ItemHasBeenUsedActions(BattleMenu, PlayerCharacter, BattleManager);
@@ -567,22 +563,22 @@ void UInventoryMenu::SetItemInfo(AGameItem* const& GameItem)
 		FString StringToSet = "";
 		if (AAssaultItem* AssaultItem = Cast<AAssaultItem>(GameItem); IsValid(AssaultItem)) {
 			StringToSet = FString("Damage: ");
-			StringToSet.AppendInt(AssaultItem->AttackValue);
+			StringToSet.AppendInt(AssaultItem->GetAttackValue());
 			ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));
 		}
 		else if (AEquipmentItem* EquipmentItem = Cast<AEquipmentItem>(GameItem); IsValid(EquipmentItem)) {
 			if (AWeaponItem* WeaponItem = Cast<AWeaponItem>(GameItem); IsValid(WeaponItem)) {
 				StringToSet = FString("Damage: ");
-				StringToSet.AppendInt(WeaponItem->StatValue);
+				StringToSet.AppendInt(WeaponItem->GetAttackValue());
 				ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));
 			}
 			else if (AArmorItem* ArmorItem = Cast<AArmorItem>(GameItem); IsValid(ArmorItem)) {
 				StringToSet = FString("Armor: ");
-				StringToSet.AppendInt(ArmorItem->StatValue);
+				StringToSet.AppendInt(ArmorItem->GetArmorValue());
 				ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));
 			}
 		}
-		else if (ARestorationItem* RestorationItem = Cast<ARestorationItem>(GameItem)) {
+		else if (ARestorationItem* RestorationItem = Cast<ARestorationItem>(GameItem); IsValid(RestorationItem)) {
 			if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::HEALTH)
 				StringToSet = FString("HP: ");
 			else if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::MANA)
@@ -590,9 +586,17 @@ void UInventoryMenu::SetItemInfo(AGameItem* const& GameItem)
 			StringToSet.AppendInt(RestorationItem->GetRestorationValuePercent());
 			ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));
 		}
-		else if (ABuffItem* BuffItem = Cast<ABuffItem>(GameItem)) {
-			StringToSet = FString("Effect Multiplier: ");
-			StringToSet.AppendInt(BuffItem->GetBuffValue());
+		else if (ABuffItem* BuffItem = Cast<ABuffItem>(GameItem); IsValid(BuffItem)) {
+			StringToSet = FString("Item's effects: ");
+				for (int i = 0; i < BuffItem->GetEffectsClasses().Num(); i++) {
+					StringToSet.Append(*SkillsSpellsAndEffectsActions::GetEnumDisplayName<EEffectArea>(Cast<AEffect>(BuffItem->GetEffectsClasses()[i]->GetDefaultObject())->GetAreaOfEffect()).ToString());
+					StringToSet.Append(" -");
+					StringToSet.AppendInt(Cast<AEffect>(BuffItem->GetEffectsClasses()[i]->GetDefaultObject())->GetEffectStat());
+					if (i != BuffItem->GetEffectsClasses().Num() - 1)
+						StringToSet.Append(", ");
+					else
+						StringToSet.Append(".");
+				}
 			ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));
 		}
 	}

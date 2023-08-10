@@ -30,13 +30,14 @@ public:
 		int AttackValue {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle")
 		int GoldReward {};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle")
+		int EvasionChance{};
 	UPROPERTY(EditAnywhere, Category = "Battle")
 		AActor* StartLocation {};
 	UPROPERTY(VisibleAnywhere, Category = "Battle")
 		AActor* Target {};
 	UPROPERTY(VisibleAnywhere, Category = "Battle")
 		TArray<AEffect*> Effects;
-	TArray<ESpellElements> SpellElements;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
 		int Strength = 1;
@@ -62,11 +63,14 @@ public:
 	ACombatEnemyNPC();
 
 	//Function to call, when an enemy got hit. Parameters for a standard attack.
-	void GetHit_Implementation(int ValueOfAttack, const TArray<ESpellElements>& ContainedElements) override;
+	void GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements) override;
 	//Function to call, when an enemy got hit. Parameters for a buff/debuff attack.
-	void GetHitWithBuffOrDebuff_Implementation(class AEffect* const& Effect) override;
+	void GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects) override;
 
 	UEnemyHealthBarWidget* GetEnemyHealthBarWidget() const;
+	TArray<FElementAndItsPercentageStruct> GetResistances() const;
+	TArray<FElementAndItsPercentageStruct> GetMeleeWeaponElements() const;
+	TArray<FElementAndItsPercentageStruct> GetRangeWeaponElements() const;
 
 protected:
 	// Called when the game starts or when spawned
@@ -80,10 +84,10 @@ protected:
 		UWidgetComponent* EnemyHealthBarComponentWidget;
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
-		TArray<ESpellElements> MagicResistances;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
-		TArray<int> MagicResistancesPercent;
-	UPROPERTY(EditAnywhere, Category = "Battle", meta = (AllowPrivateAccess = true))
-		TArray<FElementAndItsPercentageStruct> ElementsAndItsPercentStructs {};
+	UPROPERTY(EditDefaultsOnly, Category = "Battle", meta = (AllowPrivateAccess = true))
+		TArray<FElementAndItsPercentageStruct> Resistances {};
+	UPROPERTY(EditDefaultsOnly, Category = "Battle", meta = (AllowPrivateAccess = true))
+		TArray<FElementAndItsPercentageStruct> MeleeWeaponElements {};
+	UPROPERTY(EditDefaultsOnly, Category = "Battle", meta = (AllowPrivateAccess = true))
+		TArray<FElementAndItsPercentageStruct> RangeWeaponElements {};
 };

@@ -19,21 +19,15 @@ class REDEMPTION_API AAssaultSpell : public ASpell
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
 		int AttackValue{};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
-	TArray<ESpellElements> ContainedElements;
-
 	//Spell's "object" class. For example, player is throwind red rectangle(well, this is a spell's object) when using a fire arrow.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
 		class TSubclassOf<class ASpellObject> SpellObjectClass {};
 public:
 	int GetAttackValue() const;
-	TArray<ESpellElements> GetContainedElements() const;
 	class TSubclassOf<class ASpellObject> GetSpellObjectClass() const;
 
 	void SetAttackValue(int NewAttackValue);
-	void SetSpellObjectClass(class TSubclassOf<class ASpellObject> NewSpellObjectClass);
-	void SetContainedElements(const TArray<ESpellElements>& NewContainedElements);
+	void SetSpellObjectClass(const class TSubclassOf<class ASpellObject>& NewSpellObjectClass);
 
 	AAssaultSpell& AAssaultSpell::operator =(const ASpell& Spell);
 };

@@ -7,10 +7,12 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\SelectedElementEntryWidget.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\SelectedSpellTypeEntryWidget.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\RestorationSpell.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\AssaultSpell.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\BuffSpell.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\DebuffSpell.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\CreatedDebuffSpell.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\PresetDebuffSpell.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\RestorationSpell.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\AssaultSpell.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
@@ -68,6 +70,8 @@ private:
 		class UButton* LearnedSpellsJournalButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UHorizontalBox* SelectedElementsHorizontalBox;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UHorizontalBox* SelectedSpellTypeHorizontalBox;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UTextBlock* SpellNameTextBlock;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
@@ -149,21 +153,20 @@ private:
 	//Elements selection logic. Create widget and add them to a dedicated horizontal box.
 	void CreateSelectedElementWidgetAndAddToHorizontalBox(FString Filepath, ESpellElements Element);
 	//Spell type selection logic. Create widget and add it to a dedicated border.
-	void CreateSelectedSpellTypeWidgetAndAddToBorder(FString Filepath, ESpellType SpellType);
+	void CreateSelectedSpellTypeWidgetAndAddToHorizontalBox(FString Filepath, ESpellType SpellType);
 	//All spells are children of ASpell, so we create basic ASpell and then assign parameters specific to spell kind separately. 
-	class ASpell* CreateBasicSpell(ESpellType SpellType, const TArray<ESpellElements>& SpellElements);
+	class ACreatedBuffSpell* CreateBuffSpell(const TArray<ESpellElements>& SpellElements);
+	ASpell* CreateBasicSpell(ESpellType SpellType, const TArray<ESpellElements>& SpellElements);
 	class AAssaultSpell* CreateAssaultSpell(const TArray<ESpellElements>& SpellElements);
-	class ADebuffSpell* CreateDebuffSpell(const TArray<ESpellElements>& SpellElements);
-	class ARestorationSpell* CreateRestorationSpell(const TArray<ESpellElements>& SpellElements);
-	class ABuffSpell* CreateBuffSpell(const TArray<ESpellElements>& SpellElements);
+	ACreatedDebuffSpell* CreateDebuffSpell(const TArray<ESpellElements>& SpellElements);
+	ARestorationSpell* CreateRestorationSpell(const TArray<ESpellElements>& SpellElements);
 	//Find spell object corresponding to created spell's main element.
 	TSubclassOf<ASpellObject> FindSpellObject(ESpellElements MainSpellElement);
-
+	EEffectArea FindEffectAreaOfCreatedEffect(ESpellElements SpellElementOfEffect);
 	//Find element of the spell which has the highest count.
-	ESpellElements FindSpellsMainElement();
-	FText GetSpellElementName(ESpellElements MainSpellElement);
+	ESpellElements FindSpellsMainElement(const TArray<ESpellElements>& SpellElements);
 	//Create spell from elements and set CreatedSpell to it
-	void CreateSpellAndSetCreatedSpell(ESpellType TypeOfTheSpell);
+	void CreateSpellAndSetCreatedSpell(const TArray<ESpellElements>& SpellElements, ESpellType TypeOfTheSpell);
 	//Show info about created spell and hide notification
 	void ShowCreatedSpellInformation(ASpell* const &SpellToShow);
 
@@ -172,7 +175,9 @@ private:
 		class UBattleMenu* const& BattleMenu, class AUIManager* const& UIManager);
 	void RestorationSpellUse(const class ARestorationSpell* const& SpellToUse, class ABattleManager* const& BattleManager, 
 		class UBattleMenu* const& BattleMenu, class AUIManager* const& UIManager);
-	void BuffSpellUse(const class ABuffSpell* const& SpellToUse, class ABattleManager* const& BattleManager, 
+	void BuffSpellUse(const class ACreatedBuffSpell* const& SpellToUse, class ABattleManager* const& BattleManager, 
+		class UBattleMenu* const& BattleMenu, class AUIManager* const& UIManager);
+	void BuffSpellUse(const class APresetBuffSpell* const& SpellToUse, class ABattleManager* const& BattleManager,
 		class UBattleMenu* const& BattleMenu, class AUIManager* const& UIManager);
 	void DebuffSpellUse(const class ADebuffSpell* const& SpellToUse, class ABattleManager* const& BattleManager,
 		class UBattleMenu* const& BattleMenu, class AUIManager* const& UIManager);
@@ -182,6 +187,7 @@ protected:
 
 public:
 	UHorizontalBox* GetSelectedElementsHorizontalBox() const;
+	UHorizontalBox* GetSelectedSpellTypeHorizontalBox() const;
 	UBorder* GetSelectedSpellTypeBorder() const;
 	TArray<ESpellElements> GetSelectedSpellElements() const;
 	ASpell* GetCreatedSpell() const;
@@ -193,4 +199,6 @@ public:
 	void CreateNotification(const FText& NotificationText);
 	void ShowSpellTypesButtonsHideElementsButtons();
 	void ShowElementsButtonsHideSpellTypesButtons();
+
+	void Reset();
 };

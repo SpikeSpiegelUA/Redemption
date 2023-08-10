@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Effect.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "Spell.generated.h"
 
 UENUM(BlueprintType)
@@ -17,6 +18,16 @@ enum class ESpellType :uint8
 	DEBUFF UMETA(DisplayName = "Debuff"),
 };
 
+UENUM(BlueprintType)
+enum class EBuffDebuffType :uint8
+{
+	DAMAGE UMETA(DisplayName = "Attack"),
+	ARMOR UMETA(DisplayName = "Armor"),
+	EVASION UMETA(DisplayName = "Agility"),
+	ELEMENTALRESISTANCE UMETA(DisplayName = "Elemental Resistance"),
+	PHYSICALRESISTANCE UMETA(DisplayName = "Physical Resistance"),
+};
+
 UCLASS()
 class REDEMPTION_API ASpell : public AActor
 {
@@ -26,31 +37,32 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
 		FText SpellName {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
-		TArray<ESpellElements> SpellElements;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
 		int ManaCost{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
 		ESpellType TypeOfSpell {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
 		FText Description {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
+		TArray<FElementAndItsPercentageStruct> ElementsAndTheirPercentagesStructs {};
 
 public:	
 	// Sets default values for this actor's properties
 	ASpell();
 
 	FText GetSpellName() const;
-	TArray<ESpellElements> GetSpellElements() const;
 	int GetManaCost() const;
 	ESpellType GetTypeOfSpell() const;
 	FText GetDescription() const;
+	TArray<FElementAndItsPercentageStruct> GetElementsAndTheirPercentagesStructs() const;
 
 	void SetSpellName(FText& NewSpellName);
 	void SetSpellName(FText NewSpellName);
-	void SetSpellElements(TArray<ESpellElements> NewSpellElements);
 	void SetManaCost(int NewManaCost);
 	void SetTypeOfSpell(ESpellType NewTypeOfSpell);
 	void SetDescription(FText& NewDescription);
 	void SetDescription(FText NewDescription);
+	void SetElementsAndTheirPercentagesStructs(const TArray<FElementAndItsPercentageStruct>& NewArrayOfStructs);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -58,4 +70,6 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+
 };

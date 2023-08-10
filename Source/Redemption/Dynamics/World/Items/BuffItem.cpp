@@ -4,17 +4,12 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\BuffItem.h"
 #include "BuffItem.h"
 
-EBuffType ABuffItem::GetTypeOfBuff() const
+EBuffDebuffType ABuffItem::GetTypeOfBuff() const
 {
     return TypeOfBuff;
 }
 
-int ABuffItem::GetBuffValue() const
+TArray<TSubclassOf<AEffect>> ABuffItem::GetEffectsClasses() const
 {
-    return BuffValue;
-}
-
-AEffect* ABuffItem::GetEffect() const
-{
-    return Effect;
+    return EffectsClasses;
 }

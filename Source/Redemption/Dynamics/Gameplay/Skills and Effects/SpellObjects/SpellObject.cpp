@@ -3,6 +3,8 @@
 
 #include "SpellObject.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\CreatedDebuffSpell.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\PresetDebuffSpell.h"
 #include <Kismet/GameplayStatics.h>
 #include "Kismet/KismetMathLibrary.h"
 
@@ -51,12 +53,18 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
 		if (ACombatEnemyNPC* CombatEnemyNPC = Cast<ACombatEnemyNPC>(OtherActor); IsValid(CombatEnemyNPC) && IsValid(PlayerCharacter->GetSkillBattleMenuWidget()->GetCreatedSpell())) {
 			if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(Spell); IsValid(AssaultSpell)) {
-				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedEnemy, AssaultSpell->GetAttackValue(), AssaultSpell->GetContainedElements());
+				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedEnemy, AssaultSpell->GetAttackValue(), AssaultSpell->GetElementsAndTheirPercentagesStructs());
 				OnOverlapBeginsActions(PlayerCharacter);
 			}
-			else if (ADebuffSpell* DebuffSpell = Cast<ADebuffSpell>(Spell); IsValid(DebuffSpell)) {
-				AEffect* NewEffect = NewObject<AEffect>(this, DebuffSpell->GetEffectClass());
-				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedEnemy, NewEffect);
+			else if (APresetDebuffSpell* PresetDebuffSpell = Cast<APresetDebuffSpell>(Spell); IsValid(PresetDebuffSpell)) {
+				TArray<AEffect*> EffectsArray;
+				for (TSubclassOf<AEffect> EffectClass : PresetDebuffSpell->GetEffectsClasses())
+					EffectsArray.Add(Cast<AEffect>(EffectClass->GetDefaultObject()));
+				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedEnemy, EffectsArray);
+				OnOverlapBeginsActions(PlayerCharacter);
+			}
+			else if (ACreatedDebuffSpell* CreatedDebuffSpell = Cast<ACreatedDebuffSpell>(Spell); IsValid(CreatedDebuffSpell)) {
+				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedEnemy, CreatedDebuffSpell->GetEffects());
 				OnOverlapBeginsActions(PlayerCharacter);
 			}
 		}
