@@ -145,9 +145,9 @@ public:
 	UTouchInterface* GetStandardTouchInterface() const;
 
 	//Function to call, when an enemy got hit. Parameters for a standard attack.
-	void GetHit_Implementation(int ValueOfAttack, const TArray<ESpellElements>& ContainedElements) override;
+	void GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements) override;
 	//Function to call, when an enemy got hit. Parameters for a buff/debuff attack.
-	void GetHitWithBuffOrDebuff_Implementation(class AEffect* const& Effect) override;
+	void GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects) override;
 
 	//Restore widgets to default state
 	void RestartBattleMenuWidget();
@@ -271,10 +271,6 @@ public:
 		float CurrentMana = 100;
 	UPROPERTY(EditAnywhere, Category = "Battle")
 		float MaxMana = 100;
-	UPROPERTY(EditAnywhere, Category = "Battle")
-		int ArmorValue{};
-	UPROPERTY(EditAnywhere, Category = "Battle")
-		int AttackValue{};
 	UPROPERTY(VisibleAnywhere, Category = "Battle")
 		TArray<AEffect*> Effects;
 	//Variables for movement in battle scene

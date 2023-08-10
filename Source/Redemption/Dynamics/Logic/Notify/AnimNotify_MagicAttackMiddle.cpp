@@ -13,15 +13,12 @@ void UAnimNotify_MagicAttackMiddle::Notify(USkeletalMeshComponent* MeshComp, UAn
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(MeshComp->GetOwner()); IsValid(PlayerCharacter)) 
 		if (USkillBattleMenu* SkillBattleMenu = PlayerCharacter->GetSkillBattleMenuWidget(); IsValid(SkillBattleMenu) && IsValid(SkillBattleMenu->GetCreatedSpell()))
 			if(ABattleManager* BattleManager = PlayerCharacter->GetBattleManager(); IsValid(BattleManager) && BattleManager->SelectedEnemy){
-				if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(SkillBattleMenu->GetCreatedSpell()); IsValid(AssaultSpell)) {
+				if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(SkillBattleMenu->GetCreatedSpell()); IsValid(AssaultSpell)) 
 					SpawnSpellObject(AssaultSpell, MeshComp, BattleManager, PlayerCharacter);
-				}
-				else if (ABuffSpell* BuffSpell = Cast<ABuffSpell>(SkillBattleMenu->GetCreatedSpell()); IsValid(BuffSpell)) {
+				else if (ACreatedBuffSpell* BuffSpell = Cast<ACreatedBuffSpell>(SkillBattleMenu->GetCreatedSpell()); IsValid(BuffSpell)) 
 					SpawnSpellObject(BuffSpell, MeshComp, BattleManager, PlayerCharacter);
-				}
-				else if (ADebuffSpell* DebuffSpell = Cast<ADebuffSpell>(SkillBattleMenu->GetCreatedSpell()); IsValid(DebuffSpell)) {
+				else if (ACreatedDebuffSpell* DebuffSpell = Cast<ACreatedDebuffSpell>(SkillBattleMenu->GetCreatedSpell()); IsValid(DebuffSpell)) 
 					SpawnSpellObject(DebuffSpell, MeshComp, BattleManager, PlayerCharacter);
-				}
 			}
 }
 
@@ -34,20 +31,20 @@ void UAnimNotify_MagicAttackMiddle::SpawnSpellObject(const AAssaultSpell* const&
 	SpawnedSpellObject->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(SpawnedSpellObject->GetActorLocation(), BattleManager->SelectedEnemy->GetActorLocation()));
 }
 
-void UAnimNotify_MagicAttackMiddle::SpawnSpellObject(const ABuffSpell* const& BuffSpell, USkeletalMeshComponent* const& MeshComp, ABattleManager* const& BattleManager, APlayerCharacter* const& PlayerCharacter)
+void UAnimNotify_MagicAttackMiddle::SpawnSpellObject(const ACreatedBuffSpell* const& CreatedBuffSpell, USkeletalMeshComponent* const& MeshComp, ABattleManager* const& BattleManager, APlayerCharacter* const& PlayerCharacter)
 {
 	FTransform SpawnTransform = MeshComp->GetSocketTransform(FName(TEXT("RightHandIndex3")), ERelativeTransformSpace::RTS_World);
 	FActorSpawnParameters ActorSpawnParemeters;
-	ASpellObject* SpawnedSpellObject = MeshComp->GetWorld()->SpawnActor<ASpellObject>(BuffSpell->GetSpellObjectClass(), SpawnTransform, ActorSpawnParemeters);
+	ASpellObject* SpawnedSpellObject = MeshComp->GetWorld()->SpawnActor<ASpellObject>(CreatedBuffSpell->GetSpellObjectClass(), SpawnTransform, ActorSpawnParemeters);
 	SpawnedSpellObject->SetSpell(PlayerCharacter->GetSkillBattleMenuWidget()->GetCreatedSpell());
 	SpawnedSpellObject->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(SpawnedSpellObject->GetActorLocation(), BattleManager->SelectedEnemy->GetActorLocation()));
 }
 
-void UAnimNotify_MagicAttackMiddle::SpawnSpellObject(const ADebuffSpell* const& DebuffSpell, USkeletalMeshComponent* const& MeshComp, ABattleManager* const& BattleManager, APlayerCharacter* const& PlayerCharacter)
+void UAnimNotify_MagicAttackMiddle::SpawnSpellObject(const ACreatedDebuffSpell* const& CreatedDebuffSpell, USkeletalMeshComponent* const& MeshComp, ABattleManager* const& BattleManager, APlayerCharacter* const& PlayerCharacter)
 {
 	FTransform SpawnTransform = MeshComp->GetSocketTransform(FName(TEXT("RightHandIndex3")), ERelativeTransformSpace::RTS_World);
 	FActorSpawnParameters ActorSpawnParemeters;
-	ASpellObject* SpawnedSpellObject = MeshComp->GetWorld()->SpawnActor<ASpellObject>(DebuffSpell->GetSpellObjectClass(), SpawnTransform, ActorSpawnParemeters);
+	ASpellObject* SpawnedSpellObject = MeshComp->GetWorld()->SpawnActor<ASpellObject>(CreatedDebuffSpell->GetSpellObjectClass(), SpawnTransform, ActorSpawnParemeters);
 	SpawnedSpellObject->SetSpell(PlayerCharacter->GetSkillBattleMenuWidget()->GetCreatedSpell());
 	SpawnedSpellObject->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(SpawnedSpellObject->GetActorLocation(), BattleManager->SelectedEnemy->GetActorLocation()));
 }

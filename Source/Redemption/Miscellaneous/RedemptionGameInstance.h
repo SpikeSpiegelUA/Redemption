@@ -45,8 +45,6 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Player")
 		uint16 InstancePlayerMaxMana = 100;
 	UPROPERTY(VisibleAnywhere, Category = "Player")
-		uint16 InstancePlayerArmorValue = 1;
-	UPROPERTY(VisibleAnywhere, Category = "Player")
 		int8 InstancePlayerStrength = 1;
 	UPROPERTY(VisibleAnywhere, Category = "Player")
 		int8 InstancePlayerPerception = 1;

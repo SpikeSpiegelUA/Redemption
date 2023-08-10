@@ -28,4 +28,6 @@ private:
 public:
 	SpellRestorationType GetTypeOfRestoration() const;
 	int GetRestorationValuePercent() const;
+
+	ARestorationSpell& ARestorationSpell::operator =(const ASpell& Spell);
 };

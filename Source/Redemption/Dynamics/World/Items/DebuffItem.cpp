@@ -3,12 +3,13 @@
 
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\DebuffItem.h"
 
-EDebuffType ADebuffItem::GetTypeOfDebuff() const
+EBuffDebuffType ADebuffItem::GetTypeOfDebuff() const
 {
 	return TypeOfDebuff;
 }
 
-int ADebuffItem::GetDebuffValue() const
+TArray<TSubclassOf<AEffect>> ADebuffItem::GetEffectsClasses() const
 {
-	return DebuffValue;
+	return EffectsClasses;
 }
+

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "ArmorItem.generated.h"
 
 /**
@@ -25,9 +26,15 @@ class REDEMPTION_API AArmorItem : public AEquipmentItem
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information");
-		EArmorType ArmorType{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information")
+		TArray<FElementAndItsPercentageStruct> ElementsAndTheirPercentagesStructs {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information")
+		const EArmorType ArmorType{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information")
+		int ArmorValue{};
 
 public:
-	EArmorType GetArmorType() const;
+	const EArmorType GetArmorType() const;
+	TArray<FElementAndItsPercentageStruct> GetElementsAndTheirPercentagesStructs() const;
+	int GetArmorValue() const;
 };

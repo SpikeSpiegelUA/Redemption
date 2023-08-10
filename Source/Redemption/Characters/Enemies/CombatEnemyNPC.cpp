@@ -8,6 +8,7 @@
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Combat\CombatFloatingInformationActor.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\SkillsSpellsAndEffectsActions.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 // Sets default values
@@ -40,47 +41,36 @@ void ACombatEnemyNPC::Tick(float DeltaTime)
 
 }
 
-void ACombatEnemyNPC::GetHitWithBuffOrDebuff_Implementation(class AEffect* const& Effect) 
+void ACombatEnemyNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects)
 {
-	Effects.Add(Effect);
+	for (AEffect* Effect : HitEffects) 
+		Effects.Add(Effect);
 }
 
-void ACombatEnemyNPC::GetHit_Implementation(int ValueOfAttack, const TArray<ESpellElements>& ContainedElements)
+void ACombatEnemyNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements)
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
 		if (ABattleManager* BattleManager = PlayerCharacter->GetBattleManager(); IsValid(BattleManager)) {
-			int ValueOfArmor = ArmorValue;
-			int ValueOfArmorBeforeEffects = ValueOfArmor;
-			for (AEffect* Effect : Effects) {
-				if (IsValid(Effect) && Effect->GetAreaOfEffect() == EEffectArea::ARMOR) {
-					if (AEffectWithPlainModifier* EffectWithPlainModifier = Cast<AEffectWithPlainModifier>(Effect); IsValid(EffectWithPlainModifier)) {
-						if (Effect->GetTypeOfEffect() == EEffectType::BUFF)
-							ValueOfArmor += ValueOfArmorBeforeEffects + Effect->GetEffectStat();
-						else
-							ValueOfArmor += ValueOfArmorBeforeEffects - Effect->GetEffectStat();
-					}
-					else {
-						if (Effect->GetTypeOfEffect() == EEffectType::BUFF)
-							ValueOfArmor += ValueOfArmorBeforeEffects * (Effect->GetEffectStat() - 1);
-						else
-							ValueOfArmor -= ValueOfArmorBeforeEffects / Effect->GetEffectStat();
-					}
-				}
+			ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), GetActorLocation(), GetActorRotation());
+			FString TextForCombatFloatingInformationActor = FString();
+			uint8 EvasionRandomNumber = FMath::RandRange(0, 100);
+			int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance + Agility * 2, Effects, EEffectArea::EVASION);
+			if (EvasionRandomNumber <= ChanceOfEvasion) {
+				TextForCombatFloatingInformationActor.Append("Miss!");
+				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 			}
-			int ValueOfAttackiWithResistances = ValueOfAttack;
-			TArray<FElementAndItsPercentageStruct> ElementsAndTheirPercents = ElementsActions::FindContainedElements<ESpellElements>(ContainedElements);
-			for (FElementAndItsPercentageStruct ElementPercent : ElementsAndTheirPercents)
-				for (int8 i = 0; i < MagicResistances.Num(); i++)
-					if (MagicResistances[i] == ElementPercent.GetElement()) {
-						int ElementPercentOfValueOfAttack = ValueOfAttack * ElementPercent.GetPercent() / 100;
-						ValueOfAttackiWithResistances -= ElementPercentOfValueOfAttack * MagicResistancesPercent[i] / 100;
-					}
-			if (HP - (ValueOfAttackiWithResistances - ValueOfArmor / 10) < 0)
-				HP = 0;
-			else
-				HP -= (ValueOfAttackiWithResistances - ValueOfArmor / 10);
-			if (IsValid(EnemyHealthBarWidget))
-				EnemyHealthBarWidget->HP = HP;
+			else {
+				int ValueOfArmor = SkillsSpellsAndEffectsActions::GetValueAfterEffects(ArmorValue, Effects, EEffectArea::ARMOR);
+				int ValueOfAttackWithResistances = SkillsSpellsAndEffectsActions::GetAttackValueAfterResistances(ValueOfAttack, Effects, Resistances, ContainedElements);
+				if (HP - (ValueOfAttackWithResistances - ValueOfArmor / 10) < 0)
+					HP = 0;
+				else
+					HP -= (ValueOfAttackWithResistances - ValueOfArmor / 10);
+				if (IsValid(EnemyHealthBarWidget))
+					EnemyHealthBarWidget->HP = HP;
+				TextForCombatFloatingInformationActor.AppendInt(ValueOfAttackWithResistances);
+				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
+			}
 			UCombatNPCAnimInstance* AnimInstance = Cast<UCombatNPCAnimInstance>(GetMesh()->GetAnimInstance());
 			if (IsValid(AnimInstance)) {
 				if (HP <= 0)
@@ -88,11 +78,25 @@ void ACombatEnemyNPC::GetHit_Implementation(int ValueOfAttack, const TArray<ESpe
 				else
 					AnimInstance->SetCombatEnemyNPCGotHit(true);
 			}
-			ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), GetActorLocation(), GetActorRotation());
 		}
 }
 
 UEnemyHealthBarWidget* ACombatEnemyNPC::GetEnemyHealthBarWidget() const
 {
 	return EnemyHealthBarWidget;
+}
+
+TArray<FElementAndItsPercentageStruct> ACombatEnemyNPC::GetResistances() const
+{
+	return Resistances;
+}
+
+TArray<FElementAndItsPercentageStruct> ACombatEnemyNPC::GetMeleeWeaponElements() const
+{
+	return MeleeWeaponElements;
+}
+
+TArray<FElementAndItsPercentageStruct> ACombatEnemyNPC::GetRangeWeaponElements() const
+{
+	return RangeWeaponElements;
 }

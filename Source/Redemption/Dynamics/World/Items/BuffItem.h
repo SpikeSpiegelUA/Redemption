@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\BuffSpell.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "BuffItem.generated.h"
 
@@ -18,13 +18,10 @@ class REDEMPTION_API ABuffItem : public AGameItem
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		EBuffType TypeOfBuff {};
+		EBuffDebuffType TypeOfBuff {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		int BuffValue{};
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		AEffect* Effect{};
+		TArray<TSubclassOf<AEffect>> EffectsClasses{};
 public:
-	EBuffType GetTypeOfBuff() const;
-	int GetBuffValue() const;
-	AEffect* GetEffect() const;
+	EBuffDebuffType GetTypeOfBuff() const;
+	TArray<TSubclassOf<AEffect>> GetEffectsClasses() const;
 };

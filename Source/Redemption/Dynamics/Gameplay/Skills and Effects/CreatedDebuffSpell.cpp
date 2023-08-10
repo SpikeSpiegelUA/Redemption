@@ -1,19 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "BuffSpell.h"
+#include "CreatedDebuffSpell.h"
 
-EBuffDebuffType ABuffSpell::GetTypeOfBuff() const
+TArray<AEffect*> ACreatedDebuffSpell::GetEffects() const
 {
-	return TypeOfBuff;
+	return Effects;
 }
 
-class TSubclassOf<class ASpellObject> ABuffSpell::GetSpellObjectClass() const
-{
-	return SpellObjectClass;
-}
-
-ABuffSpell& ABuffSpell::operator=(const ASpell& Spell)
+ACreatedDebuffSpell& ACreatedDebuffSpell::operator=(const ASpell& Spell)
 {
 	SetSpellName(Spell.GetSpellName());
 	SetManaCost(Spell.GetManaCost());
@@ -21,4 +16,9 @@ ABuffSpell& ABuffSpell::operator=(const ASpell& Spell)
 	SetTypeOfSpell(Spell.GetTypeOfSpell());
 	SetDescription(Spell.GetDescription());
 	return *this;
+}
+
+void ACreatedDebuffSpell::AddObjectToEffects(AEffect* const& EffectToAdd)
+{
+	Effects.Add(EffectToAdd);
 }

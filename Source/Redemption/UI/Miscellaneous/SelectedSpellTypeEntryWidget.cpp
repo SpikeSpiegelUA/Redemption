@@ -26,7 +26,7 @@ void USelectedSpellTypeEntryWidget::MainButtonOnClicked()
 		if (USkillBattleMenu* SkillBattleMenu = PlayerCharacter->GetSkillBattleMenuWidget(); IsValid(PlayerCharacter))
 		{
 			SkillBattleMenu->SetSelectedSpellType(ESpellType::NONE);
-			SkillBattleMenu->GetSelectedSpellTypeBorder()->RemoveChild(this);
+			SkillBattleMenu->GetSelectedSpellTypeHorizontalBox()->RemoveChild(this);
 			this->ConditionalBeginDestroy();
 			SkillBattleMenu->SetCreatedSpell(nullptr);
 			SkillBattleMenu->ShowSpellTypesButtonsHideElementsButtons();

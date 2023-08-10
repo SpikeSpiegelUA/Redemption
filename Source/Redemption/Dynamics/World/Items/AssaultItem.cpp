@@ -3,3 +3,12 @@
 
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\AssaultItem.h"
 
+TArray<FElementAndItsPercentageStruct> AAssaultItem::GetElementsAndTheirPercentagesStructs() const
+{
+	return ElementsAndTheirPercentagesStructs;
+}
+
+int AAssaultItem::GetAttackValue() const
+{
+	return AttackValue;
+}

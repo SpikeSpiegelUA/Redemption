@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\DebuffSpell.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
+#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "DebuffItem.generated.h"
 
 /**
@@ -18,10 +19,10 @@ class REDEMPTION_API ADebuffItem : public AGameItem
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		EDebuffType TypeOfDebuff {};
+		EBuffDebuffType TypeOfDebuff {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		int DebuffValue{};
+		TArray<TSubclassOf<AEffect>> EffectsClasses {};
 public:
-	EDebuffType GetTypeOfDebuff() const;
-	int GetDebuffValue() const;
+	EBuffDebuffType GetTypeOfDebuff() const;
+	TArray<TSubclassOf<AEffect>> GetEffectsClasses() const;
 };

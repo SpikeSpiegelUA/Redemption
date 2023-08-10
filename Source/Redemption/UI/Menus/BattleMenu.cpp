@@ -226,6 +226,7 @@ void UBattleMenu::SpellButtonOnClicked()
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
 		if (USkillBattleMenu* SkillBattleMenu = PlayerCharacter->GetSkillBattleMenuWidget(); IsValid(SkillBattleMenu)) {
 			SkillBattleMenu->AddToViewport();
+			SkillBattleMenu->Reset();
 			UIManager->PickedButton = nullptr;
 			UIManager->PickedButtonIndex = 0;
 			this->RemoveFromParent();

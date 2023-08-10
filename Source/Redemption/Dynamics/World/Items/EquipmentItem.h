@@ -14,9 +14,4 @@ UCLASS()
 class AEquipmentItem : public AGameItem
 {
 	GENERATED_BODY()
-
-public:
-	//If armor, then this is a ArmorValue, otherwise AttackValue
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information");
-	int StatValue{};
 };

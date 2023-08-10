@@ -3,12 +3,17 @@
 
 #include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
 
-TArray<ESpellElements> AWeaponItem::GetContainedElements() const
-{
-    return ContainedElements;
-}
-
-EWeaponType AWeaponItem::GetWeaponType() const
+const EWeaponType AWeaponItem::GetWeaponType() const
 {
     return WeaponType;
+}
+
+TArray<FElementAndItsPercentageStruct> AWeaponItem::GetElementsAndTheirPercentagesStructs() const
+{
+    return ElementsAndTheirPercentagesStructs;
+}
+
+int AWeaponItem::GetAttackValue() const
+{
+    return AttackValue;
 }

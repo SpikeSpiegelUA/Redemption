@@ -30,12 +30,12 @@ EEffectArea AEffect::GetAreaOfEffect() const
 	return AreaOfEffect;
 }
 
- EEffectType AEffect::GetTypeOfEffect() const
+EEffectType AEffect::GetTypeOfEffect() const
 {
 	return TypeOfEffect;
 }
 
-FName AEffect::GetEffectName() const
+FText AEffect::GetEffectName() const
 {
 	return EffectName;
 }
@@ -48,5 +48,30 @@ int AEffect::GetEffectStat() const
 int AEffect::GetDuration() const
 {
 	return Duration;
+}
+
+void AEffect::SetAreaOfEffect(EEffectArea NewAreaOfEffect)
+{
+	AreaOfEffect = NewAreaOfEffect;
+}
+
+void AEffect::SetTypeOfEffect(EEffectType NewTypeOfEffect)
+{
+	TypeOfEffect = NewTypeOfEffect;
+}
+
+void AEffect::SetEffectName(const FText& NewEffectName)
+{
+	EffectName = NewEffectName;
+}
+
+void AEffect::SetEffectStat(int NewEffectStat)
+{
+	EffectStat = NewEffectStat;
+}
+
+void AEffect::SetDuration(int NewDuration)
+{
+	Duration = NewDuration;
 }
 
