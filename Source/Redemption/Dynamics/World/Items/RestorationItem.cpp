@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\RestorationItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\RestorationItem.h"
 
-ItemRestorationType ARestorationItem::GetTypeOfRestoration() const
+EItemRestorationType ARestorationItem::GetTypeOfRestoration() const
 {
     return TypeOfRestoration;
 }

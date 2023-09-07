@@ -26,7 +26,7 @@ int SkillsSpellsAndEffectsActions::GetValueAfterEffects(int ValueBeforeEffects, 
 	return ValueAfterEffects;
 }
 
-int SkillsSpellsAndEffectsActions::GetAttackValueAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements, const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements)
+int SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements, const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements)
 {
 	TArray<FElementAndItsPercentageStruct> TemporaryReceiverContainedElements;
 	for (FElementAndItsPercentageStruct ReceiverElementPercent : ReceiverContainedElements) {
@@ -51,6 +51,8 @@ int SkillsSpellsAndEffectsActions::GetAttackValueAfterResistances(int ValueBefor
 			}
 	}
 	int ValueOfAttackWithResistances = ValueBeforeResistances;
+	if (TemporaryReceiverContainedElements.Num() == 0)
+		TemporaryReceiverContainedElements = ReceiverContainedElements;
 	for (FElementAndItsPercentageStruct AttackerElementPercent : AttackerContainedElements)
 		for (FElementAndItsPercentageStruct ReceiverElementPercent : TemporaryReceiverContainedElements)
 			if (ReceiverElementPercent.GetElement() == AttackerElementPercent.GetElement()) {
@@ -58,6 +60,42 @@ int SkillsSpellsAndEffectsActions::GetAttackValueAfterResistances(int ValueBefor
 				ValueOfAttackWithResistances -= ElementPercentOfValueOfAttack * ReceiverElementPercent.GetPercent() / 100;
 			}
 	return ValueOfAttackWithResistances;
+}
+
+int SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements, const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements)
+{
+	TArray<FElementAndItsPercentageStruct> TemporaryReceiverContainedElements;
+	for (FElementAndItsPercentageStruct ReceiverElementPercent : ReceiverContainedElements) {
+		int ElementPercentBeforeEffects = ReceiverElementPercent.GetPercent();
+		FElementAndItsPercentageStruct NewElementPercent;
+		for (AEffect* Effect : Effects)
+			if (IsValid(Effect) && GetSpellElementCorrespondingToEffectArea(Effect->GetAreaOfEffect()) == ReceiverElementPercent.GetElement()) {
+				NewElementPercent.SetElement(ReceiverElementPercent.GetElement());
+				if (AEffectWithPlainModifier* EffectWithPlainModifier = Cast<AEffectWithPlainModifier>(Effect); IsValid(EffectWithPlainModifier) || ReceiverElementPercent.GetPercent() == 0) {
+					if (Effect->GetTypeOfEffect() == EEffectType::BUFF)
+						NewElementPercent.SetPercent(ElementPercentBeforeEffects + Effect->GetEffectStat());
+					else
+						NewElementPercent.SetPercent(ElementPercentBeforeEffects - Effect->GetEffectStat());
+				}
+				else {
+					if (Effect->GetTypeOfEffect() == EEffectType::BUFF)
+						NewElementPercent.SetPercent(ElementPercentBeforeEffects * (Effect->GetEffectStat() - 1));
+					else
+						NewElementPercent.SetPercent(ElementPercentBeforeEffects / Effect->GetEffectStat());
+				}
+				TemporaryReceiverContainedElements.Add(NewElementPercent);
+			}
+	}
+	int EvasionChanceWithResistances = ValueBeforeResistances;
+	if (TemporaryReceiverContainedElements.Num() == 0)
+		TemporaryReceiverContainedElements = ReceiverContainedElements;
+	for (FElementAndItsPercentageStruct AttackerElementPercent : AttackerContainedElements) 
+		for (FElementAndItsPercentageStruct ReceiverElementPercent : TemporaryReceiverContainedElements) 
+			if (ReceiverElementPercent.GetElement() == AttackerElementPercent.GetElement()) {
+				int ElementPercentOfEvasionChance = ValueBeforeResistances * AttackerElementPercent.GetPercent() / 100;
+				EvasionChanceWithResistances -= ElementPercentOfEvasionChance * ReceiverElementPercent.GetPercent() / 25;
+			}
+	return EvasionChanceWithResistances;
 }
 
 ESpellElements SkillsSpellsAndEffectsActions::GetSpellElementCorrespondingToEffectArea(EEffectArea EffectArea)
@@ -81,4 +119,22 @@ ESpellElements SkillsSpellsAndEffectsActions::GetSpellElementCorrespondingToEffe
 	else if (EffectArea == EEffectArea::WINDRESISTANCE)
 		return ESpellElements::WIND;
 	return ESpellElements::NONE;
+}
+
+void SkillsSpellsAndEffectsActions::InitializeElementalResistances(TArray<FElementAndItsPercentageStruct>& ElementalResistances)
+{
+	TArray<FElementAndItsPercentageStruct> NewElementalResistances;
+	for (ESpellElements SpellElement : TEnumRange<ESpellElements>())
+		for (int i = 0; i < ElementalResistances.Num(); i++) {
+			if (ElementalResistances[i].GetElement() == SpellElement)
+				break;
+			if (i == ElementalResistances.Num() - 1) {
+				FElementAndItsPercentageStruct NewElementPercent;
+				NewElementPercent.SetElement(SpellElement);
+				NewElementPercent.SetPercent(0);
+				NewElementalResistances.Add(NewElementPercent);
+			}
+		}
+	for (FElementAndItsPercentageStruct ElementPercent : NewElementalResistances)
+		ElementalResistances.Add(ElementPercent);
 }

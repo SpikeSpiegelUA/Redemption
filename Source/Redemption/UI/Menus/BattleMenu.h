@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Enemies\CombatEnemyNPC.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatEnemyNPC.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
 #include "BattleMenu.generated.h"
 
 /**
@@ -22,9 +22,29 @@ private:
 
 	FTimerHandle ItemUseTimerHandle{};
 	FTimerHandle DefendActionTimerHandle{};
+	FTimerHandle HideNotificationTimerHandle;
 
 	UPROPERTY()
 		AUIManager* UIManager {};
+
+	UFUNCTION()
+		void HideNotificationAndClearItsTimer();
+	void CreateNotification(const FText& NotificationText);
+
+	void AssaultSpellUse(class AAssaultSpell* const& SpellToUse, class ABattleManager* const& BattleManager,
+		class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
+	void RestorationSpellUse(class ARestorationSpell* const& SpellToUse, class ABattleManager* const& BattleManager,
+		class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
+	void BuffSpellUse(class ACreatedBuffSpell* const& SpellToUse, class ABattleManager* const& BattleManager,
+		class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
+	void BuffSpellUse(class APresetBuffSpell* const& SpellToUse, class ABattleManager* const& BattleManager,
+		class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
+	void DebuffSpellUse(class ACreatedDebuffSpell* const& SpellToUse, class ABattleManager* const& BattleManager,
+		class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
+	void DebuffSpellUse(class APresetDebuffSpell* const& SpellToUse, class ABattleManager* const& BattleManager,
+		class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
+
+	FTimerHandle UseSpellTimerHandle{};
 
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -52,6 +72,8 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* LeftRightMenuBorder;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UBorder* NotificationBorder;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UCanvasPanel* CenterMark;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UVerticalBox* MenuVerticalBox;
@@ -59,12 +81,14 @@ protected:
 		class UVerticalBox* AttackMenuVerticalBox;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* EnemyNameTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UTextBlock* NotificationTextBlock;
 
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
 
 public:
-	void SetEnemyName(const FName& Name);
+	void SetTargetName(const FText& Name);
 	
 	UCanvasPanel* GetCenterMark() const;
 	UVerticalBox* GetMenuVerticalBox() const;

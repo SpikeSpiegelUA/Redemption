@@ -12,7 +12,7 @@
 /**
  * 
  */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FResponseClicked, const FText&, ResponseText)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FResponseClicked, const FText&, ResponseText);
 
 UCLASS()
 class REDEMPTION_API UResponseEntry : public UUserWidget

@@ -6,7 +6,7 @@
 #include "../Dynamics/Gameplay/Skills and Effects/Effect.h"
 #include "Containers/EnumAsByte.h"
 #include <Redemption/Dynamics/Miscellaneous/ElementAndItsPercentage.h>
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\PhysicalTypeAndItsPercentage.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\PhysicalTypeAndItsPercentage.h"
 
 
 /**
@@ -15,7 +15,9 @@
 
 namespace SkillsSpellsAndEffectsActions {
 	int GetValueAfterEffects(int ValueBeforeEffects, const TArray<AEffect*>& Effects, EEffectArea EffectArea);
-	int GetAttackValueAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
+	int GetAttackOrRestorationValueAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
+		const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements);
+	int GetBuffOrDebuffEvasionChanceAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
 		const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements);
 	//In EEffectArea we have different resistance to elements, so we get element corresponding to the area passed by value.
 	ESpellElements GetSpellElementCorrespondingToEffectArea(EEffectArea EffectArea);

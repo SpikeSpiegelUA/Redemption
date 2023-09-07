@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatAllies.h"
 #include "RedemptionGameInstance.generated.h"
 
 /**
@@ -36,6 +37,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 		TSubclassOf<class AArmorItem> InstanceEquipedLowerArmor{};
 
+
 	UPROPERTY(VisibleAnywhere, Category = "Player")
 		uint16 InstancePlayerCurrentHP = 100;
 	UPROPERTY(VisibleAnywhere, Category = "Player")
@@ -60,6 +62,8 @@ public:
 		int8 InstancePlayerAgility = 1;
 	UPROPERTY(VisibleAnywhere, Category = "Player")
 		int8 InstancePlayerLuck = 1;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
+		TArray<TSubclassOf<ACombatAllies>> InstanceAllies;
 
 	//Settings variables
 	UPROPERTY(VisibleAnywhere, Category = "Settings")

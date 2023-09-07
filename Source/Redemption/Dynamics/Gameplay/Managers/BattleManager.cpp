@@ -1,14 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\CombatEnemyNPCAIController.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\Combat\CombatEnemyNPCAIController.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
 #include <Kismet/KismetMathLibrary.h>
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ArrayActions.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\FloatingManaBarWidget.h"
 #include <Kismet/GameplayStatics.h>
 
 // Sets default values
@@ -31,11 +32,11 @@ void ABattleManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//Rotate camera to enemy or to a the start position. Only is used in battle mode to follow attacking enemy or select enemy for an attack
-	if (CanTurnBehindPlayerCameraToEnemy && IsValid(SelectedEnemy) && IsValid(BehindPlayerCamera)) {
-		FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(BehindPlayerCamera->GetActorLocation(), SelectedEnemy->GetActorLocation());
+	if (CanTurnBehindPlayerCameraToTarget && IsValid(SelectedCombatNPC) && IsValid(BehindPlayerCamera)) {
+		FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(BehindPlayerCamera->GetActorLocation(), SelectedCombatNPC->GetActorLocation());
 		BehindPlayerCamera->SetActorRotation(FMath::RInterpTo(BehindPlayerCamera->GetActorRotation(), Rotation, DeltaTime, 7));
 		if (BehindPlayerCamera->GetActorRotation().Equals(Rotation))
-			CanTurnBehindPlayerCameraToEnemy = false;
+			CanTurnBehindPlayerCameraToTarget = false;
 	}
 	if (CanTurnBehindPlayerCameraToStartPosition && IsValid(BehindPlayerCamera)) {
 		FRotator Rotation = FRotator(-16.113443, 180.000000, 0.000000);
@@ -46,61 +47,56 @@ void ABattleManager::Tick(float DeltaTime)
 
 }
 
-void ABattleManager::SelectNewEnemy(ACombatEnemyNPC* const& Target, int Index)
+void ABattleManager::SelectNewTarget(ACombatNPC* const& Target, int Index)
 {
-	if (IsValid(SelectedEnemy) && IsValid(Target)) {
-		if (SelectedEnemy->GetEnemyHealthBarWidget())
-			SelectedEnemy->GetEnemyHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
-		if (Target->GetEnemyHealthBarWidget())
-			Target->GetEnemyHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
-		SelectedEnemy = Target;
-		SelectedEnemyIndex = Index;
-		CanTurnBehindPlayerCameraToEnemy = true;
+	if (IsValid(Target)) {
+		if (SelectedCombatNPC->GetFloatingHealthBarWidget())
+			SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
+		if (Target->GetFloatingHealthBarWidget())
+			Target->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
+		SelectedCombatNPC = Target;
+		SelectedCombatNPCIndex = Index;
+		CanTurnBehindPlayerCameraToTarget = true;
 		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 		if(IsValid(PlayerCharacter))
-			PlayerCharacter->GetBattleMenuWidget()->SetEnemyName(Target->GetCharacterName());
+			PlayerCharacter->GetBattleMenuWidget()->SetTargetName(FText::FromName(Target->GetCharacterName()));
 	}
 }
 
 void ABattleManager::TurnChange()
 {
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	//Pass turn to next random enemy
+	//Pass turn to next random enemy/ally
 
 	if (IsValid(PlayerCharacter) && PlayerCharacter->CurrentHP > 0) {
 		if (EnemyTurnQueue.Num() > 0) {
-			ACombatEnemyNPCAIController* AIController{};
 			if (ActorNumberOfTheCurrentTurn >= 0) {
-				AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[ActorNumberOfTheCurrentTurn]->GetController());
-				if(IsValid(AIController))
-				AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
+				if(ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[ActorNumberOfTheCurrentTurn]->GetController()); IsValid(AIController))
+					AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
 				BattleEnemies[ActorNumberOfTheCurrentTurn]->SetActorRotation(FRotator(0, 0, 0));
 			}
-			if (IsValid(SelectedEnemy))
-				SelectedEnemy->GetEnemyHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
+			SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
+			if (IsValid(Cast<ACombatAllies>(SelectedCombatNPC)))
+				Cast<ACombatAllies>(SelectedCombatNPC)->GetFloatingManaBarWidget()->GetManaBar()->SetVisibility(ESlateVisibility::Hidden);
 			int NextActor = EnemyTurnQueue[0];
-			SelectedEnemy = BattleEnemies[NextActor];
-			CanTurnBehindPlayerCameraToEnemy = true;
+			SelectedCombatNPC = BattleEnemies[NextActor];
+			CanTurnBehindPlayerCameraToTarget = true;
 			EnemyTurnQueue.Remove(NextActor);
 			ActorNumberOfTheCurrentTurn = NextActor;
-			AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[NextActor]->GetController());
-			if (IsValid(AIController))
-				if (AIController->GetBlackboardComponent()) {
+			if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[NextActor]->GetController()); IsValid(AIController))
+				if (IsValid(AIController->GetBlackboardComponent()))
 					AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", true);
-				}
 		}
 		//If EnemyQueue is empty, check if there are alive enemies. If yes, then enable battle UI and continue the battle, if not, show results of the battle.
 		else {
-			ACombatEnemyNPCAIController* AIController{};
 			bool AreAliveEnemies = false;
 			for (int i = 0; i < BattleEnemies.Num(); i++)
-				if (BattleEnemies[i]->HP > 0)
+				if (BattleEnemies[i]->GetHP() > 0)
 					AreAliveEnemies = true;
 			if (AreAliveEnemies) {
 				if (ActorNumberOfTheCurrentTurn >= 0) {
-					AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[ActorNumberOfTheCurrentTurn]->GetController());
-					if(IsValid(AIController))
-					AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
+					if(ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[ActorNumberOfTheCurrentTurn]->GetController()); IsValid(AIController))
+						AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
 					BattleEnemies[ActorNumberOfTheCurrentTurn]->SetActorRotation(FRotator(0, 0, 0));
 				}
 				TArray<AActor*> UIManagerActors;
@@ -110,7 +106,7 @@ void ABattleManager::TurnChange()
 					UIManager = Cast<AUIManager>(UIManagerActors[0]);
 				ActorNumberOfTheCurrentTurn = -1;
 				UBattleMenu* BattleMenu = PlayerCharacter->GetBattleMenuWidget();
-				CanTurnBehindPlayerCameraToEnemy = false;
+				CanTurnBehindPlayerCameraToTarget = false;
 				CanTurnBehindPlayerCameraToStartPosition = true;
 				if (IsValid(BattleMenu) && IsValid(UIManager)) {
 					BattleMenu->IsChoosingAction = true;
@@ -140,8 +136,7 @@ void ABattleManager::TurnChange()
 			}
 			else {
 				if (ActorNumberOfTheCurrentTurn >= 0) {
-					AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[ActorNumberOfTheCurrentTurn]->GetController());
-					if(IsValid(AIController))
+					if(ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[ActorNumberOfTheCurrentTurn]->GetController()); IsValid(AIController))
 					AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
 					BattleEnemies[ActorNumberOfTheCurrentTurn]->SetActorRotation(FRotator(0, 0, 0));
 				}
@@ -151,17 +146,17 @@ void ABattleManager::TurnChange()
 				PlayerCharacter->GetBattleResultsScreenWidget()->AddToViewport();
 				PlayerCharacter->Effects.Empty();
 				for (int i = 0; i < BattleEnemies.Num(); i++)
-					TotalGoldReward += BattleEnemies[i]->GoldReward;
+					TotalGoldReward += BattleEnemies[i]->GetGoldReward();
 				GetWorld()->GetTimerManager().SetTimer(ShowExperienceTextTimerHandle, this, &ABattleManager::ShowExperienceText, 1, false);
 				GetWorld()->GetTimerManager().SetTimer(ShowGoldTextTimerHandle, this, &ABattleManager::ShowGoldText, 3, false);
 				FTimerDelegate SetAmountOfGoldTimerDelegate = FTimerDelegate::CreateUObject(this, &ABattleManager::SetAmountOfGoldText, TotalGoldReward);
 				GetWorldTimerManager().SetTimer(SetAmountOfGoldTextTimerHandle, SetAmountOfGoldTimerDelegate, 4, false);
 				GetWorld()->GetTimerManager().SetTimer(ShowContinueButtonTimerHandle, this, &ABattleManager::ShowContinueButton, 5, false);
 				//Background Music set
-				PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponent->Play(0.0f);
-				PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponent->SetPaused(true);
-				PlayerCharacter->GetAudioManager()->DungeonBattleResultsBackgroundMusicAudioComponent->Play(0.0f);
-				PlayerCharacter->GetAudioManager()->DungeonBattleResultsBackgroundMusicAudioComponent->SetPaused(false);
+				PlayerCharacter->GetAudioManager()->GetDungeonCombatBackgroundMusicAudioComponent()->Play(0.0f);
+				PlayerCharacter->GetAudioManager()->GetDungeonCombatBackgroundMusicAudioComponent()->SetPaused(true);
+				PlayerCharacter->GetAudioManager()->GetDungeonBattleResultsBackgroundMusicAudioComponent()->Play(0.0f);
+				PlayerCharacter->GetAudioManager()->GetDungeonBattleResultsBackgroundMusicAudioComponent()->SetPaused(false);
 				for (int i = PlayerCharacter->Effects.Num() - 1; i >= 0; i--) {
 					if (IsValid(PlayerCharacter->Effects[i])) {
 						PlayerCharacter->Effects[i]->ConditionalBeginDestroy();
@@ -173,14 +168,13 @@ void ABattleManager::TurnChange()
 	}
 	//Player's death logic
 	else if (IsValid(PlayerCharacter) && PlayerCharacter->CurrentHP <= 0) {
-		ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[ActorNumberOfTheCurrentTurn]->GetController());
-		if (IsValid(AIController))
+		if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[ActorNumberOfTheCurrentTurn]->GetController()); IsValid(AIController))
 			AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
 		PlayerCharacter->GetBattleMenuWidget()->RemoveFromParent(); 
 		PlayerCharacter->GetDeathMenuWidget()->AddToViewport();
-		PlayerCharacter->GetAudioManager()->DeathMenuBackgroundMusicAudioComponent->Play(0.0f);
-		PlayerCharacter->GetAudioManager()->DeathMenuBackgroundMusicAudioComponent->SetPaused(false);
-		PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponent->SetPaused(true);
+		PlayerCharacter->GetAudioManager()->GetDeathMenuBackgroundMusicAudioComponent()->Play(0.0f);
+		PlayerCharacter->GetAudioManager()->GetDeathMenuBackgroundMusicAudioComponent()->SetPaused(false);
+		PlayerCharacter->GetAudioManager()->GetDungeonCombatBackgroundMusicAudioComponent()->SetPaused(true);
 		APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 		for (int i = PlayerCharacter->Effects.Num() - 1; i >= 0; i--) {
 			if (IsValid(PlayerCharacter->Effects[i])) {
@@ -204,30 +198,12 @@ void ABattleManager::PlayerTurnController()
 		PlayerCharacter->GetBattleMenuWidget()->IsChoosingAction = true;
 		//Delete dead enemies and fill the queue
 		for (int i = 0; i < BattleEnemies.Num(); i++)
-			if (BattleEnemies[i]->HP <= 0) {
-				TotalGoldReward += BattleEnemies[i]->GoldReward;
-				BattleEnemies.RemoveAt(i);
-			}
-		for (int i = 0; i < BattleEnemies.Num(); i++)
-			EnemyTurnQueue.Add(i);
-		RandomizeEnemyQueue(EnemyTurnQueue);
+			if (BattleEnemies[i]->GetHP() <= 0) 
+				TotalGoldReward += BattleEnemies[i]->GetGoldReward();
+			else
+				EnemyTurnQueue.Add(i);
+		ArrayActions::ShuffleArray<int>(EnemyTurnQueue);
 		TurnChange();
-	}
-}
-
-void ABattleManager::RandomizeEnemyQueue(TArray<int> &Array)
-{
-	if (Array.Num() > 0)
-	{
-		int32 LastIndex = Array.Num() - 1;
-		for (int32 i = 0; i < LastIndex; i++)
-		{
-			int32 Index = FMath::RandRange(0, LastIndex);
-			if (i != Index)
-			{
-				Array.Swap(i, Index);
-			}
-		}
 	}
 }
 
@@ -255,9 +231,9 @@ void ABattleManager::ShowContinueButton()
 	PlayerCharacter->GetBattleResultsScreenWidget()->GetContinueButton()->SetVisibility(ESlateVisibility::Visible);
 }
 
-void ABattleManager::SetCanTurnBehindPlayerCameraToEnemy(bool Value)
+void ABattleManager::SetCanTurnBehindPlayerCameraToTarget(bool Value)
 {
-	CanTurnBehindPlayerCameraToEnemy = Value;
+	CanTurnBehindPlayerCameraToTarget = Value;
 }
 
 void ABattleManager::SetCanTurnBehindPlayerCameraToStartPosition(bool Value)
@@ -265,14 +241,14 @@ void ABattleManager::SetCanTurnBehindPlayerCameraToStartPosition(bool Value)
 	CanTurnBehindPlayerCameraToStartPosition = Value;
 }
 
-void ABattleManager::AddEnemyTurnQueue(int Value)
-{
-	EnemyTurnQueue.Add(Value);
-}
-
 void ABattleManager::SetActorNumberOfTheCurrentTurn(uint8 Value)
 {
 	ActorNumberOfTheCurrentTurn = Value;
+}
+
+void ABattleManager::SetBehindPlayerCameraLocation(FVector NewLocation)
+{
+	BehindPlayerCamera->SetActorLocation(NewLocation);
 }
 
 ACameraActor* ABattleManager::GetBehindPlayerCamera() const
@@ -293,10 +269,5 @@ TSubclassOf<ACombatFloatingInformationActor> ABattleManager::GetCombatFloatingIn
 uint8 ABattleManager::GetActorNumberOfTheCurrentTurn() const
 {
 	return ActorNumberOfTheCurrentTurn;
-}
-
-TArray<int> ABattleManager::GetEnemyTurnQueue() const
-{
-	return EnemyTurnQueue;
 }
 

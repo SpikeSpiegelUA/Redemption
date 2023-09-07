@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\AudioManager.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\AudioManager.h"
 #include "Kismet\GameplayStatics.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
 #include "Components/AudioComponent.h"
 
 // Sets default values
@@ -70,5 +70,80 @@ void AAudioManager::BeginPlay()
 void AAudioManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+USoundCue* AAudioManager::GetUseHealOrBuffSoundCue() const
+{
+	return UseHealOrBuffSoundCue;
+}
+
+USoundCue* AAudioManager::GetUseDebuffSoundCue() const
+{
+	return UseDebuffSoundCue;
+}
+
+USoundCue* AAudioManager::GetUseAssaultSoundCue() const
+{
+	return UseAssaultSoundCue;
+}
+
+USoundCue* AAudioManager::GetDungeonCombatBackgroundMusicSoundCue() const
+{
+	return DungeonCombatBackgroundMusicSoundCue;
+}
+
+USoundCue* AAudioManager::GetDungeonExplorationBackgroundMusicSoundCue() const
+{
+	return DungeonExplorationBackgroundMusicSoundCue;
+}
+
+USoundCue* AAudioManager::GetDungeonBattleResultsBackgroundMusicSoundCue() const
+{
+	return DungeonBattleResultsBackgroundMusicSoundCue;
+}
+
+USoundCue* AAudioManager::GetTownExplorationBackgroundMusicSoundCue() const
+{
+	return TownExplorationBackgroundMusicSoundCue;
+}
+
+USoundCue* AAudioManager::GetMainMenuBackgroundMusicSoundCue() const
+{
+	return MainMenuBackgroundMusicSoundCue;
+}
+
+USoundCue* AAudioManager::GetDeathMenuBackgroundMusicSoundCue() const
+{
+	return DeathMenuBackgroundMusicSoundCue;
+}
+
+UAudioComponent* AAudioManager::GetDungeonCombatBackgroundMusicAudioComponent() const
+{
+	return DungeonCombatBackgroundMusicAudioComponent;
+}
+
+UAudioComponent* AAudioManager::GetDungeonExplorationBackgroundMusicAudioComponent() const
+{
+	return DungeonExplorationBackgroundMusicAudioComponent;
+}
+
+UAudioComponent* AAudioManager::GetDungeonBattleResultsBackgroundMusicAudioComponent() const
+{
+	return DungeonBattleResultsBackgroundMusicAudioComponent;
+}
+
+UAudioComponent* AAudioManager::GetTownExplorationBackgroundMusicAudioComponent() const
+{
+	return TownExplorationBackgroundMusicAudioComponent;
+}
+
+UAudioComponent* AAudioManager::GetMainMenuBackgroundMusicAudioComponent() const
+{
+	return MainMenuBackgroundMusicAudioComponent;
+}
+
+UAudioComponent* AAudioManager::GetDeathMenuBackgroundMusicAudioComponent() const
+{
+	return DeathMenuBackgroundMusicAudioComponent;
 }
 

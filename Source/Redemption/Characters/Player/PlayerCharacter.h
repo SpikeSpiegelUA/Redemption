@@ -4,29 +4,30 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\CharacterInTheWorld.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\MyInputConfigData.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\InventoryMenu.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\PauseMenu.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\PlayerMenu.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SkillBattleMenu.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\BattleResultsScreen.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\GameManager.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\AudioManager.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\DialogueBox.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\ResponsesBox.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\ResponseEntry.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\ForwardRayInfo.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Notification.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\EffectsSpellsAndSkillsManager.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\DeathMenu.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\LearnedSpellsJournalMenu.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\CharacterInTheWorld.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\MyInputConfigData.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\InventoryMenu.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\PauseMenu.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\PlayerMenu.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SkillBattleMenu.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\BattleResultsScreen.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\GameManager.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\AudioManager.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\DialogueBox.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\ResponsesBox.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\ResponseEntry.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\ForwardRayInfo.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Notification.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\EffectsSpellsAndSkillsManager.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\DeathMenu.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\LearnedSpellsJournalMenu.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatAllies.h"
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
@@ -36,7 +37,7 @@
 #include <EnhancedInputComponent.h>
 #include <InputActionValue.h>
 #include "EnhancedInputSubsystems.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\PlayerCharacterAnimInstance.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\PlayerCharacterAnimInstance.h"
 #include "InputMappingContext.h"
 #include "InputActionValue.h"
 #include "Camera/CameraComponent.h"
@@ -46,16 +47,16 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\Interfaces\BattleActionsInterface.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\Interfaces\CombatActionsInterface.h"
 #include "Containers/EnumAsByte.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\PlayerBarsWidget.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\AlliesInfoBars.h"
 #include "PlayerCharacter.generated.h"
 
 /**
  * 
  */
 UCLASS(Config=Game)
-class APlayerCharacter : public ACharacter, public IBattleActionsInterface
+class APlayerCharacter : public ACharacter, public ICombatActionsInterface
 {
 	GENERATED_BODY()
 	/** Camera boom positioning the camera behind the character*/
@@ -79,11 +80,14 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		AAudioManager* AudioManager {};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
-		AGameManager* GameManager {};
+		class AGameManager* GameManager {};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		class AEffectsSpellsAndSkillsManager* EffectsManager {};
 	UPROPERTY(BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		URedemptionGameInstance* GameInstance {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true))
+		TArray<TSubclassOf<ACombatAllies>> Allies{};
 
 	UPROPERTY()
 		APlayerController* PlayerController {};
@@ -119,7 +123,7 @@ public:
 	virtual void BeginPlay() override;
 
 	//Access functions
-	class UPlayerBarsWidget* GetPlayerBarsWidget() const;
+	class UAlliesInfoBars* GetAlliesInfoBarsWidget() const;
 	UPlayerMenu* GetPlayerMenuWidget() const;
 	UInventoryMenu* GetInventoryMenuWidget() const;
 	UBattleResultsScreen* GetBattleResultsScreenWidget() const;
@@ -131,7 +135,7 @@ public:
 	ULearnedSpellsJournalMenu* GetLearnedSpellsJournalMenu() const;
 	ABattleManager* GetBattleManager() const;
 	AUIManager* GetUIManager() const;
-	AGameManager* GetGameManager() const;
+	class AGameManager* GetGameManager() const;
 	AAudioManager* GetAudioManager() const;
 	UDeathMenu* GetDeathMenuWidget() const;
 	class USkillBattleMenu* GetSkillBattleMenuWidget() const;
@@ -143,6 +147,7 @@ public:
 	UResponsesBox* GetResponsesBox() const;
 	UTouchInterface* GetEmptyTouchInterface() const;
 	UTouchInterface* GetStandardTouchInterface() const;
+	TArray<TSubclassOf<ACombatAllies>> GetAllies() const;
 
 	//Function to call, when an enemy got hit. Parameters for a standard attack.
 	void GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements) override;
@@ -192,6 +197,8 @@ protected:
 	//UI
 	//Widget classes to spawn widget instances
 	UPROPERTY(EditAnywhere, Category = "UI")
+		TSubclassOf<UAlliesInfoBars> AlliesInfoBarsClass{};
+	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class UForwardRayInfo> ForwardRayInfoClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class ULoadingScreen> LoadingScreenClass{};
@@ -207,8 +214,6 @@ protected:
 		TSubclassOf<class UBattleMenu> BattleMenuClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class UBattleResultsScreen> BattleResultsScreenClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class UPlayerBarsWidget> PlayerBarsClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class UDialogueBox> DialogueBoxClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
@@ -239,7 +244,7 @@ protected:
 	UPROPERTY()
 		class UBattleResultsScreen* BattleResultsScreenWidget{};
 	UPROPERTY()
-		class UPlayerBarsWidget* PlayerBarsWidget{};
+		class UAlliesInfoBars* AlliesInfoBarsWidget{};
 	UPROPERTY()
 		class UDialogueBox* DialogueBoxWidget{};
 	UPROPERTY()
@@ -263,21 +268,21 @@ public:
 		class UMyInputConfigData* InputActions{};
 #pragma endregion
 	//Battle mode regarding variables
-	UPROPERTY(EditAnywhere, Category = "Battle")
+	UPROPERTY(EditAnywhere, Category = "Combat")
 		float CurrentHP = 100;
-	UPROPERTY(EditAnywhere, Category = "Battle")
+	UPROPERTY(EditAnywhere, Category = "Combat")
 		float MaxHP = 100;
-	UPROPERTY(EditAnywhere, Category = "Battle")
+	UPROPERTY(EditAnywhere, Category = "Combat")
 		float CurrentMana = 100;
-	UPROPERTY(EditAnywhere, Category = "Battle")
+	UPROPERTY(EditAnywhere, Category = "Combat")
 		float MaxMana = 100;
-	UPROPERTY(VisibleAnywhere, Category = "Battle")
+	UPROPERTY(VisibleAnywhere, Category = "Combat")
 		TArray<AEffect*> Effects;
 	//Variables for movement in battle scene
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Battle")
-	    bool Battle_IsMovingToAttackEnemy = false;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Battle")
-		bool Battle_IsMovingToStartPosition = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
+	    bool Combat_IsMovingToAttackEnemy = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
+		bool Combat_IsMovingToStartPosition = false;
 
 	bool IsInDialogue = false;
 	

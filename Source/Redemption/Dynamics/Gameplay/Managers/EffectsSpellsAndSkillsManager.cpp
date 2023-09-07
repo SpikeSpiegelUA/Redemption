@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\EffectsSpellsAndSkillsManager.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\EffectsSpellsAndSkillsManager.h"
 
 // Sets default values
 AEffectsSpellsAndSkillsManager::AEffectsSpellsAndSkillsManager()
@@ -72,5 +72,65 @@ TSubclassOf<ASpellObject> AEffectsSpellsAndSkillsManager::GetWindMainElementSpel
 TSubclassOf<ASpellObject> AEffectsSpellsAndSkillsManager::GetMultielementalMainElementSpellObjectClass() const
 {
 	return MultiElementalMainElementSpellObjectClass;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetFireElementIcon() const
+{
+	return FireElementIcon;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetWaterElementIcon() const
+{
+	return WaterElementIcon;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetWindElementIcon() const
+{
+	return WindElementIcon;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetEarthElementIcon() const
+{
+	return EarthElementIcon;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetLightningElementIcon() const
+{
+	return LightningElementIcon;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetBloodElementIcon() const
+{
+	return BloodElementIcon;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetHolyElementIcon() const
+{
+	return HolyElementIcon;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetDarkElementIcon() const
+{
+	return DarkElementIcon;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetAssaultSpellTypeIcon() const
+{
+	return AssaultSpellTypeIcon;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetDebuffSpellTypeIcon() const
+{
+	return DebuffSpellTypeIcon;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetRestorationSpellTypeIcon() const
+{
+	return RestorationSpellTypeIcon;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetBuffSpellTypeIcon() const
+{
+	return BuffSpellTypeIcon;
 }
 

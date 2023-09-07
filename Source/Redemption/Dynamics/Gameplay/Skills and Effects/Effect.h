@@ -40,6 +40,7 @@ enum class ESpellElements :uint8
 	//Need this for some logic. Basically spell/weapon has different elements with the same count. Affects only spell info and spell's spell object. Isn't a part of the combat design.
 	MULTIELEMENTAL UMETA(DisplayName = "Multielemental"),
 };
+ENUM_RANGE_BY_FIRST_AND_LAST(ESpellElements, ESpellElements::FIRE, ESpellElements::BLOOD);
 
 UENUM(BlueprintType)
 enum class EEffectType :uint8

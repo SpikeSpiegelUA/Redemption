@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\DialogueBox.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\DialogueBox.h"
 
 bool UDialogueBox::Initialize()
 {
@@ -27,8 +27,13 @@ void UDialogueBox::ContinueButtonOnClicked()
 	APlayerController* PlayerController = nullptr;
 	if (IsValid(GetWorld()))
 		PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-	if (IsValid(PlayerController))
-		PlayerController->InputKey(EKeys::E, EInputEvent::IE_Pressed, 1, false);
+	if (IsValid(PlayerController)) {
+		FInputKeyParams InputKeyParams;
+		InputKeyParams.Key = EKeys::E;
+		InputKeyParams.Event = EInputEvent::IE_Pressed;
+		InputKeyParams.bIsGamepadOverride = false;
+		PlayerController->InputKey(InputKeyParams);
+	}
 }
 
 UBorder* UDialogueBox::GetDialogueBorder() const

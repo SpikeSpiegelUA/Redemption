@@ -4,7 +4,7 @@
 #include "BTTask_StartADialogue.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
 
 UBTTask_StartADialogue::UBTTask_StartADialogue(const FObjectInitializer& ObjectInitializer)
 {

@@ -4,8 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\SmartObjects\WarzombieBattleAI.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Combat\CombatStartLocation.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatPlayerCharacter.h"
 #include "GameManager.generated.h"
 
 UCLASS()
@@ -24,12 +25,12 @@ protected:
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "General Variables", transient)
 		class APlayerCharacter* PlayerCharacter{};
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Battle variables")
-		AActor* PlayerBattleSpawn {};
-
 	// 0 - spawn 1, 1 - spawn 2, 2 - spawn 3, 3 - spawn 4
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle variables")
 		TArray<AActor*> EnemyBattleSpawns;
+	// 0 - spawn 1, 1 - spawn 2, 2 - spawn 3, 3 - spawn 4
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle variables")
+		TArray<ACombatStartLocation*> AlliesPlayerBattleSpawns;
 
 	//UI Components
 	//Battle transition variables
@@ -49,20 +50,16 @@ public:
 	void EndBattle();
 
 	ABattleManager* GetBattleManager() const;
-
-	AActor* GetPlayerBattleSpawn() const;
 	TArray<AActor*> GetEnemyBattleSpawns() const;
 
 	//Restore widgets to default state
 	void RestartBattleTransitionScreenWidget();
 
 private:
-	UPROPERTY(BlueprintReadOnly, Category = "Battle", meta = (AllowPrivateAccess = true), transient)
+	UPROPERTY(BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true), transient)
 		ABattleManager* BattleManager {};
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Creation", meta = (AllowPrivateAccess = true))
-		TSubclassOf<AWarzombieBattleAI> AWarzombieBattleAIClass{};
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true))
+		TSubclassOf<class ACombatPlayerCharacter> CombatPlayerCharacterClass {};
 	//End Battle variables
 	FVector PlayerLastLocation{};
-	FRotator PlayerLastRotation{};
 };

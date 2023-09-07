@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
 #include "RestorationSpell.generated.h"
 
 /**
  * 
  */
 UENUM(BlueprintType)
-enum class SpellRestorationType :uint8
+enum class ESpellRestorationType :uint8
 {
 	HEALTH UMETA(DisplayName = "Health"),
 	MANA UMETA(DisplayName = "Mana"),
@@ -22,12 +22,16 @@ class REDEMPTION_API ARestorationSpell : public ASpell
 	GENERATED_BODY()
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		SpellRestorationType TypeOfRestoration;
+		ESpellRestorationType TypeOfRestoration;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 		int RestorationValuePercent;
 public:
-	SpellRestorationType GetTypeOfRestoration() const;
+
+	ESpellRestorationType GetTypeOfRestoration() const;
 	int GetRestorationValuePercent() const;
+
+	void SetTypeOfRestoration(ESpellRestorationType NewSpellRestorationType);
+	void SetRestorationValuePercent(int NewRestorationValuePercent);
 
 	ARestorationSpell& ARestorationSpell::operator =(const ASpell& Spell);
 };

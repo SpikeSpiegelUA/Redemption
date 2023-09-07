@@ -4,19 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\SelectedElementEntryWidget.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\SelectedSpellTypeEntryWidget.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\BuffSpell.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\DebuffSpell.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\CreatedDebuffSpell.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\PresetDebuffSpell.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\RestorationSpell.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\AssaultSpell.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\SelectedElementEntryWidget.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\SelectedSpellTypeEntryWidget.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\BuffSpell.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\DebuffSpell.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\RestorationSpell.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\AssaultSpell.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "Components/HorizontalBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Border.h"
@@ -107,7 +102,6 @@ private:
 	TArray<ESpellElements> SelectedSpellElements;
 	ESpellType SelectedSpellType{};
 
-	FTimerHandle UseSpellTimerHandle{};
 	FTimerHandle HideNotificationTimerHandle{};
 
 	UFUNCTION()
@@ -151,36 +145,27 @@ private:
 		void HideNotificationAndClearItsTimer();
 
 	//Elements selection logic. Create widget and add them to a dedicated horizontal box.
-	void CreateSelectedElementWidgetAndAddToHorizontalBox(FString Filepath, ESpellElements Element);
+	void CreateSelectedElementWidgetAndAddToHorizontalBox(UTexture* Icon, ESpellElements Element);
 	//Spell type selection logic. Create widget and add it to a dedicated border.
-	void CreateSelectedSpellTypeWidgetAndAddToHorizontalBox(FString Filepath, ESpellType SpellType);
+	void CreateSelectedSpellTypeWidgetAndAddToHorizontalBox(UTexture* Icon, ESpellType SpellType);
 	//All spells are children of ASpell, so we create basic ASpell and then assign parameters specific to spell kind separately. 
 	class ACreatedBuffSpell* CreateBuffSpell(const TArray<ESpellElements>& SpellElements);
 	ASpell* CreateBasicSpell(ESpellType SpellType, const TArray<ESpellElements>& SpellElements);
 	class AAssaultSpell* CreateAssaultSpell(const TArray<ESpellElements>& SpellElements);
-	ACreatedDebuffSpell* CreateDebuffSpell(const TArray<ESpellElements>& SpellElements);
+	class ACreatedDebuffSpell* CreateDebuffSpell(const TArray<ESpellElements>& SpellElements);
 	ARestorationSpell* CreateRestorationSpell(const TArray<ESpellElements>& SpellElements);
+	TArray<AEffect*> CreateEffectForSpell(EEffectType EffectType, const TArray<ESpellElements>& SpellElements);
 	//Find spell object corresponding to created spell's main element.
 	TSubclassOf<ASpellObject> FindSpellObject(ESpellElements MainSpellElement);
 	EEffectArea FindEffectAreaOfCreatedEffect(ESpellElements SpellElementOfEffect);
 	//Find element of the spell which has the highest count.
 	ESpellElements FindSpellsMainElement(const TArray<ESpellElements>& SpellElements);
-	//Create spell from elements and set CreatedSpell to it
-	void CreateSpellAndSetCreatedSpell(const TArray<ESpellElements>& SpellElements, ESpellType TypeOfTheSpell);
 	//Show info about created spell and hide notification
 	void ShowCreatedSpellInformation(ASpell* const &SpellToShow);
 
+	UPROPERTY()
+		APlayerCharacter* PlayerCharacter{};
 
-	void AssaultSpellUse(const class AAssaultSpell* const& SpellToUser, class ABattleManager* const& BattleManager, 
-		class UBattleMenu* const& BattleMenu, class AUIManager* const& UIManager);
-	void RestorationSpellUse(const class ARestorationSpell* const& SpellToUse, class ABattleManager* const& BattleManager, 
-		class UBattleMenu* const& BattleMenu, class AUIManager* const& UIManager);
-	void BuffSpellUse(const class ACreatedBuffSpell* const& SpellToUse, class ABattleManager* const& BattleManager, 
-		class UBattleMenu* const& BattleMenu, class AUIManager* const& UIManager);
-	void BuffSpellUse(const class APresetBuffSpell* const& SpellToUse, class ABattleManager* const& BattleManager,
-		class UBattleMenu* const& BattleMenu, class AUIManager* const& UIManager);
-	void DebuffSpellUse(const class ADebuffSpell* const& SpellToUse, class ABattleManager* const& BattleManager,
-		class UBattleMenu* const& BattleMenu, class AUIManager* const& UIManager);
 protected:
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
@@ -191,14 +176,16 @@ public:
 	UBorder* GetSelectedSpellTypeBorder() const;
 	TArray<ESpellElements> GetSelectedSpellElements() const;
 	ASpell* GetCreatedSpell() const;
+	ESpellType GetSelectedSpellType() const;
 
 	void SelectedSpellElementsRemoveSingleItem(ESpellElements ElementToRemove);
 	void SetSelectedSpellType(ESpellType NewSpellType);
 	void SetCreatedSpell(ASpell* NewSpell);
-
+	//Create spell from elements and set CreatedSpell to it
+	void CreateSpellAndSetCreatedSpell(const TArray<ESpellElements>& SpellElements, ESpellType TypeOfTheSpell);
 	void CreateNotification(const FText& NotificationText);
 	void ShowSpellTypesButtonsHideElementsButtons();
 	void ShowElementsButtonsHideSpellTypesButtons();
 
-	void Reset();
+	void Reset(bool SetCreatedSpellToNullPtr = true);
 };
