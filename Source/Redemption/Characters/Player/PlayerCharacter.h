@@ -47,7 +47,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\Interfaces\CombatActionsInterface.h"
 #include "Containers/EnumAsByte.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\AlliesInfoBars.h"
 #include "PlayerCharacter.generated.h"
@@ -56,7 +55,7 @@
  * 
  */
 UCLASS(Config=Game)
-class APlayerCharacter : public ACharacter, public ICombatActionsInterface
+class APlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 	/** Camera boom positioning the camera behind the character*/
@@ -148,11 +147,6 @@ public:
 	UTouchInterface* GetEmptyTouchInterface() const;
 	UTouchInterface* GetStandardTouchInterface() const;
 	TArray<TSubclassOf<ACombatAllies>> GetAllies() const;
-
-	//Function to call, when an enemy got hit. Parameters for a standard attack.
-	void GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements) override;
-	//Function to call, when an enemy got hit. Parameters for a buff/debuff attack.
-	void GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects) override;
 
 	//Restore widgets to default state
 	void RestartBattleMenuWidget();
@@ -276,6 +270,8 @@ public:
 		float CurrentMana = 100;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 		float MaxMana = 100;
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+		int Gold = 0;
 	UPROPERTY(VisibleAnywhere, Category = "Combat")
 		TArray<AEffect*> Effects;
 	//Variables for movement in battle scene

@@ -29,7 +29,7 @@ public:
 	TArray<FElementAndItsPercentageStruct> GetMeleeWeaponElements() const;
 	TArray<FElementAndItsPercentageStruct> GetRangeWeaponElements() const;
 	TArray<AEffect*> GetEffects() const;
-	int GetHP() const;
+	int GetCurrentHP() const;
 	int GetArmorValue() const;
 	int GetMeleeAttackValue() const;
 	int GetRangeAttackValue() const;
@@ -54,6 +54,9 @@ public:
 		float CurrentMana = 100;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 		float MaxMana = 100;
+	//Chance, that this actor will be targeted by enemy
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+		int TargetingChance = 25;
 
 	UFUNCTION()
 		float GetHealthPercentage();

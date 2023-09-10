@@ -14,29 +14,31 @@
 void UAnimNotify_AlliesMAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
 //Hit a selected enemy
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(MeshComp->GetWorld()->GetFirstPlayerController()->GetCharacter());
-	ACombatAllies* CombatAllyPlayer = Cast<ACombatAllies>(MeshComp->GetOwner());
-	if (IsValid(CombatAllyPlayer) && IsValid(PlayerCharacter) && IsValid(PlayerCharacter->GetBattleManager()) && IsValid(PlayerCharacter->GetBattleManager()->SelectedCombatNPC) && IsValid(PlayerCharacter->GetInventoryMenuWidget()) && IsValid(PlayerCharacter->GetSkillBattleMenuWidget())) {
-		if (PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem && IsValid(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem())) {
-			if (AAssaultItem* AssaultItem = Cast<AAssaultItem>(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem()); IsValid(AssaultItem)) {
-				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedCombatNPC, 
-				CalculateAttackValueAfterEffects(AssaultItem->GetAttackValue(), CombatAllyPlayer), AssaultItem->GetElementsAndTheirPercentagesStructs());
-				PlayerCharacter->GetInventoryMenuWidget()->SetPickedItem(nullptr);
-				PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem = false;
+	if (IsValid(MeshComp->GetWorld()) && IsValid(MeshComp->GetWorld()->GetFirstPlayerController())) {
+		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(MeshComp->GetWorld()->GetFirstPlayerController()->GetCharacter());
+		ACombatAllies* CombatAllyPlayer = Cast<ACombatAllies>(MeshComp->GetOwner());
+		if (IsValid(CombatAllyPlayer) && IsValid(PlayerCharacter) && IsValid(PlayerCharacter->GetBattleManager()) && IsValid(PlayerCharacter->GetBattleManager()->SelectedCombatNPC) && IsValid(PlayerCharacter->GetInventoryMenuWidget()) && IsValid(PlayerCharacter->GetSkillBattleMenuWidget())) {
+			if (PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem && IsValid(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem())) {
+				if (AAssaultItem* AssaultItem = Cast<AAssaultItem>(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem()); IsValid(AssaultItem)) {
+					PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedCombatNPC,
+						CalculateAttackValueAfterEffects(AssaultItem->GetAttackValue(), CombatAllyPlayer), AssaultItem->GetElementsAndTheirPercentagesStructs());
+					PlayerCharacter->GetInventoryMenuWidget()->SetPickedItem(nullptr);
+					PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem = false;
+				}
 			}
-		}
-		else if (PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell && IsValid(PlayerCharacter->GetSkillBattleMenuWidget()->GetCreatedSpell())) {
-			if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(PlayerCharacter->GetSkillBattleMenuWidget()->GetCreatedSpell()); IsValid(AssaultSpell)) {
-				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedCombatNPC, 
-				CalculateAttackValueAfterEffects(AssaultSpell->GetAttackValue(), CombatAllyPlayer), AssaultSpell->GetElementsAndTheirPercentagesStructs());
-				PlayerCharacter->GetSkillBattleMenuWidget()->SetCreatedSpell(nullptr);
-				PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell = false;
+			else if (PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell && IsValid(PlayerCharacter->GetSkillBattleMenuWidget()->GetCreatedSpell())) {
+				if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(PlayerCharacter->GetSkillBattleMenuWidget()->GetCreatedSpell()); IsValid(AssaultSpell)) {
+					PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedCombatNPC,
+						CalculateAttackValueAfterEffects(AssaultSpell->GetAttackValue(), CombatAllyPlayer), AssaultSpell->GetElementsAndTheirPercentagesStructs());
+					PlayerCharacter->GetSkillBattleMenuWidget()->SetCreatedSpell(nullptr);
+					PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell = false;
+				}
 			}
-		}
-		else if (!PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem && !PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell) {
-			PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedCombatNPC, 
-			CalculateAttackValueAfterEffects(CombatAllyPlayer->GetMeleeAttackValue(), CombatAllyPlayer), CombatAllyPlayer->GetMeleeWeaponElements());
-			PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithMelee = false;
+			else if (!PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem && !PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell) {
+				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedCombatNPC,
+					CalculateAttackValueAfterEffects(CombatAllyPlayer->GetMeleeAttackValue(), CombatAllyPlayer), CombatAllyPlayer->GetMeleeWeaponElements());
+				PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithMelee = false;
+			}
 		}
 	}
 }

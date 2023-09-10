@@ -23,13 +23,10 @@ EBTNodeResult::Type UBTTask_GetStartPositionLocation::ExecuteTask(UBehaviorTreeC
 		return EBTNodeResult::Failed;
 
 	ACombatNPC* CombatChr = Cast<ACombatNPC>(MyController->GetPawn());
-	APlayerCharacter* PlayerChr = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	ABattleManager* BattleManager = nullptr;
-	if(IsValid(PlayerChr))
-		BattleManager = PlayerChr->GetBattleManager();
-	if (!IsValid(CombatChr) || !IsValid(PlayerChr) || !IsValid(BattleManager))
-		return EBTNodeResult::Failed;
+	if(!IsValid(CombatChr))
+		EBTNodeResult::Failed;
 
-	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Object>("TargetActor", CombatChr->GetStartLocation());
+	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Object>("TargetActor", CombatChr->GetStartLocation()); 
+
 	return EBTNodeResult::Succeeded;
 }

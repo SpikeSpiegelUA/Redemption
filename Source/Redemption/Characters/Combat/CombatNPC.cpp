@@ -58,7 +58,7 @@ TArray<AEffect*> ACombatNPC::GetEffects() const
 	return Effects;
 }
 
-int ACombatNPC::GetHP() const
+int ACombatNPC::GetCurrentHP() const
 {
 	return CurrentHP;
 }

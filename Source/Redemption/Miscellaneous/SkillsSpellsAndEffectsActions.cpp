@@ -125,19 +125,12 @@ void SkillsSpellsAndEffectsActions::InitializeElementalResistances(TArray<FEleme
 {
 	TArray<FElementAndItsPercentageStruct> NewElementalResistances;
 	for (ESpellElements SpellElement : TEnumRange<ESpellElements>()) {
-		if (ElementalResistances.Num() > 0) {
-			for (int i = 0; i < ElementalResistances.Num(); i++) {
-				if (ElementalResistances[i].GetElement() == SpellElement)
-					break;
-				if (i == ElementalResistances.Num() - 1) {
-					FElementAndItsPercentageStruct NewElementPercent;
-					NewElementPercent.SetElement(SpellElement);
-					NewElementPercent.SetPercent(0);
-					NewElementalResistances.Add(NewElementPercent);
-				}
-			}
-		}
-		else {
+		//If 0, then add new resistance to NewElementalResistances, if 1, then not.
+		int8 AddNewElementControl = 0;
+		for (int i = 0; i < ElementalResistances.Num(); i++)
+			if (ElementalResistances[i].GetElement() == SpellElement)
+				AddNewElementControl = 1;
+		if (AddNewElementControl == 0) {
 			FElementAndItsPercentageStruct NewElementPercent;
 			NewElementPercent.SetElement(SpellElement);
 			NewElementPercent.SetPercent(0);

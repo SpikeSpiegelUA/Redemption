@@ -489,13 +489,13 @@ void APlayerCharacter::ChangeLevel(const AActor* const &ActorResult)
 void APlayerCharacter::NotificationActions(const AActor* const& ActorResult)
 {
 	if (ActorResult->ActorHasTag(FName(TEXT("FinishGame"))) && IsValid(GameInstance) && IsValid(NotificationWidget)) {
-		if (GameInstance->KilledEnemies < 3) {
+		if (GameInstance->InstanceKilledEnemies < 3) {
 			GetWorld()->GetTimerManager().ClearTimer(RemoveNotificationTimerHandle);
 			NotificationWidget->AddToViewport(); 
 			NotificationWidget->SetNotificationTextBlockText(FText::FromString("You need to kill all enemies before proceeding!"));
 			GetWorld()->GetTimerManager().SetTimer(RemoveNotificationTimerHandle, this, &APlayerCharacter::RemoveNotification, 3, false);
 		}
-		else if(GameInstance->KilledEnemies >= 3 && !GetWorld()->GetTimerManager().IsTimerActive(FinishGameTimerHandle)) {
+		else if(GameInstance->InstanceKilledEnemies >= 3 && !GetWorld()->GetTimerManager().IsTimerActive(FinishGameTimerHandle)) {
 			NotificationWidget->AddToViewport();
 			NotificationWidget->SetNotificationTextBlockText(FText::FromString("Congratulations!!!"));
 			GetWorld()->GetTimerManager().SetTimer(FinishGameTimerHandle, this, &APlayerCharacter::FinishGame, 3, false);
@@ -650,52 +650,6 @@ FHitResult APlayerCharacter::ForwardRay()
 	CQP->AddIgnoredActor(this);
 	GetWorld()->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, ECC_Visibility, *CQP);
 	return HitResult;
-}
-
-void APlayerCharacter::GetHit_Implementation (int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements)
-{
-	int ValueOfArmor = 0;
-	if(IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedHead))
-		ValueOfArmor += InventoryMenuWidget->EquipedHead->GetArmorValue();
-	if (IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedTorse))
-		ValueOfArmor += InventoryMenuWidget->EquipedTorse->GetArmorValue();
-	if (IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedHand))
-		ValueOfArmor += InventoryMenuWidget->EquipedHand->GetArmorValue();
-	if (IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedLowerArmor))
-		ValueOfArmor += InventoryMenuWidget->EquipedLowerArmor->GetArmorValue();
-	int ValueOfArmorBeforeEffects = ValueOfArmor;
-	for (AEffect* Effect : Effects) {
-		if (IsValid(Effect) && Effect->GetAreaOfEffect() == EEffectArea::ARMOR) {
-			if (AEffectWithPlainModifier* EffectWithPlainModifier = Cast<AEffectWithPlainModifier>(Effect); IsValid(EffectWithPlainModifier)) {
-				if (Effect->GetTypeOfEffect() == EEffectType::BUFF)
-					ValueOfArmor += ValueOfArmorBeforeEffects + Effect->GetEffectStat();
-				else
-					ValueOfArmor += ValueOfArmorBeforeEffects - Effect->GetEffectStat();
-			}
-			else {
-				if (Effect->GetTypeOfEffect() == EEffectType::BUFF)
-					ValueOfArmor += ValueOfArmorBeforeEffects * (Effect->GetEffectStat() - 1);
-				else
-					ValueOfArmor -= ValueOfArmorBeforeEffects / Effect->GetEffectStat();
-			}
-		}
-	}
-	if (CurrentHP - (ValueOfAttack - ValueOfArmor /10) <= 0)
-		CurrentHP = 0;
-	else
-		CurrentHP -= (ValueOfAttack - ValueOfArmor /10);
-	if (IsValid(PlayerAnimInstance)) {
-		if (CurrentHP <= 0)
-			PlayerAnimInstance->SetPlayerIsDead(true);
-		else if(!PlayerAnimInstance->GetPlayerIsBlock() && CurrentHP > 0)
-			PlayerAnimInstance->SetPlayerGotHit(true);
-	}
-}
-
-void APlayerCharacter::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects)
-{
-	for(AEffect* Effect : HitEffects)
-		Effects.Add(Effect);
 }
 
 void APlayerCharacter::Death()

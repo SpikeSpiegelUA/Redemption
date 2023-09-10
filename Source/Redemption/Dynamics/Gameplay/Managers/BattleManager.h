@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatEnemyNPC.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatPlayerCharacter.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatNPC.h"
 #include "Camera/CameraActor.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Combat\CombatFloatingInformationActor.h"
@@ -37,6 +38,8 @@ public:
 	int8 SelectedCombatNPCIndex{};
 	//BattleAlliesPlayer index of actor with current turn.
 	int8 CurrentTurnAllyPlayerIndex{};
+
+	ACombatPlayerCharacter* CombatPlayerCharacter{};
 
 	void SetCanTurnBehindPlayerCameraToTarget(bool Value);
 	void SetCanTurnBehindPlayerCameraToStartPosition(bool Value);
@@ -80,9 +83,6 @@ private:
 
 	//Number of an enemy, who has a turn. Assign -1 value when transitioning to player's turn to prevent bugs
 	int ActorNumberOfTheCurrentTurn = -1;
-	int TotalGoldReward = 0;
-
-
 
 	//Timer Handles
 	FTimerHandle ShowExperienceTextTimerHandle{};

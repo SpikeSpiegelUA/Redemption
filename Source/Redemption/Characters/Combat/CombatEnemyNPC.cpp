@@ -31,6 +31,11 @@ void ACombatEnemyNPC::Tick(float DeltaTime)
 
 }
 
+int ACombatEnemyNPC::GetGoldReward() const
+{
+	return GoldReward;
+}
+
 void ACombatEnemyNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects)
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
@@ -42,7 +47,6 @@ void ACombatEnemyNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class A
 				uint8 EvasionRandomNumber = FMath::RandRange(0, 100);
 				int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance + Agility * 2,
 					Effects, EEffectArea::EVASION), Effects, Resistances, PlayerCharacter->GetSkillBattleMenuWidget()->GetCreatedSpell()->GetElementsAndTheirPercentagesStructs());
-				UE_LOG(LogTemp, Warning, TEXT("The chance of evasion value is: %d"), ChanceOfEvasion);
 				if (EvasionRandomNumber <= ChanceOfEvasion) {
 					TextForCombatFloatingInformationActor.Append("Miss!");
 					CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
@@ -55,11 +59,6 @@ void ACombatEnemyNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class A
 				}
 			}
 		}
-}
-
-int ACombatEnemyNPC::GetGoldReward() const
-{
-	return GoldReward;
 }
 
 void ACombatEnemyNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements)
@@ -83,7 +82,7 @@ void ACombatEnemyNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FEle
 					CurrentHP -= (ValueOfAttackWithResistances - ValueOfArmor / 10);
 				if (IsValid(FloatingHealthBarWidget))
 					FloatingHealthBarWidget->HP = CurrentHP;
-				TextForCombatFloatingInformationActor.AppendInt(ValueOfAttackWithResistances);
+				TextForCombatFloatingInformationActor.AppendInt(ValueOfAttackWithResistances - ValueOfArmor / 10);
 				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 			}
 			UCombatEnemyNPCAnimInstance* AnimInstance = Cast<UCombatEnemyNPCAnimInstance>(GetMesh()->GetAnimInstance());

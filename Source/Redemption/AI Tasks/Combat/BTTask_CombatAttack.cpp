@@ -20,10 +20,10 @@ EBTNodeResult::Type UBTTask_CombatAttack::ExecuteTask(UBehaviorTreeComponent& Ow
 		return EBTNodeResult::Failed;
 
 	USkeletalMeshComponent* SkeletalMesh = MyController->GetPawn()->FindComponentByClass<USkeletalMeshComponent>();
-	UCombatEnemyNPCAnimInstance* CombatAnimInstance = nullptr;
+	UCombatCharacterAnimInstance* CombatAnimInstance = nullptr;
 
 	if(IsValid(SkeletalMesh))
-		if (CombatAnimInstance = Cast<UCombatEnemyNPCAnimInstance>(SkeletalMesh->GetAnimInstance()); IsValid(CombatAnimInstance))
+		if (CombatAnimInstance = Cast<UCombatCharacterAnimInstance>(SkeletalMesh->GetAnimInstance()); IsValid(CombatAnimInstance)) 
 			CombatAnimInstance->ToggleCombatCharacterIsAttacking(true);
 
 	if(!IsValid(CombatAnimInstance))

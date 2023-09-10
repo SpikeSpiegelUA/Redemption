@@ -63,6 +63,7 @@ void AGameManager::StartBattle(AActor* const& AttackingNPC)
 					if (IsValid(SpawnedEnemy) && IsValid(AISmartObject))
 						SpawnedEnemy->SetSmartObject(AISmartObject);
 					ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(SpawnedEnemy->GetController());
+					SpawnedEnemy->SetStartLocation(ShuffledEnemyBattleSpawns[i]);
 					if (IsValid(AIController))
 						AIController->SetDynamicSubtree();
 					if (IsValid(BattleManager)) {
@@ -106,6 +107,7 @@ void AGameManager::StartBattle(AActor* const& AttackingNPC)
 			PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesManaBars()[BattleManager->BattleAlliesPlayer.Num()]->PercentDelegate.BindUFunction(CombatPlayerCharacter, "GetManaPercentage");
 			PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesNameTextBlockes()[BattleManager->BattleAlliesPlayer.Num()]->SetText(FText::FromName(CombatPlayerCharacter->GetCharacterName()));
 			BattleManager->BattleAlliesPlayer.Add(CombatPlayerCharacter);
+			BattleManager->CombatPlayerCharacter = CombatPlayerCharacter;
 			BattleManager->AlliesPlayerTurnQueue.Add(BattleManager->BattleAlliesPlayer.Num() - 1);
 			ArrayActions::ShuffleArray<int>(BattleManager->AlliesPlayerTurnQueue);
 			//Set camera position and set non combat player position to PlayerPlane's position
@@ -114,6 +116,7 @@ void AGameManager::StartBattle(AActor* const& AttackingNPC)
 			PlayerCharacter->SetCanInput(false);
 			PlayerCharacter->SetActorLocation(FVector(1350, 5610, -960));
 			PlayerCharacter->GetAlliesInfoBarsWidget()->AddToViewport();
+			BattleManager->AlliesPlayerTurnQueue.RemoveAt(0);
 			PC->bShowMouseCursor = true;
 			PC->bEnableClickEvents = true;
 			PC->bEnableMouseOverEvents = true;
@@ -121,8 +124,21 @@ void AGameManager::StartBattle(AActor* const& AttackingNPC)
 			FViewTargetTransitionParams Params;
 			PC->SetViewTarget(PlayerCharacter->GetBattleManager()->GetBehindPlayerCamera(), Params);
 			//Background Music set
-			PlayerCharacter->GetAudioManager()->GetDungeonExplorationBackgroundMusicAudioComponent()->SetPaused(true);
-			PlayerCharacter->GetAudioManager()->GetDungeonCombatBackgroundMusicAudioComponent()->SetPaused(false);
+			PlayerCharacter->GetAudioManager()->DungeonExplorationBackgroundMusicAudioComponents[PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(true);
+			URedemptionGameInstance* GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
+			if (IsValid(GameInstance)) {
+				bool SelectingMusic = true;
+				do {
+					int8 RandomBGMusicIndex = FMath::RandRange(0, PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents.Num() - 1);
+					if (RandomBGMusicIndex != GameInstance->InstancePreviousCombatBGMusicIndex) {
+						PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[RandomBGMusicIndex]->Play();
+						PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[RandomBGMusicIndex]->SetPaused(false);
+						PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic = RandomBGMusicIndex;
+						GameInstance->InstancePreviousCombatBGMusicIndex = RandomBGMusicIndex;
+						SelectingMusic = false;
+					}
+				} while (SelectingMusic);
+			}
 			AttackingNPC->Destroy();
 		}
 	}
@@ -145,16 +161,31 @@ void AGameManager::EndBattle()
 		PlayerCharacter->GetBattleResultsScreenWidget()->RemoveFromParent();
 		BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
 		BattleManager->SetCanTurnBehindPlayerCameraToTarget(false);
-		for (int i = 0; i < BattleManager->BattleEnemies.Num(); i++)
+		for (int i = 0; i < BattleManager->BattleEnemies.Num(); i++) {
+			PlayerCharacter->Gold += BattleManager->BattleEnemies[i]->GetGoldReward();
 			BattleManager->BattleEnemies[i]->Destroy();
+		}
+		GameInstance->InstanceGold = PlayerCharacter->Gold;
 		BattleManager->BattleEnemies.Empty();
 		PlayerCharacter->RestartBattleMenuWidget();
 		PlayerCharacter->RestartBattleResultsScreenWidget();
 		RestartBattleTransitionScreenWidget();
 		//Background Music set
 		PlayerCharacter->GetAudioManager()->GetDungeonBattleResultsBackgroundMusicAudioComponent()->SetPaused(true);
-		PlayerCharacter->GetAudioManager()->GetDungeonExplorationBackgroundMusicAudioComponent()->SetPaused(false);
-		GameInstance->KilledEnemies++;
+		if (IsValid(GameInstance)) {
+			bool SelectingMusic = true;
+			do {
+				int8 RandomBGMusicIndex = FMath::RandRange(0, PlayerCharacter->GetAudioManager()->DungeonExplorationBackgroundMusicAudioComponents.Num() - 1);
+				if (RandomBGMusicIndex != GameInstance->InstancePreviousCombatBGMusicIndex) {
+					PlayerCharacter->GetAudioManager()->DungeonExplorationBackgroundMusicAudioComponents[RandomBGMusicIndex]->Play();
+					PlayerCharacter->GetAudioManager()->DungeonExplorationBackgroundMusicAudioComponents[RandomBGMusicIndex]->SetPaused(false);
+					PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic = RandomBGMusicIndex;
+					GameInstance->InstancePreviousDungeonBGMusicIndex = RandomBGMusicIndex;
+					SelectingMusic = false;
+				}
+			} while (SelectingMusic);
+		} 
+		GameInstance->InstanceKilledEnemies++;
 	}
 }
 

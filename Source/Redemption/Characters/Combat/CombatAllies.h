@@ -40,5 +40,10 @@ public:
 	void StartMovingToEnemy();
 	void StartMovingToStartLocation();
 
+	//Function to call, when an enemy got hit. Parameters for a standard attack.
+	void GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements) override;
+	//Function to call, when an enemy got hit. Parameters for a buff/debuff attack.
+	void GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects) override;
+
 	UFloatingManaBarWidget* GetFloatingManaBarWidget() const;
 };
