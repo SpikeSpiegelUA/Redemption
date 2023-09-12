@@ -3,9 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include <Redemption/Dynamics/Gameplay/Combat/ItemObject.h>
 #include "DebuffItem.generated.h"
 
 /**
@@ -22,7 +23,10 @@ private:
 		EBuffDebuffType TypeOfDebuff {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 		TArray<TSubclassOf<AEffect>> EffectsClasses {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+		TSubclassOf<AItemObject> ItemObjectClass{};
 public:
 	EBuffDebuffType GetTypeOfDebuff() const;
 	TArray<TSubclassOf<AEffect>> GetEffectsClasses() const;
+	TSubclassOf<AItemObject> GetItemObjectClass() const;
 };

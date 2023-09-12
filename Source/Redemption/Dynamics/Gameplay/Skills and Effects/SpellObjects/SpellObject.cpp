@@ -2,9 +2,9 @@
 
 
 #include "SpellObject.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\CreatedDebuffSpell.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\PresetDebuffSpell.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\CreatedDebuffSpell.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\PresetDebuffSpell.h"
 #include <Kismet/GameplayStatics.h>
 #include "Kismet/KismetMathLibrary.h"
 
@@ -39,35 +39,37 @@ void ASpellObject::Tick(float DeltaTime)
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABattleManager::StaticClass(), BattleManagerActors);
 	if (BattleManagerActors.Num() > 0)
 		BattleManager = Cast<ABattleManager>(BattleManagerActors[0]);
-	if (IsValid(BattleManager) && IsValid(BattleManager->SelectedEnemy)) {
+	if (IsValid(BattleManager) && IsValid(BattleManager->SelectedCombatNPC)) {
 		//Interp is slowing down near the target, so we move target further
-		FVector DirectionVector = BattleManager->SelectedEnemy->GetActorLocation() - this->GetActorLocation();
+		FVector DirectionVector = BattleManager->SelectedCombatNPC->GetActorLocation() - this->GetActorLocation();
 		DirectionVector.Normalize();
-		FVector NewPosition = FMath::VInterpTo(this->GetActorLocation(), BattleManager->SelectedEnemy->GetActorLocation() + DirectionVector * 400, DeltaTime, 0.6f);
+		FVector NewPosition = FMath::VInterpTo(this->GetActorLocation(), BattleManager->SelectedCombatNPC->GetActorLocation() + DirectionVector * 400, DeltaTime, 0.6f);
 		this->SetActorLocation(NewPosition);
 	}
 }
 
 void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-		if (ACombatEnemyNPC* CombatEnemyNPC = Cast<ACombatEnemyNPC>(OtherActor); IsValid(CombatEnemyNPC) && IsValid(PlayerCharacter->GetSkillBattleMenuWidget()->GetCreatedSpell())) {
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+		if (ACombatNPC* CombatNPC = Cast<ACombatNPC>(OtherActor); IsValid(CombatNPC)) {
 			if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(Spell); IsValid(AssaultSpell)) {
-				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedEnemy, AssaultSpell->GetAttackValue(), AssaultSpell->GetElementsAndTheirPercentagesStructs());
+				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedCombatNPC,
+					AssaultSpell->GetAttackValue(), AssaultSpell->GetElementsAndTheirPercentagesStructs());
 				OnOverlapBeginsActions(PlayerCharacter);
 			}
 			else if (APresetDebuffSpell* PresetDebuffSpell = Cast<APresetDebuffSpell>(Spell); IsValid(PresetDebuffSpell)) {
 				TArray<AEffect*> EffectsArray;
 				for (TSubclassOf<AEffect> EffectClass : PresetDebuffSpell->GetEffectsClasses())
 					EffectsArray.Add(Cast<AEffect>(EffectClass->GetDefaultObject()));
-				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedEnemy, EffectsArray);
+				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedCombatNPC, EffectsArray);
 				OnOverlapBeginsActions(PlayerCharacter);
 			}
 			else if (ACreatedDebuffSpell* CreatedDebuffSpell = Cast<ACreatedDebuffSpell>(Spell); IsValid(CreatedDebuffSpell)) {
-				PlayerCharacter->GetBattleManager()->SelectedEnemy->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedEnemy, CreatedDebuffSpell->GetEffects());
+				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedCombatNPC, CreatedDebuffSpell->GetEffects());
 				OnOverlapBeginsActions(PlayerCharacter);
 			}
 		}
+	}
 }
 
 void ASpellObject::OnOverlapBeginsActions(const class APlayerCharacter* const& PlayerCharacter)

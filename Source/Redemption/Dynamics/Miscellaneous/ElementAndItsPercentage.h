@@ -2,7 +2,7 @@
 
 #pragma once 
 #include "CoreMinimal.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "ElementAndItsPercentage.generated.h"
 
 USTRUCT(BlueprintType) struct FElementAndItsPercentageStruct

@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\NPCAIController.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\SmartObjects\SmartObject.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\NPCAIController.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\SmartObjects\SmartObject.h"
 #include "CharacterInTheWorld.generated.h"
 
 UCLASS()

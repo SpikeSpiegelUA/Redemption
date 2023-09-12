@@ -4,12 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "Engine/DataTable.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Skill.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\SpellObjects\SpellObject.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Skill.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\SpellObjects\SpellObject.h"
 #include "EffectsSpellsAndSkillsManager.generated.h"
 
 USTRUCT(BlueprintType)
@@ -47,6 +47,30 @@ private:
 		TSubclassOf<class ASpellObject> WindMainElementSpellObjectClass {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = true))
 		TSubclassOf<class ASpellObject> MultiElementalMainElementSpellObjectClass {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* FireElementIcon{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* WaterElementIcon {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* WindElementIcon {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* EarthElementIcon {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* LightningElementIcon {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* BloodElementIcon {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* HolyElementIcon {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* DarkElementIcon {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* AssaultSpellTypeIcon {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* DebuffSpellTypeIcon {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* RestorationSpellTypeIcon {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* BuffSpellTypeIcon {};
 public:	
 	// Sets default values for this actor's properties
 	AEffectsSpellsAndSkillsManager();
@@ -68,4 +92,18 @@ public:
 	TSubclassOf<ASpellObject> GetWaterMainElementSpellObjectClass() const;
 	TSubclassOf<ASpellObject> GetWindMainElementSpellObjectClass() const;
 	TSubclassOf<ASpellObject> GetMultielementalMainElementSpellObjectClass() const;
+
+	UTexture* GetFireElementIcon() const;
+	UTexture* GetWaterElementIcon() const;
+	UTexture* GetWindElementIcon() const;
+	UTexture* GetEarthElementIcon() const;
+	UTexture* GetLightningElementIcon() const;
+	UTexture* GetBloodElementIcon() const;
+	UTexture* GetHolyElementIcon() const;
+	UTexture* GetDarkElementIcon() const;
+	UTexture* GetAssaultSpellTypeIcon() const;
+	UTexture* GetDebuffSpellTypeIcon() const;
+	UTexture* GetRestorationSpellTypeIcon() const;
+	UTexture* GetBuffSpellTypeIcon() const;
+
 };

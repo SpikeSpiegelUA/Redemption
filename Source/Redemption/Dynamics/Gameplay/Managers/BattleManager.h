@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Enemies\CombatEnemyNPC.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatEnemyNPC.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatPlayerCharacter.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatNPC.h"
 #include "Camera/CameraActor.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Combat\CombatFloatingInformationActor.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Combat\CombatFloatingInformationActor.h"
 #include "BattleManager.generated.h"
 
 UCLASS()
@@ -23,26 +26,32 @@ public:
 	//Array that stores spawned enemies and is used in a gameplay logic
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 		TArray<class ACombatEnemyNPC*> BattleEnemies;
-	//Array that stores spawned enemies and don't change all the way until the end of a battle
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
-		TArray<class ACombatEnemyNPC*> BattleActors;
+	//Array that stores spawned allies and the player and is used in a gameplay logic
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
+		TArray<ACombatNPC*> BattleAlliesPlayer;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
+		bool PlayerTurn = false;
+	//Target for Action(For example, a heal or an attack. Can be an ally as well as an enemy).
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, transient)
+		class ACombatNPC* SelectedCombatNPC {};
+	//Need this for control of target selection with keyboard
+	int8 SelectedCombatNPCIndex{};
+	//BattleAlliesPlayer index of actor with current turn.
+	int8 CurrentTurnAllyPlayerIndex{};
 
-	UPROPERTY(BlueprintReadOnly, transient)
-		class ACombatEnemyNPC* SelectedEnemy {};
-	int SelectedEnemyIndex{};
+	ACombatPlayerCharacter* CombatPlayerCharacter{};
 
-	void SetCanTurnBehindPlayerCameraToEnemy(bool Value);
+	void SetCanTurnBehindPlayerCameraToTarget(bool Value);
 	void SetCanTurnBehindPlayerCameraToStartPosition(bool Value);
 	void SetActorNumberOfTheCurrentTurn(uint8 Value);
-	void AddEnemyTurnQueue(int Value);
+	void SetBehindPlayerCameraLocation(FVector NewLocation);
 
 	uint8 GetActorNumberOfTheCurrentTurn() const;
-	TArray<int> GetEnemyTurnQueue() const;
 	ACameraActor* GetBehindPlayerCamera() const;
 	FTimerHandle GetPlayerTurnControllerTimerHandle() const;
 	TSubclassOf<ACombatFloatingInformationActor> GetCombatFloatingInformationActorClass() const;
 
-	void SelectNewEnemy(class ACombatEnemyNPC* const& Target, int Index);
+	void SelectNewTarget(class ACombatNPC* const& Target, int Index);
 	
 	//Function, that controls whether player's turn continues or passes to enemies
 	UFUNCTION()
@@ -51,6 +60,12 @@ public:
 	void TurnChange();
 	
 	void SetTimerForPlayerTurnController();
+
+	bool IsSelectingAllyAsTarget = false;
+
+	//Queue for enemies' and allies' turns. Randomized by dedicated function
+	TArray<int> EnemyTurnQueue;
+	TArray<int> AlliesPlayerTurnQueue;
 
 protected:
 	// Called when the game starts or when spawned
@@ -63,18 +78,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Classes", meta = (AllowPrivateAccess = true))
 		TSubclassOf<ACombatFloatingInformationActor> CombatFloatingInformationActorClass {};
 
-	bool CanTurnBehindPlayerCameraToEnemy = false;
+	bool CanTurnBehindPlayerCameraToTarget = false;
 	bool CanTurnBehindPlayerCameraToStartPosition = false;
 
 	//Number of an enemy, who has a turn. Assign -1 value when transitioning to player's turn to prevent bugs
 	int ActorNumberOfTheCurrentTurn = -1;
-	int TotalGoldReward = 0;
-	//Queue for enemies' turns. Randomized by dedicated function
-	TArray<int> EnemyTurnQueue;
-
-	void RandomizeEnemyQueue(TArray<int> &Array);
-
-
 
 	//Timer Handles
 	FTimerHandle ShowExperienceTextTimerHandle{};

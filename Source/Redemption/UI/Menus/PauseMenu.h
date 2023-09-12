@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SettingsMenu.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\LoadingScreen.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SettingsMenu.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\LoadingScreen.h"
 #include "PauseMenu.generated.h"
 
 /**

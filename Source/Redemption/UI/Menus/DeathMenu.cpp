@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\DeathMenu.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\LoadingScreen.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\DeathMenu.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\LoadingScreen.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Kismet/GameplayStatics.h"
 

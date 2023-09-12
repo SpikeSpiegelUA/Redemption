@@ -22,3 +22,9 @@ void ACreatedBuffSpell::AddObjectToEffects(AEffect* const& EffectToAdd)
 {
 	Effects.Add(EffectToAdd);
 }
+
+void ACreatedBuffSpell::AddObjectsToEffects(TArray<class AEffect*> const& EffectsToAdd)
+{
+	for (AEffect* Effect : EffectsToAdd)
+		Effects.Add(Effect);
+}

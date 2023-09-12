@@ -8,19 +8,20 @@
 #include "Components/TextBlock.h"
 #include "Components/CanvasPanel.h"
 #include "Components/ScrollBox.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\AssaultItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\RestorationItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\BuffItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\MiscellaneousItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\BuffItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\RestorationItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\AssaultItem.h"
+#include "Redemption/Dynamics/World/Items/DebuffItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\MiscellaneousItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
 #include "Redemption/Characters/Player/PlayerCharacter.h"
 #include <Kismet/GameplayStatics.h>
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\InventoryActions.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\SkillsSpellsAndEffectsActions.h"
-#include <Redemption/Dynamics/World/Items/DebuffItem.h>
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\InventoryActions.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\SkillsSpellsAndEffectsActions.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\FloatingManaBarWidget.h"
 
 
 bool UInventoryMenu::Initialize()
@@ -386,26 +387,26 @@ void UInventoryMenu::UseButtonOnClicked()
 	if (IsValid(PickedItem) && IsValid(PlayerCharacter) && IsValid(GameInstance) && IsValid(UIManager) && IsValid(EntryWidget)) {
 		if (ARestorationItem* RestorationItem = Cast<ARestorationItem>(PickedItem); IsValid(RestorationItem)) {
 			bool ItemHasBeenUsed = false;
-			if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::HEALTH && PlayerCharacter->CurrentHP < PlayerCharacter->MaxHP) {
+			if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH && PlayerCharacter->CurrentHP < PlayerCharacter->MaxHP) {
 				PlayerCharacter->CurrentHP += RestorationItem->GetRestorationValuePercent();
 				ItemHasBeenUsed = true;
 				if (PlayerCharacter->CurrentHP > PlayerCharacter->MaxHP)
 					PlayerCharacter->CurrentHP = PlayerCharacter->MaxHP;
 			}
-			else if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::MANA && PlayerCharacter->CurrentMana < PlayerCharacter->MaxMana) {
+			else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA && PlayerCharacter->CurrentMana < PlayerCharacter->MaxMana) {
 				PlayerCharacter->CurrentMana += RestorationItem->GetRestorationValuePercent();
 				ItemHasBeenUsed = true;
 				if (PlayerCharacter->CurrentMana > PlayerCharacter->MaxMana)
 					PlayerCharacter->CurrentMana = PlayerCharacter->MaxMana;
 			}
-			else if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::MANA && PlayerCharacter->CurrentMana >= PlayerCharacter->MaxMana)
+			else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA && PlayerCharacter->CurrentMana >= PlayerCharacter->MaxMana)
 				CreateNotification(FText::FromString("Your mana is already full!!!"));
-			else if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::HEALTH && PlayerCharacter->CurrentHP >= PlayerCharacter->MaxHP) 
+			else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH && PlayerCharacter->CurrentHP >= PlayerCharacter->MaxHP) 
 				CreateNotification(FText::FromString("Your health is already full!!!"));
 			if (ItemHasBeenUsed) {
 				InventoryActions::RemoveItemFromGameInstance(GameInstance, PickedItem);
 				InventoryActions::ItemAmountInInventoryLogic(EntryWidget, InventoryScrollBox, PickedItem);
-				UGameplayStatics::PlaySound2D(GetWorld(), PlayerCharacter->GetAudioManager()->UseHealOrBoostSoundCue);
+				UGameplayStatics::PlaySound2D(GetWorld(), PlayerCharacter->GetAudioManager()->GetUseHealOrBuffSoundCue());
 			}
 		}
 		else if (Cast<ABuffItem>(PickedItem))
@@ -429,69 +430,46 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 			BattleManager = PlayerCharacter->GetBattleManager();
 			BattleMenu = PlayerCharacter->GetBattleMenuWidget();
 		}
-		if (IsValid(GameInstance) && IsValid(PlayerCharacter) && IsValid(BattleManager) && IsValid(BattleMenu) && IsValid(PickedItem) && IsValid(UIManager)) {
-			UInventoryScrollBoxEntryWidget* EntryWidget = InventoryActions::FindItemInventoryEntryWidget(PickedItem, InventoryScrollBox);
-			if (ARestorationItem* RestorationItem = Cast<ARestorationItem>(PickedItem); IsValid(RestorationItem) && IsValid(EntryWidget)) {
-				bool ItemHasBeenUsed = false;
-				if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::HEALTH && PlayerCharacter->CurrentHP < PlayerCharacter->MaxHP) {
-					PlayerCharacter->CurrentHP += (PlayerCharacter->MaxHP * RestorationItem->GetRestorationValuePercent() / 100);
-					ItemHasBeenUsed = true;
-					if (PlayerCharacter->CurrentHP > PlayerCharacter->MaxHP)
-						PlayerCharacter->CurrentHP = PlayerCharacter->MaxHP;
+		if (IsValid(GameInstance) && IsValid(PlayerCharacter) && IsValid(BattleManager) && IsValid(BattleMenu) && IsValid(PickedItem) && IsValid(UIManager)) 
+			if ((IsValid(Cast<AAssaultItem>(PickedItem)) || IsValid(Cast<ADebuffItem>(PickedItem)) || IsValid(Cast<ARestorationItem>(PickedItem)) || IsValid(Cast<ABuffItem>(PickedItem)))) {
+				if (Cast<ARestorationItem>(PickedItem) || Cast<ABuffItem>(PickedItem)) {
+					BattleManager->IsSelectingAllyAsTarget = true;
+					BattleManager->SelectedCombatNPC = BattleManager ->BattleAlliesPlayer[0];
+					if(ACombatAllies* Ally = Cast<ACombatAllies>(BattleManager->BattleAlliesPlayer[0]); IsValid(Ally))
+						BattleMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(Ally->GetCharacterName()));
+					if (IsValid(Cast<ARestorationItem>(PickedItem))) {
+						if (Cast<ARestorationItem>(PickedItem)->GetTypeOfRestoration() == EItemRestorationType::HEALTH)
+							BattleManager->SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
+						else
+							Cast<ACombatAllies>(BattleManager->SelectedCombatNPC)->GetFloatingManaBarWidget()->GetManaBar()->SetVisibility(ESlateVisibility::Visible);
+					}
 				}
-				else if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::MANA && PlayerCharacter->CurrentMana < PlayerCharacter->MaxMana) {
-					PlayerCharacter->CurrentMana += (PlayerCharacter->MaxMana * RestorationItem->GetRestorationValuePercent() / 100);
-					ItemHasBeenUsed = true;
-					if (PlayerCharacter->CurrentMana > PlayerCharacter->MaxMana)
-						PlayerCharacter->CurrentMana = PlayerCharacter->MaxMana;
+				else if (Cast<AAssaultItem>(PickedItem) || Cast<ADebuffItem>(PickedItem)) {
+					BattleManager->IsSelectingAllyAsTarget = false;
+					BattleManager->SelectedCombatNPC = BattleManager->BattleEnemies[0];
+					BattleMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(BattleManager->BattleEnemies[0]->GetCharacterName()));
+					BattleManager->SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
 				}
-				else if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::MANA && PlayerCharacter->CurrentMana >= PlayerCharacter->MaxMana)
-					CreateNotification(FText::FromString("Your mana is already full!!!"));
-				else if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::HEALTH && PlayerCharacter->CurrentHP >= PlayerCharacter->MaxHP)
-					CreateNotification(FText::FromString("Your health is already full!!!"));
-				if (ItemHasBeenUsed) {
-				InventoryActions::RemoveItemFromGameInstance(GameInstance, PickedItem);
-				InventoryActions::ItemAmountInInventoryLogic(EntryWidget, InventoryScrollBox, PickedItem);
-					ItemHasBeenUsedActions(BattleMenu, PlayerCharacter, BattleManager);
-					PickedItem = nullptr;
-				}
+				BattleMenu->AddToViewport();
+				UIManager->PickedButtonIndex = 0;
+				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+				//Remove menu and turn on target selection
+				BattleMenu->IsPreparingToAttack = true;
+				BattleMenu->IsChoosingItem = false;
+				BattleMenu->IsAttackingWithItem = true;
+				BattleManager->SelectedCombatNPCIndex = 0;
+				this->RemoveFromParent();
+				BattleMenu->GetCenterMark()->SetVisibility(ESlateVisibility::Visible);
+				BattleMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
+				BattleMenu->GetAttackMenuBorder()->SetVisibility(ESlateVisibility::Visible);
+				BattleMenu->GetLeftRightMenuBorder()->SetVisibility(ESlateVisibility::Visible);
+				BattleMenu->GetAttackButton()->SetBackgroundColor(FColor(1, 1, 1, 1));
+				UIManager->PickedButton = BattleMenu->GetAttackActionButton();
+				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				UIManager->PickedButtonIndex = 0;
+				BattleManager->SetCanTurnBehindPlayerCameraToTarget(true);
+				BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
 			}
-			if (ABuffItem* BuffItem = Cast<ABuffItem>(PickedItem); IsValid(BuffItem) && IsValid(EntryWidget)) {
-				for (TSubclassOf<AEffect> EffectClass : BuffItem->GetEffectsClasses()) {
-					AEffect* NewEffect = NewObject<AEffect>(this, EffectClass);
-					PlayerCharacter->Effects.Add(NewEffect);
-				}
-				InventoryActions::RemoveItemFromGameInstance(GameInstance, PickedItem);
-				InventoryActions::ItemAmountInInventoryLogic(EntryWidget, InventoryScrollBox, PickedItem);
-				ItemHasBeenUsedActions(BattleMenu, PlayerCharacter, BattleManager);
-				PickedItem = nullptr;
-			}
-			else if (Cast<AAssaultItem>(PickedItem) || Cast<ADebuffItem>(PickedItem) && IsValid(EntryWidget)) {
-					BattleMenu->AddToViewport();
-					UIManager->PickedButtonIndex = 0;
-					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-					//Remove player and menu render and turn on target selection
-					BattleMenu->IsPreparingToAttack = true;
-					BattleMenu->IsChoosingItem = false;
-					BattleMenu->IsAttackingWithItem = true;
-					//PlayerCharacter->GetMesh()->bHiddenInGame = true;
-					BattleManager->SelectedEnemy = PlayerCharacter->GetBattleManager()->BattleEnemies[0];
-					BattleManager->SelectedEnemyIndex = 0;
-					this->RemoveFromParent();
-					BattleMenu->GetCenterMark()->SetVisibility(ESlateVisibility::Visible);
-					BattleMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
-					BattleMenu->GetAttackMenuBorder()->SetVisibility(ESlateVisibility::Visible);
-					BattleMenu->GetLeftRightMenuBorder()->SetVisibility(ESlateVisibility::Visible);
-					BattleMenu->GetAttackButton()->SetBackgroundColor(FColor(1, 1, 1, 1));
-					BattleManager->SelectedEnemy->GetEnemyHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
-					UIManager->PickedButton = BattleMenu->GetAttackActionButton();
-					UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-					UIManager->PickedButtonIndex = 0;
-					BattleManager->SetCanTurnBehindPlayerCameraToEnemy(true);
-					BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
-					BattleMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(PlayerCharacter->GetBattleManager()->BattleEnemies[0]->GetCharacterName()));
-			}
-		}
 	}
 }
 
@@ -511,15 +489,25 @@ void UInventoryMenu::BattleMenuItemsBackButtonOnClicked()
 	    }
 }
 
-void UInventoryMenu::ItemHasBeenUsedActions(class UBattleMenu* const& BattleMenu, const APlayerCharacter* const& PlayerCharacter, class ABattleManager* const& BattleManager)
+void UInventoryMenu::BuffOrRestorationItemHasBeenUsedActions(class UBattleMenu* const& BattleMenu, const APlayerCharacter* const& PlayerCharacter, class ABattleManager* const& BattleManager)
 {
 	BattleMenu->AddToViewport();
 	UIManager->PickedButtonIndex = 0;
 	if (IsValid(UIManager->PickedButton))
 		UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-	UGameplayStatics::PlaySound2D(GetWorld(), PlayerCharacter->GetAudioManager()->UseHealOrBoostSoundCue);
 	this->RemoveFromParent();
-	GetWorld()->GetTimerManager().SetTimer(ItemUseTimerHandle, BattleManager, &ABattleManager::PlayerTurnController, 1.5f, false);
+	PickedItem = nullptr;
+	GetWorld()->GetTimerManager().SetTimer(ItemUseTimerHandle, BattleManager, &ABattleManager::PlayerTurnController, 2.f, false);
+	BattleMenu->IsChoosingItem = false;
+}
+
+void UInventoryMenu::DebuffOrAssaultItemHasBeenUsedActions(UBattleMenu* const& BattleMenu, const APlayerCharacter* const& PlayerCharacter, ABattleManager* const& BattleManager)
+{
+	BattleMenu->AddToViewport();
+	UIManager->PickedButtonIndex = 0;
+	if (IsValid(UIManager->PickedButton))
+		UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+	this->RemoveFromParent();
 	BattleMenu->IsChoosingItem = false;
 }
 
@@ -551,9 +539,9 @@ void UInventoryMenu::SetItemInfo(AGameItem* const& GameItem)
 	else if (Cast<AMiscellaneousItem>(GameItem))
 		ItemTypeTextBlock->SetText(FText::FromString("Type: Miscellaneous"));
 	else if (ARestorationItem* RestorationItem = Cast<ARestorationItem>(GameItem); IsValid(RestorationItem)) {
-		if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::HEALTH)
+		if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH)
 			ItemTypeTextBlock->SetText(FText::FromString("Type: Health Restoration Item"));
-		else if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::MANA)
+		else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA)
 			ItemTypeTextBlock->SetText(FText::FromString("Type: Mana Restoration Item"));
 	}
 	else if (Cast<ABuffItem>(GameItem))
@@ -579,9 +567,9 @@ void UInventoryMenu::SetItemInfo(AGameItem* const& GameItem)
 			}
 		}
 		else if (ARestorationItem* RestorationItem = Cast<ARestorationItem>(GameItem); IsValid(RestorationItem)) {
-			if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::HEALTH)
+			if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH)
 				StringToSet = FString("HP: ");
-			else if (RestorationItem->GetTypeOfRestoration() == ItemRestorationType::MANA)
+			else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA)
 				StringToSet = FString("Mana: ");
 			StringToSet.AppendInt(RestorationItem->GetRestorationValuePercent());
 			ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));

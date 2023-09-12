@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "ArmorItem.generated.h"
 
 /**
@@ -29,7 +29,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information")
 		TArray<FElementAndItsPercentageStruct> ElementsAndTheirPercentagesStructs {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information")
-		const EArmorType ArmorType{};
+		EArmorType ArmorType{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information")
 		int ArmorValue{};
 

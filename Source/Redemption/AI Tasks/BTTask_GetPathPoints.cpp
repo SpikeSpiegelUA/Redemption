@@ -4,8 +4,8 @@
 #include "BTTask_GetPathPoints.h"
 #include "AIController.h"
 #include "Components/SplineComponent.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\CharacterInTheWorld.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\SmartObjects\PatrolPath.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\CharacterInTheWorld.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\SmartObjects\PatrolPath.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
 

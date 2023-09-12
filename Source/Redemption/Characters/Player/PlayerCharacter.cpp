@@ -3,21 +3,22 @@
 
 #include "PlayerCharacter.h"
 
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\LoadingScreen.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\LootInTheWorld.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\Interfaces\DialogueActionsInterface.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Other\TownNPC.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\EffectWithPlainModifier.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ElementsActions.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\LoadingScreen.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\LootInTheWorld.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\Interfaces\DialogueActionsInterface.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\NonCombat\TownNPC.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\EffectWithPlainModifier.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ElementsActions.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatPlayerCharacter.h"
 #include "GameFramework/TouchInterface.h"
 #include "Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\InventoryActions.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\InventoryActions.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 
 
@@ -113,8 +114,8 @@ void APlayerCharacter::BeginPlay()
 			InventoryMenuWidget = CreateWidget<UInventoryMenu>(PlayerController, InventoryMenuClass);
 		if (IsValid(PauseMenuClass))
 			PauseMenuWidget = CreateWidget<UPauseMenu>(PlayerController, PauseMenuClass);
-		if (IsValid(PlayerBarsClass))
-			PlayerBarsWidget = CreateWidget<UPlayerBarsWidget>(PlayerController, PlayerBarsClass);
+		if (IsValid(AlliesInfoBarsClass))
+			AlliesInfoBarsWidget = CreateWidget<UAlliesInfoBars>(PlayerController, AlliesInfoBarsClass);
 		if (IsValid(DialogueBoxClass))
 			DialogueBoxWidget = CreateWidget<UDialogueBox>(PlayerController, DialogueBoxClass);
 		if (IsValid(ResponsesBoxClass))
@@ -141,9 +142,8 @@ void APlayerCharacter::BeginPlay()
 		Intelligence = GameInstance->InstancePlayerIntelligence;
 		Agility = GameInstance->InstancePlayerAgility;
 		Luck = GameInstance->InstancePlayerLuck;
+		Allies = GameInstance->InstanceAllies;
 	}
-	if (GetWorld()->GetName() == "Dungeon")
-		PlayerBarsWidget->AddToViewport(5);
 
 	TArray<AActor*> UIManagerActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AUIManager::StaticClass(), UIManagerActors);
@@ -158,13 +158,13 @@ void APlayerCharacter::Tick(float DeltaTime)
 	CheckForwardRayHitResult();
 	//Need to move player in battle scene, when input is disable. Use Interp in Tick(). Not the best solution, but this's the only one I came up with
 	//Move player to enemy in Battle scene
-	if (Battle_IsMovingToAttackEnemy) {
+	/*if (Combat_IsMovingToAttackEnemy) {
 		FVector DistanceVector;
-		if (BattleManager->SelectedEnemy) {
-			DistanceVector = FVector(BattleManager->SelectedEnemy->GetActorLocation() - this->GetActorLocation());
-			FVector NewPosition = FMath::VInterpTo(this->GetActorLocation(), BattleManager->SelectedEnemy->GetActorLocation(), DeltaTime, 0.6f);
+		if (BattleManager->SelectedActor) {
+			DistanceVector = FVector(BattleManager->SelectedActor->GetActorLocation() - this->GetActorLocation());
+			FVector NewPosition = FMath::VInterpTo(this->GetActorLocation(), BattleManager->SelectedActor->GetActorLocation(), DeltaTime, 0.6f);
 			this->SetActorLocation(NewPosition);
-			FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), BattleManager->SelectedEnemy->GetActorLocation());
+			FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), BattleManager->SelectedActor->GetActorLocation());
 			Rotation = FRotator(this->GetActorRotation().Pitch, Rotation.Yaw, this->GetActorRotation().Roll);
 			this->SetActorRotation(Rotation);
 			if (IsValid(PlayerAnimInstance))
@@ -172,7 +172,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		}
 		//If distance between player and selected enemy is less than 160, turn on animation
 		if (DistanceVector.Length() <= 160) {
-			Battle_IsMovingToAttackEnemy = false;
+			Combat_IsMovingToAttackEnemy = false;
 			if (IsValid(PlayerAnimInstance)) {
 				PlayerAnimInstance->SetPlayerIsAttacking(true);
 				PlayerAnimInstance->SetSpeedToActualSpeed = true;
@@ -180,13 +180,13 @@ void APlayerCharacter::Tick(float DeltaTime)
 		}
 	}
 	//Move player back to his start position
-	else if (Battle_IsMovingToStartPosition) {
+	else if (Combat_IsMovingToStartPosition) {
 		FVector DistanceVector{};
-		if (IsValid(GameManager->GetPlayerBattleSpawn())) {
-			DistanceVector = FVector(GameManager->GetPlayerBattleSpawn()->GetActorLocation() - this->GetActorLocation());
-			FVector NewPosition = FMath::VInterpTo(this->GetActorLocation(), GameManager->GetPlayerBattleSpawn()->GetActorLocation(), DeltaTime, 0.6f);
+		if (IsValid(Combat_StartLocation)) {
+			DistanceVector = FVector(Combat_StartLocation->GetActorLocation() - this->GetActorLocation());
+			FVector NewPosition = FMath::VInterpTo(this->GetActorLocation(), Combat_StartLocation->GetActorLocation(), DeltaTime, 0.6f);
 			this->SetActorLocation(NewPosition);
-			FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), GameManager->GetPlayerBattleSpawn()->GetActorLocation());
+			FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), Combat_StartLocation->GetActorLocation());
 			Rotation = FRotator(this->GetActorRotation().Pitch, Rotation.Yaw, this->GetActorRotation().Roll);
 			this->SetActorRotation(Rotation);
 			if (IsValid(PlayerAnimInstance))
@@ -195,13 +195,13 @@ void APlayerCharacter::Tick(float DeltaTime)
 		//If distance between player and start position is less than 100, stop
 		if (DistanceVector.Length() <= 100) {
 			BattleMenuWidget->GetCenterMark()->SetVisibility(ESlateVisibility::Hidden);
-			Battle_IsMovingToStartPosition = false;
+			Combat_IsMovingToStartPosition = false;
 			this->SetActorRotation(FRotator(0, 180, 0));
 			if (IsValid(PlayerAnimInstance))
 				PlayerAnimInstance->SetSpeedToActualSpeed = true;
 			BattleManager->PlayerTurnController();
 		}
-	}
+	}*/
 }
 void APlayerCharacter::Move(const FInputActionValue& Value)
 {
@@ -250,7 +250,6 @@ void APlayerCharacter::InputOpenPlayerMenu()
 		PlayerController->bEnableClickEvents = true;
 		PlayerController->bEnableMouseOverEvents = true;
 		PlayerController->SetPause(true);
-		PlayerBarsWidget->AddToViewport(5);
 	}
 }
 
@@ -268,38 +267,56 @@ void APlayerCharacter::InputOpenPauseMenu()
 
 void APlayerCharacter::InputScrollLeft()
 {
-	if (IsValid(Controller)) {
-		if (!Battle_IsMovingToAttackEnemy) {
-			if (BattleMenuWidget->IsPreparingToAttack) {
-				TArray<ACombatEnemyNPC*> BattleEnemies = BattleManager->BattleEnemies;
-				//Choose enemy with scroll
-				if (BattleEnemies.Num() > 1) {
-					if (BattleManager->SelectedEnemyIndex + 1 < BattleEnemies.Num())
-						BattleManager->SelectNewEnemy(BattleEnemies[BattleManager->SelectedEnemyIndex + 1], BattleManager->SelectedEnemyIndex + 1);
-					else
-						BattleManager->SelectNewEnemy(BattleEnemies[0], 0);
+	if (IsValid(Controller)) 
+		if (!Combat_IsMovingToAttackEnemy)
+			if (BattleMenuWidget->IsPreparingToAttack)
+				if (BattleManager->IsSelectingAllyAsTarget) {
+					TArray<ACombatNPC*> BattleAlliesPlayer = BattleManager->BattleAlliesPlayer;
+					//Choose Target with scroll
+					if (BattleAlliesPlayer.Num() > 1) {
+						if (BattleManager->SelectedCombatNPCIndex + 1 < BattleAlliesPlayer.Num()) 
+								BattleManager->SelectNewTarget(BattleAlliesPlayer[BattleManager->SelectedCombatNPCIndex + 1], BattleManager->SelectedCombatNPCIndex + 1);
+						else 
+								BattleManager->SelectNewTarget(BattleAlliesPlayer[0], 0);
+					}
 				}
-			}
-		}
-	}
+				else {
+					TArray<ACombatEnemyNPC*> BattleEnemies = BattleManager->BattleEnemies;
+					//Choose Target with scroll
+					if (BattleEnemies.Num() > 1) {
+						if (BattleManager->SelectedCombatNPCIndex + 1 < BattleEnemies.Num())
+							BattleManager->SelectNewTarget(BattleEnemies[BattleManager->SelectedCombatNPCIndex + 1], BattleManager->SelectedCombatNPCIndex + 1);
+						else
+							BattleManager->SelectNewTarget(BattleEnemies[0], 0);
+					}
+				}
 }
 
 void APlayerCharacter::InputScrollRight()
 {
-	if (IsValid(Controller)) {
-		if(!Battle_IsMovingToAttackEnemy){
-			if (BattleMenuWidget->IsPreparingToAttack) {
-				TArray<ACombatEnemyNPC*> BattleEnemies = BattleManager->BattleEnemies;
-				//Choose enemy with scroll
-				if (BattleEnemies.Num() > 1) {
-					if (BattleManager->SelectedEnemyIndex - 1 >= 0)
-						BattleManager->SelectNewEnemy(BattleEnemies[BattleManager->SelectedEnemyIndex - 1], BattleManager->SelectedEnemyIndex - 1);
-					else
-						BattleManager->SelectNewEnemy(BattleEnemies[BattleEnemies.Num() - 1], BattleEnemies.Num() - 1);
+	if (IsValid(Controller)) 
+		if(!Combat_IsMovingToAttackEnemy)
+			if (BattleMenuWidget->IsPreparingToAttack) 
+				if (BattleManager->IsSelectingAllyAsTarget) {
+				TArray<ACombatNPC*> BattleAlliesPlayer = BattleManager->BattleAlliesPlayer;
+				//Choose target with scroll
+				if (BattleAlliesPlayer.Num() > 1) {
+					if (BattleManager->SelectedCombatNPCIndex - 1 >= 0) 
+							BattleManager->SelectNewTarget(BattleAlliesPlayer[BattleManager->SelectedCombatNPCIndex - 1], BattleManager->SelectedCombatNPCIndex - 1);
+					else 
+							BattleManager->SelectNewTarget(BattleAlliesPlayer[BattleAlliesPlayer.Num() - 1], BattleAlliesPlayer.Num() - 1);
 				}
 			}
-	    }
-	}
+			else {
+				TArray<ACombatEnemyNPC*> BattleEnemies = BattleManager->BattleEnemies;
+				//Choose target with scroll
+				if (BattleEnemies.Num() > 1) {
+					if (BattleManager->SelectedCombatNPCIndex - 1 >= 0)
+						BattleManager->SelectNewTarget(BattleEnemies[BattleManager->SelectedCombatNPCIndex - 1], BattleManager->SelectedCombatNPCIndex - 1);
+					else
+						BattleManager->SelectNewTarget(BattleEnemies[BattleEnemies.Num() - 1], BattleEnemies.Num() - 1);
+				}
+			}
 }
 
 void APlayerCharacter::InputScrollUp()
@@ -472,13 +489,13 @@ void APlayerCharacter::ChangeLevel(const AActor* const &ActorResult)
 void APlayerCharacter::NotificationActions(const AActor* const& ActorResult)
 {
 	if (ActorResult->ActorHasTag(FName(TEXT("FinishGame"))) && IsValid(GameInstance) && IsValid(NotificationWidget)) {
-		if (GameInstance->KilledEnemies < 3) {
+		if (GameInstance->InstanceKilledEnemies < 3) {
 			GetWorld()->GetTimerManager().ClearTimer(RemoveNotificationTimerHandle);
 			NotificationWidget->AddToViewport(); 
 			NotificationWidget->SetNotificationTextBlockText(FText::FromString("You need to kill all enemies before proceeding!"));
 			GetWorld()->GetTimerManager().SetTimer(RemoveNotificationTimerHandle, this, &APlayerCharacter::RemoveNotification, 3, false);
 		}
-		else if(GameInstance->KilledEnemies >= 3 && !GetWorld()->GetTimerManager().IsTimerActive(FinishGameTimerHandle)) {
+		else if(GameInstance->InstanceKilledEnemies >= 3 && !GetWorld()->GetTimerManager().IsTimerActive(FinishGameTimerHandle)) {
 			NotificationWidget->AddToViewport();
 			NotificationWidget->SetNotificationTextBlockText(FText::FromString("Congratulations!!!"));
 			GetWorld()->GetTimerManager().SetTimer(FinishGameTimerHandle, this, &APlayerCharacter::FinishGame, 3, false);
@@ -635,52 +652,6 @@ FHitResult APlayerCharacter::ForwardRay()
 	return HitResult;
 }
 
-void APlayerCharacter::GetHit_Implementation (int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements)
-{
-	int ValueOfArmor = 0;
-	if(IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedHead))
-		ValueOfArmor += InventoryMenuWidget->EquipedHead->GetArmorValue();
-	if (IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedTorse))
-		ValueOfArmor += InventoryMenuWidget->EquipedTorse->GetArmorValue();
-	if (IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedHand))
-		ValueOfArmor += InventoryMenuWidget->EquipedHand->GetArmorValue();
-	if (IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->EquipedLowerArmor))
-		ValueOfArmor += InventoryMenuWidget->EquipedLowerArmor->GetArmorValue();
-	int ValueOfArmorBeforeEffects = ValueOfArmor;
-	for (AEffect* Effect : Effects) {
-		if (IsValid(Effect) && Effect->GetAreaOfEffect() == EEffectArea::ARMOR) {
-			if (AEffectWithPlainModifier* EffectWithPlainModifier = Cast<AEffectWithPlainModifier>(Effect); IsValid(EffectWithPlainModifier)) {
-				if (Effect->GetTypeOfEffect() == EEffectType::BUFF)
-					ValueOfArmor += ValueOfArmorBeforeEffects + Effect->GetEffectStat();
-				else
-					ValueOfArmor += ValueOfArmorBeforeEffects - Effect->GetEffectStat();
-			}
-			else {
-				if (Effect->GetTypeOfEffect() == EEffectType::BUFF)
-					ValueOfArmor += ValueOfArmorBeforeEffects * (Effect->GetEffectStat() - 1);
-				else
-					ValueOfArmor -= ValueOfArmorBeforeEffects / Effect->GetEffectStat();
-			}
-		}
-	}
-	if (CurrentHP - (ValueOfAttack - ValueOfArmor /10) <= 0)
-		CurrentHP = 0;
-	else
-		CurrentHP -= (ValueOfAttack - ValueOfArmor /10);
-	if (IsValid(PlayerAnimInstance)) {
-		if (CurrentHP <= 0)
-			PlayerAnimInstance->SetPlayerIsDead(true);
-		else if(!PlayerAnimInstance->GetPlayerIsBlock() && CurrentHP > 0)
-			PlayerAnimInstance->SetPlayerGotHit(true);
-	}
-}
-
-void APlayerCharacter::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects)
-{
-	for(AEffect* Effect : HitEffects)
-		Effects.Add(Effect);
-}
-
 void APlayerCharacter::Death()
 {
 
@@ -825,9 +796,14 @@ UTouchInterface* APlayerCharacter::GetStandardTouchInterface() const
 	return StandardTouchInterface;
 }
 
-class UPlayerBarsWidget* APlayerCharacter::GetPlayerBarsWidget() const
+TArray<TSubclassOf<ACombatAllies>> APlayerCharacter::GetAllies() const
 {
-	return PlayerBarsWidget;
+	return Allies;
+}
+
+class UAlliesInfoBars* APlayerCharacter::GetAlliesInfoBarsWidget() const
+{
+	return AlliesInfoBarsWidget;
 }
 
 void APlayerCharacter::SetInventoryScrollBoxEntryWidget(UInventoryScrollBoxEntryWidget* NewWidget) 

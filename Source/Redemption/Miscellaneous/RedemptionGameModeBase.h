@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\MainMenu.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\MainMenu.h"
 #include "RedemptionGameModeBase.generated.h"
 
 /**

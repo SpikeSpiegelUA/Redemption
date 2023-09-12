@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\SpellObjects\SpellObject.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\SpellObjects\SpellObject.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "BuffSpell.generated.h"
 
 /**
@@ -26,6 +26,9 @@ private:
 public:
 	EBuffDebuffType GetTypeOfBuff() const;
 	TSubclassOf<class ASpellObject> GetSpellObjectClass() const;
+
+	void SetSpellObjectClass(const TSubclassOf<class ASpellObject>& NewSpellObjectClass);
+	void SetTypeOfBuff(EBuffDebuffType NewTypeOfDebuff);
 
 	ABuffSpell& ABuffSpell::operator =(const ASpell& Spell);
 };

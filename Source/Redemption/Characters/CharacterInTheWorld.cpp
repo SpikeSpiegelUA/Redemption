@@ -3,7 +3,7 @@
 
 #include "CharacterInTheWorld.h"
 #include <Kismet/GameplayStatics.h>
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Enemies\NonCombatEnemyNPC.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\NonCombat\NonCombatEnemyNPC.h"
 #include <Engine/TargetPoint.h>
 
 // Sets default values

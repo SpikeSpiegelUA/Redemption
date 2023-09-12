@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "D:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
 #include "RestorationItem.generated.h"
 
 /**
  * 
  */
 UENUM(BlueprintType)
-enum class ItemRestorationType :uint8
+enum class EItemRestorationType :uint8
 {
 	HEALTH UMETA(DisplayName = "Health"),
 	MANA UMETA(DisplayName = "Mana"),
@@ -22,13 +22,13 @@ class REDEMPTION_API ARestorationItem : public AGameItem
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
-		ItemRestorationType TypeOfRestoration {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
+		EItemRestorationType TypeOfRestoration {};
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		int RestorationValuePercent{};
 
 public:
-	ItemRestorationType GetTypeOfRestoration() const;
+	EItemRestorationType GetTypeOfRestoration() const;
 	int GetRestorationValuePercent() const;
 };
