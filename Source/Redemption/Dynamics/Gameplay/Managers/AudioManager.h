@@ -37,6 +37,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Cues")
 		USoundCue* UseAssaultSoundCue {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Cues")
+		USoundCue* ShotSoundCue {};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Cues")
 		USoundCue* DungeonCombatBackgroundMusicSoundCue_RunRabbitJunk {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Cues")
 		USoundCue* DungeonCombatBackgroundMusicSoundCue_Leash {};
@@ -48,6 +50,8 @@ protected:
 		USoundCue* DungeonExplorationBackgroundMusicSoundCue_Stretch {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Cues")
 		USoundCue* DungeonExplorationBackgroundMusicSoundCue_SearchForAmbrosia {};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Cues")
+		USoundCue* DungeonTalkBackgroundMusicSoundCue_Daat{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Cues")
 		USoundCue* DungeonBattleResultsBackgroundMusicSoundCue {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Cues")
@@ -74,6 +78,8 @@ protected:
 		UAudioComponent* DungeonExplorationBackgroundMusicAudioComponent_Stretch {};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio Components")
 		UAudioComponent* DungeonExplorationBackgroundMusicAudioComponent_SearchForAmbrosia {};
+		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio Components")
+		UAudioComponent* DungeonTalkBackgroundMusicAudioComponent_Daat{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio Components")
 		UAudioComponent* DungeonBattleResultsBackgroundMusicAudioComponent {};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio Components")
@@ -94,12 +100,14 @@ public:
 	USoundCue* GetUseHealOrBuffSoundCue() const;
 	USoundCue* GetUseDebuffSoundCue() const;
 	USoundCue* GetUseAssaultSoundCue() const;
+	USoundCue* GetShotSoundCue() const;
 	USoundCue* GetDungeonCombatBackgroundMusicSoundCue_RunRabbitJunk() const;
 	USoundCue* GetDungeonCombatBackgroundMusicSoundCue_Leash() const;
 	USoundCue* GetDungeonCombatBackgroundMusicSoundCue_AnotherRoundForEveryone() const;
 	USoundCue* GetDungeonExplorationBackgroundMusicSoundCue_Woman() const;
 	USoundCue* GetDungeonExplorationBackgroundMusicSoundCue_Stretch() const;
 	USoundCue* GetDungeonExplorationBackgroundMusicSoundCue_SearchForAmbrosia() const;
+	USoundCue* GetDungeonTalkBackgroundMusicSoundCue_Daat() const;
 	USoundCue* GetDungeonBattleResultsBackgroundMusicSoundCue() const;
 	USoundCue* GetTownExplorationBackgroundMusicSoundCue_NYCBar() const;
 	USoundCue* GetTownExplorationBackgroundMusicSoundCue_UNATCO() const;
@@ -113,10 +121,13 @@ public:
 	UAudioComponent* GetDungeonExplorationBackgroundMusicAudioComponent_Woman() const;
 	UAudioComponent* GetDungeonExplorationBackgroundMusicAudioComponent_Stretch() const;
 	UAudioComponent* GetDungeonExplorationBackgroundMusicAudioComponent_SearchForAmbrosia() const;
+	UAudioComponent* GetDungeonTalkBackgroundMusicAudioComponent_Daat() const;
 	UAudioComponent* GetDungeonBattleResultsBackgroundMusicAudioComponent() const;
 	UAudioComponent* GetTownExplorationBackgroundMusicAudioComponent_NYCBar() const;
 	UAudioComponent* GetTownExplorationBackgroundMusicAudioComponent_UNATCO() const;
 	UAudioComponent* GetTownExplorationBackgroundMusicAudioComponent_Tokyo() const;
 	UAudioComponent* GetMainMenuBackgroundMusicAudioComponent() const;
 	UAudioComponent* GetDeathMenuBackgroundMusicAudioComponent() const;
+
+	int8 RandomDungeonCombatBackgroundMusicIndex{};
 };

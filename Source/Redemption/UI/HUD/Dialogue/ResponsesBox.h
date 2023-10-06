@@ -20,6 +20,8 @@ protected:
 
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
+
+	void OnMouseEnter(FGeometry MyGeometry, const FPointerEvent& MouseEvent);
 public:
 
 	UVerticalBox* GetResponseVerticalBox() const;

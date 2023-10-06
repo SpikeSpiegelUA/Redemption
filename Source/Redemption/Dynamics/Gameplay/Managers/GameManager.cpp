@@ -7,7 +7,7 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\ToBattleTransitionScreen.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\NonCombat\NonCombatEnemyNPC.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
+#include "UIManagerWorldSubsystem.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatAllyNPC.h"
 #include "Components/StackBox.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
@@ -15,6 +15,7 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\Combat\CombatEnemyNPCAIController.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ArrayActions.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\Combat\CombatAllyNPCAIController.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 
 // Sets default values
 AGameManager::AGameManager()
@@ -120,9 +121,10 @@ void AGameManager::StartBattle(AActor* const& AttackingNPC)
 			PC->bShowMouseCursor = true;
 			PC->bEnableClickEvents = true;
 			PC->bEnableMouseOverEvents = true;
-			PC->ActivateTouchInterface(PlayerCharacter->GetEmptyTouchInterface());
+			//PC->ActivateTouchInterface(PlayerCharacter->GetEmptyTouchInterface());
 			FViewTargetTransitionParams Params;
 			PC->SetViewTarget(PlayerCharacter->GetBattleManager()->GetBehindPlayerCamera(), Params);
+			UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(PC, PlayerCharacter->GetBattleMenuWidget(), EMouseLockMode::DoNotLock);
 			//Background Music set
 			PlayerCharacter->GetAudioManager()->DungeonExplorationBackgroundMusicAudioComponents[PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(true);
 			URedemptionGameInstance* GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
@@ -153,10 +155,11 @@ void AGameManager::EndBattle()
 	if (IsValid(PC) && IsValid(PlayerCharacter) && IsValid(GameInstance) && IsValid(BattleManager)) {
 		PC->SetViewTarget(PlayerCharacter->GetFollowCamera()->GetOwner(), Params);
 		PlayerCharacter->SetActorLocation(PlayerLastLocation);
-		PC->bShowMouseCursor = true;
+		PC->bShowMouseCursor = false;
 		PC->bEnableClickEvents = false;
 		PC->bEnableMouseOverEvents = false;
-		PC->ActivateTouchInterface(PlayerCharacter->GetStandardTouchInterface());
+		UWidgetBlueprintLibrary::SetInputMode_GameOnly(PC);
+		//PC->ActivateTouchInterface(PlayerCharacter->GetStandardTouchInterface());
 		PlayerCharacter->SetCanInput(true);
 		PlayerCharacter->GetBattleResultsScreenWidget()->RemoveFromParent();
 		BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
@@ -192,17 +195,12 @@ void AGameManager::EndBattle()
 void AGameManager::ToBattleTransition() 
 {
 	UBattleMenu* BattleMenu = PlayerCharacter->GetBattleMenuWidget();
-	TArray<AActor*> UIManagerActors;
-	AUIManager* UIManager = nullptr;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AUIManager::StaticClass(), UIManagerActors);
-	if (UIManagerActors.Num() > 0)
-		UIManager = Cast<AUIManager>(UIManagerActors[0]);
 	ToBattleTransitionScreen->RemoveFromParent();
-	if (IsValid(BattleMenu) && IsValid(UIManager)) {
+	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(BattleMenu) && IsValid(UIManagerWorldSubsystem)) {
 		BattleMenu->AddToViewport();
 		BattleMenu->GetAttackButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-		UIManager->PickedButton = BattleMenu->GetAttackButton();
-		UIManager->PickedButtonIndex = 0;
+		UIManagerWorldSubsystem->PickedButton = BattleMenu->GetAttackButton();
+		UIManagerWorldSubsystem->PickedButtonIndex = 0;
 		BattleMenu->IsChoosingAction = true;
 	}
 }

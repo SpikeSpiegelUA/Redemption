@@ -54,7 +54,7 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 		if (ACombatNPC* CombatNPC = Cast<ACombatNPC>(OtherActor); IsValid(CombatNPC)) {
 			if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(Spell); IsValid(AssaultSpell)) {
 				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedCombatNPC,
-					AssaultSpell->GetAttackValue(), AssaultSpell->GetElementsAndTheirPercentagesStructs());
+					AssaultSpell->GetAttackValue(), AssaultSpell->GetElementsAndTheirPercentagesStructs(), false);
 				OnOverlapBeginsActions(PlayerCharacter);
 			}
 			else if (APresetDebuffSpell* PresetDebuffSpell = Cast<APresetDebuffSpell>(Spell); IsValid(PresetDebuffSpell)) {
@@ -74,7 +74,7 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 
 void ASpellObject::OnOverlapBeginsActions(const class APlayerCharacter* const& PlayerCharacter)
 {
-	PlayerCharacter->GetSkillBattleMenuWidget()->SetCreatedSpell(nullptr);
+	PlayerCharacter->GetSpellBattleMenuWidget()->SetCreatedSpell(nullptr);
 	PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell = false;
 	PlayerCharacter->GetBattleManager()->SetTimerForPlayerTurnController();
 	this->Destroy();

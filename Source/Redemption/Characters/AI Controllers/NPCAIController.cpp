@@ -20,32 +20,25 @@ ANPCAIController::ANPCAIController()
 void ANPCAIController::BeginPlay() 
 {
 	Super::BeginPlay();
-
-	ACharacterInTheWorld* Chr = Cast<ACharacterInTheWorld>(GetPawn());
-	if(IsValid(Chr))
-		if (IsValid(Chr->GetSmartObject())) {
-			const FGameplayTag SubTreeTag = FGameplayTag::RequestGameplayTag(FName("SubTreeTag"));
-			BehaviorTreeComponent->SetDynamicSubtree(SubTreeTag, Chr->GetSmartObject()->GetSubTree());
-	}
-		
 }
 
 void ANPCAIController::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
 }
 
 void ANPCAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-
 	ACharacterInTheWorld* Chr = Cast<ACharacterInTheWorld>(InPawn);
 	if (IsValid(Chr) && IsValid(Chr->GetTreeAsset())) {
-
-		//Initialize the Blackboard
 		BlackboardComponent->InitializeBlackboard(*Chr->GetTreeAsset()->BlackboardAsset);
-
 		//Start the Behavior Tree
 		BehaviorTreeComponent->StartTree(*Chr->GetTreeAsset());
+		if (IsValid(Chr->GetSmartObject())) {
+			const FGameplayTag SubTreeTag = FGameplayTag::RequestGameplayTag(FName("SubTreeTag"));
+			BehaviorTreeComponent->SetDynamicSubtree(SubTreeTag, Chr->GetSmartObject()->GetSubTree());
+		}
 	}
 }
 

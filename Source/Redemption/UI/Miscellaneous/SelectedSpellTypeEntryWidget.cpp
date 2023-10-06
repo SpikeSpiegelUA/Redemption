@@ -3,7 +3,7 @@
 
 #include "SelectedSpellTypeEntryWidget.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SkillBattleMenu.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SpellBattleMenu.h"
 
 bool USelectedSpellTypeEntryWidget::Initialize()
 {
@@ -23,7 +23,7 @@ void USelectedSpellTypeEntryWidget::MainButtonOnClicked()
 {
 	//Delete this widget and nullify selected spell type
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-		if (USkillBattleMenu* SkillBattleMenu = PlayerCharacter->GetSkillBattleMenuWidget(); IsValid(PlayerCharacter))
+		if (USpellBattleMenu* SkillBattleMenu = PlayerCharacter->GetSpellBattleMenuWidget(); IsValid(PlayerCharacter))
 		{
 			SkillBattleMenu->SetSelectedSpellType(ESpellType::NONE);
 			SkillBattleMenu->GetSelectedSpellTypeHorizontalBox()->RemoveChild(this);

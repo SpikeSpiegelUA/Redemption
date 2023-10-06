@@ -15,6 +15,11 @@ void UResponsesBox::NativeConstruct()
 	Super::NativeConstruct();
 }
 
+void UResponsesBox::OnMouseEnter(FGeometry MyGeometry, const FPointerEvent& MouseEvent)
+{
+	UE_LOG(LogTemp, Warning, TEXT("ENTERED"));
+}
+
 UVerticalBox* UResponsesBox::GetResponseVerticalBox() const
 {
 	return ResponseVerticalBox;

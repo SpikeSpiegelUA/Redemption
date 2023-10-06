@@ -11,6 +11,7 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\SkillsSpellsAndEffectsActions.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include <Redemption/Characters/AI Controllers/Combat/CombatEnemyNPCAIController.h>
 
 // Sets default values
 ACombatEnemyNPC::ACombatEnemyNPC()
@@ -31,22 +32,17 @@ void ACombatEnemyNPC::Tick(float DeltaTime)
 
 }
 
-int ACombatEnemyNPC::GetGoldReward() const
-{
-	return GoldReward;
-}
-
 void ACombatEnemyNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects)
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
 		if (ABattleManager* BattleManager = PlayerCharacter->GetBattleManager(); IsValid(BattleManager)) {
-			if (IsValid(PlayerCharacter->GetSkillBattleMenuWidget()->GetCreatedSpell())) {
+			if (IsValid(PlayerCharacter->GetSpellBattleMenuWidget()->GetCreatedSpell())) {
 				ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(),
 					GetActorLocation(), GetActorRotation());
 				FString TextForCombatFloatingInformationActor = FString();
 				uint8 EvasionRandomNumber = FMath::RandRange(0, 100);
 				int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance + Agility * 2,
-					Effects, EEffectArea::EVASION), Effects, Resistances, PlayerCharacter->GetSkillBattleMenuWidget()->GetCreatedSpell()->GetElementsAndTheirPercentagesStructs());
+					Effects, EEffectArea::EVASION), Effects, Resistances, PlayerCharacter->GetSpellBattleMenuWidget()->GetCreatedSpell()->GetElementsAndTheirPercentagesStructs());
 				if (EvasionRandomNumber <= ChanceOfEvasion) {
 					TextForCombatFloatingInformationActor.Append("Miss!");
 					CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
@@ -61,7 +57,7 @@ void ACombatEnemyNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class A
 		}
 }
 
-void ACombatEnemyNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements)
+void ACombatEnemyNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, bool ForcedMiss)
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
 		if (ABattleManager* BattleManager = PlayerCharacter->GetBattleManager(); IsValid(BattleManager)) {
@@ -69,7 +65,7 @@ void ACombatEnemyNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FEle
 			FString TextForCombatFloatingInformationActor = FString();
 			uint8 EvasionRandomNumber = FMath::RandRange(0, 100);
 			int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance + Agility * 2, Effects, EEffectArea::EVASION);
-			if (EvasionRandomNumber <= ChanceOfEvasion) {
+			if (EvasionRandomNumber <= ChanceOfEvasion || ForcedMiss) {
 				TextForCombatFloatingInformationActor.Append("Miss!");
 				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 			}
@@ -93,4 +89,21 @@ void ACombatEnemyNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FEle
 					AnimInstance->ToggleCombatCharacterGotHit(true);
 			}
 		}
+}
+
+void ACombatEnemyNPC::StartADialogue_Implementation()
+{
+	ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(GetController());
+	if (IsValid(AIController))
+		AIController->StartADialogue();
+}
+
+int ACombatEnemyNPC::GetGoldReward() const
+{
+	return GoldReward;
+}
+
+UBehaviorTree* ACombatEnemyNPC::GetDialogueTree()
+{
+	return DialogueTree;
 }

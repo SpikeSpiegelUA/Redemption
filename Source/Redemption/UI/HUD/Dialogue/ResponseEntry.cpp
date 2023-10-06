@@ -12,6 +12,7 @@ bool UResponseEntry::Initialize()
 		ResponseButton->OnHovered.AddDynamic(this, &UResponseEntry::ResponseButtonOnHovered);
 		ResponseButton->OnUnhovered.AddDynamic(this, &UResponseEntry::ResponseButtonOnUnhovered);
 	}
+
 	if (!bSuccess) return false;
 	return bSuccess;
 }
@@ -33,7 +34,7 @@ void UResponseEntry::ResponseButtonOnHovered()
 
 void UResponseEntry::ResponseButtonOnUnhovered()
 {
-	ResponseButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
+	ResponseButton->SetBackgroundColor(FColor::FromHex("C5456390"));
 }
 
 UTextBlock* UResponseEntry::GetResponseTextBlock() const

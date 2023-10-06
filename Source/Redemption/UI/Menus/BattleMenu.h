@@ -6,7 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatEnemyNPC.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
+#include "UIManagerWorldSubsystem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "BattleMenu.generated.h"
 
 /**
@@ -20,35 +22,37 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = "GeneralInformation", meta = (AllowPrivateAccess = true))
 		URedemptionGameInstance* GameInstance {};
 
-	FTimerHandle ItemUseTimerHandle{};
-	FTimerHandle DefendActionTimerHandle{};
+	UPROPERTY()
+		class ABattleManager * BattleManager{};
+
 	FTimerHandle HideNotificationTimerHandle;
+	FTimerHandle PlayerTurnControllerTimerHandle{};
+
+	bool CenterMarkIsMovingToTarget = false;
+	FVector2D RandomTargetForCenterMark{};
+	//Every n moves CenterMark has to go towards the Target.
+	int MoveCounter = 0;
 
 	UPROPERTY()
-		AUIManager* UIManager {};
+		UUIManagerWorldSubsystem* UIManagerWorldSubsystem {};
 
 	UFUNCTION()
 		void HideNotificationAndClearItsTimer();
 	void CreateNotification(const FText& NotificationText);
 
-	void AssaultSpellUse(class AAssaultSpell* const& SpellToUse, class ABattleManager* const& BattleManager,
-		class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
-	void RestorationSpellUse(class ARestorationSpell* const& SpellToUse, class ABattleManager* const& BattleManager,
-		class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
-	void BuffSpellUse(class ACreatedBuffSpell* const& SpellToUse, class ABattleManager* const& BattleManager,
-		class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
-	void BuffSpellUse(class APresetBuffSpell* const& SpellToUse, class ABattleManager* const& BattleManager,
-		class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
-	void DebuffSpellUse(class ACreatedDebuffSpell* const& SpellToUse, class ABattleManager* const& BattleManager,
-		class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
-	void DebuffSpellUse(class APresetDebuffSpell* const& SpellToUse, class ABattleManager* const& BattleManager,
-		class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
-
-	FTimerHandle UseSpellTimerHandle{};
+	void AssaultSpellUse(class AAssaultSpell* const& SpellToUse, class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
+	void RestorationSpellUse(class ARestorationSpell* const& SpellToUse, class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
+	void BuffSpellUse(class ACreatedBuffSpell* const& SpellToUse, class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
+	void BuffSpellUse(class APresetBuffSpell* const& SpellToUse, class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
+	void DebuffSpellUse(class ACreatedDebuffSpell* const& SpellToUse, class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
+	void DebuffSpellUse(class APresetDebuffSpell* const& SpellToUse, class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
+	void RangeAttackUse(UCombatAlliesAnimInstance* CurrentTurnAlliesNPCAnimInstance);
 
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* AttackButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UButton* RangeButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* DefendButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -58,11 +62,15 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* AttackActionButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UButton* TalkActionButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* LeftButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* RightButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* SpellButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UButton* TalkButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* MenuBorder;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -74,7 +82,7 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* NotificationBorder;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		class UCanvasPanel* CenterMark;
+		class UCanvasPanel* CenterMarkCanvasPanel;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UVerticalBox* MenuVerticalBox;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -84,8 +92,10 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* NotificationTextBlock;
 
+
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 public:
 	void SetTargetName(const FText& Name);
@@ -111,6 +121,8 @@ public:
 	bool IsChoosingSpell = false;
 	bool IsAttackingWithSpell = false;
 	bool IsAttackingWithMelee = false;
+	bool IsAttackingWithRange = false;
+	bool IsPreparingToTalk = false;
 
 	UFUNCTION()
 		void AttackButtonOnClicked();
@@ -128,4 +140,10 @@ public:
 		void RightButtonOnClicked();
 	UFUNCTION()
 		void SpellButtonOnClicked();
+	UFUNCTION()
+		void RangeButtonOnClicked();
+	UFUNCTION()
+		void TalkButtonOnClicked();
+	UFUNCTION()
+		void TalkActionButtonOnClicked();
 };

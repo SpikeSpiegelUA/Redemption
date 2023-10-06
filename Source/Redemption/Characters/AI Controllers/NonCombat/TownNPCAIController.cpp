@@ -13,6 +13,12 @@
 void ATownNPCAIController::BeginPlay()
 {
 	Super::BeginPlay();
+
+}
+
+void ATownNPCAIController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
 	//Default Behavior Tree initialization
 	ACharacterInTheWorld* Chr = Cast<ACharacterInTheWorld>(GetPawn());
 	if (IsValid(Chr))

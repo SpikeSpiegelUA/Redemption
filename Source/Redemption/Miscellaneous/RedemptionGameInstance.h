@@ -8,6 +8,7 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\RangeWeapon.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatAllies.h"
 #include "RedemptionGameInstance.generated.h"
 
@@ -27,7 +28,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 		TSubclassOf<class AWeaponItem> InstanceEquipedMelee{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-		TSubclassOf<class AWeaponItem> InstanceEquipedRange{};
+		TSubclassOf<class ARangeWeapon> InstanceEquipedRange{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 		TSubclassOf<class AArmorItem> InstanceEquipedHead{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")

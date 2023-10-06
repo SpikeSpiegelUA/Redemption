@@ -62,6 +62,14 @@ void UCombatCharacterAnimInstance::ToggleCombatCharacterIsAttackingWithMagic(boo
 		BitmapsActions::ClearBit(CombatCharacterAnimationStateBitmaskCode, static_cast<int32>(ECombatCharacterAnimationState::CombatCharacterIsAttackingWithMagic));
 }
 
+void UCombatCharacterAnimInstance::ToggleCombatCharacterIsAiming(bool Value)
+{
+	if (Value)
+		BitmapsActions::SetBit(CombatCharacterAnimationStateBitmaskCode, static_cast<int32>(ECombatCharacterAnimationState::CombatCharacterIsAiming));
+	else
+		BitmapsActions::ClearBit(CombatCharacterAnimationStateBitmaskCode, static_cast<int32>(ECombatCharacterAnimationState::CombatCharacterIsAiming));
+}
+
 bool UCombatCharacterAnimInstance::GetCombatCharacterIsDead() const
 {
 	return BitmapsActions::TestBit(CombatCharacterAnimationStateBitmaskCode, static_cast<int32>(ECombatCharacterAnimationState::CombatCharacterIsDead));
@@ -70,4 +78,9 @@ bool UCombatCharacterAnimInstance::GetCombatCharacterIsDead() const
 bool UCombatCharacterAnimInstance::GetCombatCharacterGotHit() const
 {
 	return BitmapsActions::TestBit(CombatCharacterAnimationStateBitmaskCode, static_cast<int32>(ECombatCharacterAnimationState::CombatCharacterGotHit));
+}
+
+bool UCombatCharacterAnimInstance::GetCombatCharacterIsAiming()
+{
+	return BitmapsActions::TestBit(CombatCharacterAnimationStateBitmaskCode, static_cast<int32>(ECombatCharacterAnimationState::CombatCharacterIsAiming));
 }

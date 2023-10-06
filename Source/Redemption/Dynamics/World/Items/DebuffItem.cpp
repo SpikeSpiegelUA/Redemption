@@ -18,3 +18,8 @@ TSubclassOf<AItemObject> ADebuffItem::GetItemObjectClass() const
 	return ItemObjectClass;
 }
 
+TArray<FElementAndItsPercentageStruct> ADebuffItem::GetElementsAndTheirPercentagesStructs() const
+{
+	return ElementsAndTheirPercentagesStructs;
+}
+

@@ -16,6 +16,7 @@ class ATownNPCAIController : public ANPCAIController
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void OnPossess(APawn* InPawn) override;
 
 public:
 	FTimerHandle TimerHandle{};

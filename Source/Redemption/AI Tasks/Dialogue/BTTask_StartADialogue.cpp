@@ -4,6 +4,7 @@
 #include "BTTask_StartADialogue.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
 
 UBTTask_StartADialogue::UBTTask_StartADialogue(const FObjectInitializer& ObjectInitializer)
@@ -32,11 +33,11 @@ EBTNodeResult::Type UBTTask_StartADialogue::ExecuteTask(UBehaviorTreeComponent& 
 		PlayerCharacter->IsInDialogue = true;
 		PlayerCharacter->GetForwardRayInfoWidget()->RemoveFromParent();
 
-		PlayerCharacter->GetDialogueBoxWidget()->SetFocus();
-
-		ACharacterInTheWorld* Speaker = Cast<ACharacterInTheWorld>(MyController->GetPawn());
+;		ACharacterInTheWorld* Speaker = Cast<ACharacterInTheWorld>(MyController->GetPawn());
 		PlayerCharacter->GetDialogueBoxWidget()->SetSpeakerName(FText::FromName(Speaker->GetCharacterName()));
 
+		UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(PlayerController, PlayerCharacter->GetDialogueBoxWidget(), EMouseLockMode::DoNotLock);
+		
 		OwnerComp.GetBlackboardComponent()->ClearValue(DialogueBoxWidgetKeySelector.SelectedKeyName);
 		OwnerComp.GetBlackboardComponent()->SetValueAsObject(DialogueBoxWidgetKeySelector.SelectedKeyName, PlayerCharacter->GetDialogueBoxWidget());
 

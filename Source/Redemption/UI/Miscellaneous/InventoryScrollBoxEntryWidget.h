@@ -31,6 +31,8 @@ protected:
 
 	UFUNCTION()
 		void InventoryEntryWidgetButtonOnClicked();
+	UFUNCTION()
+		void InventoryEntryWidgetButtonOnHovered();
 
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;

@@ -3,7 +3,7 @@
 
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\SelectedElementEntryWidget.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SkillBattleMenu.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SpellBattleMenu.h"
 
 bool USelectedElementEntryWidget::Initialize()
 {
@@ -23,7 +23,7 @@ void USelectedElementEntryWidget::MainButtonOnClicked()
 {
 	//Delete this widget and decrease selected elements count on click
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) 
-		if (USkillBattleMenu* SkillBattleMenu = PlayerCharacter->GetSkillBattleMenuWidget(); IsValid(PlayerCharacter)) 
+		if (USpellBattleMenu* SkillBattleMenu = PlayerCharacter->GetSpellBattleMenuWidget(); IsValid(PlayerCharacter)) 
 			for (UWidget* Child : SkillBattleMenu->GetSelectedElementsHorizontalBox()->GetAllChildren()) 
 				if(USelectedElementEntryWidget* SelectedElementEntryWidget = Cast<USelectedElementEntryWidget>(Child); IsValid(SelectedElementEntryWidget))
 					if (Child == this) {

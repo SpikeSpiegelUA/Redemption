@@ -13,7 +13,7 @@ void UAnimNotify_CEnemyMAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 		if(IsValid(Owner))
 			CombatAllies = Cast<ACombatAllies>(Owner->Target);
 		if (IsValid(CombatAllies) && IsValid(Owner)) 
-			CombatAllies->Execute_GetHit(CombatAllies, CalculateAttackValueAfterEffects(Owner->GetMeleeAttackValue(), Owner), Owner->GetMeleeWeaponElements());
+			CombatAllies->Execute_GetHit(CombatAllies, CalculateAttackValueAfterEffects(Owner->GetMeleeAttackValue(), Owner), Owner->GetMeleeWeaponElements(), false);
 	}
 }
 

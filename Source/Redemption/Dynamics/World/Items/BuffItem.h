@@ -21,7 +21,10 @@ private:
 		EBuffDebuffType TypeOfBuff {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 		TArray<TSubclassOf<AEffect>> EffectsClasses{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
+		TArray<FElementAndItsPercentageStruct> ElementsAndTheirPercentagesStructs {};
 public:
 	EBuffDebuffType GetTypeOfBuff() const;
 	TArray<TSubclassOf<AEffect>> GetEffectsClasses() const;
+	TArray<FElementAndItsPercentageStruct> GetElementsAndTheirPercentagesStructs() const;
 };

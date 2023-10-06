@@ -18,4 +18,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void OnPossess(APawn* InPawn) override;
+	void StartADialogue();
+
+protected:
+	virtual void BeginPlay() override;
 };

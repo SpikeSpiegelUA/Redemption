@@ -44,12 +44,16 @@ void AAudioManager::BeginPlay()
 			MainMenuBackgroundMusicAudioComponent = UGameplayStatics::SpawnSound2D(GetWorld(), MainMenuBackgroundMusicSoundCue);
 		if (IsValid(DeathMenuBackgroundMusicSoundCue))
 			DeathMenuBackgroundMusicAudioComponent = UGameplayStatics::SpawnSound2D(GetWorld(), DeathMenuBackgroundMusicSoundCue);
+		if (IsValid(DungeonTalkBackgroundMusicSoundCue_Daat))
+			DungeonTalkBackgroundMusicAudioComponent_Daat = UGameplayStatics::SpawnSound2D(GetWorld(), DungeonTalkBackgroundMusicSoundCue_Daat);
 		if (IsValid(DungeonBattleResultsBackgroundMusicAudioComponent))
 			DungeonBattleResultsBackgroundMusicAudioComponent->SetPaused(true);
 		if (IsValid(MainMenuBackgroundMusicAudioComponent))
 			MainMenuBackgroundMusicAudioComponent->SetPaused(true);
 		if (IsValid(DeathMenuBackgroundMusicAudioComponent))
 			DeathMenuBackgroundMusicAudioComponent->SetPaused(true);
+		if (IsValid(DungeonTalkBackgroundMusicAudioComponent_Daat))
+			DungeonTalkBackgroundMusicAudioComponent_Daat->SetPaused(true);
 
 		DungeonCombatBackgroundMusicAudioComponents.Add(DungeonCombatBackgroundMusicAudioComponent_RunRabbitJunk);
 		DungeonCombatBackgroundMusicAudioComponents.Add(DungeonCombatBackgroundMusicAudioComponent_Leash);
@@ -86,6 +90,8 @@ void AAudioManager::BeginPlay()
 						SelectingMusic = false;
 					}
 				}
+				//Select background music with the help of random index. Note: do while loop, if selected music is the same that played right before the selected, then generate a new index
+				//until a new music picked.
 				else if (MapName == "UEDPIE_0_Dungeon") {
 					int8 RandomDungeonBGMusicIndex = FMath::RandRange(0, DungeonExplorationBackgroundMusicAudioComponents.Num() - 1);
 					if (RandomDungeonBGMusicIndex != GameInstance->InstancePreviousDungeonBGMusicIndex && IsValid(DungeonExplorationBackgroundMusicAudioComponents[RandomDungeonBGMusicIndex])) {
@@ -132,6 +138,11 @@ USoundCue* AAudioManager::GetUseAssaultSoundCue() const
 	return UseAssaultSoundCue;
 }
 
+USoundCue* AAudioManager::GetShotSoundCue() const
+{
+	return ShotSoundCue;
+}
+
 USoundCue* AAudioManager::GetDungeonCombatBackgroundMusicSoundCue_RunRabbitJunk() const
 {
 	return DungeonCombatBackgroundMusicSoundCue_RunRabbitJunk;
@@ -160,6 +171,11 @@ USoundCue* AAudioManager::GetDungeonExplorationBackgroundMusicSoundCue_Stretch()
 USoundCue* AAudioManager::GetDungeonExplorationBackgroundMusicSoundCue_SearchForAmbrosia() const
 {
 	return DungeonExplorationBackgroundMusicSoundCue_SearchForAmbrosia;
+}
+
+USoundCue* AAudioManager::GetDungeonTalkBackgroundMusicSoundCue_Daat() const
+{
+	return DungeonTalkBackgroundMusicSoundCue_Daat;
 }
 
 USoundCue* AAudioManager::GetDungeonBattleResultsBackgroundMusicSoundCue() const
@@ -220,6 +236,11 @@ UAudioComponent* AAudioManager::GetDungeonExplorationBackgroundMusicAudioCompone
 UAudioComponent* AAudioManager::GetDungeonExplorationBackgroundMusicAudioComponent_SearchForAmbrosia() const
 {
 	return DungeonExplorationBackgroundMusicAudioComponent_SearchForAmbrosia;
+}
+
+UAudioComponent* AAudioManager::GetDungeonTalkBackgroundMusicAudioComponent_Daat() const
+{
+	return DungeonTalkBackgroundMusicAudioComponent_Daat;
 }
 
 UAudioComponent* AAudioManager::GetDungeonBattleResultsBackgroundMusicAudioComponent() const

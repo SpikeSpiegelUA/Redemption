@@ -25,8 +25,11 @@ private:
 		TArray<TSubclassOf<AEffect>> EffectsClasses {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 		TSubclassOf<AItemObject> ItemObjectClass{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
+		TArray<FElementAndItsPercentageStruct> ElementsAndTheirPercentagesStructs {};
 public:
 	EBuffDebuffType GetTypeOfDebuff() const;
 	TArray<TSubclassOf<AEffect>> GetEffectsClasses() const;
 	TSubclassOf<AItemObject> GetItemObjectClass() const;
+	TArray<FElementAndItsPercentageStruct> GetElementsAndTheirPercentagesStructs() const;
 };

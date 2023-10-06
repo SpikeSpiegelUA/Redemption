@@ -73,6 +73,11 @@ int ACombatNPC::GetRangeAttackValue() const
 	return RangeAttackValue;
 }
 
+int ACombatNPC::GetRangeAmmo() const
+{
+	return RangeAmmo;
+}
+
 AActor* ACombatNPC::GetStartLocation() const
 {
 	return StartLocation;
@@ -91,6 +96,11 @@ float ACombatNPC::GetHealthPercentage()
 float ACombatNPC::GetManaPercentage()
 {
 	return CurrentMana/MaxMana;
+}
+
+void ACombatNPC::SetRangeAmmo(int8 NewRangeAmmo)
+{
+	RangeAmmo = NewRangeAmmo;
 }
 
 void ACombatNPC::SetStartLocation(AActor* const& NewLocation)
