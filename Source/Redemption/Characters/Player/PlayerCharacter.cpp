@@ -266,6 +266,11 @@ void APlayerCharacter::InputOpenPauseMenu()
 	}
 }
 
+void APlayerCharacter::InputBack()
+{
+
+}
+
 void APlayerCharacter::InputScrollRight()
 {
 	if (IsValid(Controller)) 
@@ -629,26 +634,52 @@ void APlayerCharacter::InputScrollDown()
 		}
 		else if (IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->SelectedPanelWidget) && InventoryMenuWidget->IsInViewport()) {
 			TArray<UWidget*> SelectedScrollBoxChildren = InventoryMenuWidget->SelectedPanelWidget->GetAllChildren();
-			if (SelectedScrollBoxChildren.Num() > 0) {
-				if (UIManagerWorldSubsystem->PickedButtonIndex == SelectedScrollBoxChildren.Num() - 1) {
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
-					if(InventoryMenuWidget->IsSelectingSpecificItem)
-						UIManagerWorldSubsystem->PickedButton = Cast<UInventoryScrollBoxEntryWidget>(SelectedScrollBoxChildren[0])->GetMainButton();
-					else
-						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SelectedScrollBoxChildren[0]);
-					UIManagerWorldSubsystem->PickedButtonIndex = 0;
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				if (SelectedScrollBoxChildren.Num() > 0) {
+					if (UIManagerWorldSubsystem->PickedButtonIndex == SelectedScrollBoxChildren.Num() - 1) {
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+							if(InventoryMenuWidget->IsSelectingSpecificItem)
+								UIManagerWorldSubsystem->PickedButton = Cast<UInventoryScrollBoxEntryWidget>(SelectedScrollBoxChildren[0])->GetMainButton();
+							else
+								UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SelectedScrollBoxChildren[0]);
+							UIManagerWorldSubsystem->PickedButtonIndex = 0;
+							if(IsValid(UIManagerWorldSubsystem->PickedButton))
+								UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+					}
+					else {
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+						UE_LOG(LogTemp, Warning, TEXT("The index value is: %d"), UIManagerWorldSubsystem->PickedButtonIndex);
+						UE_LOG(LogTemp, Warning, TEXT("The selected panel widget name is %s"), *InventoryMenuWidget->SelectedPanelWidget->GetName());
+						if (InventoryMenuWidget->IsSelectingSpecificItem && IsValid(Cast<UInventoryScrollBoxEntryWidget>(SelectedScrollBoxChildren[UIManagerWorldSubsystem->PickedButtonIndex + 1])))
+							UIManagerWorldSubsystem->PickedButton = Cast<UInventoryScrollBoxEntryWidget>(SelectedScrollBoxChildren[UIManagerWorldSubsystem->PickedButtonIndex + 1])->GetMainButton();
+						else {
+							UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SelectedScrollBoxChildren[UIManagerWorldSubsystem->PickedButtonIndex + 1]);
+							InventoryMenuWidget->GetInventoryButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+							InventoryMenuWidget->GetMeleeButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+							InventoryMenuWidget->GetRangeButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+							InventoryMenuWidget->GetHeadButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+							InventoryMenuWidget->GetTorseButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+							InventoryMenuWidget->GetHandButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+							InventoryMenuWidget->GetLowerArmorButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+							Cast<UButton>(InventoryMenuWidget->GetItemTypeStackBox()->GetAllChildren()[InventoryMenuWidget->SelectedButtonIndex])->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+							if (InventoryMenuWidget->GetInventoryBorder()->GetVisibility() == ESlateVisibility::Visible)
+								InventoryMenuWidget->GetInventoryButton()->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+							if (InventoryMenuWidget->GetMeleeInventoryBorder()->GetVisibility() == ESlateVisibility::Visible)
+								InventoryMenuWidget->GetMeleeButton()->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+							if (InventoryMenuWidget->GetRangeInventoryBorder()->GetVisibility() == ESlateVisibility::Visible)
+								InventoryMenuWidget->GetRangeButton()->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+							if (InventoryMenuWidget->GetHeadInventoryBorder()->GetVisibility() == ESlateVisibility::Visible)
+								InventoryMenuWidget->GetHeadButton()->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+							if (InventoryMenuWidget->GetTorseInventoryBorder()->GetVisibility() == ESlateVisibility::Visible)
+								InventoryMenuWidget->GetTorseButton()->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+							if (InventoryMenuWidget->GetHandInventoryBorder()->GetVisibility() == ESlateVisibility::Visible)
+								InventoryMenuWidget->GetHandButton()->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+							if (InventoryMenuWidget->GetLowerArmorInventoryBorder()->GetVisibility() == ESlateVisibility::Visible)
+								InventoryMenuWidget->GetLowerArmorButton()->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+						}
+						UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex + 1;
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+					}
 				}
-				else {
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
-					if (InventoryMenuWidget->IsSelectingSpecificItem)
-						UIManagerWorldSubsystem->PickedButton = Cast<UInventoryScrollBoxEntryWidget>(SelectedScrollBoxChildren[UIManagerWorldSubsystem->PickedButtonIndex + 1])->GetMainButton();
-					else
-						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SelectedScrollBoxChildren[UIManagerWorldSubsystem->PickedButtonIndex + 1]);
-					UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex + 1;
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-				}
-			}
 		}
 	}
 }
@@ -807,6 +838,7 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 		PEI->BindAction(InputActions->InputScrollUp, ETriggerEvent::Started, this, &APlayerCharacter::InputScrollUp);
 		PEI->BindAction(InputActions->InputScrollDown, ETriggerEvent::Started, this, &APlayerCharacter::InputScrollDown);
 		PEI->BindAction(InputActions->InputPause, ETriggerEvent::Started, this, &APlayerCharacter::InputOpenPauseMenu);
+		PEI->BindAction(InputActions->InputBack, ETriggerEvent::Started, this, &APlayerCharacter::InputBack);
 	}
 }
 //Ray of detecting objects in front of a player

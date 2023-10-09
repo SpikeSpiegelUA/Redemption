@@ -197,31 +197,56 @@ void UInventoryMenu::SetColorForItemsTypesButtons(const UButton* const& ButtonTo
 		LowerArmorButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
 }
 
-void UInventoryMenu::ItemTypeButtonsOnClickedOtherActions(UButton* const& SelectedButton, UPanelWidget* const& PickedPanelWidget, int8 Index)
+void UInventoryMenu::ItemTypeButtonsOnClickedOtherActions(UPanelWidget* const& PickedPanelWidget, int8 Index)
 {
 	EquipButton->SetVisibility(ESlateVisibility::Visible);
 	UseButton->SetVisibility(ESlateVisibility::Hidden);
 	PickedItem = nullptr;
 	SelectedPanelWidget = PickedPanelWidget;
-	IsSelectingSpecificItem = true;
+	SelectedButtonIndex = Index;
 	if (IsValid(UIManagerWorldSubsystem)) {
-		if (IsValid(UIManagerWorldSubsystem->PickedButton) && UIManagerWorldSubsystem->PickedButton != SelectedButton)
+		if (IsValid(UIManagerWorldSubsystem->PickedButton) && UIManagerWorldSubsystem->PickedButton != ItemTypeStackBox->GetAllChildren()[SelectedButtonIndex])
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
 		if (PickedPanelWidget->GetAllChildren().Num() > 0) {
 			UIManagerWorldSubsystem->PickedButton = Cast<UInventoryScrollBoxEntryWidget>(PickedPanelWidget->GetAllChildren()[0])->GetMainButton();
 			UIManagerWorldSubsystem->PickedButtonIndex = 0;
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			IsSelectingSpecificItem = true;
 		}
 		else {
-			UIManagerWorldSubsystem->PickedButton = SelectedButton;
+			SelectedPanelWidget = ItemTypeStackBox;
+			UIManagerWorldSubsystem->PickedButton = Cast<UButton>(ItemTypeStackBox->GetAllChildren()[Index]);
 			UIManagerWorldSubsystem->PickedButtonIndex = Index;
+			IsSelectingSpecificItem = false;
 		}
 	}
 }
 
 void UInventoryMenu::TypeButtonsOnHoveredActions(UButton* const& SelectedButton, int8 Index)
 {
+	InventoryButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+	MeleeButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+	RangeButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+	HeadButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+	TorseButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+	HandButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+	LowerArmorButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
 	SelectedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+	if (InventoryBorder->GetVisibility() == ESlateVisibility::Visible)
+		InventoryButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	if (MeleeInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
+		MeleeButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	if (RangeInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
+		RangeButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	if (HeadInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
+		HeadButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	if (TorseInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
+		TorseButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	if (HandInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
+		HandButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	if (LowerArmorInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
+		LowerArmorButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
 	if (IsValid(UIManagerWorldSubsystem)) {
 		if (IsValid(UIManagerWorldSubsystem->PickedButton) && UIManagerWorldSubsystem->PickedButton != SelectedButton)
 			SetPickedTypeButtonColor(UIManagerWorldSubsystem->PickedButton);
@@ -294,49 +319,49 @@ void UInventoryMenu::MeleeButtonOnClicked()
 {
 	SetVisibilityForItemsTypesBorders(MeleeInventoryBorder);
 	SetColorForItemsTypesButtons(MeleeButton);
-	ItemTypeButtonsOnClickedOtherActions(MeleeButton, MeleeInventoryScrollBox, 1);
+	ItemTypeButtonsOnClickedOtherActions(MeleeInventoryScrollBox, 1);
 }
 
 void UInventoryMenu::RangeButtonOnClicked()
 {
 	SetVisibilityForItemsTypesBorders(RangeInventoryBorder);
 	SetColorForItemsTypesButtons(RangeButton);
-	ItemTypeButtonsOnClickedOtherActions(RangeButton, RangeInventoryScrollBox, 2);
+	ItemTypeButtonsOnClickedOtherActions(RangeInventoryScrollBox, 2);
 }
 
 void UInventoryMenu::HeadButtonOnClicked()
 {
 	SetVisibilityForItemsTypesBorders(HeadInventoryBorder);
 	SetColorForItemsTypesButtons(HeadButton);
-	ItemTypeButtonsOnClickedOtherActions(HeadButton, HeadInventoryScrollBox, 3);
+	ItemTypeButtonsOnClickedOtherActions(HeadInventoryScrollBox, 3);
 }
 
 void UInventoryMenu::TorseButtonOnClicked()
 {
 	SetVisibilityForItemsTypesBorders(TorseInventoryBorder);
 	SetColorForItemsTypesButtons(TorseButton);
-	ItemTypeButtonsOnClickedOtherActions(TorseButton, TorseInventoryScrollBox, 4);
+	ItemTypeButtonsOnClickedOtherActions(TorseInventoryScrollBox, 4);
 }
 
 void UInventoryMenu::HandButtonOnClicked()
 {
 	SetVisibilityForItemsTypesBorders(HandInventoryBorder);
 	SetColorForItemsTypesButtons(HandButton);
-	ItemTypeButtonsOnClickedOtherActions(HandButton, HandInventoryScrollBox, 5);
+	ItemTypeButtonsOnClickedOtherActions(HandInventoryScrollBox, 5);
 }
 
 void UInventoryMenu::LowerArmorButtonOnClicked()
 {
 	SetVisibilityForItemsTypesBorders(LowerArmorInventoryBorder);
 	SetColorForItemsTypesButtons(LowerArmorButton);
-	ItemTypeButtonsOnClickedOtherActions(LowerArmorButton, LowerArmorInventoryScrollBox, 6);
+	ItemTypeButtonsOnClickedOtherActions(LowerArmorInventoryScrollBox, 6);
 }
 
 void UInventoryMenu::InventoryButtonOnClicked()
 {
 	SetVisibilityForItemsTypesBorders(InventoryBorder);
 	SetColorForItemsTypesButtons(InventoryButton);
-	ItemTypeButtonsOnClickedOtherActions(InventoryButton, InventoryScrollBox, 0);
+	ItemTypeButtonsOnClickedOtherActions(InventoryScrollBox, 0);
 }
 
 void UInventoryMenu::EquipButtonOnClicked()
@@ -403,90 +428,74 @@ void UInventoryMenu::InventoryButtonOnHovered()
 
 void UInventoryMenu::MeleeButtonOnHovered()
 {
-	TypeButtonsOnHoveredActions(MeleeButton, 0);
+	TypeButtonsOnHoveredActions(MeleeButton, 1);
 }
 
 void UInventoryMenu::RangeButtonOnHovered()
 {
-	TypeButtonsOnHoveredActions(RangeButton, 0);
+	TypeButtonsOnHoveredActions(RangeButton, 2);
 }
 
 void UInventoryMenu::HeadButtonOnHovered()
 {
-	TypeButtonsOnHoveredActions(HeadButton, 0);
+	TypeButtonsOnHoveredActions(HeadButton, 3);
 }
 
 void UInventoryMenu::TorseButtonOnHovered()
 {
-	TypeButtonsOnHoveredActions(TorseButton, 0);
+	TypeButtonsOnHoveredActions(TorseButton, 4);
 }
 
 void UInventoryMenu::HandButtonOnHovered()
 {
-	TypeButtonsOnHoveredActions(HandButton, 0);
+	TypeButtonsOnHoveredActions(HandButton, 5);
 }
 
 void UInventoryMenu::LowerArmorButtonOnHovered()
 {
-	TypeButtonsOnHoveredActions(LowerArmorButton, 0);
+	TypeButtonsOnHoveredActions(LowerArmorButton, 6);
 }
 
 void UInventoryMenu::InventoryButtonOnUnhovered()
 {
 	if(InventoryBorder->GetVisibility() == ESlateVisibility::Visible)
 		InventoryButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-	else if(InventoryBorder->GetVisibility() == ESlateVisibility::Hidden || InventoryBorder->GetVisibility() == ESlateVisibility::Collapsed)
-		InventoryButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
 }
 
 void UInventoryMenu::MeleeButtonOnUnhovered()
 {
 	if (MeleeInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
 		MeleeButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-	else if (MeleeInventoryBorder->GetVisibility() == ESlateVisibility::Hidden || MeleeInventoryBorder->GetVisibility() == ESlateVisibility::Collapsed)
-		MeleeButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
 }
 
 void UInventoryMenu::RangeButtonOnUnhovered()
 {
-	if (RangeInventoryBorder->GetVisibility() == ESlateVisibility::Visible) {
+	if (RangeInventoryBorder->GetVisibility() == ESlateVisibility::Visible) 
 		RangeButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-		UE_LOG(LogTemp, Warning, TEXT("IS OK!!!"));
-	}
-	else if (RangeInventoryBorder->GetVisibility() == ESlateVisibility::Hidden || RangeInventoryBorder->GetVisibility() == ESlateVisibility::Collapsed)
-		RangeButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
 }
 
 void UInventoryMenu::HeadButtonOnUnhovered()
 {
 	if (HeadInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
 		HeadButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-	else if (HeadInventoryBorder->GetVisibility() == ESlateVisibility::Hidden || HeadInventoryBorder->GetVisibility() == ESlateVisibility::Collapsed)
-		HeadButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
 }
 
 void UInventoryMenu::TorseButtonOnUnhovered()
 {
 	if (TorseInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
 		TorseButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-	else if (TorseInventoryBorder->GetVisibility() == ESlateVisibility::Hidden || TorseInventoryBorder->GetVisibility() == ESlateVisibility::Collapsed)
-		TorseButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
 }
 
 void UInventoryMenu::HandButtonOnUnhovered()
 {
 	if (HandInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
 		HandButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-	else if (HandInventoryBorder->GetVisibility() == ESlateVisibility::Hidden || HandInventoryBorder->GetVisibility() == ESlateVisibility::Collapsed)
-		HandButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
 }
 
 void UInventoryMenu::LowerArmorButtonOnUnhovered()
 {
 	if (LowerArmorInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
 		LowerArmorButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-	else if (LowerArmorInventoryBorder->GetVisibility() == ESlateVisibility::Hidden || LowerArmorInventoryBorder->GetVisibility() == ESlateVisibility::Collapsed)
-		LowerArmorButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
 }
 
 void UInventoryMenu::EquipItem(AEquipmentItem*& ItemToEquip, TSubclassOf<class AWeaponItem>& GameInstanceVariableToStoreThisEquipmentType,
@@ -841,6 +850,36 @@ UBorder* UInventoryMenu::GetInventoryBorder() const
 UBorder* UInventoryMenu::GetItemInfoBorder() const
 {
 	return ItemInfoBorder;
+}
+
+UBorder* UInventoryMenu::GetMeleeInventoryBorder() const
+{
+	return MeleeInventoryBorder;
+}
+
+UBorder* UInventoryMenu::GetRangeInventoryBorder() const
+{
+	return RangeInventoryBorder;
+}
+
+UBorder* UInventoryMenu::GetHeadInventoryBorder() const
+{
+	return HeadInventoryBorder;
+}
+
+UBorder* UInventoryMenu::GetTorseInventoryBorder() const
+{
+	return TorseInventoryBorder;
+}
+
+UBorder* UInventoryMenu::GetHandInventoryBorder() const
+{
+	return HandInventoryBorder;
+}
+
+UBorder* UInventoryMenu::GetLowerArmorInventoryBorder() const
+{
+	return LowerArmorInventoryBorder;
 }
 
 UButton* UInventoryMenu::GetInventoryButton() const

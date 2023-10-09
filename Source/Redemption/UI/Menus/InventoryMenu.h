@@ -36,7 +36,7 @@ private:
 	void SetColorForItemsTypesButtons(const class UButton* const& ButtonToSetGreen);
 	//Set PickedButton opaque, then if there are items of picked type, set picked button to first item in the selected ScrollBox and change its color, otherwise set picked button
 	//to type button. Also set PickedButtonIndex to parameter Index and PickedItem to nullptr. Also set IsSelectingSpecificItem to true(Used in PlayerCharacter for keyboard input control)
-	void ItemTypeButtonsOnClickedOtherActions(class UButton* const& SelectedButton, class UPanelWidget* const& PickedPanelWidget, int8 Index);
+	void ItemTypeButtonsOnClickedOtherActions(class UPanelWidget* const& PickedPanelWidget, int8 Index);
 	//Set SelectedButton color to green, make PickedButton opaque, set PickedButton to SelectedButton and PickedButtonIndex to Index,SelectedPanelWidget to ItemTypeStackBox
 	//PickedItem to nullptr and IsSelectingSpecificItem to false;
 	void TypeButtonsOnHoveredActions(class UButton* const& SelectedButton, int8 Index);
@@ -166,6 +166,8 @@ public:
 	//Either ScrollBox or StackBox. Need this for an input from a keyboard.
 	UPROPERTY()
 		UPanelWidget* SelectedPanelWidget{};
+	//Index of a button that was picked in type stack box. Has a green color
+	int8 SelectedButtonIndex{};
 
 	UScrollBox* GetInventoryScrollBox() const;
 	UScrollBox* GetMeleeInventoryScrollBox() const;
@@ -181,6 +183,12 @@ public:
 	UBorder* GetBattleMenuButtonsForItemsBorder() const;
 	UBorder* GetInventoryBorder() const;
 	UBorder* GetItemInfoBorder() const;
+	UBorder* GetMeleeInventoryBorder() const;
+	UBorder* GetRangeInventoryBorder() const;
+	UBorder* GetHeadInventoryBorder() const;
+	UBorder* GetTorseInventoryBorder() const;
+	UBorder* GetHandInventoryBorder() const;
+	UBorder* GetLowerArmorInventoryBorder() const;
 	UButton* GetInventoryButton() const;
 	UButton* GetMeleeButton() const;
 	UButton* GetRangeButton() const;

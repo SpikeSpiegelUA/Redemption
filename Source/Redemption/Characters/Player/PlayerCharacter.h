@@ -340,7 +340,7 @@ private:
 	void InputOpenPlayerMenu();
 	
 	void InputOpenPauseMenu();
-
+	void InputBack();
 	//Scroll Control
 	void InputScrollUp();
 	void InputScrollDown();
