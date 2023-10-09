@@ -18,6 +18,7 @@ enum ECombatCharacterAnimationState
 	CombatCharacterIsDead = 0x0002,
 	CombatCharacterGotHit = 0x0004,
 	CombatCharacterIsAttackingWithMagic = 0x0008,
+	CombatCharacterIsAiming = 0x0100
 };
 
 ENUM_CLASS_FLAGS(ECombatCharacterAnimationState)
@@ -46,7 +47,9 @@ public:
 	void ToggleCombatCharacterIsDead(bool Value);
 	void ToggleCombatCharacterGotHit(bool Value);
 	void ToggleCombatCharacterIsAttackingWithMagic(bool Value);
+	void ToggleCombatCharacterIsAiming(bool Value);
 
 	bool GetCombatCharacterIsDead() const;
 	bool GetCombatCharacterGotHit() const;
+	bool GetCombatCharacterIsAiming();
 };

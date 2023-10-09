@@ -7,6 +7,7 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\MainMenu.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\PauseMenu.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
+#include "Redemption/Characters/Player/PlayerCharacter.h"
 
 bool USettingsMenu::Initialize()
 {
@@ -85,23 +86,27 @@ void USettingsMenu::BackgroundMusicSliderOnValueChanged(float Value)
 
 void USettingsMenu::BackButtonOnClicked()
 {
-	APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-	if (IsValid(PlayerController)) {
-		this->RemoveFromParent();
-		FString MapName = GetWorld()->GetMapName();
-		UMainMenu* MainMenuWidget = nullptr;
-		UPauseMenu* PauseMenuWidget = nullptr;
-		if (MapName == "UEDPIE_0_MainMenu") {
-			MainMenuWidget = CreateWidget<UMainMenu>(PlayerController, MainMenuClass);
-			if(IsValid(MainMenuWidget))
-				MainMenuWidget->AddToViewport();
+	if(APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
+		if (APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()); IsValid(PlayerController)) {
+			this->RemoveFromParent();
+			FString MapName = GetWorld()->GetMapName();
+			UMainMenu* MainMenuWidget = nullptr;
+			UPauseMenu* PauseMenuWidget = nullptr;
+			if (MapName == "UEDPIE_0_MainMenu") {
+				if(IsValid(PlayerCharacter->GetMainMenuWidget()))
+					PlayerCharacter->GetMainMenuWidget()->AddToViewport();
+			}
+			else if (MapName == "UEDPIE_0_Town" || MapName == "UEDPIE_0_Dungeon") {
+				if(IsValid(PlayerCharacter->GetPauseMenuWidget()))
+					PlayerCharacter->GetPauseMenuWidget()->AddToViewport();
+				UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
+				if (IsValid(UIManagerWorldSubsystem)) {
+					UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetPauseMenuWidget()->GetResumeButton();
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+					UIManagerWorldSubsystem->PickedButtonIndex = 0;
+				}
+			}
 		}
-		else if (MapName == "UEDPIE_0_Town" || MapName == "UEDPIE_0_Dungeon") {
-			PauseMenuWidget = CreateWidget<UPauseMenu>(PlayerController, PauseMenuClass);
-			if(IsValid(PauseMenuWidget))
-				PauseMenuWidget->AddToViewport();
-		}
-	}
 }
 
 UButton* USettingsMenu::GetBackButton() const

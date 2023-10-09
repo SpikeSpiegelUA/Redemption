@@ -6,11 +6,13 @@
 bool UDialogueBox::Initialize()
 {
 	const bool bSuccess = Super::Initialize();
-	DialogueTextBlock->TextDelegate.BindUFunction(this, "GetDialogueText");
-	SpeakerNameTextBlock->TextDelegate.BindUFunction(this, "GetSpeakerName");
+	if(IsValid(DialogueTextBlock))
+		DialogueTextBlock->TextDelegate.BindUFunction(this, "GetDialogueText");
+	if (IsValid(SpeakerNameTextBlock))
+		SpeakerNameTextBlock->TextDelegate.BindUFunction(this, "GetSpeakerName");
 	if (IsValid(ContinueButton))
 		ContinueButton->OnClicked.AddDynamic(this, &UDialogueBox::ContinueButtonOnClicked);
-	bIsFocusable = true;
+	bIsFocusable = false;
 	if (!bSuccess) return false;
 	return bSuccess;
 }

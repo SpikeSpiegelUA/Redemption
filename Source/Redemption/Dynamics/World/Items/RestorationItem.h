@@ -28,7 +28,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		int RestorationValuePercent{};
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
+		TArray<FElementAndItsPercentageStruct> ElementsAndTheirPercentagesStructs {};
+
 public:
 	EItemRestorationType GetTypeOfRestoration() const;
 	int GetRestorationValuePercent() const;
+	TArray<FElementAndItsPercentageStruct> GetElementsAndTheirPercentagesStructs() const;
 };

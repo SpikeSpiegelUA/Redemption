@@ -52,7 +52,7 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 		if (ACombatEnemyNPC* CombatEnemyNPC = Cast<ACombatEnemyNPC>(OtherActor); IsValid(CombatEnemyNPC)) {
 			if (AAssaultItem* AssaultItem = Cast<AAssaultItem>(Item); IsValid(AssaultItem)) {
 				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedCombatNPC,
-					AssaultItem->GetAttackValue(), AssaultItem->GetElementsAndTheirPercentagesStructs());
+					AssaultItem->GetAttackValue(), AssaultItem->GetElementsAndTheirPercentagesStructs(), false);
 				OnOverlapBeginsActions(PlayerCharacter);
 			}
 			else if (ADebuffItem* DebuffItem = Cast<ADebuffItem>(Item); IsValid(DebuffItem)) {

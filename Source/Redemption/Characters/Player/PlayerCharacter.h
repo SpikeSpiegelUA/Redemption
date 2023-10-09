@@ -11,13 +11,13 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\InventoryMenu.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\PauseMenu.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\PlayerMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SkillBattleMenu.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SpellBattleMenu.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\BattleResultsScreen.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\GameManager.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\AudioManager.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
+#include "UIManagerWorldSubsystem.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\DialogueBox.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\ResponsesBox.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\ResponseEntry.h"
@@ -28,6 +28,7 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\DeathMenu.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\LearnedSpellsJournalMenu.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatAllies.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\SkillEntryWidget.h"
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
@@ -95,7 +96,7 @@ private:
 	UPROPERTY()
 		UPlayerCharacterAnimInstance* PlayerAnimInstance {};
 	UPROPERTY()
-		AUIManager* UIManager {};
+		UUIManagerWorldSubsystem* UIManagerWorldSubsystem {};
 
 	//Touch interfaces
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mobile", meta = (AllowPrivateAccess = true))
@@ -133,16 +134,19 @@ public:
 	UBattleMenu* GetBattleMenuWidget() const;
 	ULearnedSpellsJournalMenu* GetLearnedSpellsJournalMenu() const;
 	ABattleManager* GetBattleManager() const;
-	AUIManager* GetUIManager() const;
+	UUIManagerWorldSubsystem* GetUIManagerWorldSubsystem() const;
 	class AGameManager* GetGameManager() const;
 	AAudioManager* GetAudioManager() const;
 	UDeathMenu* GetDeathMenuWidget() const;
-	class USkillBattleMenu* GetSkillBattleMenuWidget() const;
+	USettingsMenu* GetSettingsMenuWidget() const;
+	class USpellBattleMenu* GetSpellBattleMenuWidget() const;
 	class AEffectsSpellsAndSkillsManager* GetEffectsSpellsAndSkillsManager() const;
 	URedemptionGameInstance* GetGameInstance() const;
 	UInventoryScrollBoxEntryWidget* GetInventoryScrollBoxEntryWidget() const;
 	UDialogueBox* GetDialogueBoxWidget() const;
 	UForwardRayInfo* GetForwardRayInfoWidget() const;
+	UPauseMenu* GetPauseMenuWidget() const;
+	UMainMenu* GetMainMenuWidget() const;
 	UResponsesBox* GetResponsesBox() const;
 	UTouchInterface* GetEmptyTouchInterface() const;
 	UTouchInterface* GetStandardTouchInterface() const;
@@ -201,6 +205,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class UInventoryScrollBoxEntryWidget> InventoryScrollBoxEntryClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
+		TSubclassOf<class USkillEntryWidget> SkillEntryClass{};
+	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class UInventoryMenu> InventoryMenuClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class UPauseMenu> PauseMenuClass{};
@@ -219,7 +225,11 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class UDeathMenu> DeathMenuClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class USkillBattleMenu> SkillBattleMenuClass{};
+		TSubclassOf<class USpellBattleMenu> SpellBattleMenuClass{};
+	UPROPERTY(EditAnywhere, Category = "UI")
+		TSubclassOf<class USettingsMenu> SettingsMenuClass{};
+	UPROPERTY(EditAnywhere, Category = "UI")
+		TSubclassOf<class UMainMenu> MainMenuClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class ULearnedSpellsJournalMenu> LearnedSpellsJournalMenuClass{};
 	//The widget instances
@@ -229,6 +239,8 @@ protected:
 		class UPlayerMenu* PlayerMenuWidget{};
 	UPROPERTY()
 		class UInventoryScrollBoxEntryWidget* InventoryScrollBoxEntryWidget{};
+	UPROPERTY()
+		USkillEntryWidget* SkillEntryWidget{};
 	UPROPERTY()
 		class UInventoryMenu* InventoryMenuWidget{};
 	UPROPERTY()
@@ -248,11 +260,13 @@ protected:
 	UPROPERTY()
 		class UDeathMenu* DeathMenuWidget{};
 	UPROPERTY()
-		class USkillBattleMenu* SkillBattleMenuWidget{};
+		class USpellBattleMenu* SpellBattleMenuWidget{};
+	UPROPERTY()
+		class USettingsMenu* SettingsMenuWidget{};
+	UPROPERTY()
+		class UMainMenu* MainMenuWidget{};
 	UPROPERTY()
 		class ULearnedSpellsJournalMenu* LearnedSpellsJournalMenuWidget{};
-
-	bool CanInput = true;
 
 public:
 #pragma region
@@ -274,14 +288,14 @@ public:
 		int Gold = 0;
 	UPROPERTY(VisibleAnywhere, Category = "Combat")
 		TArray<AEffect*> Effects;
-	//Variables for movement in battle scene
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
-	    bool Combat_IsMovingToAttackEnemy = false;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
-		bool Combat_IsMovingToStartPosition = false;
+	//Ultimately just spells, that I couldn't come up with crafting  formula for. Like armor debuff, weapon boost, etc.
+	UPROPERTY(EditAnywhere, Category = "Combat")
+		TArray<class ASpell*> Skills;
 
 	bool IsInDialogue = false;
-	
+	//If a player opened an inventory menu, he can't open a pause menu.
+	bool CanOpenOtherMenus = true;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
 		int Strength = 1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
@@ -319,9 +333,6 @@ private:
 	void InputAction();
 	void PickUpItem(AActor* const& ActorResult);
 	void DialogueInteract(AActor* const &ActorResult);
-	void ActionButtonBattleMenuInteraction();
-	void ActionButtonBattleResultsScreenInteraction();
-	void ActionButtonInventoryMenuInteraction();
 	void ChangeLevel(const AActor* const &ActorResult);
 	void NotificationActions(const AActor* const &ActorResult);
 
@@ -329,7 +340,7 @@ private:
 	void InputOpenPlayerMenu();
 	
 	void InputOpenPauseMenu();
-
+	void InputBack();
 	//Scroll Control
 	void InputScrollUp();
 	void InputScrollDown();

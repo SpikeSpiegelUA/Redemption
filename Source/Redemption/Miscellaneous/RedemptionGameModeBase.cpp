@@ -3,6 +3,7 @@
 
 #include "RedemptionGameModeBase.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Kismet\GameplayStatics.h"
 
 ARedemptionGameModeBase::ARedemptionGameModeBase()
@@ -28,7 +29,7 @@ void ARedemptionGameModeBase::BeginPlay()
 				PlayerController->bShowMouseCursor = true;
 				PlayerController->bEnableClickEvents = true;
 				PlayerController->bEnableMouseOverEvents = true;
-				PlayerController->ActivateTouchInterface(PlayerCharacter->GetEmptyTouchInterface());
+				//PlayerController->ActivateTouchInterface(PlayerCharacter->GetEmptyTouchInterface());
 			}
 		}
 	}

@@ -6,7 +6,7 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
+#include "UIManagerWorldSubsystem.h"
 #include <Kismet/KismetMathLibrary.h>
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ArrayActions.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\FloatingManaBarWidget.h"
@@ -67,7 +67,6 @@ void ABattleManager::SelectNewTarget(ACombatNPC* const& Target, int Index)
 void ABattleManager::TurnChange()
 {
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-
 	//Pass turn to next random enemy
 	if (IsValid(CombatPlayerCharacter) && CombatPlayerCharacter->CurrentHP > 0) {
 		if (EnemyTurnQueue.Num() > 0) {
@@ -76,20 +75,21 @@ void ABattleManager::TurnChange()
 					AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
 				BattleEnemies[ActorNumberOfTheCurrentTurn]->SetActorRotation(FRotator(0, 0, 0));
 			}
-			for (int i = 0; i < BattleAlliesPlayer.Num(); i++)
-				if (BattleAlliesPlayer[i]->GetCurrentHP() <= 0)
-					BattleAlliesPlayer.RemoveAt(i);
-			SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
+			/*for (int i = BattleAlliesPlayer.Num() - 1; i >= 0; i--)
+				if (BattleAlliesPlayer[i]->GetCurrentHP() <= 0) 
+					BattleAlliesPlayer.RemoveAt(i);*/
+			if(IsValid(SelectedCombatNPC))
+				SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
 			if (IsValid(Cast<ACombatAllies>(SelectedCombatNPC)))
 				Cast<ACombatAllies>(SelectedCombatNPC)->GetFloatingManaBarWidget()->GetManaBar()->SetVisibility(ESlateVisibility::Hidden);
-			int NextActor = EnemyTurnQueue[0];
-			SelectedCombatNPC = BattleEnemies[NextActor];
+				int NextActor = EnemyTurnQueue[0];
+				SelectedCombatNPC = BattleEnemies[NextActor];
+				ActorNumberOfTheCurrentTurn = NextActor;
+				if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[NextActor]->GetController()); IsValid(AIController))
+					if (IsValid(AIController->GetBlackboardComponent()))
+						AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", true);
+				EnemyTurnQueue.RemoveAt(0);
 			CanTurnBehindPlayerCameraToTarget = true;
-			EnemyTurnQueue.Remove(NextActor);
-			ActorNumberOfTheCurrentTurn = NextActor;
-			if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[NextActor]->GetController()); IsValid(AIController))
-				if (IsValid(AIController->GetBlackboardComponent()))
-					AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", true);
 		}
 		//If EnemyQueue is empty, check if there are alive enemies. If yes, then enable battle UI and continue the battle, if not, show results of the battle.
 		else {
@@ -103,41 +103,42 @@ void ABattleManager::TurnChange()
 						AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
 					BattleEnemies[ActorNumberOfTheCurrentTurn]->SetActorRotation(FRotator(0, 0, 0));
 				}
-				TArray<AActor*> UIManagerActors;
-				AUIManager* UIManager = nullptr;
-				UGameplayStatics::GetAllActorsOfClass(GetWorld(), AUIManager::StaticClass(), UIManagerActors);
-				if (UIManagerActors.Num() > 0)
-					UIManager = Cast<AUIManager>(UIManagerActors[0]);
+				UUIManagerWorldSubsystem* UIManagerWorldSubsystem = nullptr;
+				if (IsValid(GetWorld()))
+					UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
 				ActorNumberOfTheCurrentTurn = -1;
 				UBattleMenu* BattleMenu = PlayerCharacter->GetBattleMenuWidget();
 				CanTurnBehindPlayerCameraToTarget = false;
 				CanTurnBehindPlayerCameraToStartPosition = true;
-				for (int i = 0; i < BattleAlliesPlayer.Num(); i++) {
-					UE_LOG(LogTemp, Warning, TEXT("LOOP IS OK!!!"));
-					UE_LOG(LogTemp, Warning, TEXT("CURRENT HP: %d"), BattleAlliesPlayer[i]->GetCurrentHP());
+				/*for (int8 i = BattleAlliesPlayer.Num() - 1; i >= 0; i--)
 					if (BattleAlliesPlayer[i]->GetCurrentHP() <= 0)
-						BattleAlliesPlayer.RemoveAt(i);
-					else if (BattleAlliesPlayer[i]->GetCurrentHP() > 0) {
+						BattleAlliesPlayer.RemoveAt(i);*/
+				for (int8 i = BattleAlliesPlayer.Num() - 1; i >= 0; i--) 
+					if(BattleAlliesPlayer[i]->GetCurrentHP() > 0)
 						AlliesPlayerTurnQueue.Add(i);
-						UE_LOG(LogTemp, Warning, TEXT("ADDED"));
-					}
-				}
 				ArrayActions::ShuffleArray<int>(AlliesPlayerTurnQueue);
-				if (AlliesPlayerTurnQueue.Num() > 0 && BattleAlliesPlayer.Num() > 0)
+				if (BattleAlliesPlayer.Num() > 0)
 					BehindPlayerCamera->SetActorLocation(Cast<ACombatStartLocation>(BattleAlliesPlayer[AlliesPlayerTurnQueue[0]]->GetStartLocation())->CombatCameraLocation);
-				if (AlliesPlayerTurnQueue.Num() > 0)
-					CurrentTurnAllyPlayerIndex = AlliesPlayerTurnQueue[0];
-				UE_LOG(LogTemp, Warning, TEXT("SECOND BRANCH IS OK!!!"));
-				UE_LOG(LogTemp, Warning, TEXT("The integer value IN SECOND BRANCH is: %d"), AlliesPlayerTurnQueue.Num());
-				if(AlliesPlayerTurnQueue.Num() > 0)
-					AlliesPlayerTurnQueue.RemoveAt(0);
-				if (IsValid(BattleMenu) && IsValid(UIManager)) {
+				CurrentTurnAllyPlayerIndex = AlliesPlayerTurnQueue[0];
+				AlliesPlayerTurnQueue.RemoveAt(0);
+				if (IsValid(BattleMenu) && IsValid(UIManagerWorldSubsystem)) {
 					BattleMenu->AddToViewport();
 					BattleMenu->IsChoosingAction = true;
 					BattleMenu->GetMenuBorder()->SetVisibility(ESlateVisibility::Visible);
-					UIManager->PickedButton = BattleMenu->GetAttackButton();
+					UIManagerWorldSubsystem->PickedButton = BattleMenu->GetAttackButton();
 					BattleMenu->GetAttackButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 				}
+				//Toggle blocking animation off
+				UCombatAlliesAnimInstance* CombatAlliesAnimInstance{};
+				if (CurrentTurnAllyPlayerIndex >= 0) {
+					if (IsValid(BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]))
+						if (IsValid(BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->GetMesh()))
+							if (IsValid(BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->GetMesh()->GetAnimInstance()))
+								CombatAlliesAnimInstance = Cast<UCombatAlliesAnimInstance>(BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->GetMesh()->GetAnimInstance());
+				}
+				if (IsValid(CombatAlliesAnimInstance))
+					if (CombatAlliesAnimInstance->GetCombatAlliesIsBlocking())
+						CombatAlliesAnimInstance->ToggleCombatAlliesIsBlocking(false);
 			}
 			else {
 				if (ActorNumberOfTheCurrentTurn >= 0) {
@@ -205,7 +206,9 @@ void ABattleManager::PlayerTurnController()
 					AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
 				BattleEnemies[ActorNumberOfTheCurrentTurn]->SetActorRotation(FRotator(0, 0, 0));
 			}*/
-			SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
+			BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->SetActorRotation(FRotator(0, 180, 0));
+			if(IsValid(SelectedCombatNPC))
+				SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
 			if (IsValid(Cast<ACombatAllies>(SelectedCombatNPC)))
 				Cast<ACombatAllies>(SelectedCombatNPC)->GetFloatingManaBarWidget()->GetManaBar()->SetVisibility(ESlateVisibility::Hidden);
 			int NextActor = AlliesPlayerTurnQueue[0];
@@ -215,20 +218,18 @@ void ABattleManager::PlayerTurnController()
 			//CanTurnBehindPlayerCameraToTarget = true;
 			AlliesPlayerTurnQueue.Remove(NextActor);
 			ActorNumberOfTheCurrentTurn = NextActor;
-			TArray<AActor*> UIManagerActors;
-			AUIManager* UIManager = nullptr;
-			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AUIManager::StaticClass(), UIManagerActors);
-			if (UIManagerActors.Num() > 0)
-				UIManager = Cast<AUIManager>(UIManagerActors[0]);
+			UUIManagerWorldSubsystem* UIManagerWorldSubsystem = nullptr;
+			if (IsValid(GetWorld()))
+				UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
 			ActorNumberOfTheCurrentTurn = -1;
 			UBattleMenu* BattleMenu = PlayerCharacter->GetBattleMenuWidget();
 			CanTurnBehindPlayerCameraToTarget = false;
 			CanTurnBehindPlayerCameraToStartPosition = true;
-			if (IsValid(BattleMenu) && IsValid(UIManager)) {
+			if (IsValid(BattleMenu) && IsValid(UIManagerWorldSubsystem)) {
 				BattleMenu->AddToViewport();
 				BattleMenu->IsChoosingAction = true;
 				BattleMenu->GetMenuBorder()->SetVisibility(ESlateVisibility::Visible);
-				UIManager->PickedButton = BattleMenu->GetAttackButton();
+				UIManagerWorldSubsystem->PickedButton = BattleMenu->GetAttackButton();
 				BattleMenu->GetAttackButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 			}
 			//Check Effects array in a next character. If CurrentDuration>=Duration, add index to special array and then delete in separate loop
@@ -258,12 +259,13 @@ void ABattleManager::PlayerTurnController()
 		}
 		else {
 			//Delete dead enemies and fill the queue
-			for (int i = 0; i < BattleEnemies.Num(); i++)
+			/*for (int i = BattleEnemies.Num() - 1; i >= 0; i--)
 				if (BattleEnemies[i]->GetCurrentHP() <= 0) {
 					PlayerCharacter->Gold += BattleEnemies[i]->GetGoldReward();
 					BattleEnemies.RemoveAt(i);
-				}
-				else
+				}*/
+			for (int i = BattleEnemies.Num() - 1; i >= 0; i--)
+				if(BattleEnemies[i]->GetCurrentHP() > 0)
 					EnemyTurnQueue.Add(i);
 			ArrayActions::ShuffleArray<int>(EnemyTurnQueue);
 			TurnChange();

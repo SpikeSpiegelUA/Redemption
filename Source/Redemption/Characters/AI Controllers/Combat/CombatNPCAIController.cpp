@@ -20,6 +20,11 @@ void ACombatNPCAIController::Tick(float DeltaTime)
 
 }
 
+void ACombatNPCAIController::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 void ACombatNPCAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);

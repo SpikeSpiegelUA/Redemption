@@ -34,9 +34,11 @@ public:
 	int GetMeleeAttackValue() const;
 	int GetRangeAttackValue() const;
 	int GetEvasionChance() const;
+	int GetRangeAmmo() const;
 	AActor* GetStartLocation() const;
 	TSubclassOf<ASmartObject> GetAIClass() const;
 
+	void SetRangeAmmo(int8 NewRangeAmmo);
 	void SetStartLocation(AActor* const& NewLocation);
 
 	//Combat mode regarding variables
@@ -73,6 +75,8 @@ protected:
 		int MeleeAttackValue{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 		int RangeAttackValue{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+		int RangeAmmo{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 		int EvasionChance{};
 	UPROPERTY(EditAnywhere, Category = "Combat")

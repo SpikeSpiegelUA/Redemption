@@ -25,4 +25,6 @@ public:
 
 protected:
 	uint8 ActorsTurnKeyID{};
+
+	virtual void BeginPlay() override;
 };

@@ -40,7 +40,6 @@ public:
 	FName GetCharacterName() const;
 
 	UBehaviorTree* GetTreeAsset() const;
-
 	ASmartObject* GetSmartObject() const;
 	
 	void SetSmartObject(ASmartObject* Object);

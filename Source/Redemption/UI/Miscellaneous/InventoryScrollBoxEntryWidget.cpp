@@ -6,7 +6,7 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\UIManager.h"
+#include "UIManagerWorldSubsystem.h"
 #include <Kismet/GameplayStatics.h>
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
@@ -18,6 +18,7 @@ bool UInventoryScrollBoxEntryWidget::Initialize()
 {
 	const bool bSuccess = Super::Initialize();
 	MainButton->OnClicked.AddDynamic(this, &UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnClicked);
+	MainButton->OnHovered.AddDynamic(this, &UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnHovered);
 	if (!bSuccess) return false;
 	return bSuccess;
 }
@@ -29,26 +30,36 @@ void UInventoryScrollBoxEntryWidget::NativeConstruct()
 
 void UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnClicked()
 {
-	TArray<AActor*> UIManagerActors;
-	AUIManager* UIManager = nullptr;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AUIManager::StaticClass(), UIManagerActors);
-	if (UIManagerActors.Num() > 0)
-		UIManager = Cast<AUIManager>(UIManagerActors[0]);
+	UE_LOG(LogTemp, Warning, TEXT("BUTTON PRESSED!!!"));
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); 
+		IsValid(PlayerCharacter) && IsValid(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem())) {
+		if (IsValid(Cast<AEquipmentItem>(Item)))
+			PlayerCharacter->GetInventoryMenuWidget()->EquipButtonOnClicked();
+		else
+			PlayerCharacter->GetInventoryMenuWidget()->UseButtonOnClicked();
+	}
+}
+
+void UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnHovered()
+{
+	UUIManagerWorldSubsystem* UIManagerWorldSubsystem = nullptr;
+	if (GetWorld())
+		UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-		IsValid(PlayerCharacter) && IsValid(UIManager) && IsValid(Item)) {
+		IsValid(PlayerCharacter) && IsValid(UIManagerWorldSubsystem) && IsValid(Item)) {
 		PlayerCharacter->GetInventoryMenuWidget()->SetPickedItem(Item);
 		PlayerCharacter->GetInventoryMenuWidget()->GetItemInfoBorder()->SetVisibility(ESlateVisibility::Visible);
 		PlayerCharacter->GetInventoryMenuWidget()->SetItemInfo(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem());
 		MainButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-		if (UIManager->PickedButton)
-			if (UIManager->PickedButton != MainButton)
-				UIManager->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
-		UIManager->PickedButton = MainButton;
+		if (UIManagerWorldSubsystem->PickedButton)
+			if (UIManagerWorldSubsystem->PickedButton != MainButton)
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+		UIManagerWorldSubsystem->PickedButton = MainButton;
 		//Set picked button index
 		UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(PlayerCharacter->GetInventoryMenuWidget(), Item);
 		for (int i = 0; i < CurrentScrollBox->GetAllChildren().Num(); i++)
 			if (CurrentScrollBox->GetAllChildren()[i] == this) {
-				UIManager->PickedButtonIndex = i;
+				UIManagerWorldSubsystem->PickedButtonIndex = i;
 				break;
 			}
 	}

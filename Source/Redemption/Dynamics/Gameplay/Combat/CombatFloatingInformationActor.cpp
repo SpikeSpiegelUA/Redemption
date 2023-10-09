@@ -21,7 +21,7 @@ void ACombatFloatingInformationActor::BeginPlay()
 		CombatFloatingInformationWidget = Cast<UCombatFloatingInformation>(CombatFloatingInformationComponentWidget->GetWidget());
 	UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(GetComponentByClass(UStaticMeshComponent::StaticClass()));
 	if(IsValid(StaticMeshComponent))
-		StaticMeshComponent->AddImpulse(FVector(FMath::FRandRange(-400.0, 400.0), FMath::FRandRange(-400.0, 400.0), FMath::FRandRange(400.0, 800.0)), NAME_None, true);
+		StaticMeshComponent->AddImpulse(FVector(FMath::FRandRange(-200.0, 200.0), FMath::FRandRange(-200.0, 200.0), FMath::FRandRange(-200.0, 200.0)), NAME_None, true);
 	GetWorld()->GetTimerManager().SetTimer(ActorDestroyTimerHandle, this, &ACombatFloatingInformationActor::DestroyThisActor, 2.f, false);
 }
 

@@ -22,7 +22,7 @@ enum EPlayerCharacterAnimationState
 	PlayerIsAttackingWithMagic = 0x0010,
 	PlayerIsIdle = 0x0020,
 	PlayerIsInAir = 0x0040,
-	PlayerIsDead = 0x0080
+	PlayerIsDead = 0x0080,
 };
 
 ENUM_CLASS_FLAGS(EPlayerCharacterAnimationState)
@@ -45,6 +45,7 @@ public:
 	void SetPlayerGotHit(bool Value);
 	void SetPlayerIsThrowing(bool Value);
 	void SetPlayerIsAttackingWithMagic(bool Value);
+	void SetPlayerIsAiming(bool Value);
 
 	//In battle mode to play "Run" animation, Speed must be assigned manually to 300 and not to actual player speed. So we block NativeUpdateAnimation of this variable with this bool
 	bool SetSpeedToActualSpeed = true;

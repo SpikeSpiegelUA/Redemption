@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SettingsMenu.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\LoadingScreen.h"
+#include "UIManagerWorldSubsystem.h"
 #include "PauseMenu.generated.h"
 
 /**
@@ -16,14 +17,10 @@ class REDEMPTION_API UPauseMenu : public UUserWidget
 {
 	GENERATED_BODY()
 private:
-	UFUNCTION()
-		void ResumeButtonOnClicked();
-	UFUNCTION()
-		void LoadButtonOnClicked();
-	UFUNCTION()
-		void SettingsButtonOnClicked();
-	UFUNCTION()
-		void MainMenuButtonOnClicked();
+	UPROPERTY()
+		UUIManagerWorldSubsystem* UIManagerWorldSubsystem{};
+	//Set picked button to HoveredButton, find index of the button and assign PickedButtonIndex to it
+		void ButtonOnHoveredActions(UButton* const& PickedButton);
 protected:
 	//Components
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -34,6 +31,8 @@ protected:
 		class UButton* SettingsButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* MainMenuButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UStackBox* ButtonsStackBox;
 
 
 	virtual bool Initialize() override;
@@ -50,4 +49,23 @@ public:
 	UButton* GetLoadButton() const;
 	UButton* GetSettingsButton() const;
 	UButton* GetMainMenuButton() const;
+	UStackBox* GetButtonsStackBox() const;
+
+	UFUNCTION()
+	void ResumeButtonOnClicked();
+	UFUNCTION()
+	void ResumeButtonOnHovered();
+	UFUNCTION()
+	void LoadButtonOnClicked();
+	UFUNCTION()
+	void LoadButtonOnHovered();
+	UFUNCTION()
+	void SettingsButtonOnClicked();
+	UFUNCTION()
+	void SettingsButtonOnHovered();
+	UFUNCTION()
+	void MainMenuButtonOnClicked();
+	UFUNCTION()
+	void MainMenuButtonOnHovered();
+
 };
