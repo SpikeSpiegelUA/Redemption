@@ -15,11 +15,6 @@ class REDEMPTION_API ARedemptionGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 protected:
-	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class UMainMenu> MainMenuClass;
-	UPROPERTY()
-		class UMainMenu* MainMenuWidget{};
-
 	ARedemptionGameModeBase();
 	virtual void BeginPlay() override;
 public:

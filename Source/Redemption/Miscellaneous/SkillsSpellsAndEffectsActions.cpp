@@ -2,7 +2,7 @@
 
 
 #include "SkillsSpellsAndEffectsActions.h"
-#include <Redemption/Dynamics/Gameplay/Skills and Effects/EffectWithPlainModifier.h>
+#include "Redemption/Dynamics/Gameplay/Skills and Effects/EffectWithPlainModifier.h"
 
 int SkillsSpellsAndEffectsActions::GetValueAfterEffects(int ValueBeforeEffects, const TArray<AEffect*>& Effects, EEffectArea EffectArea)
 {

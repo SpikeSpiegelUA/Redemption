@@ -17,7 +17,7 @@ class REDEMPTION_API UAnimNotify_AlliesMAttack : public UAnimNotify
 
 private:
 	//Calculate how effects affect attack value
-	int CalculateAttackValueAfterEffects(int AttackValue, const ACombatNPC* const& CombatNPC);
+	int CalculateAttackValueAfterEffects(int AttackValue, const ACombatNPC* const CombatNPC);
 public:
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 };

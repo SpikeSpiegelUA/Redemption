@@ -20,7 +20,7 @@ private:
 public:
 	TArray<class AEffect*> GetEffects() const;
 	ACreatedBuffSpell& ACreatedBuffSpell::operator =(const ASpell& Spell);
-	void AddObjectToEffects(class AEffect* const& EffectToAdd);
-	void AddObjectsToEffects(TArray<class AEffect*> const& EffectsToAdd);
+	void AddObjectToEffects(const class AEffect* const EffectToAdd);
+	void AddObjectsToEffects(const TArray<class AEffect*>& EffectsToAdd);
 };
 

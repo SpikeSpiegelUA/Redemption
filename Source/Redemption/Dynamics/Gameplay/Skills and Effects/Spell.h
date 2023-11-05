@@ -42,7 +42,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
 		FText Description {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
-		TArray<FElementAndItsPercentageStruct> ElementsAndTheirPercentagesStructs {};
+		TArray<ESpellElements> SpellElements {};
 
 public:	
 	// Sets default values for this actor's properties
@@ -52,7 +52,7 @@ public:
 	int GetManaCost() const;
 	ESpellType GetTypeOfSpell() const;
 	FText GetDescription() const;
-	TArray<FElementAndItsPercentageStruct> GetElementsAndTheirPercentagesStructs() const;
+	TArray<ESpellElements> GetSpellElements() const;
 
 	void SetSpellName(FText& NewSpellName);
 	void SetSpellName(FText NewSpellName);
@@ -60,7 +60,7 @@ public:
 	void SetTypeOfSpell(ESpellType NewTypeOfSpell);
 	void SetDescription(FText& NewDescription);
 	void SetDescription(FText NewDescription);
-	void SetElementsAndTheirPercentagesStructs(const TArray<FElementAndItsPercentageStruct>& NewArrayOfStructs);
+	void SetSpellElements(const TArray<ESpellElements>& NewSpellElements);
 
 protected:
 	// Called when the game starts or when spawned

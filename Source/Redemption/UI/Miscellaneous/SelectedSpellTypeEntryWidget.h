@@ -31,6 +31,8 @@ private:
 
 	UFUNCTION()
 		void MainButtonOnClicked();
+	UFUNCTION()
+		void MainButtonOnHovered();
 
 public:
 	void SetSpellType(ESpellType NewSpellType);

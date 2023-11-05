@@ -48,14 +48,14 @@ void ABattleManager::Tick(float DeltaTime)
 
 }
 
-void ABattleManager::SelectNewTarget(ACombatNPC* const& Target, int Index)
+void ABattleManager::SelectNewTarget(const ACombatNPC* const Target, int Index)
 {
 	if (IsValid(Target)) {
 		if (SelectedCombatNPC->GetFloatingHealthBarWidget())
 			SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
 		if (Target->GetFloatingHealthBarWidget())
 			Target->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
-		SelectedCombatNPC = Target;
+		SelectedCombatNPC = const_cast<ACombatNPC*>(Target);
 		SelectedCombatNPCIndex = Index;
 		CanTurnBehindPlayerCameraToTarget = true;
 		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
@@ -200,6 +200,7 @@ void ABattleManager::PlayerTurnController()
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
 		PlayerCharacter->GetBattleMenuWidget()->IsChoosingAction = true;
+		IsSelectingAllyAsTarget = false;
 		if (AlliesPlayerTurnQueue.Num() > 0) {
 		/*	if (ActorNumberOfTheCurrentTurn >= 0) {
 				if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[ActorNumberOfTheCurrentTurn]->GetController()); IsValid(AIController))
@@ -313,7 +314,7 @@ void ABattleManager::SetActorNumberOfTheCurrentTurn(uint8 Value)
 	ActorNumberOfTheCurrentTurn = Value;
 }
 
-void ABattleManager::SetBehindPlayerCameraLocation(FVector NewLocation)
+void ABattleManager::SetBehindPlayerCameraLocation(FVector& NewLocation)
 {
 	BehindPlayerCamera->SetActorLocation(NewLocation);
 }

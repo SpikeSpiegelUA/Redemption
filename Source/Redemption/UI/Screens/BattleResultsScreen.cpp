@@ -32,7 +32,7 @@ void UBattleResultsScreen::SetAmountOfGoldTextBlock(const FText& TextToSet)
 	AmountOfGoldTextBlock->SetText(TextToSet);
 }
 
-void UBattleResultsScreen::AddExperienceLevelUpStackBox(UUserWidget* WidgetToAdd)
+void UBattleResultsScreen::AddExperienceLevelUpStackBox(UUserWidget* const WidgetToAdd)
 {
 	ExperienceLevelUpStackBox->AddChildToStackBox(WidgetToAdd);
 }

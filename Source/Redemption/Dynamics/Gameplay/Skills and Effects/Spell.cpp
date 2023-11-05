@@ -52,9 +52,9 @@ void ASpell::SetDescription(FText NewDescription)
 	Description = NewDescription;
 }
 
-void ASpell::SetElementsAndTheirPercentagesStructs(const TArray<FElementAndItsPercentageStruct>& NewArrayOfStructs)
+void ASpell::SetSpellElements(const TArray<ESpellElements>& NewSpellElemnts)
 {
-	ElementsAndTheirPercentagesStructs = NewArrayOfStructs;
+	SpellElements = NewSpellElemnts;
 }
 
 FText ASpell::GetSpellName() const
@@ -77,8 +77,8 @@ FText ASpell::GetDescription() const
 	return Description;
 }
 
-TArray<FElementAndItsPercentageStruct> ASpell::GetElementsAndTheirPercentagesStructs() const
+TArray<ESpellElements> ASpell::GetSpellElements() const
 {
-	return ElementsAndTheirPercentagesStructs;
+	return SpellElements;
 }
 

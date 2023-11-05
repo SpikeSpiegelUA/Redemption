@@ -44,14 +44,14 @@ public:
 	void SetCanTurnBehindPlayerCameraToTarget(bool Value);
 	void SetCanTurnBehindPlayerCameraToStartPosition(bool Value);
 	void SetActorNumberOfTheCurrentTurn(uint8 Value);
-	void SetBehindPlayerCameraLocation(FVector NewLocation);
+	void SetBehindPlayerCameraLocation(FVector& NewLocation);
 
 	uint8 GetActorNumberOfTheCurrentTurn() const;
 	ACameraActor* GetBehindPlayerCamera() const;
 	FTimerHandle GetPlayerTurnControllerTimerHandle() const;
 	TSubclassOf<ACombatFloatingInformationActor> GetCombatFloatingInformationActorClass() const;
 
-	void SelectNewTarget(class ACombatNPC* const& Target, int Index);
+	void SelectNewTarget(const class ACombatNPC* const Target, int Index);
 	
 	//Function, that controls whether player's turn continues or passes to enemies
 	UFUNCTION()

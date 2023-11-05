@@ -3,18 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItemWithItemObject.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "Containers/EnumAsByte.h"
-#include <Redemption/Dynamics/Gameplay/Combat/ItemObject.h>
 #include "AssaultItem.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class REDEMPTION_API AAssaultItem : public AGameItem
+class REDEMPTION_API AAssaultItem : public AGameItemWithItemObject
 {
 	GENERATED_BODY()
 private:
@@ -22,11 +21,8 @@ private:
 		int AttackValue = 0;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		TArray<FElementAndItsPercentageStruct> ElementsAndTheirPercentagesStructs {};
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		TSubclassOf<AItemObject> ItemObjectClass{};
 
 public:
 	int GetAttackValue() const;
 	TArray<FElementAndItsPercentageStruct> GetElementsAndTheirPercentagesStructs() const;
-	TSubclassOf<AItemObject> GetItemObjectClass() const;
 };

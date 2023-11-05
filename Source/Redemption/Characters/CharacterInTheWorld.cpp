@@ -48,8 +48,8 @@ ASmartObject* ACharacterInTheWorld::GetSmartObject() const
 	return SmartObject;
 }
 
-void ACharacterInTheWorld::SetSmartObject(ASmartObject* Object)
+void ACharacterInTheWorld::SetSmartObject(const ASmartObject* const Object)
 {
-	SmartObject = Object;
+	SmartObject = const_cast<ASmartObject*>(Object);
 }
 

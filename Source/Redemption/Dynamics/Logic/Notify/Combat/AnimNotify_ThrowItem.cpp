@@ -4,25 +4,14 @@
 #include "AnimNotify_ThrowItem.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
 #include <Kismet/KismetMathLibrary.h>
-#include <Redemption/Dynamics/Gameplay/Combat/ItemObject.h>
 #include <Kismet/GameplayStatics.h>
 
-void UAnimNotify_ThrowItem::SpawnItemObject(AAssaultItem* const& AssaultItem, USkeletalMeshComponent* const& MeshComp, ABattleManager* const& BattleManager, ACombatNPC* const& CombatNPC)
+void UAnimNotify_ThrowItem::SpawnItemObject(const AGameItemWithItemObject* const& GameItemWithItemObject, const USkeletalMeshComponent* const& MeshComp, const ACombatNPC* const& CombatNPC)
 {
 	FTransform SpawnTransform = MeshComp->GetSocketTransform(FName(TEXT("RightHandIndex3")), ERelativeTransformSpace::RTS_World);
 	FActorSpawnParameters ActorSpawnParemeters;
-	AItemObject* SpawnedItemObject = MeshComp->GetWorld()->SpawnActor<AItemObject>(AssaultItem->GetItemObjectClass(), SpawnTransform, ActorSpawnParemeters);
-	SpawnedItemObject->SetItem(AssaultItem);
-	SpawnedItemObject->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(SpawnedItemObject->GetActorLocation(), CombatNPC->Target->GetActorLocation()));
-
-}
-
-void UAnimNotify_ThrowItem::SpawnItemObject(ADebuffItem* const& DebuffItem, USkeletalMeshComponent* const& MeshComp, ABattleManager* const& BattleManager, ACombatNPC* const& CombatNPC)
-{
-	FTransform SpawnTransform = MeshComp->GetSocketTransform(FName(TEXT("RightHandIndex3")), ERelativeTransformSpace::RTS_World);
-	FActorSpawnParameters ActorSpawnParemeters;
-	AItemObject* SpawnedItemObject = MeshComp->GetWorld()->SpawnActor<AItemObject>(DebuffItem->GetItemObjectClass(), SpawnTransform, ActorSpawnParemeters);
-	SpawnedItemObject->SetItem(DebuffItem);
+	AItemObject* SpawnedItemObject = MeshComp->GetWorld()->SpawnActor<AItemObject>(GameItemWithItemObject->GetItemObjectClass(), SpawnTransform, ActorSpawnParemeters);
+	SpawnedItemObject->SetItem(const_cast<AGameItemWithItemObject*>(GameItemWithItemObject));
 	SpawnedItemObject->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(SpawnedItemObject->GetActorLocation(), CombatNPC->Target->GetActorLocation()));
 }
 
@@ -33,14 +22,10 @@ void UAnimNotify_ThrowItem::Notify(USkeletalMeshComponent* MeshComp, UAnimSequen
 	if (IsValid(MeshComp->GetWorld()) && IsValid(MeshComp->GetWorld()->GetFirstPlayerController()))
 		if (ACombatNPC* CombatNPC = Cast<ACombatNPC>(MeshComp->GetOwner()); IsValid(CombatNPC))
 			if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(MeshComp->GetWorld()->GetFirstPlayerController()->GetCharacter()))
-				if (ABattleManager* BattleManager = PlayerCharacter->GetBattleManager(); IsValid(BattleManager)) {
-					if (AAssaultItem* AssaultItem = Cast<AAssaultItem>(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem()); IsValid(AssaultItem)) {
-						SpawnItemObject(AssaultItem, MeshComp, BattleManager, CombatNPC);
+				if (ABattleManager* BattleManager = PlayerCharacter->GetBattleManager(); IsValid(BattleManager)) 
+					if (AGameItemWithItemObject* GameItemWithItemObject = Cast<AGameItemWithItemObject>(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem()); IsValid(GameItemWithItemObject)) {
+						SpawnItemObject(GameItemWithItemObject, MeshComp, CombatNPC);
 						UGameplayStatics::PlaySound2D(GetWorld(), PlayerCharacter->GetAudioManager()->GetUseAssaultSoundCue());
 					}
-					else if (ADebuffItem* DebuffItem = Cast<ADebuffItem>(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem()); IsValid(DebuffItem)) {
-						SpawnItemObject(DebuffItem, MeshComp, BattleManager, CombatNPC);
-						UGameplayStatics::PlaySound2D(GetWorld(), PlayerCharacter->GetAudioManager()->GetUseDebuffSoundCue());
-					}
-				}
+
 }

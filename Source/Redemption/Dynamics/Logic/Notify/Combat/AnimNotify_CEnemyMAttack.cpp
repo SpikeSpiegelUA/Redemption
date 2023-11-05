@@ -17,7 +17,7 @@ void UAnimNotify_CEnemyMAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 	}
 }
 
-int UAnimNotify_CEnemyMAttack::CalculateAttackValueAfterEffects(int AttackValue, ACombatNPC* const& CombatNPC)
+int UAnimNotify_CEnemyMAttack::CalculateAttackValueAfterEffects(int AttackValue, const ACombatNPC* const CombatNPC)
 {
 	int AttackValueBeforeEffects = AttackValue;
 	for (AEffect* Effect : CombatNPC->GetEffects()) {

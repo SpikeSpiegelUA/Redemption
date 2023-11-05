@@ -6,6 +6,7 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Components/StackBox.h"
 #include "UIManagerWorldSubsystem.h"
 #include <Kismet/GameplayStatics.h>
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
@@ -30,13 +31,16 @@ void UInventoryScrollBoxEntryWidget::NativeConstruct()
 
 void UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("BUTTON PRESSED!!!"));
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); 
 		IsValid(PlayerCharacter) && IsValid(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem())) {
 		if (IsValid(Cast<AEquipmentItem>(Item)))
 			PlayerCharacter->GetInventoryMenuWidget()->EquipButtonOnClicked();
-		else
-			PlayerCharacter->GetInventoryMenuWidget()->UseButtonOnClicked();
+		else {
+			if (PlayerCharacter->GetInventoryMenuWidget()->GetBattleMenuButtonsForItemsBorder()->GetVisibility() == ESlateVisibility::Visible)
+				PlayerCharacter->GetInventoryMenuWidget()->BattleMenuItemsUseButtonOnClicked();
+			else
+				PlayerCharacter->GetInventoryMenuWidget()->UseButtonOnClicked();
+		}
 	}
 }
 
@@ -54,6 +58,8 @@ void UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnHovered()
 		if (UIManagerWorldSubsystem->PickedButton)
 			if (UIManagerWorldSubsystem->PickedButton != MainButton)
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+		if (IsValid(Cast<UButton>(PlayerCharacter->GetInventoryMenuWidget()->GetItemTypeStackBox()->GetAllChildren()[PlayerCharacter->GetInventoryMenuWidget()->SelectedTypeButtonIndex])))
+			Cast<UButton>(PlayerCharacter->GetInventoryMenuWidget()->GetItemTypeStackBox()->GetAllChildren()[PlayerCharacter->GetInventoryMenuWidget()->SelectedTypeButtonIndex])->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
 		UIManagerWorldSubsystem->PickedButton = MainButton;
 		//Set picked button index
 		UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(PlayerCharacter->GetInventoryMenuWidget(), Item);
@@ -80,7 +86,7 @@ UButton* UInventoryScrollBoxEntryWidget::GetMainButton() const
 	return MainButton;
 }
 
-void UInventoryScrollBoxEntryWidget::SetItem(AGameItem* const& NewItem)
+void UInventoryScrollBoxEntryWidget::SetItem(const AGameItem* const NewItem)
 {
-	Item = NewItem;
+	Item = const_cast<AGameItem*>(NewItem);
 }

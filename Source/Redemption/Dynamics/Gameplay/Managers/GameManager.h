@@ -46,7 +46,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void StartBattle(AActor* const &AttackingNPC);
+	void StartBattle(AActor* const AttackingNPC);
 	void EndBattle();
 
 	ABattleManager* GetBattleManager() const;

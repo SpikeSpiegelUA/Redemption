@@ -31,6 +31,8 @@ private:
 
 	UFUNCTION()
 		void MainButtonOnClicked();
+	UFUNCTION()
+		void MainButtonOnHovered();
 
 public:
 	void SetElement(ESpellElements NewElement);

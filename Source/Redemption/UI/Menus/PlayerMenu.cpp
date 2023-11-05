@@ -33,15 +33,15 @@ void UPlayerMenu::CloseMenuButtonOnClicked()
 		if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
 			if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
 				PlayerCharacter->GetPlayerMenuWidget()->RemoveFromParent();
-					PC->bShowMouseCursor = false;
-					PC->bEnableClickEvents = false;
-					PC->bEnableMouseOverEvents = false;
-					PC->SetPause(false);
-					PlayerCharacter->CanOpenOtherMenus = true;
-					//PC->ActivateTouchInterface(PlayerCharacter->GetStandardTouchInterface());
-					UWidgetBlueprintLibrary::SetInputMode_GameOnly(PC);
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-					UIManagerWorldSubsystem->PickedButton = nullptr;
+				PC->bShowMouseCursor = false;
+				PC->bEnableClickEvents = false;
+				PC->bEnableMouseOverEvents = false;
+				PC->SetPause(false);
+				PlayerCharacter->CanOpenOtherMenus = true;
+				//PC->ActivateTouchInterface(PlayerCharacter->GetStandardTouchInterface());
+				UWidgetBlueprintLibrary::SetInputMode_GameOnly(PC);
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+				UIManagerWorldSubsystem->PickedButton = nullptr;
 			}
 	}
 }
@@ -56,11 +56,13 @@ void UPlayerMenu::InventoryButtonOnClicked()
 		PlayerCharacter->GetInventoryMenuWidget()->GetBattleMenuButtonsForItemsBorder()->SetVisibility(ESlateVisibility::Hidden);
 		InventoryButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 		PlayerCharacter->GetInventoryMenuWidget()->SelectedPanelWidget = PlayerCharacter->GetInventoryMenuWidget()->GetItemTypeStackBox();
+		PlayerCharacter->GetInventoryMenuWidget()->SelectedTypeButtonIndex = 0;
 		UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
 		if (IsValid(UIManagerWorldSubsystem)) {
 			UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetInventoryMenuWidget()->GetInventoryButton();
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+
 		}
 	}
 }
@@ -76,7 +78,7 @@ void UPlayerMenu::CloseMenuButtonOnHovered()
 	ButtonOnHoveredActions(CloseMenuButton);
 }
 
-void UPlayerMenu::ButtonOnHoveredActions(UButton* const& PickedButton)
+void UPlayerMenu::ButtonOnHoveredActions(UButton* const PickedButton)
 {
 	UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
 	if (IsValid(UIManagerWorldSubsystem) && IsValid(PickedButton))

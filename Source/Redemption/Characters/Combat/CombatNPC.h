@@ -39,7 +39,7 @@ public:
 	TSubclassOf<ASmartObject> GetAIClass() const;
 
 	void SetRangeAmmo(int8 NewRangeAmmo);
-	void SetStartLocation(AActor* const& NewLocation);
+	void SetStartLocation(const AActor* const NewLocation);
 
 	//Combat mode regarding variables
 	UPROPERTY(VisibleAnywhere, Category = "Combat")

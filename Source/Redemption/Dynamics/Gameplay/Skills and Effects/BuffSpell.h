@@ -3,9 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\SpellObjects\SpellObject.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\SpellWithSpellObject.h"
 #include "BuffSpell.generated.h"
 
 /**
@@ -13,21 +11,15 @@
  */
 
 UCLASS()
-class REDEMPTION_API ABuffSpell : public ASpell
+class REDEMPTION_API ABuffSpell : public ASpellWithSpellObject
 {
 	GENERATED_BODY()
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 		EBuffDebuffType TypeOfBuff {};
-	//Spell's "object" class. For example, player is throwind red rectangle(well, this is a spell's object) when using a fire arrow.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
-		TSubclassOf<class ASpellObject> SpellObjectClass;
 public:
 	EBuffDebuffType GetTypeOfBuff() const;
-	TSubclassOf<class ASpellObject> GetSpellObjectClass() const;
-
-	void SetSpellObjectClass(const TSubclassOf<class ASpellObject>& NewSpellObjectClass);
 	void SetTypeOfBuff(EBuffDebuffType NewTypeOfDebuff);
 
 	ABuffSpell& ABuffSpell::operator =(const ASpell& Spell);

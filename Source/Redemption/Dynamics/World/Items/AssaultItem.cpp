@@ -8,11 +8,6 @@ TArray<FElementAndItsPercentageStruct> AAssaultItem::GetElementsAndTheirPercenta
 	return ElementsAndTheirPercentagesStructs;
 }
 
-TSubclassOf<AItemObject> AAssaultItem::GetItemObjectClass() const
-{
-	return ItemObjectClass;
-}
-
 int AAssaultItem::GetAttackValue() const
 {
 	return AttackValue;

@@ -27,7 +27,7 @@ ARestorationSpell& ARestorationSpell::operator=(const ASpell& Spell)
 {
 	SetSpellName(Spell.GetSpellName());
 	SetManaCost(Spell.GetManaCost());
-	SetElementsAndTheirPercentagesStructs(Spell.GetElementsAndTheirPercentagesStructs());
+	SetSpellElements(Spell.GetSpellElements());
 	SetTypeOfSpell(Spell.GetTypeOfSpell());
 	SetDescription(Spell.GetDescription());
 	return *this;

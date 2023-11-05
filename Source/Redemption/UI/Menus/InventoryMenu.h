@@ -22,26 +22,51 @@ class UInventoryMenu : public UUserWidget
 	GENERATED_BODY()
 private:
 	FTimerHandle ItemUseTimerHandle;
-	FTimerHandle HideNotificationTimerHandle;
 
 	UPROPERTY()
 		UUIManagerWorldSubsystem* UIManagerWorldSubsystem {};
 
-	UFUNCTION()
-	void HideNotificationAndClearItsTimer();
-
 	//When we pick an item type in the ItemTypeStackBox, we need to make visible all picked item types' border on the left and make picked type's border visible.
-	void SetVisibilityForItemsTypesBorders(const class UBorder* const& BorderToMakeVisible);
+	void SetVisibilityForItemsTypesBorders(const class UBorder* const BorderToMakeVisible);
 	//After we pick an item type we need to make all not picked buttons in the ItemTypeStackBox opaque.
-	void SetColorForItemsTypesButtons(const class UButton* const& ButtonToSetGreen);
+	void SetColorForItemsTypesButtons(const class UButton* const ButtonToSetGreen);
 	//Set PickedButton opaque, then if there are items of picked type, set picked button to first item in the selected ScrollBox and change its color, otherwise set picked button
 	//to type button. Also set PickedButtonIndex to parameter Index and PickedItem to nullptr. Also set IsSelectingSpecificItem to true(Used in PlayerCharacter for keyboard input control)
-	void ItemTypeButtonsOnClickedOtherActions(class UPanelWidget* const& PickedPanelWidget, int8 Index);
+	void ItemTypeButtonsOnClickedOtherActions(const class UPanelWidget* const PickedPanelWidget, int8 Index);
 	//Set SelectedButton color to green, make PickedButton opaque, set PickedButton to SelectedButton and PickedButtonIndex to Index,SelectedPanelWidget to ItemTypeStackBox
 	//PickedItem to nullptr and IsSelectingSpecificItem to false;
-	void TypeButtonsOnHoveredActions(class UButton* const& SelectedButton, int8 Index);
+	void TypeButtonsOnHoveredActions(class UButton* const SelectedButtonParameter, int8 Index);
 	//So if we picked type, its button has to be green. But when we hover over another button, PickedButton is set opaque. This method checks, if type's border is visible and then set opaque or not.
-	void SetPickedTypeButtonColor(class UButton* const& SelectedButton);
+	void SetPickedTypeButtonColor(const class UButton* const SelectedButton);
+
+	UFUNCTION()
+	void MeleeButtonOnClicked();
+	UFUNCTION()
+	void RangeButtonOnClicked();
+	UFUNCTION()
+	void HeadButtonOnClicked();
+	UFUNCTION()
+	void TorseButtonOnClicked();
+	UFUNCTION()
+	void HandButtonOnClicked();
+	UFUNCTION()
+	void LowerArmorButtonOnClicked();
+	UFUNCTION()
+	void InventoryButtonOnClicked();
+	UFUNCTION()
+	void InventoryButtonOnHovered();
+	UFUNCTION()
+	void MeleeButtonOnHovered();
+	UFUNCTION()
+	void RangeButtonOnHovered();
+	UFUNCTION()
+	void HeadButtonOnHovered();
+	UFUNCTION()
+	void TorseButtonOnHovered();
+	UFUNCTION()
+	void HandButtonOnHovered();
+	UFUNCTION()
+	void LowerArmorButtonOnHovered();
 
 protected:
 	//Variables for required widget components
@@ -84,8 +109,10 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UStackBox* ItemTypeStackBox;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UVerticalBox* BattleMenuButtonsForItemsVerticalBox;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* BackButton;
-		UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* InventoryButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* MeleeButton;
@@ -100,13 +127,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* LowerArmorButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		class UButton* EquipButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* BattleMenuItemsUseButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* BattleMenuItemsBackButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		class UButton* UseButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* MeleeTextBlock;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -143,22 +166,23 @@ protected:
 	UFUNCTION()
 		void BackButtonOnClicked();
 	UFUNCTION()
-	void EquipItem(AEquipmentItem*& ItemToEquip, TSubclassOf<class AWeaponItem>& GameInstanceVariableToStoreThisEquipmentType,
-		AWeaponItem*& InventoryMenuVariableToStoreThisEquipmentType, UInventoryScrollBoxEntryWidget*& ItemWidget, UScrollBox*& ScrollBoxWithWidget, URedemptionGameInstance*& GameInstance
-		, APlayerCharacter*& PlayerCharacter);
-	void EquipItem(AEquipmentItem*& ItemToEquip, TSubclassOf<class ARangeWeapon>& GameInstanceVariableToStoreThisEquipmentType,
-		ARangeWeapon*& InventoryMenuVariableToStoreThisEquipmentType, UInventoryScrollBoxEntryWidget*& ItemWidget, UScrollBox*& ScrollBoxWithWidget, URedemptionGameInstance*& GameInstance
-		, APlayerCharacter*& PlayerCharacter);
-	void EquipItem(AEquipmentItem*& ItemToEquip, TSubclassOf<class AArmorItem>& GameInstanceVariableToStoreThisEquipmentType,
-		AArmorItem*& InventoryMenuVariableToStoreThisEquipmentType, UInventoryScrollBoxEntryWidget*& ItemWidget, UScrollBox*& ScrollBoxWithWidget, URedemptionGameInstance*& GameInstance
-		, APlayerCharacter*& PlayerCharacter);
-	UFUNCTION()
-		void BattleMenuItemsBackButtonOnClicked();
+	void EquipItem(const AEquipmentItem* const ItemToEquip, TSubclassOf<class AArmorItem>& GameInstanceVariableToStoreThisEquipmentType,
+		AArmorItem*& InventoryMenuVariableToStoreThisEquipmentType, UInventoryScrollBoxEntryWidget* const ItemWidget, UScrollBox* const ScrollBoxWithWidget,
+		URedemptionGameInstance* const GameInstance);
+	void EquipItem(const AEquipmentItem* const ItemToEquip, TSubclassOf<class AWeaponItem>& GameInstanceVariableToStoreThisEquipmentType,
+		AWeaponItem*& InventoryMenuVariableToStoreThisEquipmentType, UInventoryScrollBoxEntryWidget* const ItemWidget, UScrollBox* const ScrollBoxWithWidget,
+		URedemptionGameInstance* const GameInstance);
+	void EquipItem(const AEquipmentItem* const ItemToEquip, TSubclassOf<class ARangeWeapon>& GameInstanceVariableToStoreThisEquipmentType,
+		ARangeWeapon*& InventoryMenuVariableToStoreThisEquipmentType, UInventoryScrollBoxEntryWidget* const ItemWidget, UScrollBox* const ScrollBoxWithWidget,
+		URedemptionGameInstance* const GameInstance);
 
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
 public:
 	void FillInventory();
+
+	//If button's corresponding border(For example, InventoryButton and InventoryBorder) is visible, than make the button green.
+	void CheckForButtonsBordersVisibilityAndSetGreenColorToButton();
 
 	//After we select the type of an item in the ItemTypeStackBox, select specific item in the scroll box corresponding to the selected item type. Need this variable for selection and equip control with a keyboard.
 	bool IsSelectingSpecificItem = false;
@@ -167,7 +191,7 @@ public:
 	UPROPERTY()
 		UPanelWidget* SelectedPanelWidget{};
 	//Index of a button that was picked in type stack box. Has a green color
-	int8 SelectedButtonIndex{};
+	int8 SelectedTypeButtonIndex{};
 
 	UScrollBox* GetInventoryScrollBox() const;
 	UScrollBox* GetMeleeInventoryScrollBox() const;
@@ -177,6 +201,7 @@ public:
 	UScrollBox* GetHandInventoryScrollBox() const;
 	UScrollBox* GetLowerArmorInventoryScrollBox() const;
 	UStackBox* GetItemTypeStackBox() const;
+	UVerticalBox* GetBattleMenuButtonsForItemsVerticalBox() const;
 	AGameItem* GetPickedItem() const;
 	UCanvasPanel* GetMainCanvasPanel() const;
 	UCanvasPanel* GetNotInBattleMenuIncludedCanvasPanel() const;
@@ -196,8 +221,9 @@ public:
 	UButton* GetTorseButton() const;
 	UButton* GetHandButton() const;
 	UButton* GetLowerArmorButton() const;
+	UButton* GetBattleMenuItemsUseButton() const;
 
-	void SetPickedItem(AGameItem* NewItem);
+	void SetPickedItem(const AGameItem* const NewItem);
 	void SetTextOfItemNameTextBlock(const FText& NewText);
 	void SetTextOfItemTypeTextBlock(const FText& NewText);
 	void SetTextOfItemEffectValueTextBlock(const FText& NewText);
@@ -205,9 +231,10 @@ public:
 	void SetTextOfItemDescriptionTextBlock(const FText& NewText);
 
 	//Set ItemInfo for ItemInfoBorder
-	void SetItemInfo(AGameItem* const& GameItem);
+	void SetItemInfo(const AGameItem* const GameItem);
 
 	void CreateNotification(const FText& NotificationText);
+	void HideNotification();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
 		AWeaponItem* EquipedMelee {};
@@ -226,54 +253,14 @@ public:
 	UFUNCTION()
 	void BattleMenuItemsUseButtonOnClicked();
 	UFUNCTION()
-	void MeleeButtonOnClicked();
-	UFUNCTION()
-	void RangeButtonOnClicked();
-	UFUNCTION()
-	void HeadButtonOnClicked();
-	UFUNCTION()
-	void TorseButtonOnClicked();
-	UFUNCTION()
-	void HandButtonOnClicked();
-	UFUNCTION()
-	void LowerArmorButtonOnClicked();
-	UFUNCTION()
-	void InventoryButtonOnClicked();
+	void BattleMenuItemsBackButtonOnClicked();
 	UFUNCTION()
 	void UseButtonOnClicked();
 	UFUNCTION()
 	void EquipButtonOnClicked();
-	UFUNCTION()
-	void InventoryButtonOnHovered();
-	UFUNCTION()
-	void MeleeButtonOnHovered();
-	UFUNCTION()
-	void RangeButtonOnHovered();
-	UFUNCTION()
-	void HeadButtonOnHovered();
-	UFUNCTION()
-	void TorseButtonOnHovered();
-	UFUNCTION()
-	void HandButtonOnHovered();
-	UFUNCTION()
-	void LowerArmorButtonOnHovered();
-	UFUNCTION()
-	void InventoryButtonOnUnhovered();
-	UFUNCTION()
-	void MeleeButtonOnUnhovered();
-	UFUNCTION()
-	void RangeButtonOnUnhovered();
-	UFUNCTION()
-	void HeadButtonOnUnhovered();
-	UFUNCTION()
-	void TorseButtonOnUnhovered();
-	UFUNCTION()
-	void HandButtonOnUnhovered();
-	UFUNCTION()
-	void LowerArmorButtonOnUnhovered();
 
 	//After we use an item, we need to do some stuff for the game to actually work properly. No shit. Mainly set timer for PlayerTurnController and !!!set PickedItem to nullptr!!!.
-	void BuffOrRestorationItemHasBeenUsedActions(class UBattleMenu* const& BattleMenu, const APlayerCharacter* const& PlayerCharacter, class ABattleManager* const& BattleManager);
+	void BuffOrRestorationItemHasBeenUsedActions(class UBattleMenu* const BattleMenu, class ABattleManager* const BattleManager);
 	//Same as above, but without timer for PlayerTurnController and without setting PickedItem to nullptr.
-	void DebuffOrAssaultItemHasBeenUsedActions(class UBattleMenu* const& BattleMenu, const APlayerCharacter* const& PlayerCharacter, class ABattleManager* const& BattleManager);
+	void DebuffOrAssaultItemHasBeenUsedActions(UBattleMenu* const& BattleMenu);
 };

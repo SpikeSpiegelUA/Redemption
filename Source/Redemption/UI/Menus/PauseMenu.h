@@ -20,7 +20,7 @@ private:
 	UPROPERTY()
 		UUIManagerWorldSubsystem* UIManagerWorldSubsystem{};
 	//Set picked button to HoveredButton, find index of the button and assign PickedButtonIndex to it
-		void ButtonOnHoveredActions(UButton* const& PickedButton);
+		void ButtonOnHoveredActions(UButton* const PickedButton);
 protected:
 	//Components
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))

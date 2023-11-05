@@ -29,7 +29,7 @@ protected:
 
 public:
 	void SetAmountOfGoldTextBlock(const FText& TextToSet);
-	void AddExperienceLevelUpStackBox(UUserWidget* WidgetToAdd);
+	void AddExperienceLevelUpStackBox(UUserWidget* const WidgetToAdd);
 
 	UTextBlock* GetExperienceTextBlock() const;
 	UTextBlock* GetGoldTextBlock() const;

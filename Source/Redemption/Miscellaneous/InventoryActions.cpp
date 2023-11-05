@@ -6,7 +6,7 @@
 #include "Engine/World.h"
 #include "Redemption/Characters/Player/PlayerCharacter.h"
 
-void InventoryActions::IfItemAlreadyIsInInventory(UWorld* const& World, UScrollBox*& ItemScrollBox, AGameItem* const& Item)
+void InventoryActions::IfItemAlreadyIsInInventory(UWorld* const World, UScrollBox* ItemScrollBox, const AGameItem* const Item)
 {
 	bool IsInInventory = false;
 	for (UWidget* ScrollBoxWidget : ItemScrollBox->GetAllChildren()) {
@@ -27,7 +27,7 @@ void InventoryActions::IfItemAlreadyIsInInventory(UWorld* const& World, UScrollB
 				InventoryScrollBoxEntryWidget = CreateWidget<UInventoryScrollBoxEntryWidget>(World, PlayerCharacter->GetInventoryScrollBoxEntryClass());
 		if (IsValid(InventoryScrollBoxEntryWidget)) {
 			InventoryScrollBoxEntryWidget->GetMainTextBlock()->SetText(FText::FromName(Item->GetItemName()));
-			InventoryScrollBoxEntryWidget->SetItem(Item);
+			InventoryScrollBoxEntryWidget->SetItem(const_cast<AGameItem*>(Item));
 			InventoryScrollBoxEntryWidget->AmountOfItems = 1;
 			InventoryScrollBoxEntryWidget->AddToViewport();
 			ItemScrollBox->AddChild(InventoryScrollBoxEntryWidget);
@@ -35,7 +35,7 @@ void InventoryActions::IfItemAlreadyIsInInventory(UWorld* const& World, UScrollB
 	}
 }
 
-void InventoryActions::ItemAmountInInventoryLogic(UInventoryScrollBoxEntryWidget* const& ItemWidget, UScrollBox* const& ScrollBoxWithWidget, const AGameItem* UsedItem)
+void InventoryActions::ItemAmountInInventoryLogic(UInventoryScrollBoxEntryWidget* const ItemWidget, UScrollBox* const ScrollBoxWithWidget, const AGameItem* const UsedItem)
 {
 	if (IsValid(ItemWidget)) {
 		if (ItemWidget->AmountOfItems <= 1) {
@@ -56,28 +56,7 @@ void InventoryActions::ItemAmountInInventoryLogic(UInventoryScrollBoxEntryWidget
 	}
 }
 
-void InventoryActions::ItemAmountInInventoryLogic(UInventoryScrollBoxEntryWidget* const& ItemWidget, UScrollBox* const& ScrollBoxWithWidget, AEquipmentItem*& EquipedItem)
-{
-	if (IsValid(ItemWidget)) {
-		if (ItemWidget->AmountOfItems <= 1) {
-			ScrollBoxWithWidget->RemoveChild(ItemWidget);
-			ItemWidget->RemoveFromParent();
-			ItemWidget->ConditionalBeginDestroy();
-		}
-		else
-		{
-			ItemWidget->AmountOfItems--;
-			FString NameString;
-			if (ItemWidget->AmountOfItems > 1)
-				NameString = EquipedItem->GetItemName().ToString() + FString("(" + FString::FromInt(ItemWidget->AmountOfItems) + ")");
-			else
-				NameString = EquipedItem->GetItemName().ToString();
-			ItemWidget->GetMainTextBlock()->SetText(FText::FromString(NameString));
-		}
-	}
-}
-
-void InventoryActions::RemoveItemFromGameInstance(URedemptionGameInstance*& GameInstance, const AGameItem* const& UsedOrEquipedItem)
+void InventoryActions::RemoveItemFromGameInstance(URedemptionGameInstance* const GameInstance, const AGameItem* const UsedOrEquipedItem)
 {
 	for (TSubclassOf<AGameItem> InstanceItemsInTheInventoryGameItem : GameInstance->InstanceItemsInTheInventory) {
 		if (AGameItem* GameItem = Cast<AGameItem>(InstanceItemsInTheInventoryGameItem->GetDefaultObject()); IsValid(GameItem))
@@ -88,7 +67,7 @@ void InventoryActions::RemoveItemFromGameInstance(URedemptionGameInstance*& Game
 	}
 }
 
-UInventoryScrollBoxEntryWidget* InventoryActions::FindItemInventoryEntryWidget(const AGameItem* const& ItemToSearchFor, const UScrollBox* const& ItemScrollBox)
+UInventoryScrollBoxEntryWidget* InventoryActions::FindItemInventoryEntryWidget(const AGameItem* const ItemToSearchFor, const UScrollBox* const ItemScrollBox)
 {
 	for (UWidget* Child : ItemScrollBox->GetAllChildren()) {
 		UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(Child);
@@ -99,7 +78,7 @@ UInventoryScrollBoxEntryWidget* InventoryActions::FindItemInventoryEntryWidget(c
 	return nullptr;
 }
 
-UScrollBox* InventoryActions::FindCorrespondingScrollBox(const UInventoryMenu* const& InventoryMenu, const AGameItem* const& ItemScrollBoxIsFor)
+UScrollBox* InventoryActions::FindCorrespondingScrollBox(const UInventoryMenu* const InventoryMenu, const AGameItem* const ItemScrollBoxIsFor)
 {
 	if (const AEquipmentItem* EquipmentItem = Cast<AEquipmentItem>(ItemScrollBoxIsFor); IsValid(EquipmentItem)) {
 		if (const AWeaponItem* WeaponItem = Cast<AWeaponItem>(EquipmentItem); IsValid(WeaponItem)) {

@@ -43,7 +43,7 @@ public:
 	UTextBlock* GetMainTextBlock() const;
 	UButton* GetMainButton() const;
 
-	void SetItem(AGameItem* const& Item);
+	void SetItem(const AGameItem* const Item);
 
 	uint8 AmountOfItems = 1;
 };

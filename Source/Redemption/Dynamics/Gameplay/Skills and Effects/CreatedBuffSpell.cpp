@@ -12,18 +12,18 @@ ACreatedBuffSpell& ACreatedBuffSpell::operator=(const ASpell& Spell)
 {
 	SetSpellName(Spell.GetSpellName());
 	SetManaCost(Spell.GetManaCost());
-	SetElementsAndTheirPercentagesStructs(Spell.GetElementsAndTheirPercentagesStructs());
+	SetSpellElements(Spell.GetSpellElements());
 	SetTypeOfSpell(Spell.GetTypeOfSpell());
 	SetDescription(Spell.GetDescription());
 	return *this;
 }
 
-void ACreatedBuffSpell::AddObjectToEffects(AEffect* const& EffectToAdd)
+void ACreatedBuffSpell::AddObjectToEffects(const AEffect* const EffectToAdd)
 {
-	Effects.Add(EffectToAdd);
+	Effects.Add(const_cast<AEffect*>(EffectToAdd));
 }
 
-void ACreatedBuffSpell::AddObjectsToEffects(TArray<class AEffect*> const& EffectsToAdd)
+void ACreatedBuffSpell::AddObjectsToEffects(const TArray<class AEffect*>& EffectsToAdd)
 {
 	for (AEffect* Effect : EffectsToAdd)
 		Effects.Add(Effect);

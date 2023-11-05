@@ -10,6 +10,7 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\AssaultSpell.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\EffectWithPlainModifier.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ElementsActions.h"
 
 void UAnimNotify_AlliesMAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
@@ -29,7 +30,7 @@ void UAnimNotify_AlliesMAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 			else if (PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell && IsValid(PlayerCharacter->GetSpellBattleMenuWidget()->GetCreatedSpell())) {
 				if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(PlayerCharacter->GetSpellBattleMenuWidget()->GetCreatedSpell()); IsValid(AssaultSpell)) {
 					PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedCombatNPC,
-						CalculateAttackValueAfterEffects(AssaultSpell->GetAttackValue(), CombatAllyPlayer), AssaultSpell->GetElementsAndTheirPercentagesStructs(), false);
+						CalculateAttackValueAfterEffects(AssaultSpell->GetAttackValue(), CombatAllyPlayer), ElementsActions::FindContainedElements(AssaultSpell->GetSpellElements()), false);
 					PlayerCharacter->GetSpellBattleMenuWidget()->SetCreatedSpell(nullptr);
 					PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell = false;
 				}
@@ -43,7 +44,7 @@ void UAnimNotify_AlliesMAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 	}
 }
 
-int UAnimNotify_AlliesMAttack::CalculateAttackValueAfterEffects(int AttackValue, const ACombatNPC* const& CombatNPC)
+int UAnimNotify_AlliesMAttack::CalculateAttackValueAfterEffects(int AttackValue, const ACombatNPC* const CombatNPC)
 {
 	int AttackValueBeforeEffects = AttackValue;
 	for (AEffect* Effect : CombatNPC->Effects) {

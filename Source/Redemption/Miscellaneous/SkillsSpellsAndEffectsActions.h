@@ -25,7 +25,6 @@ namespace SkillsSpellsAndEffectsActions {
 	void InitializeElementalResistances(TArray<FElementAndItsPercentageStruct>& ElementalResistances);
 	//Same as the function above, just for physical resistances;
 	void InitializePhysicalResistances(TArray<FPhysicalTypeAndItsPercentageStruct>& ResistancesResistances);
-
 	template<typename T>
 	FText GetEnumDisplayName(T EnumValue)
 	{

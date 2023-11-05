@@ -100,7 +100,7 @@ void UPauseMenu::MainMenuButtonOnHovered()
 	ButtonOnHoveredActions(MainMenuButton);
 }
 
-void UPauseMenu::ButtonOnHoveredActions(UButton* const& PickedButton)
+void UPauseMenu::ButtonOnHoveredActions(UButton* const PickedButton)
 {
 	if (IsValid(UIManagerWorldSubsystem) && IsValid(PickedButton)) 
 	{

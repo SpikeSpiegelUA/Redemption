@@ -156,11 +156,10 @@ public:
 	void RestartBattleMenuWidget();
 	void RestartBattleResultsScreenWidget();
 
-	void SetInventoryScrollBoxEntryWidget(UInventoryScrollBoxEntryWidget* NewWidget);
-	void SetGameManager(AGameManager* const &NewGameManager);
-	void SetBattleManager(ABattleManager* const &NewBattleManager);
-	void SetAudioManager(AAudioManager* const &NewAudioManager);
-
+	void SetInventoryScrollBoxEntryWidget(const UInventoryScrollBoxEntryWidget* const NewWidget);
+	void SetGameManager(const AGameManager* const NewGameManager);
+	void SetBattleManager(const ABattleManager* const NewBattleManager);
+	void SetAudioManager(const AAudioManager* const NewAudioManager);
 protected:
 	/**Called for forwards/backward input*/
 	void MoveForward(float Value);
@@ -313,9 +312,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
 		int Luck = 1;
 
-	//Scroll Control
-	//These are used by left/right button in battle menu
+
+	//This is used by right button in the battle menu.
 	void InputScrollRight();
+	//This is used by left button in the battle menu.
 	void InputScrollLeft();
 
 private:
@@ -329,12 +329,17 @@ private:
 	//Jump input for binding
 	void InputJump();
 
+	void InputSpellUse();
+	void InputUniqueSpellUseSpellInfoToggle();
+	void InputSpellReset();
+	void InputOpenLearnedSpells();
+
 	//Action button input for binding
 	void InputAction();
-	void PickUpItem(AActor* const& ActorResult);
-	void DialogueInteract(AActor* const &ActorResult);
-	void ChangeLevel(const AActor* const &ActorResult);
-	void NotificationActions(const AActor* const &ActorResult);
+	void PickUpItem(AActor* const ActorResult);
+	void DialogueInteract(const AActor* const ActorResult);
+	void ChangeLevel(const AActor* const ActorResult);
+	void NotificationActions(const AActor* const ActorResult);
 
 	//Opens player menu
 	void InputOpenPlayerMenu();

@@ -44,7 +44,7 @@ void AGameManager::Tick(float DeltaTime)
 }
 
 //Set up battle stage
-void AGameManager::StartBattle(AActor* const& AttackingNPC)
+void AGameManager::StartBattle(AActor* const AttackingNPC)
 {
 	if (IsValid(PlayerCharacter)) {
 		PlayerLastLocation = PlayerCharacter->GetActorLocation();
