@@ -27,16 +27,29 @@ void ULearnedSpellEntryWidget::MainButtonOnClicked()
         PlayerCharacter->GetSpellBattleMenuWidget()->SetCreatedSpell(EntrySpell);
         PlayerCharacter->GetSpellBattleMenuWidget()->SetSpellInfo(EntrySpell);
         PlayerCharacter->GetSpellBattleMenuWidget()->GetSpellInfoBorder()->SetVisibility(ESlateVisibility::Visible);
+        PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton = MainButton;
     }
 }
 
 void ULearnedSpellEntryWidget::MainButtonOnHovered()
 {
     if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
-        if(UIManagerWorldSubsystem->PickedButton)
-            UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
-        UIManagerWorldSubsystem->PickedButton = MainButton;
-        UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+        if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter())) {
+            if (UIManagerWorldSubsystem->PickedButton) {
+                if(PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton != MainButton)
+                    UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
+                else
+                    UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+            }
+            UIManagerWorldSubsystem->PickedButton = MainButton;
+            UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+            PlayerCharacter->GetLearnedSpellsJournalMenu()->CanUseKeyboardButtonSelection = true;
+            for (uint8 Index = 0; Index < PlayerCharacter->GetLearnedSpellsJournalMenu()->GetMainScrollBox()->GetAllChildren().Num(); Index++)
+                if (PlayerCharacter->GetLearnedSpellsJournalMenu()->GetMainScrollBox()->GetAllChildren()[Index] == this) {
+                    UIManagerWorldSubsystem->PickedButtonIndex = Index;
+                    break;
+                }
+        }
     }
 }
 

@@ -8,13 +8,13 @@
 bool ULearnedSpellsJournalMenu::Initialize()
 {
     const bool bSuccess = Super::Initialize();
-    if (IsValid(BackButton)) {
-        BackButton->OnClicked.AddDynamic(this, &ULearnedSpellsJournalMenu::BackButtonOnClicked);
-        BackButton->OnHovered.AddDynamic(this, &ULearnedSpellsJournalMenu::BackButtonOnHovered);
+    if (IsValid(BackButtonWithNeighbors)) {
+        BackButtonWithNeighbors->OnClicked.AddDynamic(this, &ULearnedSpellsJournalMenu::BackButtonOnClicked);
+        BackButtonWithNeighbors->OnHovered.AddDynamic(this, &ULearnedSpellsJournalMenu::BackButtonOnHovered);
     }
-    if (IsValid(UseButton)) {
-        UseButton->OnClicked.AddDynamic(this, &ULearnedSpellsJournalMenu::UseButtonOnClicked);
-        UseButton->OnHovered.AddDynamic(this, &ULearnedSpellsJournalMenu::UseButtonOnHovered);
+    if (IsValid(UseButtonWithNeighbors)) {
+        UseButtonWithNeighbors->OnClicked.AddDynamic(this, &ULearnedSpellsJournalMenu::UseButtonOnClicked);
+        UseButtonWithNeighbors->OnHovered.AddDynamic(this, &ULearnedSpellsJournalMenu::UseButtonOnHovered);
     }
     if (IsValid(GetWorld()) && IsValid(GetWorld()->GetFirstPlayerController()))
         PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
@@ -40,6 +40,7 @@ void ULearnedSpellsJournalMenu::BackButtonOnClicked()
     this->RemoveFromParent();
     if (IsValid(PlayerCharacter)) {
         PlayerCharacter->GetSpellBattleMenuWidget()->ShowSpellBattleMenu();
+        PlayerCharacter->GetSpellBattleMenuWidget()->OnMenuOpenUIManagerLogic();
         PlayerCharacter->GetAlliesInfoBarsWidget()->AddToViewport(-1);
         PlayerCharacter->GetSpellBattleMenuWidget()->GetSpellInfoBorder()->SetVisibility(ESlateVisibility::Hidden);
         PlayerCharacter->GetSpellBattleMenuWidget()->CanUseKeyboardButtonSelection = true;
@@ -47,26 +48,39 @@ void ULearnedSpellsJournalMenu::BackButtonOnClicked()
             PlayerCharacter->GetBattleMenuWidget()->IsChoosingLearnedSpell = false;
         if(IsValid(PlayerCharacter->GetSpellBattleMenuWidget()))
             PlayerCharacter->GetSpellBattleMenuWidget()->GetSpellInfoBorder()->SetVisibility(ESlateVisibility::Hidden);
+        SelectedSpellButton = nullptr;
     }
 }
 
 void ULearnedSpellsJournalMenu::UseButtonOnHovered()
 {
     if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
-        if (UIManagerWorldSubsystem->PickedButton)
-            UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
-        UIManagerWorldSubsystem->PickedButton = UseButton;
+        if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+            if(SelectedSpellButton == UIManagerWorldSubsystem->PickedButton)
+                UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+            else
+                UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
+        }
+        UIManagerWorldSubsystem->PickedButton = UseButtonWithNeighbors;
         UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+        if(IsValid(PlayerCharacter))
+            PlayerCharacter->GetLearnedSpellsJournalMenu()->CanUseKeyboardButtonSelection = false;
     }
 }
 
 void ULearnedSpellsJournalMenu::BackButtonOnHovered()
 {
     if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
-        if (UIManagerWorldSubsystem->PickedButton)
-            UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
-        UIManagerWorldSubsystem->PickedButton = BackButton;
+        if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+            if (SelectedSpellButton == UIManagerWorldSubsystem->PickedButton)
+                UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+            else
+                UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
+        }`````
+        UIManagerWorldSubsystem->PickedButton = BackButtonWithNeighbors;
         UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+        if (IsValid(PlayerCharacter))
+            PlayerCharacter->GetLearnedSpellsJournalMenu()->CanUseKeyboardButtonSelection = false;
     }
 }
 
@@ -83,12 +97,17 @@ void ULearnedSpellsJournalMenu::AddLearnedSpellEntryToMainScrollBox(const class 
     } 
 }
 
-UScrollBox* ULearnedSpellsJournalMenu::GetMainScrollBox() const
+const UScrollBox* ULearnedSpellsJournalMenu::GetMainScrollBox() const
 {
     return MainScrollBox;
 }
 
-UButton* ULearnedSpellsJournalMenu::GetUseButton() const
+UButtonWithNeighbors* ULearnedSpellsJournalMenu::GetUseButtonWithNeighbors() const
 {
-    return UseButton;
+    return UseButtonWithNeighbors;
+}
+
+UButtonWithNeighbors* ULearnedSpellsJournalMenu::GetBackButtonWithNeighbors() const
+{
+    return BackButtonWithNeighbors;
 }

@@ -590,6 +590,24 @@ void USpellBattleMenu::LearnedSpellsJournalButtonOnClicked()
 		if (IsValid(PlayerCharacter->GetBattleMenuWidget()))
 			PlayerCharacter->GetBattleMenuWidget()->IsChoosingLearnedSpell = true;
 		CanUseKeyboardButtonSelection = false;
+		if (IsValid(UIManagerWorldSubsystem)) {
+			if (IsValid(UIManagerWorldSubsystem->PickedButton))
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
+			if (IsValid(PlayerCharacter->GetLearnedSpellsJournalMenu()) && PlayerCharacter->GetLearnedSpellsJournalMenu()->GetMainScrollBox()->GetAllChildren().Num() > 0) {
+				if (auto* LearnedSpellEntryWidget = Cast<ULearnedSpellEntryWidget>(PlayerCharacter->GetLearnedSpellsJournalMenu()->GetMainScrollBox()->GetAllChildren()[0]);
+					IsValid(LearnedSpellEntryWidget))
+						UIManagerWorldSubsystem->PickedButton = LearnedSpellEntryWidget->GetMainButton();
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				PlayerCharacter->GetLearnedSpellsJournalMenu()->CanUseKeyboardButtonSelection = true;
+			}
+			else if(IsValid(PlayerCharacter->GetLearnedSpellsJournalMenu()) && PlayerCharacter->GetLearnedSpellsJournalMenu()->GetMainScrollBox()->GetAllChildren().Num() <= 0) {
+				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetLearnedSpellsJournalMenu()->GetBackButtonWithNeighbors();
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				PlayerCharacter->GetLearnedSpellsJournalMenu()->CanUseKeyboardButtonSelection = false;
+			}
+		}
 	}
 }
 
@@ -1082,6 +1100,20 @@ void USpellBattleMenu::ShowSpellBattleMenu()
 		HolyElementButton->SetVisibility(ESlateVisibility::Visible);
 		BloodElementButton->SetVisibility(ESlateVisibility::Visible);
 		DarkElementButton->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void USpellBattleMenu::OnMenuOpenUIManagerLogic()
+{
+	if (IsValid(UIManagerWorldSubsystem)) {
+		if (IsValid(UIManagerWorldSubsystem->PickedButton))
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+		if (SelectedSpellType == ESpellType::NONE)
+			UIManagerWorldSubsystem->PickedButton = AssaultSpellTypeButtonWithNeighbors;
+		else
+			UIManagerWorldSubsystem->PickedButton = WaterElementButton;
+		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+		UIManagerWorldSubsystem->PickedButtonIndex = 0;
 	}
 }
 

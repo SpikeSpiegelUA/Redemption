@@ -32,8 +32,6 @@ private:
 	UFUNCTION()
 	void UseButtonOnClicked();
 	UFUNCTION()
-	void BackButtonOnClicked();
-	UFUNCTION()
 	void UseButtonOnHovered();
 	UFUNCTION()
 	void BackButtonOnHovered();
@@ -48,6 +46,16 @@ private:
 public:
 	void AddLearnedSpellEntryToMainScrollBox(const class ASpell* const SpellToAdd);
 
-	UScrollBox* GetMainScrollBox() const;
-	UButton* GetUseButton() const;
+	const UScrollBox* GetMainScrollBox() const;
+	UButtonWithNeighbors* GetUseButtonWithNeighbors() const;
+	UButtonWithNeighbors* GetBackButtonWithNeighbors() const;
+
+	bool CanUseKeyboardButtonSelection = true;
+
+	//Selected spell button in scroll box, whose info is shown. Need this, to control which button to make green.
+	UPROPERTY()
+		UButton* SelectedSpellButton{};
+
+	UFUNCTION()
+	void BackButtonOnClicked();
 };

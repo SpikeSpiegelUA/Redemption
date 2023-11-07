@@ -382,8 +382,7 @@ void APlayerCharacter::InputScrollRight()
 					}
 				}
 			}
-	if (IsValid(SpellBattleMenuWidget) && SpellBattleMenuWidget->IsInViewport()) {
-		if (SpellBattleMenuWidget->GetSelectedSpellType() == ESpellType::NONE) {
+	if (IsValid(SpellBattleMenuWidget) && IsValid(LearnedSpellsJournalMenuWidget) && (SpellBattleMenuWidget->IsInViewport() || LearnedSpellsJournalMenuWidget->IsInViewport())) {
 			if (UButtonWithNeighbors* PickedButtonWithNeighbors = Cast<UButtonWithNeighbors>(UIManagerWorldSubsystem->PickedButton); IsValid(PickedButtonWithNeighbors))
 				for (FSideAndItsButton SideAndItsButton : PickedButtonWithNeighbors->SidesAndTheirButtons)
 					if (SideAndItsButton.Side == ESides::RIGHT) {
@@ -391,7 +390,6 @@ void APlayerCharacter::InputScrollRight()
 						UIManagerWorldSubsystem->PickedButton = SideAndItsButton.NeighborButton;
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
 					}
-		}
 	}
 }
 
@@ -464,8 +462,7 @@ void APlayerCharacter::InputScrollLeft()
 					}
 				}
 			}
-	if (IsValid(SpellBattleMenuWidget) && SpellBattleMenuWidget->IsInViewport()) {
-		if (SpellBattleMenuWidget->GetSelectedSpellType() == ESpellType::NONE) {
+	if (IsValid(SpellBattleMenuWidget) && IsValid(LearnedSpellsJournalMenuWidget) && (SpellBattleMenuWidget->IsInViewport() || LearnedSpellsJournalMenuWidget->IsInViewport())){
 			if (UButtonWithNeighbors* PickedButtonWithNeighbors = Cast<UButtonWithNeighbors>(UIManagerWorldSubsystem->PickedButton); IsValid(PickedButtonWithNeighbors))
 				for (FSideAndItsButton SideAndItsButton : PickedButtonWithNeighbors->SidesAndTheirButtons)
 					if (SideAndItsButton.Side == ESides::LEFT) {
@@ -473,7 +470,6 @@ void APlayerCharacter::InputScrollLeft()
 						UIManagerWorldSubsystem->PickedButton = SideAndItsButton.NeighborButton;
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
 					}
-		}
 	}
 }
 
@@ -610,7 +606,7 @@ void APlayerCharacter::InputScrollUp()
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 			}
 		}
-		else if (IsValid(SpellBattleMenuWidget) && SpellBattleMenuWidget->IsInViewport() && SpellBattleMenuWidget->CanUseKeyboardButtonSelection) {
+		else if (IsValid(SpellBattleMenuWidget) && SpellBattleMenuWidget->IsInViewport() && SpellBattleMenuWidget->CanUseKeyboardButtonSelection && !LearnedSpellsJournalMenuWidget->IsInViewport()) {
 			if (SpellBattleMenuWidget->GetSelectedSpellType() == ESpellType::NONE) {
 				if (UButtonWithNeighbors* PickedButtonWithNeighbors = Cast<UButtonWithNeighbors>(UIManagerWorldSubsystem->PickedButton); IsValid(PickedButtonWithNeighbors)) 
 					for (FSideAndItsButton SideAndItsButton : PickedButtonWithNeighbors->SidesAndTheirButtons)
@@ -641,6 +637,25 @@ void APlayerCharacter::InputScrollUp()
 					if (IsValid(UIManagerWorldSubsystem->PickedButton))
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
 					UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SpellBattleMenuElementsButtons[UIManagerWorldSubsystem->PickedButtonIndex - 1]);
+					UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex - 1;
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+				}
+			}
+		}
+		else if (IsValid(LearnedSpellsJournalMenuWidget) && LearnedSpellsJournalMenuWidget->IsInViewport() && LearnedSpellsJournalMenuWidget->CanUseKeyboardButtonSelection) {
+			TArray<UWidget*> LearnedSpellsJournalMenuButtons = LearnedSpellsJournalMenuWidget->GetMainScrollBox()->GetAllChildren();
+			if (LearnedSpellsJournalMenuButtons.Num() > 0) {
+				if (UIManagerWorldSubsystem->PickedButtonIndex == 0) {
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+					UIManagerWorldSubsystem->PickedButton = Cast<ULearnedSpellEntryWidget>(LearnedSpellsJournalMenuButtons[LearnedSpellsJournalMenuButtons.Num() - 1])->GetMainButton();
+					UIManagerWorldSubsystem->PickedButtonIndex = LearnedSpellsJournalMenuButtons.Num() - 1;
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+				}
+				else {
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+					UIManagerWorldSubsystem->PickedButton = Cast<ULearnedSpellEntryWidget>(LearnedSpellsJournalMenuButtons[UIManagerWorldSubsystem->PickedButtonIndex - 1])->GetMainButton();
 					UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex - 1;
 					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
 				}
@@ -871,6 +886,25 @@ void APlayerCharacter::InputScrollDown()
 				}
 			}
 		}
+		else if (IsValid(LearnedSpellsJournalMenuWidget) && LearnedSpellsJournalMenuWidget->IsInViewport() && LearnedSpellsJournalMenuWidget->CanUseKeyboardButtonSelection) {
+			TArray<UWidget*> LearnedSpellsJournalMenuButtons = LearnedSpellsJournalMenuWidget->GetMainScrollBox()->GetAllChildren();
+			if (LearnedSpellsJournalMenuButtons.Num() > 1) {
+				if (UIManagerWorldSubsystem->PickedButtonIndex == LearnedSpellsJournalMenuButtons.Num() - 1) {
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+					UIManagerWorldSubsystem->PickedButton = Cast<ULearnedSpellEntryWidget>(LearnedSpellsJournalMenuButtons[0])->GetMainButton();
+					UIManagerWorldSubsystem->PickedButtonIndex = 0;
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+				}
+				else {
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+					UIManagerWorldSubsystem->PickedButton = Cast<ULearnedSpellEntryWidget>(LearnedSpellsJournalMenuButtons[UIManagerWorldSubsystem->PickedButtonIndex + 1])->GetMainButton();
+					UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex + 1;
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+				}
+			}
+		}
 		else if (IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->SelectedPanelWidget) && InventoryMenuWidget->IsInViewport()) {
 			TArray<UWidget*> SelectedScrollBoxChildren = InventoryMenuWidget->SelectedPanelWidget->GetAllChildren();
 				if (SelectedScrollBoxChildren.Num() > 0) {
@@ -1021,11 +1055,14 @@ void APlayerCharacter::InputBack()
 			UIManagerWorldSubsystem->PickedButtonIndex = 0;
 			CanOpenOtherMenus = true;
 		}
-		else if (SpellBattleMenuWidget->IsInViewport()) {
+		else if (SpellBattleMenuWidget->IsInViewport() && !LearnedSpellsJournalMenuWidget->IsInViewport()) {
 			if (SpellBattleMenuWidget->GetSpellInfoBorder()->GetVisibility() != ESlateVisibility::Visible)
 				SpellBattleMenuWidget->BackButtonOnClicked();
 			else
 				SpellBattleMenuWidget->BackToSpellCreationButtonOnClicked();
+		}
+		else if (LearnedSpellsJournalMenuWidget->IsInViewport()) {
+			LearnedSpellsJournalMenuWidget->BackButtonOnClicked();
 		}
 		else if (SettingsMenuWidget->IsInViewport() && MapName != "UEDPIE_0_MainMenu") {
 			SettingsMenuWidget->RemoveFromParent();

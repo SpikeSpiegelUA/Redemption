@@ -261,6 +261,9 @@ public:
 	void HideSpellBattleMenu();
 	//Fully shows menu(except spell info and related buttons).
 	void ShowSpellBattleMenu();
+	//For example, we go back from LearnedSpellJournal to this. We need to set correct PickedButtonIndex and whether picked button is AssaultType or WaterElement
+	//(depends, whether SelectedSpellType is NONE).
+	void OnMenuOpenUIManagerLogic();
 	//Set PickedButton to water element button, PickedButtonIndex to 0 and button's background color after we selected a spell type.
 	void ShowElementsButtonsUIManagerLogic();
 

@@ -342,7 +342,7 @@ void UBattleMenu::AttackMenuBackButtonOnClicked()
 						UIManagerWorldSubsystem->PickedButtonIndex = 0;
 					}
 					else {
-						UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetLearnedSpellsJournalMenu()->GetUseButton();
+						UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetLearnedSpellsJournalMenu()->GetUseButtonWithNeighbors();
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 					}
 				}
