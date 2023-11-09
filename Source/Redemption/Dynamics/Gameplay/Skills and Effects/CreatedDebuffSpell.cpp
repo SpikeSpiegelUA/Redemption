@@ -11,7 +11,7 @@ TArray<AEffect*> ACreatedDebuffSpell::GetEffects() const
 ACreatedDebuffSpell& ACreatedDebuffSpell::operator=(const ASpell& Spell)
 {
 	SetSpellName(Spell.GetSpellName());
-	SetManaCost(Spell.GetManaCost());
+	SetCost(Spell.GetCost());
 	SetSpellElements(Spell.GetSpellElements());
 	SetTypeOfSpell(Spell.GetTypeOfSpell());
 	SetDescription(Spell.GetDescription());

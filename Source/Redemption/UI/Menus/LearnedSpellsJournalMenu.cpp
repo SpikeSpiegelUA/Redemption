@@ -76,7 +76,7 @@ void ULearnedSpellsJournalMenu::BackButtonOnHovered()
                 UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
             else
                 UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
-        }`````
+        }
         UIManagerWorldSubsystem->PickedButton = BackButtonWithNeighbors;
         UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
         if (IsValid(PlayerCharacter))

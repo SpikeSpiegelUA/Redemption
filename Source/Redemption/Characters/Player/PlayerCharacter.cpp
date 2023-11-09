@@ -135,6 +135,8 @@ void APlayerCharacter::BeginPlay()
 			SettingsMenuWidget = CreateWidget<USettingsMenu>(PlayerController, SettingsMenuClass);
 		if (IsValid(MainMenuClass))
 			MainMenuWidget = CreateWidget<UMainMenu>(PlayerController, MainMenuClass);
+		if (IsValid(SkillBattleMenuClass))
+			SkillBattleMenuWidget = CreateWidget<USkillBattleMenu>(PlayerController, SkillBattleMenuClass);
 	}
 	//Level change logic
 	if (IsValid(GameInstance)) {

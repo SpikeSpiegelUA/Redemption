@@ -18,6 +18,13 @@ enum class ESpellType :uint8
 };
 
 UENUM(BlueprintType)
+enum class ESpellCostType :uint8
+{
+	HEALTH UMETA(DisplayName = "Health"),
+	MANA UMETA(DisplayName = "Mana"),
+};
+
+UENUM(BlueprintType)
 enum class EBuffDebuffType :uint8
 {
 	DAMAGE UMETA(DisplayName = "Attack"),
@@ -36,7 +43,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
 		FText SpellName {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
-		int ManaCost{};
+		 ESpellCostType SpellCostType{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
+		int Cost{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
 		ESpellType TypeOfSpell {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
@@ -49,14 +58,16 @@ public:
 	ASpell();
 
 	FText GetSpellName() const;
-	int GetManaCost() const;
+	ESpellCostType GetSpellCostType() const;
+	int GetCost() const;
 	ESpellType GetTypeOfSpell() const;
 	FText GetDescription() const;
 	TArray<ESpellElements> GetSpellElements() const;
 
 	void SetSpellName(FText& NewSpellName);
 	void SetSpellName(FText NewSpellName);
-	void SetManaCost(int NewManaCost);
+	void SetCost(int NewCost);
+	void SetSpellCostType(ESpellCostType NewSpellCostType);
 	void SetTypeOfSpell(ESpellType NewTypeOfSpell);
 	void SetDescription(FText& NewDescription);
 	void SetDescription(FText NewDescription);

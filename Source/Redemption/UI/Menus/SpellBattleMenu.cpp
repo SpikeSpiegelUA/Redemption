@@ -247,6 +247,7 @@ class ASpell* USpellBattleMenu::CreateBasicSpell(ESpellType SpellType, const TAr
 		NameOfTheSpell.Append(" Health Restoration Spell");
 		break;
 	}
+	CreatedBasicSpell->SetSpellCostType(ESpellCostType::MANA);
 	CreatedBasicSpell->SetSpellName(FText::FromString(NameOfTheSpell));
 	CreatedBasicSpell->SetSpellElements(SelectedSpellElements);
 	//Calculate mana cost;
@@ -271,7 +272,7 @@ class ASpell* USpellBattleMenu::CreateBasicSpell(ESpellType SpellType, const TAr
 			BasicManaCost += 10 * CostModifier;
 		else
 			BasicManaCost += 5 * CostModifier;
-	CreatedBasicSpell->SetManaCost(BasicManaCost);
+	CreatedBasicSpell->SetCost(BasicManaCost);
 	CreatedBasicSpell->SetTypeOfSpell(SpellType);
 	/*FString DescriptionOfTheSpell{};
 	switch (SpellType) {
@@ -1007,7 +1008,7 @@ void USpellBattleMenu::SetSpellInfo(const ASpell* const SpellToShow)
 		SpellTypeTextBlock->SetText(FText::FromString(SpellTypeString));
 		SpellEffectValueTextBlock->SetText(FText::FromString(SpellEffectValueString));
 		FString SpellManaCostString = FString("Mana cost: ");
-		SpellManaCostString.AppendInt(SpellToShow->GetManaCost());
+		SpellManaCostString.AppendInt(SpellToShow->GetCost());
 		SpellManaCostTextBlock->SetText(FText::FromString(SpellManaCostString));
 		SpellDescriptionTextBlock->SetText(SpellToShow->GetDescription());
 		HideNotificationAndClearItsTimer();
@@ -1134,7 +1135,13 @@ void USpellBattleMenu::UseButtonOnClicked()
 			if (ABattleManager* BManager = PlayerCharacter->GetBattleManager(); IsValid(BManager))
 				if (UBattleMenu* BMenu = PlayerCharacter->GetBattleMenuWidget(); IsValid(BMenu))
 					if (IsValid(UIManagerWorldSubsystem)) {
-						if (BManager->BattleAlliesPlayer[BManager->CurrentTurnAllyPlayerIndex]->CurrentMana >= CreatedSpell->GetManaCost()) {
+						float VariableCorrespondingToSpellCostType{};
+						if (CreatedSpell->GetSpellCostType() == ESpellCostType::MANA)
+							VariableCorrespondingToSpellCostType = BManager->BattleAlliesPlayer[BManager->CurrentTurnAllyPlayerIndex]->CurrentMana;
+						else
+							VariableCorrespondingToSpellCostType = BManager->BattleAlliesPlayer[BManager->CurrentTurnAllyPlayerIndex]->CurrentHP;
+						if ((CreatedSpell->GetSpellCostType() == ESpellCostType::MANA && VariableCorrespondingToSpellCostType >= CreatedSpell->GetCost()) ||
+							(CreatedSpell->GetSpellCostType() == ESpellCostType::HEALTH && VariableCorrespondingToSpellCostType > CreatedSpell->GetCost())) {
 							BManager->BattleAlliesPlayer[BManager->CurrentTurnAllyPlayerIndex]->SpellToUse = CreatedSpell;
 							if (Cast<ARestorationSpell>(CreatedSpell) || Cast<ABuffSpell>(CreatedSpell)) {
 								PlayerCharacter->GetBattleManager()->IsSelectingAllyAsTarget = true;
@@ -1174,7 +1181,9 @@ void USpellBattleMenu::UseButtonOnClicked()
 							BManager->SetCanTurnBehindPlayerCameraToTarget(true);
 							BManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
 						}
-						else
+						else if(CreatedSpell->GetSpellCostType() == ESpellCostType::HEALTH)
+							CreateNotification(FText::FromString("Not enough health!!!"));
+						else if (CreatedSpell->GetSpellCostType() == ESpellCostType::MANA)
 							CreateNotification(FText::FromString("Not enough mana!!!"));
 					}
 	}
@@ -1189,7 +1198,13 @@ void USpellBattleMenu::UseUniqueSpellButtonOnClicked()
 				if (ABattleManager* BManager = PlayerCharacter->GetBattleManager(); IsValid(BManager))
 					if (UBattleMenu* BMenu = PlayerCharacter->GetBattleMenuWidget(); IsValid(BMenu)) 
 						if (UIManagerWorldSubsystem) {
-							if (BManager->BattleAlliesPlayer[BManager->CurrentTurnAllyPlayerIndex]->CurrentMana >= CreatedSpell->GetManaCost()) {
+							float VariableCorrespondingToSpellCostType{};
+							if (CreatedSpell->GetSpellCostType() == ESpellCostType::MANA)
+								VariableCorrespondingToSpellCostType = BManager->BattleAlliesPlayer[BManager->CurrentTurnAllyPlayerIndex]->CurrentMana;
+							else
+								VariableCorrespondingToSpellCostType = BManager->BattleAlliesPlayer[BManager->CurrentTurnAllyPlayerIndex]->CurrentHP;
+							if ((CreatedSpell->GetSpellCostType() == ESpellCostType::MANA && VariableCorrespondingToSpellCostType >= CreatedSpell->GetCost()) ||
+								(CreatedSpell->GetSpellCostType() == ESpellCostType::HEALTH && VariableCorrespondingToSpellCostType > CreatedSpell->GetCost())) {
 								BManager->BattleAlliesPlayer[BManager->CurrentTurnAllyPlayerIndex]->SpellToUse = CreatedSpell;
 								if (Cast<ARestorationSpell>(CreatedSpell) || Cast<ABuffSpell>(CreatedSpell)) {
 									PlayerCharacter->GetBattleManager()->IsSelectingAllyAsTarget = true;
@@ -1234,7 +1249,9 @@ void USpellBattleMenu::UseUniqueSpellButtonOnClicked()
 								BManager->SetCanTurnBehindPlayerCameraToTarget(true);
 								BManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
 							}
-							else
+							else if (CreatedSpell->GetSpellCostType() == ESpellCostType::HEALTH)
+								CreateNotification(FText::FromString("Not enough health!!!"));
+							else if (CreatedSpell->GetSpellCostType() == ESpellCostType::MANA)
 								CreateNotification(FText::FromString("Not enough mana!!!"));
 						}
 			}

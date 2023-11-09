@@ -98,7 +98,7 @@ protected:
 
 public:
 	void SetTargetName(const FText& Name);
-	
+
 	UCanvasPanel* GetCenterMark() const;
 	UVerticalBox* GetMenuVerticalBox() const;
 	UVerticalBox* GetAttackMenuVerticalBox() const;

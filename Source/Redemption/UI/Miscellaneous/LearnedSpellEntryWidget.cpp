@@ -27,6 +27,8 @@ void ULearnedSpellEntryWidget::MainButtonOnClicked()
         PlayerCharacter->GetSpellBattleMenuWidget()->SetCreatedSpell(EntrySpell);
         PlayerCharacter->GetSpellBattleMenuWidget()->SetSpellInfo(EntrySpell);
         PlayerCharacter->GetSpellBattleMenuWidget()->GetSpellInfoBorder()->SetVisibility(ESlateVisibility::Visible);
+        if (IsValid(PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton))
+            PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
         PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton = MainButton;
     }
 }
@@ -35,11 +37,11 @@ void ULearnedSpellEntryWidget::MainButtonOnHovered()
 {
     if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
         if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter())) {
-            if (UIManagerWorldSubsystem->PickedButton) {
-                if(PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton != MainButton)
-                    UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
-                else
+            if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+                if(PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton == UIManagerWorldSubsystem->PickedButton)
                     UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+                else
+                    UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
             }
             UIManagerWorldSubsystem->PickedButton = MainButton;
             UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));

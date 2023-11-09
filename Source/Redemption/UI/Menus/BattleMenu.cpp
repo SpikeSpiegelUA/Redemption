@@ -319,7 +319,7 @@ void UBattleMenu::AttackMenuBackButtonOnClicked()
 			}
 			else if (IsAttackingWithSpell && !IsChoosingLearnedSpell && IsValid(SpellBattleMenu) ) {
 				IsChoosingSpell = true;
-				IsChoosingLearnedSpell = true;
+				IsChoosingLearnedSpell = false;
 				IsAttackingWithSpell = false;
 				this->RemoveFromParent();
 				SpellBattleMenu->AddToViewport();
@@ -455,29 +455,25 @@ void UBattleMenu::AttackActionButtonOnClicked()
 			if (IsValid(SkillBattleMenu) && SkillBattleMenu->GetSelectedSpellType() != ESpellType::NONE && SkillBattleMenu->GetSelectedElementsHorizontalBox()->GetAllChildren().Num() > 0) {
 				if (!IsValid(SkillBattleMenu->GetCreatedSpell()))
 					SkillBattleMenu->CreateSpellAndSetCreatedSpell(SkillBattleMenu->GetSelectedSpellElements(), SkillBattleMenu->GetSelectedSpellType());
-				UBattleMenu* BattleMenu{};
-				if (IsValid(PlayerCharacter)) {
-					BattleMenu = PlayerCharacter->GetBattleMenuWidget();
-				}
-				if (IsValid(SkillBattleMenu->GetCreatedSpell()) && IsValid(BattleManager) && IsValid(BattleMenu) && IsValid(UIManagerWorldSubsystem) && IsValid(PlayerCharacter)) {
+				if (IsValid(SkillBattleMenu->GetCreatedSpell()) && IsValid(BattleManager) && IsValid(UIManagerWorldSubsystem) && IsValid(PlayerCharacter)) {
 					switch (SkillBattleMenu->GetCreatedSpell()->GetTypeOfSpell()) {
 					case ESpellType::ASSAULT:
 						if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(SkillBattleMenu->GetCreatedSpell()); IsValid(AssaultSpell))
-							AssaultSpellUse(BattleMenu, CurrentTurnAlliesNPC);
+							AssaultSpellUse(this, CurrentTurnAlliesNPC);
 						break;
 					case ESpellType::RESTORATION:
 						if (ARestorationSpell* RestorationSpell = Cast<ARestorationSpell>(SkillBattleMenu->GetCreatedSpell()); IsValid(RestorationSpell))
-							RestorationSpellUse(RestorationSpell, BattleMenu, CurrentTurnAlliesNPC);
+							RestorationSpellUse(RestorationSpell, this, CurrentTurnAlliesNPC);
 						break;
 					case ESpellType::BUFF:
 						if (ACreatedBuffSpell* CreatedBuffSpell = Cast<ACreatedBuffSpell>(SkillBattleMenu->GetCreatedSpell()); IsValid(CreatedBuffSpell))
-							BuffSpellUse(CreatedBuffSpell, BattleMenu, CurrentTurnAlliesNPC);
+							BuffSpellUse(CreatedBuffSpell, this, CurrentTurnAlliesNPC);
 						else if (APresetBuffSpell* PresetBuffSpell = Cast<APresetBuffSpell>(SkillBattleMenu->GetCreatedSpell()); IsValid(PresetBuffSpell))
-							BuffSpellUse(PresetBuffSpell, BattleMenu, CurrentTurnAlliesNPC);
+							BuffSpellUse(PresetBuffSpell, this, CurrentTurnAlliesNPC);
 						break;
 					case ESpellType::DEBUFF:
 						if (ACreatedDebuffSpell* CreatedDebuffSpell = Cast<ACreatedDebuffSpell>(SkillBattleMenu->GetCreatedSpell()); IsValid(CreatedDebuffSpell))
-							DebuffSpellUse(BattleMenu, CurrentTurnAlliesNPC);
+							DebuffSpellUse(this, CurrentTurnAlliesNPC);
 						break;
 					}
 					IsAttackingWithSpell = false;
@@ -530,9 +526,16 @@ void UBattleMenu::RangeAttackUse(UCombatAlliesAnimInstance* CurrentTurnAlliesNPC
 
 void UBattleMenu::AssaultSpellUse(class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC)
 {
-	CurrentTurnNPC->CurrentMana -= CurrentTurnNPC->SpellToUse->GetManaCost();
-	if (CurrentTurnNPC->CurrentMana < 0)
-		CurrentTurnNPC->CurrentMana = 0;
+	if (CurrentTurnNPC->SpellToUse->GetSpellCostType() == ESpellCostType::MANA) {
+		CurrentTurnNPC->CurrentMana -= CurrentTurnNPC->SpellToUse->GetCost();
+		if (CurrentTurnNPC->CurrentMana < 0)
+			CurrentTurnNPC->CurrentMana = 0;
+	}
+	else {
+		CurrentTurnNPC->CurrentHP -= CurrentTurnNPC->SpellToUse->GetCost();
+		if (CurrentTurnNPC->CurrentHP < 0)
+			CurrentTurnNPC->CurrentHP = 0;
+	}
 	CurrentTurnNPC->Target = BattleManager->SelectedCombatNPC;
 	APlayerCharacter* PC = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	if (UCombatCharacterAnimInstance* AnimInstance = Cast<UCombatCharacterAnimInstance>(CurrentTurnNPC->GetMesh()->GetAnimInstance()); IsValid(AnimInstance)) {
@@ -582,10 +585,17 @@ void UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 		APlayerCharacter* PC = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 		UGameplayStatics::PlaySound2D(GetWorld(), PC->GetAudioManager()->GetUseHealOrBuffSoundCue());
 		GetWorld()->GetTimerManager().SetTimer(PlayerTurnControllerTimerHandle, BattleManager, &ABattleManager::PlayerTurnController, 1.5f, false);
-		CurrentTurnNPC->CurrentMana -= SpellToUse->GetManaCost();
 		BattleMenu->IsChoosingSpell = false;
-		if (CurrentTurnNPC->CurrentMana < 0)
-			CurrentTurnNPC->CurrentMana = 0;
+		if (SpellToUse->GetSpellCostType() == ESpellCostType::MANA) {
+			CurrentTurnNPC->CurrentMana -= SpellToUse->GetCost();
+			if (CurrentTurnNPC->CurrentMana < 0)
+				CurrentTurnNPC->CurrentMana = 0;
+		}
+		else {
+			CurrentTurnNPC->CurrentHP -= SpellToUse->GetCost();
+			if (CurrentTurnNPC->CurrentHP < 0)
+				CurrentTurnNPC->CurrentHP = 0;
+		}
 		PC->GetSpellBattleMenuWidget()->Reset(false);
 	}
 }
@@ -595,10 +605,18 @@ void UBattleMenu::BuffSpellUse(const class ACreatedBuffSpell* const SpellToUse, 
 		CurrentTurnNPC->Execute_GetHitWithBuffOrDebuff(CurrentTurnNPC, SpellToUse->GetEffects());
 		UGameplayStatics::PlaySound2D(GetWorld(), PC->GetAudioManager()->GetUseHealOrBuffSoundCue());
 		GetWorld()->GetTimerManager().SetTimer(PlayerTurnControllerTimerHandle, BattleManager, &ABattleManager::PlayerTurnController, 1.5f, false);
-		CurrentTurnNPC->CurrentMana -= SpellToUse->GetManaCost();
+		CurrentTurnNPC->CurrentMana -= SpellToUse->GetCost();
 		BattleMenu->IsChoosingSpell = false;
-		if (CurrentTurnNPC->CurrentMana < 0)
-			CurrentTurnNPC->CurrentMana = 0;
+		if (SpellToUse->GetSpellCostType() == ESpellCostType::MANA) {
+			CurrentTurnNPC->CurrentMana -= SpellToUse->GetCost();
+			if (CurrentTurnNPC->CurrentMana < 0)
+				CurrentTurnNPC->CurrentMana = 0;
+		}
+		else {
+			CurrentTurnNPC->CurrentHP -= SpellToUse->GetCost();
+			if (CurrentTurnNPC->CurrentHP < 0)
+				CurrentTurnNPC->CurrentHP = 0;
+		}
 		PC->GetSpellBattleMenuWidget()->Reset(false);
 	}
 }
@@ -614,19 +632,34 @@ void UBattleMenu::BuffSpellUse(const class APresetBuffSpell* const SpellToUse, c
 		CurrentTurnNPC->Execute_GetHitWithBuffOrDebuff(CurrentTurnNPC, CreatedEffectsFromClasses);
 		UGameplayStatics::PlaySound2D(GetWorld(), PC->GetAudioManager()->GetUseHealOrBuffSoundCue());
 		GetWorld()->GetTimerManager().SetTimer(PlayerTurnControllerTimerHandle, BattleManager, &ABattleManager::PlayerTurnController, 1.5f, false);
-		CurrentTurnNPC->CurrentMana -= SpellToUse->GetManaCost();
+		CurrentTurnNPC->CurrentMana -= SpellToUse->GetCost();
 		BattleMenu->IsChoosingSpell = false;
-		if (CurrentTurnNPC->CurrentMana < 0)
-			CurrentTurnNPC->CurrentMana = 0;
+		if (SpellToUse->GetSpellCostType() == ESpellCostType::MANA) {
+			CurrentTurnNPC->CurrentMana -= SpellToUse->GetCost();
+			if (CurrentTurnNPC->CurrentMana < 0)
+				CurrentTurnNPC->CurrentMana = 0;
+		}
+		else {
+			CurrentTurnNPC->CurrentHP -= SpellToUse->GetCost();
+			if (CurrentTurnNPC->CurrentHP < 0)
+				CurrentTurnNPC->CurrentHP = 0;
+		}
 		PC->GetSpellBattleMenuWidget()->Reset(false);
 	}
 }
 
 void UBattleMenu::DebuffSpellUse(class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC)
 {
-	CurrentTurnNPC->CurrentMana -= CurrentTurnNPC->SpellToUse->GetManaCost();
-	if (CurrentTurnNPC->CurrentMana < 0)
-		CurrentTurnNPC->CurrentMana = 0;
+	if (CurrentTurnNPC->SpellToUse->GetSpellCostType() == ESpellCostType::MANA) {
+		CurrentTurnNPC->CurrentMana -= CurrentTurnNPC->SpellToUse->GetCost();
+		if (CurrentTurnNPC->CurrentMana < 0)
+			CurrentTurnNPC->CurrentMana = 0;
+	}
+	else {
+		CurrentTurnNPC->CurrentHP -= CurrentTurnNPC->SpellToUse->GetCost();
+		if (CurrentTurnNPC->CurrentHP < 0)
+			CurrentTurnNPC->CurrentHP = 0;
+	}
 	CurrentTurnNPC->Target = BattleManager->SelectedCombatNPC;
 	APlayerCharacter* PC = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	if (UCombatCharacterAnimInstance* AnimInstance = Cast<UCombatCharacterAnimInstance>(CurrentTurnNPC->GetMesh()->GetAnimInstance()); IsValid(AnimInstance)) {
@@ -764,10 +797,10 @@ void UBattleMenu::TalkActionButtonOnHovered()
 void UBattleMenu::ButtonOnHoveredActions(UButton* const HoveredButton, int8 Index)
 {
 	if (IsValid(UIManagerWorldSubsystem->PickedButton))
-		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 	UIManagerWorldSubsystem->PickedButton = HoveredButton;
 	if (IsValid(UIManagerWorldSubsystem->PickedButton))
-		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 	UIManagerWorldSubsystem->PickedButtonIndex = Index;
 }
 

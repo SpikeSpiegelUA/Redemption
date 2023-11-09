@@ -12,6 +12,7 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\PauseMenu.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\PlayerMenu.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SpellBattleMenu.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SkillBattleMenu.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\BattleResultsScreen.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\GameManager.h"
@@ -231,6 +232,8 @@ protected:
 		TSubclassOf<class UMainMenu> MainMenuClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class ULearnedSpellsJournalMenu> LearnedSpellsJournalMenuClass{};
+	UPROPERTY(EditAnywhere, Category = "UI")
+		TSubclassOf<class USkillBattleMenu> SkillBattleMenuClass{};
 	//The widget instances
 	UPROPERTY()
 		class UForwardRayInfo* ForwardRayInfoWidget{};
@@ -266,6 +269,8 @@ protected:
 		class UMainMenu* MainMenuWidget{};
 	UPROPERTY()
 		class ULearnedSpellsJournalMenu* LearnedSpellsJournalMenuWidget{};
+	UPROPERTY()
+		class USkillBattleMenu* SkillBattleMenuWidget{};
 
 public:
 #pragma region

@@ -32,9 +32,14 @@ void ASpell::SetSpellName(FText NewSpellName)
 	SpellName = NewSpellName;
 }
 
-void ASpell::SetManaCost(int NewManaCost)
+void ASpell::SetCost(int NewManaCost)
 {
-	ManaCost = NewManaCost;
+	Cost = NewManaCost;
+}
+
+void ASpell::SetSpellCostType(ESpellCostType NewSpellCostType)
+{
+	SpellCostType = NewSpellCostType;
 }
 
 void ASpell::SetTypeOfSpell(ESpellType NewTypeOfSpell)
@@ -62,9 +67,14 @@ FText ASpell::GetSpellName() const
 	return SpellName;
 }
 
-int ASpell::GetManaCost() const
+ESpellCostType ASpell::GetSpellCostType() const
 {
-	return ManaCost;
+	return SpellCostType;
+}
+
+int ASpell::GetCost() const
+{
+	return Cost;
 }
 
 ESpellType ASpell::GetTypeOfSpell() const
