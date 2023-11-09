@@ -5,6 +5,7 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\CreatedDebuffSpell.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\PresetDebuffSpell.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ElementsActions.h"
 #include <Kismet/GameplayStatics.h>
 #include "Kismet/KismetMathLibrary.h"
 
@@ -54,7 +55,7 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 		if (ACombatNPC* CombatNPC = Cast<ACombatNPC>(OtherActor); IsValid(CombatNPC)) {
 			if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(Spell); IsValid(AssaultSpell)) {
 				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedCombatNPC,
-					AssaultSpell->GetAttackValue(), AssaultSpell->GetElementsAndTheirPercentagesStructs(), false);
+					AssaultSpell->GetAttackValue(), ElementsActions::FindContainedElements(AssaultSpell->GetSpellElements()), false);
 				OnOverlapBeginsActions(PlayerCharacter);
 			}
 			else if (APresetDebuffSpell* PresetDebuffSpell = Cast<APresetDebuffSpell>(Spell); IsValid(PresetDebuffSpell)) {
@@ -72,7 +73,7 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 	}
 }
 
-void ASpellObject::OnOverlapBeginsActions(const class APlayerCharacter* const& PlayerCharacter)
+void ASpellObject::OnOverlapBeginsActions(const class APlayerCharacter* const PlayerCharacter)
 {
 	PlayerCharacter->GetSpellBattleMenuWidget()->SetCreatedSpell(nullptr);
 	PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell = false;
@@ -80,7 +81,7 @@ void ASpellObject::OnOverlapBeginsActions(const class APlayerCharacter* const& P
 	this->Destroy();
 }
 
-void ASpellObject::SetSpell(class ASpell* NewSpell)
+void ASpellObject::SetSpell(const class ASpell* const NewSpell)
 {
-	Spell = NewSpell;
+	Spell = const_cast<ASpell*>(NewSpell);
 }

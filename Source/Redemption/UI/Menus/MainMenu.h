@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
+#include "Components/VerticalBox.h"
 #include "MainMenu.generated.h"
 
 /**
@@ -16,13 +17,23 @@ class REDEMPTION_API UMainMenu : public UUserWidget
 	GENERATED_BODY()
 private:
 	UFUNCTION()
-		void NewGameButtonOnClicked();
+	void NewGameButtonOnClicked();
 	UFUNCTION()
-		void LoadGameButtonOnClicked();
+	void LoadGameButtonOnClicked();
 	UFUNCTION()
-		void SettingsButtonOnClicked();
+	void SettingsButtonOnClicked();
 	UFUNCTION()
-		void ExitButtonOnClicked();
+	void ExitButtonOnClicked();
+	UFUNCTION()
+	void NewGameButtonOnHovered();
+	UFUNCTION()
+	void LoadGameButtonOnHovered();
+	UFUNCTION()
+	void SettingsButtonOnHovered();
+	UFUNCTION()
+	void ExitButtonOnHovered();
+
+	void ButtonOnHoveredActions(const UButton* const HoveredButton, int8 Index);
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* NewGameButton;
@@ -32,16 +43,14 @@ protected:
 		class UButton* SettingsButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* ExitButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UVerticalBox* MainVerticalBox;
 
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class ULoadingScreen> LoadingScreenClass = nullptr;
-	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class USettingsMenu> SettingsMenuClass = nullptr;
-	UPROPERTY()
-		USettingsMenu* SettingsMenuWidget = nullptr;
 
 public:
 
@@ -49,4 +58,5 @@ public:
 	UButton* GetLoadGameButton() const;
 	UButton* GetSettingsButton() const;
 	UButton* GetExitButton() const;
+	UVerticalBox* GetMainVerticalBox() const;
 };

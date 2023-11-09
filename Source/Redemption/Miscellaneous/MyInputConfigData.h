@@ -38,4 +38,12 @@ public:
 		UInputAction* InputBack {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 		UInputAction* InputPause {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		UInputAction* InputSpellUse{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		UInputAction* InputUniqueSpellUseSpellInfoToggle{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		UInputAction* InputSpellReset{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		UInputAction* InputOpenLearnedSpells{};
 };

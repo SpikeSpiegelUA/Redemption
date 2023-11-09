@@ -40,12 +40,11 @@ private:
 		void HideNotificationAndClearItsTimer();
 	void CreateNotification(const FText& NotificationText);
 
-	void AssaultSpellUse(class AAssaultSpell* const& SpellToUse, class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
-	void RestorationSpellUse(class ARestorationSpell* const& SpellToUse, class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
-	void BuffSpellUse(class ACreatedBuffSpell* const& SpellToUse, class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
-	void BuffSpellUse(class APresetBuffSpell* const& SpellToUse, class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
-	void DebuffSpellUse(class ACreatedDebuffSpell* const& SpellToUse, class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
-	void DebuffSpellUse(class APresetDebuffSpell* const& SpellToUse, class UBattleMenu* const& BattleMenu, class ACombatNPC* const& CurrentTurnNPC);
+	void AssaultSpellUse(class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
+	void RestorationSpellUse(const class ARestorationSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
+	void BuffSpellUse(const class ACreatedBuffSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
+	void BuffSpellUse(const class APresetBuffSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
+	void DebuffSpellUse(class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
 	void RangeAttackUse(UCombatAlliesAnimInstance* CurrentTurnAlliesNPCAnimInstance);
 
 protected:
@@ -99,7 +98,7 @@ protected:
 
 public:
 	void SetTargetName(const FText& Name);
-	
+
 	UCanvasPanel* GetCenterMark() const;
 	UVerticalBox* GetMenuVerticalBox() const;
 	UVerticalBox* GetAttackMenuVerticalBox() const;
@@ -110,6 +109,7 @@ public:
 	UButton* GetAttackButton() const;
 	UButton* GetDefendButton() const;
 	UButton* GetItemButton() const;
+	UButton* GetSpellButton() const;
 	UButton* GetAttackMenuBackButton() const;
 	UButton* GetAttackActionButton() const;
 	UTextBlock* GetEnemyNameTextBlock() const;
@@ -119,6 +119,7 @@ public:
 	bool IsChoosingItem = false;
 	bool IsAttackingWithItem = false;
 	bool IsChoosingSpell = false;
+	bool IsChoosingLearnedSpell = false;
 	bool IsAttackingWithSpell = false;
 	bool IsAttackingWithMelee = false;
 	bool IsAttackingWithRange = false;
@@ -146,4 +147,28 @@ public:
 		void TalkButtonOnClicked();
 	UFUNCTION()
 		void TalkActionButtonOnClicked();
+	UFUNCTION()
+		void AttackButtonOnHovered();
+	UFUNCTION()
+		void DefendButtonOnHovered();
+	UFUNCTION()
+		void ItemButtonOnHovered();
+	UFUNCTION()
+		void AttackMenuBackButtonOnHovered();
+	UFUNCTION()
+		void AttackActionButtonOnHovered();
+	UFUNCTION()
+		void LeftButtonOnHovered();
+	UFUNCTION()
+		void RightButtonOnHovered();
+	UFUNCTION()
+		void SpellButtonOnHovered();
+	UFUNCTION()
+		void RangeButtonOnHovered();
+	UFUNCTION()
+		void TalkButtonOnHovered();
+	UFUNCTION()
+		void TalkActionButtonOnHovered();
+
+	void ButtonOnHoveredActions(UButton* const HoveredButton, int8 Index);
 };

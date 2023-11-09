@@ -42,5 +42,5 @@ public:
 	UBehaviorTree* GetTreeAsset() const;
 	ASmartObject* GetSmartObject() const;
 	
-	void SetSmartObject(ASmartObject* Object);
+	void SetSmartObject(const ASmartObject* const Object);
 };

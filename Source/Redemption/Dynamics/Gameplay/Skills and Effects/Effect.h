@@ -37,7 +37,7 @@ enum class ESpellElements :uint8
 	DARK UMETA(DisplayName = "Dark"),
 	BLOOD UMETA(DisplayName = "Blood"),
 
-	//Need this for some logic. Basically spell/weapon has different elements with the same count. Affects only spell info and spell's spell object. Isn't a part of the combat design.
+	//Need this for some logic. Basically spell/weapon has different elements with the same count.
 	MULTIELEMENTAL UMETA(DisplayName = "Multielemental"),
 };
 ENUM_RANGE_BY_FIRST_AND_LAST(ESpellElements, ESpellElements::FIRE, ESpellElements::BLOOD);

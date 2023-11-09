@@ -26,8 +26,8 @@ void ARestorationSpell::SetRestorationValuePercent(int NewRestorationValuePercen
 ARestorationSpell& ARestorationSpell::operator=(const ASpell& Spell)
 {
 	SetSpellName(Spell.GetSpellName());
-	SetManaCost(Spell.GetManaCost());
-	SetElementsAndTheirPercentagesStructs(Spell.GetElementsAndTheirPercentagesStructs());
+	SetCost(Spell.GetCost());
+	SetSpellElements(Spell.GetSpellElements());
 	SetTypeOfSpell(Spell.GetTypeOfSpell());
 	SetDescription(Spell.GetDescription());
 	return *this;

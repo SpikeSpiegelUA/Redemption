@@ -9,18 +9,29 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\LoadingScreen.h"
 #include "GameFramework/GameUserSettings.h"
 #include"Kismet/KismetSystemLibrary.h"
+#include "Redemption/Characters/Player/PlayerCharacter.h"
+#include "UIManagerWorldSubsystem.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 
 bool UMainMenu::Initialize()
 {
 	const bool bSuccess = Super::Initialize();
-	if (IsValid(NewGameButton))
+	if (IsValid(NewGameButton)) {
 		NewGameButton->OnClicked.AddDynamic(this, &UMainMenu::NewGameButtonOnClicked);
-	if (IsValid(LoadGameButton))
+		NewGameButton->OnHovered.AddDynamic(this, &UMainMenu::NewGameButtonOnHovered);
+	}
+	if (IsValid(LoadGameButton)) {
 		LoadGameButton->OnClicked.AddDynamic(this, &UMainMenu::LoadGameButtonOnClicked);
-	if (IsValid(SettingsButton))
+		LoadGameButton->OnHovered.AddDynamic(this, &UMainMenu::LoadGameButtonOnHovered);
+	}
+	if (IsValid(SettingsButton)) {
 		SettingsButton->OnClicked.AddDynamic(this, &UMainMenu::SettingsButtonOnClicked);
-	if (IsValid(ExitButton))
+		SettingsButton->OnHovered.AddDynamic(this, &UMainMenu::SettingsButtonOnHovered);
+	}
+	if (IsValid(ExitButton)) {
 		ExitButton->OnClicked.AddDynamic(this, &UMainMenu::ExitButtonOnClicked);
+		ExitButton->OnHovered.AddDynamic(this, &UMainMenu::ExitButtonOnHovered);
+	}
 	if (!bSuccess) return false;
 	return bSuccess;
 }
@@ -42,6 +53,7 @@ void UMainMenu::NewGameButtonOnClicked()
 	APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 	if (IsValid(GameInstance) && IsValid(PlayerController)) {
 		UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
+		UWidgetBlueprintLibrary::SetInputMode_GameOnly(PlayerController);
 		GameInstance->InstanceItemsInTheInventory.Empty();
 		GameInstance->InstanceEquipedMelee = nullptr;
 		GameInstance->InstanceEquipedRange = nullptr;
@@ -61,17 +73,24 @@ void UMainMenu::NewGameButtonOnClicked()
 
 void UMainMenu::LoadGameButtonOnClicked()
 {
-
+	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+		if (IsValid(UIManagerWorldSubsystem->PickedButton))
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FColor::FromHex("8C8C8CFF"));
+		UIManagerWorldSubsystem->PickedButton = nullptr;
+	}
 }
 
 void UMainMenu::SettingsButtonOnClicked()
 {
-	APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+	if(APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)){
 	this->RemoveFromParent();
-	if (IsValid(SettingsMenuClass) && IsValid(PlayerController)) {
-		SettingsMenuWidget = CreateWidget<USettingsMenu>(PlayerController, SettingsMenuClass);
-		if(IsValid(SettingsMenuWidget))
-			SettingsMenuWidget->AddToViewport();
+		if(IsValid(PlayerCharacter->GetSettingsMenuWidget()))
+			PlayerCharacter->GetSettingsMenuWidget()->AddToViewport();
+		if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+			if(IsValid(UIManagerWorldSubsystem->PickedButton))
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FColor::FromHex("8C8C8CFF"));
+			UIManagerWorldSubsystem->PickedButton = nullptr;
+		}
 	}
 }
 
@@ -81,6 +100,38 @@ void UMainMenu::ExitButtonOnClicked()
 		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 		if(IsValid(PlayerController))
 			UKismetSystemLibrary::QuitGame(GetWorld(), PlayerController, EQuitPreference::Quit, true);
+	}
+}
+
+void UMainMenu::NewGameButtonOnHovered()
+{
+	ButtonOnHoveredActions(NewGameButton, 0);
+}
+
+void UMainMenu::LoadGameButtonOnHovered()
+{
+	ButtonOnHoveredActions(LoadGameButton, 1);
+}
+
+void UMainMenu::SettingsButtonOnHovered()
+{
+	ButtonOnHoveredActions(SettingsButton, 2);
+}
+
+void UMainMenu::ExitButtonOnHovered()
+{
+	ButtonOnHoveredActions(ExitButton, 3);
+}
+
+void UMainMenu::ButtonOnHoveredActions(const UButton* const HoveredButton, int8 Index)
+{
+	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+		if(IsValid(UIManagerWorldSubsystem->PickedButton))
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FColor::FromHex("8C8C8CFF"));
+		UIManagerWorldSubsystem->PickedButton = const_cast<UButton*>(HoveredButton);
+		if(IsValid(UIManagerWorldSubsystem->PickedButton))
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+		UIManagerWorldSubsystem->PickedButtonIndex = Index;
 	}
 }
 
@@ -102,4 +153,9 @@ UButton* UMainMenu::GetSettingsButton() const
 UButton* UMainMenu::GetExitButton() const
 {
 	return ExitButton;
+}
+
+UVerticalBox* UMainMenu::GetMainVerticalBox() const
+{
+	return MainVerticalBox;
 }

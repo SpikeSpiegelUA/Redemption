@@ -9,9 +9,12 @@
  * 
  */
 namespace ElementsActions {
+	//Find element of the spell which has the highest count.
+	ESpellElements FindSpellsMainElement(const TArray<ESpellElements>& SpellElements);
+
 	//Find elements that are contained in the spell and their percent.
-	template <typename T>
-	TArray<FElementAndItsPercentageStruct> FindContainedElements(TArray<T> ElementsArray)
+	template<typename T>
+	TArray<FElementAndItsPercentageStruct> FindContainedElements(const TArray<T>& ElementsArray)
 	{
 		TArray<FElementAndItsPercentageStruct> ArrayToReturn{};
 		if (ElementsArray.Num() != 0) {

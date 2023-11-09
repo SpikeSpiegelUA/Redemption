@@ -66,46 +66,37 @@ bool UInventoryMenu::Initialize()
 	if (IsValid(MeleeButton)) {
 		MeleeButton->OnClicked.AddDynamic(this, &UInventoryMenu::MeleeButtonOnClicked);
 		MeleeButton->OnHovered.AddDynamic(this, &UInventoryMenu::MeleeButtonOnHovered);
-		MeleeButton->OnUnhovered.AddDynamic(this, &UInventoryMenu::MeleeButtonOnUnhovered);
 	}
 	if (IsValid(RangeButton)) {
 		RangeButton->OnClicked.AddDynamic(this, &UInventoryMenu::RangeButtonOnClicked);
 		RangeButton->OnHovered.AddDynamic(this, &UInventoryMenu::RangeButtonOnHovered);
-		RangeButton->OnUnhovered.AddDynamic(this, &UInventoryMenu::RangeButtonOnUnhovered);
 	}
 	if (IsValid(HeadButton)) {
 		HeadButton->OnClicked.AddDynamic(this, &UInventoryMenu::HeadButtonOnClicked);
 		HeadButton->OnHovered.AddDynamic(this, &UInventoryMenu::HeadButtonOnHovered);
-		HeadButton->OnUnhovered.AddDynamic(this, &UInventoryMenu::HeadButtonOnUnhovered);
 	}
 	if (IsValid(TorseButton)) {
 		TorseButton->OnClicked.AddDynamic(this, &UInventoryMenu::TorseButtonOnClicked);
 		TorseButton->OnHovered.AddDynamic(this, &UInventoryMenu::TorseButtonOnHovered);
-		TorseButton->OnUnhovered.AddDynamic(this, &UInventoryMenu::TorseButtonOnUnhovered);
 	}
 	if (IsValid(HandButton)) {
 		HandButton->OnClicked.AddDynamic(this, &UInventoryMenu::HandButtonOnClicked);
 		HandButton->OnHovered.AddDynamic(this, &UInventoryMenu::HandButtonOnHovered);
-		HandButton->OnUnhovered.AddDynamic(this, &UInventoryMenu::HandButtonOnUnhovered);
 	}
 	if (IsValid(LowerArmorButton)) {
 		LowerArmorButton->OnClicked.AddDynamic(this, &UInventoryMenu::LowerArmorButtonOnClicked);
 		LowerArmorButton->OnHovered.AddDynamic(this, &UInventoryMenu::LowerArmorButtonOnHovered);
-		LowerArmorButton->OnUnhovered.AddDynamic(this, &UInventoryMenu::LowerArmorButtonOnUnhovered);
 	}
 	if (IsValid(InventoryButton)) {
 		InventoryButton->OnClicked.AddDynamic(this, &UInventoryMenu::InventoryButtonOnClicked);
 		InventoryButton->OnHovered.AddDynamic(this, &UInventoryMenu::InventoryButtonOnHovered);
-		InventoryButton->OnUnhovered.AddDynamic(this, &UInventoryMenu::InventoryButtonOnUnhovered);
 	}
-	if (IsValid(EquipButton))
-		EquipButton->OnClicked.AddDynamic(this, &UInventoryMenu::EquipButtonOnClicked);
-	if (IsValid(UseButton)) 
-		UseButton->OnClicked.AddDynamic(this, &UInventoryMenu::UseButtonOnClicked);
-	if (IsValid(BattleMenuItemsUseButton)) 
+	if (IsValid(BattleMenuItemsUseButton)) {
 		BattleMenuItemsUseButton->OnClicked.AddDynamic(this, &UInventoryMenu::BattleMenuItemsUseButtonOnClicked);
-	if (IsValid(BattleMenuItemsBackButton)) 
+	}
+	if (IsValid(BattleMenuItemsBackButton)) {
 		BattleMenuItemsBackButton->OnClicked.AddDynamic(this, &UInventoryMenu::BattleMenuItemsBackButtonOnClicked);
+	}
 	if (!bSuccess) return false;
 	return bSuccess;
 }
@@ -115,7 +106,6 @@ void UInventoryMenu::NativeConstruct()
 	Super::NativeConstruct();
 	if (IsValid(GetWorld()))
 		UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
-	
 	ItemInfoBorder->SetVisibility(ESlateVisibility::Hidden);
 	ItemEffectValueTextBlock->SetVisibility(ESlateVisibility::Visible);
 }
@@ -133,7 +123,7 @@ void UInventoryMenu::FillInventory()
 		}
 }
 
-void UInventoryMenu::SetVisibilityForItemsTypesBorders(const UBorder* const& BorderToMakeVisible)
+void UInventoryMenu::SetVisibilityForItemsTypesBorders(const UBorder* const BorderToMakeVisible)
 {
 	if(BorderToMakeVisible != InventoryBorder)
 		InventoryBorder->SetVisibility(ESlateVisibility::Hidden);
@@ -165,50 +155,80 @@ void UInventoryMenu::SetVisibilityForItemsTypesBorders(const UBorder* const& Bor
 		MeleeInventoryBorder->SetVisibility(ESlateVisibility::Visible);
 }
 
-void UInventoryMenu::SetColorForItemsTypesButtons(const UButton* const& ButtonToSetGreen)
+void UInventoryMenu::SetColorForItemsTypesButtons(const class UButton* const ButtonToSetGreen)
 {
-	if(ButtonToSetGreen == MeleeButton)
+	if(ButtonToSetGreen == MeleeButton && MeleeInventoryScrollBox->GetAllChildren().Num() > 0)
 		MeleeButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	else if(ButtonToSetGreen == MeleeButton && MeleeInventoryScrollBox->GetAllChildren().Num() <= 0)
+		MeleeButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 	else 
 		MeleeButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
-	if (ButtonToSetGreen == InventoryButton)
+	if (ButtonToSetGreen == InventoryButton && InventoryScrollBox->GetAllChildren().Num() > 0)
 		InventoryButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	else if (ButtonToSetGreen == InventoryButton && InventoryScrollBox->GetAllChildren().Num() <= 0)
+		InventoryButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 	else
 		InventoryButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
-	if (ButtonToSetGreen == RangeButton)
+	if (ButtonToSetGreen == RangeButton && RangeInventoryScrollBox->GetAllChildren().Num() > 0)
 		RangeButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	else if (ButtonToSetGreen == RangeButton && RangeInventoryScrollBox->GetAllChildren().Num() <= 0)
+		RangeButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 	else
 		RangeButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
-	if (ButtonToSetGreen == HeadButton)
+	if (ButtonToSetGreen == HeadButton && HeadInventoryScrollBox->GetAllChildren().Num() > 0)
 		HeadButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	else if (ButtonToSetGreen == HeadButton && HeadInventoryScrollBox->GetAllChildren().Num() <= 0)
+		HeadButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 	else
 		HeadButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
-	if (ButtonToSetGreen == TorseButton)
+	if (ButtonToSetGreen == TorseButton && TorseInventoryScrollBox->GetAllChildren().Num() > 0)
 		TorseButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	else if (ButtonToSetGreen == TorseButton && TorseInventoryScrollBox->GetAllChildren().Num() <= 0)
+		TorseButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 	else
 		TorseButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
-	if (ButtonToSetGreen == HandButton)
+	if (ButtonToSetGreen == HandButton && HandInventoryScrollBox->GetAllChildren().Num() > 0)
 		HandButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	else if (ButtonToSetGreen == HandButton && HandInventoryScrollBox->GetAllChildren().Num() <= 0)
+		HandButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 	else
 		HandButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
-	if (ButtonToSetGreen == LowerArmorButton)
+	if (ButtonToSetGreen == LowerArmorButton && LowerArmorInventoryScrollBox->GetAllChildren().Num() > 0)
 		LowerArmorButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	else if (ButtonToSetGreen == LowerArmorButton && LowerArmorInventoryScrollBox->GetAllChildren().Num() <= 0)
+		LowerArmorButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 	else
 		LowerArmorButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
 }
 
-void UInventoryMenu::ItemTypeButtonsOnClickedOtherActions(UPanelWidget* const& PickedPanelWidget, int8 Index)
+void UInventoryMenu::CheckForButtonsBordersVisibilityAndSetGreenColorToButton()
 {
-	EquipButton->SetVisibility(ESlateVisibility::Visible);
-	UseButton->SetVisibility(ESlateVisibility::Hidden);
-	PickedItem = nullptr;
-	SelectedPanelWidget = PickedPanelWidget;
-	SelectedButtonIndex = Index;
+	if (InventoryBorder->GetVisibility() == ESlateVisibility::Visible)
+		InventoryButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	if (MeleeInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
+		MeleeButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	if (RangeInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
+		RangeButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	if (HeadInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
+		HeadButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	if (TorseInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
+		TorseButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	if (HandInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
+		HandButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+	if (LowerArmorInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
+		LowerArmorButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+}
+
+void UInventoryMenu::ItemTypeButtonsOnClickedOtherActions(const UPanelWidget* const PickedPanelWidget, int8 Index)
+{
+	SelectedPanelWidget = const_cast<UPanelWidget*>(PickedPanelWidget);
+	SelectedTypeButtonIndex = Index;
 	if (IsValid(UIManagerWorldSubsystem)) {
-		if (IsValid(UIManagerWorldSubsystem->PickedButton) && UIManagerWorldSubsystem->PickedButton != ItemTypeStackBox->GetAllChildren()[SelectedButtonIndex])
+		if (IsValid(UIManagerWorldSubsystem->PickedButton) && UIManagerWorldSubsystem->PickedButton != ItemTypeStackBox->GetAllChildren()[SelectedTypeButtonIndex])
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
 		if (PickedPanelWidget->GetAllChildren().Num() > 0) {
 			UIManagerWorldSubsystem->PickedButton = Cast<UInventoryScrollBoxEntryWidget>(PickedPanelWidget->GetAllChildren()[0])->GetMainButton();
+			PickedItem = Cast<UInventoryScrollBoxEntryWidget>(PickedPanelWidget->GetAllChildren()[0])->GetItem();
 			UIManagerWorldSubsystem->PickedButtonIndex = 0;
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 			IsSelectingSpecificItem = true;
@@ -217,12 +237,13 @@ void UInventoryMenu::ItemTypeButtonsOnClickedOtherActions(UPanelWidget* const& P
 			SelectedPanelWidget = ItemTypeStackBox;
 			UIManagerWorldSubsystem->PickedButton = Cast<UButton>(ItemTypeStackBox->GetAllChildren()[Index]);
 			UIManagerWorldSubsystem->PickedButtonIndex = Index;
+			PickedItem = nullptr;
 			IsSelectingSpecificItem = false;
 		}
 	}
 }
 
-void UInventoryMenu::TypeButtonsOnHoveredActions(UButton* const& SelectedButton, int8 Index)
+void UInventoryMenu::TypeButtonsOnHoveredActions(UButton* const SelectedButtonParameter, int8 Index)
 {
 	InventoryButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
 	MeleeButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
@@ -231,7 +252,6 @@ void UInventoryMenu::TypeButtonsOnHoveredActions(UButton* const& SelectedButton,
 	TorseButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
 	HandButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
 	LowerArmorButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
-	SelectedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 	if (InventoryBorder->GetVisibility() == ESlateVisibility::Visible)
 		InventoryButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
 	if (MeleeInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
@@ -247,10 +267,11 @@ void UInventoryMenu::TypeButtonsOnHoveredActions(UButton* const& SelectedButton,
 	if (LowerArmorInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
 		LowerArmorButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
 	UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
+	SelectedButtonParameter->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 	if (IsValid(UIManagerWorldSubsystem)) {
-		if (IsValid(UIManagerWorldSubsystem->PickedButton) && UIManagerWorldSubsystem->PickedButton != SelectedButton)
+		if (IsValid(UIManagerWorldSubsystem->PickedButton) && UIManagerWorldSubsystem->PickedButton != SelectedButtonParameter)
 			SetPickedTypeButtonColor(UIManagerWorldSubsystem->PickedButton);
-		UIManagerWorldSubsystem->PickedButton = SelectedButton;
+		UIManagerWorldSubsystem->PickedButton = SelectedButtonParameter;
 		UIManagerWorldSubsystem->PickedButtonIndex = Index;
 	}
 	PickedItem = nullptr;
@@ -258,7 +279,7 @@ void UInventoryMenu::TypeButtonsOnHoveredActions(UButton* const& SelectedButton,
 	IsSelectingSpecificItem = false;
 }
 
-void UInventoryMenu::SetPickedTypeButtonColor(UButton* const& SelectedButton)
+void UInventoryMenu::SetPickedTypeButtonColor(const UButton* const SelectedButton)
 {
 	if (SelectedButton == MeleeButton && MeleeInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
 		MeleeButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
@@ -293,15 +314,15 @@ void UInventoryMenu::SetPickedTypeButtonColor(UButton* const& SelectedButton)
 void UInventoryMenu::BackButtonOnClicked()
 {
 	InventoryBorder->SetVisibility(ESlateVisibility::Visible);
-	UseButton->SetVisibility(ESlateVisibility::Visible);
 	LowerArmorInventoryBorder->SetVisibility(ESlateVisibility::Hidden);
 	HandInventoryBorder->SetVisibility(ESlateVisibility::Hidden);
 	TorseInventoryBorder->SetVisibility(ESlateVisibility::Hidden);
 	HeadInventoryBorder->SetVisibility(ESlateVisibility::Hidden);
 	RangeInventoryBorder->SetVisibility(ESlateVisibility::Hidden);
 	MeleeInventoryBorder->SetVisibility(ESlateVisibility::Hidden);
-	EquipButton->SetVisibility(ESlateVisibility::Hidden);
-	HideNotificationAndClearItsTimer();
+	HideNotification();
+	if (IsValid(Cast<UButton>(ItemTypeStackBox->GetAllChildren()[SelectedTypeButtonIndex])))
+		Cast<UButton>(ItemTypeStackBox->GetAllChildren()[SelectedTypeButtonIndex])->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
 	if (IsValid(UIManagerWorldSubsystem)) {
 		if (IsValid(UIManagerWorldSubsystem->PickedButton))
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
@@ -379,13 +400,13 @@ void UInventoryMenu::EquipButtonOnClicked()
 				if (WeaponItem->GetWeaponType() == EWeaponType::MELEE) {
 					if (!EquipedMelee || EquipedMelee->GetItemName() != WeaponItem->GetItemName()) {
 						MeleeTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Melee: "), FText::FromName(EquipmentItem->GetItemName())));
-						EquipItem(EquipmentItem, GameInstance->InstanceEquipedMelee, EquipedMelee, WidgetOfTheItem, MeleeInventoryScrollBox, GameInstance, PlayerCharacter);
+						EquipItem(EquipmentItem, GameInstance->InstanceEquipedMelee, EquipedMelee, WidgetOfTheItem, MeleeInventoryScrollBox, GameInstance);
 					}
 				}
 				else if (WeaponItem->GetWeaponType() == EWeaponType::RANGE) {
 					if (!EquipedRange || EquipedRange->GetItemName() != WeaponItem->GetItemName()) {
 						RangeTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Range: "), FText::FromName(EquipmentItem->GetItemName())));
-						EquipItem(EquipmentItem, GameInstance->InstanceEquipedRange, EquipedRange, WidgetOfTheItem, RangeInventoryScrollBox, GameInstance, PlayerCharacter);
+						EquipItem(EquipmentItem, GameInstance->InstanceEquipedRange, EquipedRange, WidgetOfTheItem, RangeInventoryScrollBox, GameInstance);
 					}
 				}
 			}
@@ -394,25 +415,25 @@ void UInventoryMenu::EquipButtonOnClicked()
 				case EArmorType::HEAD:
 					if (!EquipedHead || EquipedHead->GetItemName() != EquipmentItem->GetItemName()) {
 						HeadTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Head: "), FText::FromName(EquipmentItem->GetItemName())));
-						EquipItem(EquipmentItem, GameInstance->InstanceEquipedHead, EquipedHead, WidgetOfTheItem, HeadInventoryScrollBox, GameInstance, PlayerCharacter);
+						EquipItem(EquipmentItem, GameInstance->InstanceEquipedHead, EquipedHead, WidgetOfTheItem, HeadInventoryScrollBox, GameInstance);
 					}
 					break;
 				case EArmorType::TORSE:
 					if (!EquipedTorse || EquipedTorse->GetItemName() != EquipmentItem->GetItemName()) {
 						TorseTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Torse: "), FText::FromName(EquipmentItem->GetItemName())));
-						EquipItem(EquipmentItem, GameInstance->InstanceEquipedTorse, EquipedTorse, WidgetOfTheItem, TorseInventoryScrollBox, GameInstance, PlayerCharacter);
+						EquipItem(EquipmentItem, GameInstance->InstanceEquipedTorse, EquipedTorse, WidgetOfTheItem, TorseInventoryScrollBox, GameInstance);
 					}
 					break;
 				case EArmorType::HAND:
 					if (!EquipedHand || EquipedHand->GetItemName() != EquipmentItem->GetItemName()) {
 						HandTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("Hand: "), FText::FromName(EquipmentItem->GetItemName())));
-						EquipItem(EquipmentItem, GameInstance->InstanceEquipedHand, EquipedHand, WidgetOfTheItem, HandInventoryScrollBox, GameInstance, PlayerCharacter);
+						EquipItem(EquipmentItem, GameInstance->InstanceEquipedHand, EquipedHand, WidgetOfTheItem, HandInventoryScrollBox, GameInstance);
 					}
 					break;
 				case EArmorType::LOWERARMOR:
 					if (!EquipedLowerArmor || EquipedLowerArmor->GetItemName() != EquipmentItem->GetItemName()) {
 						LowerArmorTextBlock->SetText(FText::Join(FText::FromString(" "), FText::FromString("LowerArmor: "), FText::FromName(EquipmentItem->GetItemName())));
-						EquipItem(EquipmentItem, GameInstance->InstanceEquipedLowerArmor, EquipedLowerArmor, WidgetOfTheItem, LowerArmorInventoryScrollBox, GameInstance, PlayerCharacter);
+						EquipItem(EquipmentItem, GameInstance->InstanceEquipedLowerArmor, EquipedLowerArmor, WidgetOfTheItem, LowerArmorInventoryScrollBox, GameInstance);
 					}
 					break;
 				}
@@ -456,103 +477,120 @@ void UInventoryMenu::LowerArmorButtonOnHovered()
 	TypeButtonsOnHoveredActions(LowerArmorButton, 6);
 }
 
-void UInventoryMenu::InventoryButtonOnUnhovered()
-{
-	if(InventoryBorder->GetVisibility() == ESlateVisibility::Visible)
-		InventoryButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-}
-
-void UInventoryMenu::MeleeButtonOnUnhovered()
-{
-	if (MeleeInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
-		MeleeButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-}
-
-void UInventoryMenu::RangeButtonOnUnhovered()
-{
-	if (RangeInventoryBorder->GetVisibility() == ESlateVisibility::Visible) 
-		RangeButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-}
-
-void UInventoryMenu::HeadButtonOnUnhovered()
-{
-	if (HeadInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
-		HeadButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-}
-
-void UInventoryMenu::TorseButtonOnUnhovered()
-{
-	if (TorseInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
-		TorseButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-}
-
-void UInventoryMenu::HandButtonOnUnhovered()
-{
-	if (HandInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
-		HandButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-}
-
-void UInventoryMenu::LowerArmorButtonOnUnhovered()
-{
-	if (LowerArmorInventoryBorder->GetVisibility() == ESlateVisibility::Visible)
-		LowerArmorButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-}
-
-void UInventoryMenu::EquipItem(AEquipmentItem*& ItemToEquip, TSubclassOf<class AWeaponItem>& GameInstanceVariableToStoreThisEquipmentType,
-	AWeaponItem*& InventoryMenuVariableToStoreThisEquipmentType, UInventoryScrollBoxEntryWidget*& ItemWidget, UScrollBox*& ScrollBoxWithWidget , URedemptionGameInstance*& GameInstance
-	, APlayerCharacter*& PlayerCharacter)
+void UInventoryMenu::EquipItem(const AEquipmentItem* const ItemToEquip, TSubclassOf<class AArmorItem>& GameInstanceVariableToStoreThisEquipmentType,
+	AArmorItem*& InventoryMenuVariableToStoreThisEquipmentType, UInventoryScrollBoxEntryWidget* const ItemWidget, UScrollBox* const ScrollBoxWithWidget,
+	URedemptionGameInstance* const GameInstance)
 {
 	//If something is equiped, return it to inventory
 	if (InventoryMenuVariableToStoreThisEquipmentType != nullptr) {
 		GameInstance->InstanceItemsInTheInventory.Add(InventoryMenuVariableToStoreThisEquipmentType->GetClass());
-		//Get ScrollBox corresponding to the item's type
-		UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(this, InventoryMenuVariableToStoreThisEquipmentType);
 		//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
-		if (IsValid(CurrentScrollBox))
+		if (UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(this, InventoryMenuVariableToStoreThisEquipmentType); IsValid(CurrentScrollBox))
 			InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, InventoryMenuVariableToStoreThisEquipmentType);
 	}
 	GameInstanceVariableToStoreThisEquipmentType = ItemToEquip->GetClass();
-	InventoryMenuVariableToStoreThisEquipmentType = Cast<AWeaponItem>(ItemToEquip);
+	InventoryMenuVariableToStoreThisEquipmentType = const_cast<AArmorItem*>(Cast<AArmorItem>(ItemToEquip));
 	InventoryActions::ItemAmountInInventoryLogic(ItemWidget, ScrollBoxWithWidget, ItemToEquip);
 	InventoryActions::RemoveItemFromGameInstance(GameInstance, ItemToEquip);
+	//Logic for a new selected button after we equiped an item. Need this for keyboard input.
+	if (InventoryMenuVariableToStoreThisEquipmentType != nullptr) 
+		if (UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(this, InventoryMenuVariableToStoreThisEquipmentType); IsValid(CurrentScrollBox)) {
+			if (CurrentScrollBox->GetAllChildren().Num() <= 0) {
+				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(ItemTypeStackBox->GetAllChildren()[SelectedTypeButtonIndex]);
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				UIManagerWorldSubsystem->PickedButtonIndex = SelectedTypeButtonIndex;
+				IsSelectingSpecificItem = false;
+				SelectedPanelWidget = ItemTypeStackBox;
+			}
+			else {
+				while (UIManagerWorldSubsystem->PickedButtonIndex >= CurrentScrollBox->GetAllChildren().Num()) {
+					UIManagerWorldSubsystem->PickedButtonIndex--;
+					if (UIManagerWorldSubsystem->PickedButtonIndex < 0)
+						break;
+				}
+				UIManagerWorldSubsystem->PickedButton = Cast<UInventoryScrollBoxEntryWidget>(CurrentScrollBox->GetAllChildren()[UIManagerWorldSubsystem->PickedButtonIndex])->GetMainButton();
+				PickedItem = Cast<UInventoryScrollBoxEntryWidget>(CurrentScrollBox->GetAllChildren()[UIManagerWorldSubsystem->PickedButtonIndex])->GetItem();
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			}
+		}
 }
 
-void UInventoryMenu::EquipItem(AEquipmentItem*& ItemToEquip, TSubclassOf<class ARangeWeapon>& GameInstanceVariableToStoreThisEquipmentType,
-	ARangeWeapon*& InventoryMenuVariableToStoreThisEquipmentType, UInventoryScrollBoxEntryWidget*& ItemWidget, UScrollBox*& ScrollBoxWithWidget, URedemptionGameInstance*& GameInstance
-	, APlayerCharacter*& PlayerCharacter)
+void UInventoryMenu::EquipItem(const AEquipmentItem* const ItemToEquip, TSubclassOf<class AWeaponItem>& GameInstanceVariableToStoreThisEquipmentType, 
+	AWeaponItem*& InventoryMenuVariableToStoreThisEquipmentType, UInventoryScrollBoxEntryWidget* const ItemWidget, UScrollBox* const ScrollBoxWithWidget, 
+	URedemptionGameInstance* const GameInstance)
 {
 	//If something is equiped, return it to inventory
 	if (InventoryMenuVariableToStoreThisEquipmentType != nullptr) {
 		GameInstance->InstanceItemsInTheInventory.Add(InventoryMenuVariableToStoreThisEquipmentType->GetClass());
-		//Get ScrollBox corresponding to the item's type
-		UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(this, InventoryMenuVariableToStoreThisEquipmentType);
 		//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
-		if (IsValid(CurrentScrollBox))
+		if (UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(this, InventoryMenuVariableToStoreThisEquipmentType); IsValid(CurrentScrollBox))
 			InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, InventoryMenuVariableToStoreThisEquipmentType);
 	}
 	GameInstanceVariableToStoreThisEquipmentType = ItemToEquip->GetClass();
-	InventoryMenuVariableToStoreThisEquipmentType = Cast<ARangeWeapon>(ItemToEquip);
+	InventoryMenuVariableToStoreThisEquipmentType = const_cast<AWeaponItem*>(Cast<AWeaponItem>(ItemToEquip));
 	InventoryActions::ItemAmountInInventoryLogic(ItemWidget, ScrollBoxWithWidget, ItemToEquip);
 	InventoryActions::RemoveItemFromGameInstance(GameInstance, ItemToEquip);
+	//Logic for a new selected button after we equiped an item. Need this for keyboard input.
+	if (InventoryMenuVariableToStoreThisEquipmentType != nullptr)
+		if (UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(this, InventoryMenuVariableToStoreThisEquipmentType); IsValid(CurrentScrollBox)) {
+			if (CurrentScrollBox->GetAllChildren().Num() <= 0) {
+				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(ItemTypeStackBox->GetAllChildren()[SelectedTypeButtonIndex]);
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				UIManagerWorldSubsystem->PickedButtonIndex = SelectedTypeButtonIndex;
+				IsSelectingSpecificItem = false;
+				SelectedPanelWidget = ItemTypeStackBox;
+			}
+			else {
+				while (UIManagerWorldSubsystem->PickedButtonIndex >= CurrentScrollBox->GetAllChildren().Num()) {
+					UIManagerWorldSubsystem->PickedButtonIndex--;
+					if (UIManagerWorldSubsystem->PickedButtonIndex < 0)
+						break;
+				}
+				UIManagerWorldSubsystem->PickedButton = Cast<UInventoryScrollBoxEntryWidget>(CurrentScrollBox->GetAllChildren()[UIManagerWorldSubsystem->PickedButtonIndex])->GetMainButton();
+				PickedItem = Cast<UInventoryScrollBoxEntryWidget>(CurrentScrollBox->GetAllChildren()[UIManagerWorldSubsystem->PickedButtonIndex])->GetItem();
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			}
+		}
 }
 
-void UInventoryMenu::EquipItem(AEquipmentItem*& ItemToEquip, TSubclassOf<class AArmorItem>& GameInstanceVariableToStoreThisEquipmentType,
-	AArmorItem*& InventoryMenuVariableToStoreThisEquipmentType, UInventoryScrollBoxEntryWidget*& ItemWidget, UScrollBox*& ScrollBoxWithWidget, URedemptionGameInstance*& GameInstance
-	, APlayerCharacter*& PlayerCharacter)
+void UInventoryMenu::EquipItem(const AEquipmentItem* const ItemToEquip, TSubclassOf<class ARangeWeapon>& GameInstanceVariableToStoreThisEquipmentType, 
+	ARangeWeapon*& InventoryMenuVariableToStoreThisEquipmentType, UInventoryScrollBoxEntryWidget* const ItemWidget, UScrollBox* const ScrollBoxWithWidget, 
+	URedemptionGameInstance* const GameInstance)
 {
 	//If something is equiped, return it to inventory
 	if (InventoryMenuVariableToStoreThisEquipmentType != nullptr) {
 		GameInstance->InstanceItemsInTheInventory.Add(InventoryMenuVariableToStoreThisEquipmentType->GetClass());
-		//Get ScrollBox corresponding to the item's type
-		UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(this, InventoryMenuVariableToStoreThisEquipmentType);
 		//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
-		if (IsValid(CurrentScrollBox))
+		if (UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(this, InventoryMenuVariableToStoreThisEquipmentType); IsValid(CurrentScrollBox))
 			InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, InventoryMenuVariableToStoreThisEquipmentType);
 	}
 	GameInstanceVariableToStoreThisEquipmentType = ItemToEquip->GetClass();
-	InventoryMenuVariableToStoreThisEquipmentType = Cast<AArmorItem>(ItemToEquip);
+	InventoryMenuVariableToStoreThisEquipmentType = const_cast<ARangeWeapon*>(Cast<ARangeWeapon>(ItemToEquip));
 	InventoryActions::ItemAmountInInventoryLogic(ItemWidget, ScrollBoxWithWidget, ItemToEquip);
 	InventoryActions::RemoveItemFromGameInstance(GameInstance, ItemToEquip);
+	//Logic for a new selected button after we equiped an item. Need this for keyboard input.
+	if (InventoryMenuVariableToStoreThisEquipmentType != nullptr)
+		if (UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(this, InventoryMenuVariableToStoreThisEquipmentType); IsValid(CurrentScrollBox)) {
+			if (CurrentScrollBox->GetAllChildren().Num() <= 0) {
+				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(ItemTypeStackBox->GetAllChildren()[SelectedTypeButtonIndex]);
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				UIManagerWorldSubsystem->PickedButtonIndex = SelectedTypeButtonIndex;
+				IsSelectingSpecificItem = false;
+				SelectedPanelWidget = ItemTypeStackBox;
+			}
+			else {
+				while (UIManagerWorldSubsystem->PickedButtonIndex >= CurrentScrollBox->GetAllChildren().Num()) {
+					UIManagerWorldSubsystem->PickedButtonIndex--;
+					if (UIManagerWorldSubsystem->PickedButtonIndex < 0) {
+						UIManagerWorldSubsystem->PickedButtonIndex = 0;
+						break;
+					}
+				}
+				UIManagerWorldSubsystem->PickedButton = Cast<UInventoryScrollBoxEntryWidget>(CurrentScrollBox->GetAllChildren()[UIManagerWorldSubsystem->PickedButtonIndex])->GetMainButton();
+				PickedItem = Cast<UInventoryScrollBoxEntryWidget>(CurrentScrollBox->GetAllChildren()[UIManagerWorldSubsystem->PickedButtonIndex])->GetItem();
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			}
+		}
 }
 
 void UInventoryMenu::UseButtonOnClicked()
@@ -663,10 +701,11 @@ void UInventoryMenu::BattleMenuItemsBackButtonOnClicked()
 			UIManagerWorldSubsystem->PickedButtonIndex = 0;
 			UIManagerWorldSubsystem->PickedButton = BattleMenu->GetAttackButton();
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			SelectedPanelWidget = nullptr;
 	    }
 }
 
-void UInventoryMenu::BuffOrRestorationItemHasBeenUsedActions(class UBattleMenu* const& BattleMenu, const APlayerCharacter* const& PlayerCharacter, class ABattleManager* const& BattleManager)
+void UInventoryMenu::BuffOrRestorationItemHasBeenUsedActions(class UBattleMenu* const BattleMenu, class ABattleManager* const BattleManager)
 {
 	BattleMenu->AddToViewport();
 	UIManagerWorldSubsystem->PickedButtonIndex = 0;
@@ -678,7 +717,7 @@ void UInventoryMenu::BuffOrRestorationItemHasBeenUsedActions(class UBattleMenu* 
 	BattleMenu->IsChoosingItem = false;
 }
 
-void UInventoryMenu::DebuffOrAssaultItemHasBeenUsedActions(UBattleMenu* const& BattleMenu, const APlayerCharacter* const& PlayerCharacter, ABattleManager* const& BattleManager)
+void UInventoryMenu::DebuffOrAssaultItemHasBeenUsedActions(UBattleMenu* const& BattleMenu)
 {
 	BattleMenu->AddToViewport();
 	UIManagerWorldSubsystem->PickedButtonIndex = 0;
@@ -688,11 +727,11 @@ void UInventoryMenu::DebuffOrAssaultItemHasBeenUsedActions(UBattleMenu* const& B
 	BattleMenu->IsChoosingItem = false;
 }
 
-void UInventoryMenu::SetItemInfo(AGameItem* const& GameItem)
+void UInventoryMenu::SetItemInfo(const AGameItem* const GameItem)
 {
 	FString ItemName = FString("Name: ").Append(GameItem->GetItemName().ToString());
 	ItemNameTextBlock->SetText(FText::FromString(ItemName));
-	if (AEquipmentItem* EquipmentItem = Cast<AEquipmentItem>(GameItem); IsValid(EquipmentItem)) {
+	if (AEquipmentItem* EquipmentItem = const_cast<AEquipmentItem*>(Cast<AEquipmentItem>(GameItem)); IsValid(EquipmentItem)) {
 		if (Cast<AWeaponItem>(EquipmentItem))
 			ItemTypeTextBlock->SetText(FText::FromString("Type: Weapon"));
 		else if (AArmorItem* ArmorItem = Cast<AArmorItem>(EquipmentItem); IsValid(ArmorItem)) 
@@ -715,7 +754,7 @@ void UInventoryMenu::SetItemInfo(AGameItem* const& GameItem)
 		ItemTypeTextBlock->SetText(FText::FromString("Type: Assault Item"));
 	else if (Cast<AMiscellaneousItem>(GameItem))
 		ItemTypeTextBlock->SetText(FText::FromString("Type: Miscellaneous"));
-	else if (ARestorationItem* RestorationItem = Cast<ARestorationItem>(GameItem); IsValid(RestorationItem)) {
+	else if (ARestorationItem* RestorationItem = const_cast<ARestorationItem*>(Cast<ARestorationItem>(GameItem)); IsValid(RestorationItem)) {
 		if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH)
 			ItemTypeTextBlock->SetText(FText::FromString("Type: Health Restoration Item"));
 		else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA)
@@ -726,24 +765,24 @@ void UInventoryMenu::SetItemInfo(AGameItem* const& GameItem)
 	if (!Cast<AMiscellaneousItem>(GameItem)) {
 		ItemEffectValueTextBlock->SetVisibility(ESlateVisibility::Visible);
 		FString StringToSet = "";
-		if (AAssaultItem* AssaultItem = Cast<AAssaultItem>(GameItem); IsValid(AssaultItem)) {
+		if (AAssaultItem* AssaultItem = const_cast<AAssaultItem*>(Cast<AAssaultItem>(GameItem)); IsValid(AssaultItem)) {
 			StringToSet = FString("Damage: ");
 			StringToSet.AppendInt(AssaultItem->GetAttackValue());
 			ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));
 		}
-		else if (AEquipmentItem* EquipmentItem = Cast<AEquipmentItem>(GameItem); IsValid(EquipmentItem)) {
-			if (AWeaponItem* WeaponItem = Cast<AWeaponItem>(GameItem); IsValid(WeaponItem)) {
+		else if (AEquipmentItem* EquipmentItem = const_cast<AEquipmentItem*>(Cast<AEquipmentItem>(GameItem)); IsValid(EquipmentItem)) {
+			if (AWeaponItem* WeaponItem = const_cast<AWeaponItem*>(Cast<AWeaponItem>(GameItem)); IsValid(WeaponItem)) {
 				StringToSet = FString("Damage: ");
 				StringToSet.AppendInt(WeaponItem->GetAttackValue());
 				ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));
 			}
-			else if (AArmorItem* ArmorItem = Cast<AArmorItem>(GameItem); IsValid(ArmorItem)) {
+			else if (AArmorItem* ArmorItem = const_cast<AArmorItem*>(Cast<AArmorItem>(GameItem)); IsValid(ArmorItem)) {
 				StringToSet = FString("Armor: ");
 				StringToSet.AppendInt(ArmorItem->GetArmorValue());
 				ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));
 			}
 		}
-		else if (ARestorationItem* RestorationItem = Cast<ARestorationItem>(GameItem); IsValid(RestorationItem)) {
+		else if (ARestorationItem* RestorationItem = const_cast<ARestorationItem*>(Cast<ARestorationItem>(GameItem)); IsValid(RestorationItem)) {
 			if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH)
 				StringToSet = FString("HP: ");
 			else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA)
@@ -751,7 +790,7 @@ void UInventoryMenu::SetItemInfo(AGameItem* const& GameItem)
 			StringToSet.AppendInt(RestorationItem->GetRestorationValuePercent());
 			ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));
 		}
-		else if (ABuffItem* BuffItem = Cast<ABuffItem>(GameItem); IsValid(BuffItem)) {
+		else if (ABuffItem* BuffItem = const_cast<ABuffItem*>(Cast<ABuffItem>(GameItem)); IsValid(BuffItem)) {
 			StringToSet = FString("Item's effects: ");
 				for (int i = 0; i < BuffItem->GetEffectsClasses().Num(); i++) {
 					StringToSet.Append(*SkillsSpellsAndEffectsActions::GetEnumDisplayName<EEffectArea>(Cast<AEffect>(BuffItem->GetEffectsClasses()[i]->GetDefaultObject())->GetAreaOfEffect()).ToString());
@@ -773,18 +812,16 @@ void UInventoryMenu::SetItemInfo(AGameItem* const& GameItem)
 	ItemDescriptionTextBlock->SetText(GameItem->GetDescription());
 }
 
-void UInventoryMenu::HideNotificationAndClearItsTimer()
+void UInventoryMenu::HideNotification()
 {
 	NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
 	NotificationTextBlock->SetText(FText::FromString(""));
-	GetWorld()->GetTimerManager().ClearTimer(HideNotificationTimerHandle);
 }
 
 void UInventoryMenu::CreateNotification(const FText& NotificationText)
 {
 	NotificationBorder->SetVisibility(ESlateVisibility::Visible);
 	NotificationTextBlock->SetText(NotificationText);
-	GetWorld()->GetTimerManager().SetTimer(HideNotificationTimerHandle, this, &UInventoryMenu::HideNotificationAndClearItsTimer, 3.f, false);
 }
 
 UScrollBox* UInventoryMenu::GetInventoryScrollBox() const
@@ -917,14 +954,24 @@ UButton* UInventoryMenu::GetLowerArmorButton() const
 	return LowerArmorButton;
 }
 
+UButton* UInventoryMenu::GetBattleMenuItemsUseButton() const
+{
+	return BattleMenuItemsUseButton;
+}
+
 UStackBox* UInventoryMenu::GetItemTypeStackBox() const
 {
 	return ItemTypeStackBox;
 }
 
-void UInventoryMenu::SetPickedItem(AGameItem* NewItem)
+UVerticalBox* UInventoryMenu::GetBattleMenuButtonsForItemsVerticalBox() const
 {
-	PickedItem = NewItem;
+	return BattleMenuButtonsForItemsVerticalBox;
+}
+
+void UInventoryMenu::SetPickedItem(const AGameItem* const NewItem)
+{
+	PickedItem = const_cast<AGameItem*>(NewItem);
 }
 
 void UInventoryMenu::SetTextOfItemNameTextBlock(const FText& NewText)

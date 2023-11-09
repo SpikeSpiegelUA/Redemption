@@ -7,6 +7,7 @@
 #include <Redemption/Dynamics/World/Items/AssaultItem.h>
 #include <Redemption/Dynamics/World/Items/DebuffItem.h>
 #include "Redemption/Dynamics/Gameplay/Managers/BattleManager.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItemWithItemObject.h"
 #include "AnimNotify_ThrowItem.generated.h"
 
 
@@ -19,8 +20,7 @@ class REDEMPTION_API UAnimNotify_ThrowItem : public UAnimNotify
 	GENERATED_BODY()
 
 private:
-	void SpawnItemObject(AAssaultItem* const& AssaultItem, USkeletalMeshComponent* const& MeshComp, ABattleManager* const& BattleManager, ACombatNPC* const& CombatNPC);
-	void SpawnItemObject(ADebuffItem* const& DebuffItem, USkeletalMeshComponent* const& MeshComp, ABattleManager* const& BattleManager, ACombatNPC* const& CombatNPC);
+	void SpawnItemObject(const AGameItemWithItemObject* const& GameItemWithItemObject, const USkeletalMeshComponent* const& MeshComp, const ACombatNPC* const& CombatNPC);
 
 public:
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;

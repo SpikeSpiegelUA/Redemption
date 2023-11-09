@@ -87,26 +87,27 @@ void USettingsMenu::BackgroundMusicSliderOnValueChanged(float Value)
 void USettingsMenu::BackButtonOnClicked()
 {
 	if(APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-		if (APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()); IsValid(PlayerController)) {
-			this->RemoveFromParent();
-			FString MapName = GetWorld()->GetMapName();
-			UMainMenu* MainMenuWidget = nullptr;
-			UPauseMenu* PauseMenuWidget = nullptr;
-			if (MapName == "UEDPIE_0_MainMenu") {
-				if(IsValid(PlayerCharacter->GetMainMenuWidget()))
-					PlayerCharacter->GetMainMenuWidget()->AddToViewport();
-			}
-			else if (MapName == "UEDPIE_0_Town" || MapName == "UEDPIE_0_Dungeon") {
-				if(IsValid(PlayerCharacter->GetPauseMenuWidget()))
-					PlayerCharacter->GetPauseMenuWidget()->AddToViewport();
-				UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
-				if (IsValid(UIManagerWorldSubsystem)) {
+		if(UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+			if (APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()); IsValid(PlayerController)) {
+				this->RemoveFromParent();
+				FString MapName = GetWorld()->GetMapName();
+				UMainMenu* MainMenuWidget = nullptr;
+				UPauseMenu* PauseMenuWidget = nullptr;
+				if (MapName == "UEDPIE_0_MainMenu") {
+					if (IsValid(PlayerCharacter->GetMainMenuWidget()))
+						PlayerCharacter->GetMainMenuWidget()->AddToViewport();
+					UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetMainMenuWidget()->GetNewGameButton();
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+					UIManagerWorldSubsystem->PickedButtonIndex = 0;
+				}
+				else if (MapName == "UEDPIE_0_Town" || MapName == "UEDPIE_0_Dungeon") {
+					if (IsValid(PlayerCharacter->GetPauseMenuWidget()))
+						PlayerCharacter->GetPauseMenuWidget()->AddToViewport();
 					UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetPauseMenuWidget()->GetResumeButton();
 					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 					UIManagerWorldSubsystem->PickedButtonIndex = 0;
 				}
 			}
-		}
 }
 
 UButton* USettingsMenu::GetBackButton() const

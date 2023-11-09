@@ -15,7 +15,7 @@ class UPlayerMenu : public UUserWidget
 	GENERATED_BODY()
 private:
 	//Set picked button to HoveredButton, find index of the button and assign PickedButtonIndex to it
-	void ButtonOnHoveredActions(class UButton* const& PickedButton);
+	void ButtonOnHoveredActions(class UButton* const PickedButton);
 protected:
 	//Variables for required widget components
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))

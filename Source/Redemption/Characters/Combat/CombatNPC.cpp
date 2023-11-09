@@ -103,7 +103,7 @@ void ACombatNPC::SetRangeAmmo(int8 NewRangeAmmo)
 	RangeAmmo = NewRangeAmmo;
 }
 
-void ACombatNPC::SetStartLocation(AActor* const& NewLocation)
+void ACombatNPC::SetStartLocation(const AActor* const NewLocation)
 {
-	StartLocation = NewLocation;
+	StartLocation = const_cast<AActor*>(NewLocation);
 }

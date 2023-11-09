@@ -32,9 +32,14 @@ void ASpell::SetSpellName(FText NewSpellName)
 	SpellName = NewSpellName;
 }
 
-void ASpell::SetManaCost(int NewManaCost)
+void ASpell::SetCost(int NewManaCost)
 {
-	ManaCost = NewManaCost;
+	Cost = NewManaCost;
+}
+
+void ASpell::SetSpellCostType(ESpellCostType NewSpellCostType)
+{
+	SpellCostType = NewSpellCostType;
 }
 
 void ASpell::SetTypeOfSpell(ESpellType NewTypeOfSpell)
@@ -52,9 +57,9 @@ void ASpell::SetDescription(FText NewDescription)
 	Description = NewDescription;
 }
 
-void ASpell::SetElementsAndTheirPercentagesStructs(const TArray<FElementAndItsPercentageStruct>& NewArrayOfStructs)
+void ASpell::SetSpellElements(const TArray<ESpellElements>& NewSpellElemnts)
 {
-	ElementsAndTheirPercentagesStructs = NewArrayOfStructs;
+	SpellElements = NewSpellElemnts;
 }
 
 FText ASpell::GetSpellName() const
@@ -62,9 +67,14 @@ FText ASpell::GetSpellName() const
 	return SpellName;
 }
 
-int ASpell::GetManaCost() const
+ESpellCostType ASpell::GetSpellCostType() const
 {
-	return ManaCost;
+	return SpellCostType;
+}
+
+int ASpell::GetCost() const
+{
+	return Cost;
 }
 
 ESpellType ASpell::GetTypeOfSpell() const
@@ -77,8 +87,8 @@ FText ASpell::GetDescription() const
 	return Description;
 }
 
-TArray<FElementAndItsPercentageStruct> ASpell::GetElementsAndTheirPercentagesStructs() const
+TArray<ESpellElements> ASpell::GetSpellElements() const
 {
-	return ElementsAndTheirPercentagesStructs;
+	return SpellElements;
 }
 

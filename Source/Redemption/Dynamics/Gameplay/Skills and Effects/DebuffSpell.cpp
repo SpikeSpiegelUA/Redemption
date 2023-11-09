@@ -8,16 +8,6 @@ EBuffDebuffType ADebuffSpell::GetTypeOfDebuff() const
 	return TypeOfDebuff;
 }
 
-class TSubclassOf<ASpellObject> ADebuffSpell::GetSpellObjectClass() const
-{
-	return SpellObjectClass;
-}
-
-void ADebuffSpell::SetSpellObjectClass(const TSubclassOf<class ASpellObject>& NewSpellObjectClass)
-{
-	SpellObjectClass = NewSpellObjectClass;
-}
-
 void ADebuffSpell::SetTypeOfDebuff(EBuffDebuffType NewTypeOfDebuff)
 {
 	TypeOfDebuff = NewTypeOfDebuff;
@@ -26,8 +16,8 @@ void ADebuffSpell::SetTypeOfDebuff(EBuffDebuffType NewTypeOfDebuff)
 ADebuffSpell& ADebuffSpell::operator=(const ASpell& Spell)
 {
 	SetSpellName(Spell.GetSpellName());
-	SetManaCost(Spell.GetManaCost());
-	SetElementsAndTheirPercentagesStructs(Spell.GetElementsAndTheirPercentagesStructs());
+	SetCost(Spell.GetCost());
+	SetSpellElements(Spell.GetSpellElements());
 	SetTypeOfSpell(Spell.GetTypeOfSpell());
 	SetDescription(Spell.GetDescription());
 	return *this;

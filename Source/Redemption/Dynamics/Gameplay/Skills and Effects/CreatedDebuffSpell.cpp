@@ -11,19 +11,19 @@ TArray<AEffect*> ACreatedDebuffSpell::GetEffects() const
 ACreatedDebuffSpell& ACreatedDebuffSpell::operator=(const ASpell& Spell)
 {
 	SetSpellName(Spell.GetSpellName());
-	SetManaCost(Spell.GetManaCost());
-	SetElementsAndTheirPercentagesStructs(Spell.GetElementsAndTheirPercentagesStructs());
+	SetCost(Spell.GetCost());
+	SetSpellElements(Spell.GetSpellElements());
 	SetTypeOfSpell(Spell.GetTypeOfSpell());
 	SetDescription(Spell.GetDescription());
 	return *this;
 }
 
-void ACreatedDebuffSpell::AddObjectToEffects(AEffect* const& EffectToAdd)
+void ACreatedDebuffSpell::AddObjectToEffects(const AEffect* const EffectToAdd)
 {
-	Effects.Add(EffectToAdd);
+	Effects.Add(const_cast<AEffect*>(EffectToAdd));
 }
 
-void ACreatedDebuffSpell::AddObjectsToEffects(TArray<class AEffect*> const& EffectsToAdd)
+void ACreatedDebuffSpell::AddObjectsToEffects(const TArray<class AEffect*>& EffectsToAdd)
 {
 	for (AEffect* Effect : EffectsToAdd)
 		Effects.Add(Effect);

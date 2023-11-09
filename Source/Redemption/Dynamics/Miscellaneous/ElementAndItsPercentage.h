@@ -5,7 +5,8 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "ElementAndItsPercentage.generated.h"
 
-USTRUCT(BlueprintType) struct FElementAndItsPercentageStruct
+USTRUCT(BlueprintType) 
+struct FElementAndItsPercentageStruct
 {
 	GENERATED_BODY()
 
@@ -24,7 +25,7 @@ USTRUCT(BlueprintType) struct FElementAndItsPercentageStruct
 		return Element;
 	}
 
-	void SetPercent(int NewPercent)
+	void SetPercent(int16 NewPercent)
 	{
 		Percent = NewPercent;
 	}

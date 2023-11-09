@@ -10,6 +10,7 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Combat\CombatFloatingInformationActor.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\SkillsSpellsAndEffectsActions.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ElementsActions.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include <Redemption/Characters/AI Controllers/Combat/CombatEnemyNPCAIController.h>
 
@@ -42,7 +43,7 @@ void ACombatEnemyNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class A
 				FString TextForCombatFloatingInformationActor = FString();
 				uint8 EvasionRandomNumber = FMath::RandRange(0, 100);
 				int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance + Agility * 2,
-					Effects, EEffectArea::EVASION), Effects, Resistances, PlayerCharacter->GetSpellBattleMenuWidget()->GetCreatedSpell()->GetElementsAndTheirPercentagesStructs());
+					Effects, EEffectArea::EVASION), Effects, Resistances, ElementsActions::FindContainedElements(PlayerCharacter->GetSpellBattleMenuWidget()->GetCreatedSpell()->GetSpellElements()));
 				if (EvasionRandomNumber <= ChanceOfEvasion) {
 					TextForCombatFloatingInformationActor.Append("Miss!");
 					CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));

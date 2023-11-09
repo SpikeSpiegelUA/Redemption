@@ -65,7 +65,7 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 		}
 }
 
-void AItemObject::OnOverlapBeginsActions(const APlayerCharacter* const& PlayerCharacter)
+void AItemObject::OnOverlapBeginsActions(const APlayerCharacter* const PlayerCharacter)
 {
 	PlayerCharacter->GetInventoryMenuWidget()->SetPickedItem(nullptr);
 	PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem = false;

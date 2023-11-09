@@ -64,6 +64,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
 		UTexture* DarkElementIcon {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* MultielementalIcon{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
 		UTexture* AssaultSpellTypeIcon {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
 		UTexture* DebuffSpellTypeIcon {};
@@ -101,9 +103,19 @@ public:
 	UTexture* GetBloodElementIcon() const;
 	UTexture* GetHolyElementIcon() const;
 	UTexture* GetDarkElementIcon() const;
+	UTexture* GetMultielementalIcon() const;
 	UTexture* GetAssaultSpellTypeIcon() const;
 	UTexture* GetDebuffSpellTypeIcon() const;
 	UTexture* GetRestorationSpellTypeIcon() const;
 	UTexture* GetBuffSpellTypeIcon() const;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells")
+		TArray<TSubclassOf<ASpell>> ThreeElementsUniqueSpellsClasses{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells")
+		TArray<TSubclassOf<ASpell>> FourElementsUniqueSpellsClasses{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells")
+		TArray<TSubclassOf<ASpell>> FiveElementsUniqueSpellsClasses{};
+
+	UTexture* GetSpellTypeImageTexture(ESpellType SpellType);
+	UTexture* GetMainSpellElementImageTexture(ESpellElements MainSpellElement);
 };

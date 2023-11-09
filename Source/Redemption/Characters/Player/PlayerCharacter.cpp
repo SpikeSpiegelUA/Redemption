@@ -15,6 +15,7 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatPlayerCharacter.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\SkillsSpellsAndEffectsActions.h"
+#include "Redemption/UI/Menus/MainMenu.h"
 #include "GameFramework/TouchInterface.h"
 #include "Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h"
 #include "Components/StackBox.h"
@@ -68,8 +69,6 @@ APlayerCharacter::APlayerCharacter() {
 	ForwardRayInfoClass = nullptr;
 
 	PrimaryActorTick.bTickEvenWhenPaused = true;
-
-
 }
 
 void APlayerCharacter::BeginPlay() 
@@ -134,6 +133,10 @@ void APlayerCharacter::BeginPlay()
 			LearnedSpellsJournalMenuWidget = CreateWidget<ULearnedSpellsJournalMenu>(PlayerController, LearnedSpellsJournalMenuClass);
 		if (IsValid(SettingsMenuClass))
 			SettingsMenuWidget = CreateWidget<USettingsMenu>(PlayerController, SettingsMenuClass);
+		if (IsValid(MainMenuClass))
+			MainMenuWidget = CreateWidget<UMainMenu>(PlayerController, MainMenuClass);
+		if (IsValid(SkillBattleMenuClass))
+			SkillBattleMenuWidget = CreateWidget<USkillBattleMenu>(PlayerController, SkillBattleMenuClass);
 	}
 	//Level change logic
 	if (IsValid(GameInstance)) {
@@ -152,6 +155,23 @@ void APlayerCharacter::BeginPlay()
 	}
 	if (IsValid(GetWorld()))
 		UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
+	//Main Menu Turn On Logic
+	FString MapName = GetWorld()->GetMapName();
+	if (MapName == "UEDPIE_0_MainMenu") {
+		MainMenuWidget->AddToViewport();
+		PlayerController->bShowMouseCursor = true;
+		PlayerController->bEnableClickEvents = true;
+		PlayerController->bEnableMouseOverEvents = true;
+		PlayerController->SetPause(true);
+		//PlayerController->ActivateTouchInterface(PlayerCharacter->GetEmptyTouchInterface());
+		if (IsValid(UIManagerWorldSubsystem)) {
+			UIManagerWorldSubsystem->PickedButton = MainMenuWidget->GetNewGameButton();
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			CanOpenOtherMenus = false;
+		}
+		UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(PlayerController, MainMenuWidget, EMouseLockMode::DoNotLock);
+	}
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -198,14 +218,35 @@ void APlayerCharacter::InputJump()
 		Jump();
 }
 
+void APlayerCharacter::InputSpellUse()
+{
+	SpellBattleMenuWidget->UseButtonOnClicked();
+}
+
+void APlayerCharacter::InputUniqueSpellUseSpellInfoToggle()
+{
+	SpellBattleMenuWidget->UseUniqueSpellButtonOnClicked();
+}
+
+void APlayerCharacter::InputSpellReset()
+{
+	SpellBattleMenuWidget->ResetButtonOnClicked();
+	SpellBattleMenuWidget->ResetUIKeyboardControlLogic();
+}
+
+void APlayerCharacter::InputOpenLearnedSpells()
+{
+
+}
+
 void APlayerCharacter::InputOpenPlayerMenu()
 {
 	if (!PlayerMenuWidget->IsInViewport() && CanOpenOtherMenus) {
+		PlayerController->SetPause(true);
 		PlayerMenuWidget->AddToViewport();
 		PlayerController->bShowMouseCursor = true;
 		PlayerController->bEnableClickEvents = true;
 		PlayerController->bEnableMouseOverEvents = true;
-		PlayerController->SetPause(true);
 		UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(PlayerController, PlayerMenuWidget, EMouseLockMode::DoNotLock);
 		//PlayerController->ActivateTouchInterface(EmptyTouchInterface);
 		PlayerMenuWidget->GetInventoryButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
@@ -230,12 +271,14 @@ void APlayerCharacter::InputOpenPlayerMenu()
 
 void APlayerCharacter::InputOpenPauseMenu()
 {
+	FString MapName = GetWorld()->GetMapName();
+	
 	if (!PauseMenuWidget->IsInViewport() && CanOpenOtherMenus) {
+		PlayerController->SetPause(true);
 		PauseMenuWidget->AddToViewport();
 		PlayerController->bShowMouseCursor = true;
 		PlayerController->bEnableClickEvents = true;
 		PlayerController->bEnableMouseOverEvents = true;
-		PlayerController->SetPause(true);
 		UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(PlayerController, PauseMenuWidget, EMouseLockMode::DoNotLock);
 		//PlayerController->ActivateTouchInterface(EmptyTouchInterface);
 		PauseMenuWidget->GetResumeButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
@@ -257,18 +300,20 @@ void APlayerCharacter::InputOpenPauseMenu()
 		UIManagerWorldSubsystem->PickedButtonIndex = 0;
 		CanOpenOtherMenus = true;
 	}
-	else if (SettingsMenuWidget->IsInViewport()) {
+	else if (SettingsMenuWidget->IsInViewport() && MapName != "UEDPIE_0_MainMenu") {
 		SettingsMenuWidget->RemoveFromParent();
 		PauseMenuWidget->AddToViewport();
 		PauseMenuWidget->GetResumeButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 		UIManagerWorldSubsystem->PickedButton = PauseMenuWidget->GetResumeButton();
 		UIManagerWorldSubsystem->PickedButtonIndex = 0;
 	}
-}
-
-void APlayerCharacter::InputBack()
-{
-
+	else if (SettingsMenuWidget->IsInViewport() && MapName == "UEDPIE_0_MainMenu") {
+		SettingsMenuWidget->RemoveFromParent();
+		MainMenuWidget->AddToViewport();
+		MainMenuWidget->GetNewGameButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+		UIManagerWorldSubsystem->PickedButton = MainMenuWidget->GetNewGameButton();
+		UIManagerWorldSubsystem->PickedButtonIndex = 0;
+	}
 }
 
 void APlayerCharacter::InputScrollRight()
@@ -277,7 +322,6 @@ void APlayerCharacter::InputScrollRight()
 		if (BattleMenuWidget->IsPreparingToAttack || BattleMenuWidget->IsPreparingToTalk)
 			if (BattleManager->IsSelectingAllyAsTarget) {
 				TArray<ACombatNPC*> BattleAlliesPlayer = BattleManager->BattleAlliesPlayer;
-
 				//Choose Target with scroll
 				if (BattleAlliesPlayer.Num() > 1) {
 					int8 CurrentIndex = BattleManager->SelectedCombatNPCIndex;
@@ -340,6 +384,15 @@ void APlayerCharacter::InputScrollRight()
 					}
 				}
 			}
+	if (IsValid(SpellBattleMenuWidget) && IsValid(LearnedSpellsJournalMenuWidget) && (SpellBattleMenuWidget->IsInViewport() || LearnedSpellsJournalMenuWidget->IsInViewport())) {
+			if (UButtonWithNeighbors* PickedButtonWithNeighbors = Cast<UButtonWithNeighbors>(UIManagerWorldSubsystem->PickedButton); IsValid(PickedButtonWithNeighbors))
+				for (FSideAndItsButton SideAndItsButton : PickedButtonWithNeighbors->SidesAndTheirButtons)
+					if (SideAndItsButton.Side == ESides::RIGHT) {
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+						UIManagerWorldSubsystem->PickedButton = SideAndItsButton.NeighborButton;
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+					}
+	}
 }
 
 void APlayerCharacter::InputScrollLeft()
@@ -348,11 +401,11 @@ void APlayerCharacter::InputScrollLeft()
 		if (BattleMenuWidget->IsPreparingToAttack || BattleMenuWidget->IsPreparingToTalk)
 			if (BattleManager->IsSelectingAllyAsTarget) {
 				TArray<ACombatNPC*> BattleAlliesPlayer = BattleManager->BattleAlliesPlayer;
-				//Choose target with scroll
-				int8 CurrentIndex = BattleManager->SelectedCombatNPCIndex;
-				int8 StartIndex = BattleManager->SelectedCombatNPCIndex;
-				while (true) {
-					if (BattleAlliesPlayer.Num() > 1) {
+				if (BattleAlliesPlayer.Num() > 1) {
+					//Choose target with scroll
+					int8 CurrentIndex = BattleManager->SelectedCombatNPCIndex;
+					int8 StartIndex = BattleManager->SelectedCombatNPCIndex;
+					while (true) {
 						if (CurrentIndex - 1 >= 0) {
 							if (BattleAlliesPlayer[CurrentIndex - 1]->GetCurrentHP() > 0) {
 								BattleManager->SelectNewTarget(BattleAlliesPlayer[CurrentIndex - 1], CurrentIndex - 1);
@@ -380,11 +433,11 @@ void APlayerCharacter::InputScrollLeft()
 			}
 			else {
 				TArray<ACombatEnemyNPC*> BattleEnemies = BattleManager->BattleEnemies;
-				//Choose target with scroll
-				int8 CurrentIndex = BattleManager->SelectedCombatNPCIndex;
-				int8 StartIndex = BattleManager->SelectedCombatNPCIndex;
-				while (true) {
-					if (BattleEnemies.Num() > 1) {
+				if (BattleEnemies.Num() > 1) {
+					//Choose target with scroll
+					int8 CurrentIndex = BattleManager->SelectedCombatNPCIndex;
+					int8 StartIndex = BattleManager->SelectedCombatNPCIndex;
+					while (true) {
 						if (CurrentIndex - 1 >= 0) {
 							if (BattleEnemies[CurrentIndex - 1]->GetCurrentHP() > 0) {
 								BattleManager->SelectNewTarget(BattleEnemies[CurrentIndex - 1], CurrentIndex - 1);
@@ -407,9 +460,19 @@ void APlayerCharacter::InputScrollLeft()
 									break;
 							}
 						}
+
 					}
 				}
 			}
+	if (IsValid(SpellBattleMenuWidget) && IsValid(LearnedSpellsJournalMenuWidget) && (SpellBattleMenuWidget->IsInViewport() || LearnedSpellsJournalMenuWidget->IsInViewport())){
+			if (UButtonWithNeighbors* PickedButtonWithNeighbors = Cast<UButtonWithNeighbors>(UIManagerWorldSubsystem->PickedButton); IsValid(PickedButtonWithNeighbors))
+				for (FSideAndItsButton SideAndItsButton : PickedButtonWithNeighbors->SidesAndTheirButtons)
+					if (SideAndItsButton.Side == ESides::LEFT) {
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+						UIManagerWorldSubsystem->PickedButton = SideAndItsButton.NeighborButton;
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+					}
+	}
 }
 
 void APlayerCharacter::InputScrollUp()
@@ -420,13 +483,15 @@ void APlayerCharacter::InputScrollUp()
 				TArray<UWidget*> MenuVerticalBoxChildrens = BattleMenuWidget->GetMenuVerticalBox()->GetAllChildren();
 				if (MenuVerticalBoxChildrens.Num() > 0) {
 					if (UIManagerWorldSubsystem->PickedButtonIndex == 0) {
-						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+						if (IsValid(UIManagerWorldSubsystem->PickedButton))
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(MenuVerticalBoxChildrens[MenuVerticalBoxChildrens.Num() - 1]);
 						UIManagerWorldSubsystem->PickedButtonIndex = MenuVerticalBoxChildrens.Num() - 1;
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 					}
 					else {
-						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+						if (IsValid(UIManagerWorldSubsystem->PickedButton))
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(MenuVerticalBoxChildrens[UIManagerWorldSubsystem->PickedButtonIndex - 1]);
 						UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex - 1;
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
@@ -439,7 +504,8 @@ void APlayerCharacter::InputScrollUp()
 					if (UIManagerWorldSubsystem->PickedButtonIndex == 0) {
 						UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(InventoryScrollBoxChildrens[InventoryScrollBoxChildrens.Num() - 1]);
 						InventoryMenuWidget->GetInventoryScrollBox()->ScrollToEnd();
-						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+						if (IsValid(UIManagerWorldSubsystem->PickedButton))
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
 						UIManagerWorldSubsystem->PickedButtonIndex = InventoryScrollBoxChildrens.Num() - 1;
 						UIManagerWorldSubsystem->PickedButton = EntryWidget->GetMainButton();
 						InventoryMenuWidget->SetPickedItem(EntryWidget->GetItem());
@@ -447,7 +513,8 @@ void APlayerCharacter::InputScrollUp()
 					}
 					else {
 						UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(InventoryScrollBoxChildrens[UIManagerWorldSubsystem->PickedButtonIndex - 1]);
-						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+						if (IsValid(UIManagerWorldSubsystem->PickedButton))
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
 						UIManagerWorldSubsystem->PickedButtonIndex--;
 						UIManagerWorldSubsystem->PickedButton = EntryWidget->GetMainButton();
 						InventoryMenuWidget->SetPickedItem(EntryWidget->GetItem());
@@ -455,19 +522,30 @@ void APlayerCharacter::InputScrollUp()
 					}
 				}
 			}
-			else if (BattleMenuWidget->IsPreparingToAttack) {
+			else if (BattleMenuWidget->IsPreparingToAttack || BattleMenuWidget->IsPreparingToTalk) {
 				TArray<UWidget*> AttackMenuVerticalBoxChildrens = BattleMenuWidget->GetAttackMenuVerticalBox()->GetAllChildren();
 				if (AttackMenuVerticalBoxChildrens.Num() > 0) {
 					if (UIManagerWorldSubsystem->PickedButtonIndex == 0) {
-						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(AttackMenuVerticalBoxChildrens[AttackMenuVerticalBoxChildrens.Num() - 1]);
+						if (IsValid(UIManagerWorldSubsystem->PickedButton))
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 						UIManagerWorldSubsystem->PickedButtonIndex = AttackMenuVerticalBoxChildrens.Num() - 1;
+						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(AttackMenuVerticalBoxChildrens[UIManagerWorldSubsystem->PickedButtonIndex]);
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 					}
 					else {
-						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(AttackMenuVerticalBoxChildrens[UIManagerWorldSubsystem->PickedButtonIndex - 1]);
-						UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex - 1;
+						if (IsValid(UIManagerWorldSubsystem->PickedButton))
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+						if (BattleMenuWidget->IsPreparingToTalk) {
+							UIManagerWorldSubsystem->PickedButtonIndex -= 1;
+							if (UIManagerWorldSubsystem->PickedButtonIndex == 0)
+								UIManagerWorldSubsystem->PickedButtonIndex = AttackMenuVerticalBoxChildrens.Num() - 1;
+						}
+						else if (BattleMenuWidget->IsPreparingToAttack) {
+							UIManagerWorldSubsystem->PickedButtonIndex -= 1;
+							if (UIManagerWorldSubsystem->PickedButtonIndex == 1)
+								UIManagerWorldSubsystem->PickedButtonIndex -= 1;
+						}
+						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(AttackMenuVerticalBoxChildrens[UIManagerWorldSubsystem->PickedButtonIndex]);
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 					}
 				}
@@ -478,13 +556,15 @@ void APlayerCharacter::InputScrollUp()
 			PlayerMenuButtons.Add(PlayerMenuWidget->GetInventoryButton());
 			PlayerMenuButtons.Add(PlayerMenuWidget->GetCloseMenuButton());
 			if (UIManagerWorldSubsystem->PickedButtonIndex == 0) {
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(PlayerMenuButtons[PlayerMenuButtons.Num() - 1]);
 				UIManagerWorldSubsystem->PickedButtonIndex = PlayerMenuButtons.Num() - 1;
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 			}
 			else {
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(PlayerMenuButtons[UIManagerWorldSubsystem->PickedButtonIndex - 1]);
 				UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex - 1;
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
@@ -497,38 +577,142 @@ void APlayerCharacter::InputScrollUp()
 			PauseMenuButtons.Add(PauseMenuWidget->GetSettingsButton());
 			PauseMenuButtons.Add(PauseMenuWidget->GetMainMenuButton());
 			if (UIManagerWorldSubsystem->PickedButtonIndex == 0) {
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(PauseMenuButtons[PauseMenuButtons.Num() - 1]);
 				UIManagerWorldSubsystem->PickedButtonIndex = PauseMenuButtons.Num() - 1;
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 			}
 			else {
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(PauseMenuButtons[UIManagerWorldSubsystem->PickedButtonIndex - 1]);
 				UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex - 1;
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			}
+		}
+		else if (IsValid(MainMenuWidget) && MainMenuWidget->IsInViewport()) {
+			TArray<UWidget*> MainMenuButtons = MainMenuWidget->GetMainVerticalBox()->GetAllChildren();
+			if (UIManagerWorldSubsystem->PickedButtonIndex == 0) {
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FColor::FromHex("8C8C8CFF"));
+				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(MainMenuButtons[MainMenuButtons.Num() - 1]);
+				UIManagerWorldSubsystem->PickedButtonIndex = MainMenuButtons.Num() - 1;
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			}
+			else {
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FColor::FromHex("8C8C8CFF"));
+				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(MainMenuButtons[UIManagerWorldSubsystem->PickedButtonIndex - 1]);
+				UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex - 1;
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			}
+		}
+		else if (IsValid(SpellBattleMenuWidget) && SpellBattleMenuWidget->IsInViewport() && SpellBattleMenuWidget->CanUseKeyboardButtonSelection && !LearnedSpellsJournalMenuWidget->IsInViewport()) {
+			if (SpellBattleMenuWidget->GetSelectedSpellType() == ESpellType::NONE) {
+				if (UButtonWithNeighbors* PickedButtonWithNeighbors = Cast<UButtonWithNeighbors>(UIManagerWorldSubsystem->PickedButton); IsValid(PickedButtonWithNeighbors)) 
+					for (FSideAndItsButton SideAndItsButton : PickedButtonWithNeighbors->SidesAndTheirButtons)
+						if (SideAndItsButton.Side == ESides::UP) {
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+							UIManagerWorldSubsystem->PickedButton = SideAndItsButton.NeighborButton;
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+						}
+			}
+			else {
+				TArray<UWidget*> SpellBattleMenuElementsButtons{};
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetWaterElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetEarthElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetDarkElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetLightningElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetHolyElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetWindElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetFireElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetBloodElementButton());
+				if (UIManagerWorldSubsystem->PickedButtonIndex == 0) {
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+					UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SpellBattleMenuElementsButtons[SpellBattleMenuElementsButtons.Num() - 1]);
+					UIManagerWorldSubsystem->PickedButtonIndex = SpellBattleMenuElementsButtons.Num() - 1;
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+				}
+				else {
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+					UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SpellBattleMenuElementsButtons[UIManagerWorldSubsystem->PickedButtonIndex - 1]);
+					UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex - 1;
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+				}
+			}
+		}
+		else if (IsValid(LearnedSpellsJournalMenuWidget) && LearnedSpellsJournalMenuWidget->IsInViewport() && LearnedSpellsJournalMenuWidget->CanUseKeyboardButtonSelection) {
+			TArray<UWidget*> LearnedSpellsJournalMenuButtons = LearnedSpellsJournalMenuWidget->GetMainScrollBox()->GetAllChildren();
+			if (LearnedSpellsJournalMenuButtons.Num() > 0) {
+				if (UIManagerWorldSubsystem->PickedButtonIndex == 0) {
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+					UIManagerWorldSubsystem->PickedButton = Cast<ULearnedSpellEntryWidget>(LearnedSpellsJournalMenuButtons[LearnedSpellsJournalMenuButtons.Num() - 1])->GetMainButton();
+					UIManagerWorldSubsystem->PickedButtonIndex = LearnedSpellsJournalMenuButtons.Num() - 1;
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+				}
+				else {
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+					UIManagerWorldSubsystem->PickedButton = Cast<ULearnedSpellEntryWidget>(LearnedSpellsJournalMenuButtons[UIManagerWorldSubsystem->PickedButtonIndex - 1])->GetMainButton();
+					UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex - 1;
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+				}
 			}
 		}
 		else if (IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->SelectedPanelWidget) && InventoryMenuWidget->IsInViewport()) {
 			TArray<UWidget*> SelectedScrollBoxChildren = InventoryMenuWidget->SelectedPanelWidget->GetAllChildren();
 			if (SelectedScrollBoxChildren.Num() > 0) {
 				if (UIManagerWorldSubsystem->PickedButtonIndex == 0) {
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
-					if (InventoryMenuWidget->IsSelectingSpecificItem)
-						UIManagerWorldSubsystem->PickedButton = Cast<UInventoryScrollBoxEntryWidget>(SelectedScrollBoxChildren[SelectedScrollBoxChildren.Num() - 1])->GetMainButton();
+					if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+						if (InventoryMenuWidget->GetBattleMenuButtonsForItemsBorder()->GetVisibility() == ESlateVisibility::Visible)
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.6, 0.6, 0.6, 1));
+						else
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+					}
+					if (InventoryMenuWidget->IsSelectingSpecificItem) {
+						if (UInventoryScrollBoxEntryWidget* SelectedEntryWidget = Cast<UInventoryScrollBoxEntryWidget>(SelectedScrollBoxChildren[SelectedScrollBoxChildren.Num() - 1]); IsValid(SelectedEntryWidget)) {
+							UIManagerWorldSubsystem->PickedButton = SelectedEntryWidget->GetMainButton();
+							InventoryMenuWidget->SetPickedItem(SelectedEntryWidget->GetItem());
+						}
+					}
 					else
 						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SelectedScrollBoxChildren[SelectedScrollBoxChildren.Num() - 1]);
 					UIManagerWorldSubsystem->PickedButtonIndex = SelectedScrollBoxChildren.Num() - 1;
+					InventoryMenuWidget->CheckForButtonsBordersVisibilityAndSetGreenColorToButton();
 					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 				}
 				else {
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
-					if (InventoryMenuWidget->IsSelectingSpecificItem)
-						UIManagerWorldSubsystem->PickedButton = Cast<UInventoryScrollBoxEntryWidget>(SelectedScrollBoxChildren[UIManagerWorldSubsystem->PickedButtonIndex - 1])->GetMainButton();
-					else
+					if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+						if (InventoryMenuWidget->GetBattleMenuButtonsForItemsBorder()->GetVisibility() == ESlateVisibility::Visible)
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.6, 0.6, 0.6, 1));
+						else
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+					}
+					if (InventoryMenuWidget->IsSelectingSpecificItem) {
+						if (UInventoryScrollBoxEntryWidget* SelectedEntryWidget = Cast<UInventoryScrollBoxEntryWidget>(SelectedScrollBoxChildren[UIManagerWorldSubsystem->PickedButtonIndex - 1]); IsValid(SelectedEntryWidget)) {
+							UIManagerWorldSubsystem->PickedButton = SelectedEntryWidget->GetMainButton();
+							InventoryMenuWidget->SetPickedItem(SelectedEntryWidget->GetItem());
+						}
+					}
+					else {
 						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SelectedScrollBoxChildren[UIManagerWorldSubsystem->PickedButtonIndex - 1]);
+						InventoryMenuWidget->GetInventoryButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+						InventoryMenuWidget->GetMeleeButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+						InventoryMenuWidget->GetRangeButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+						InventoryMenuWidget->GetHeadButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+						InventoryMenuWidget->GetTorseButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+						InventoryMenuWidget->GetHandButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+						InventoryMenuWidget->GetLowerArmorButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
+						Cast<UButton>(InventoryMenuWidget->GetItemTypeStackBox()->GetAllChildren()[InventoryMenuWidget->SelectedTypeButtonIndex])->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+						InventoryMenuWidget->CheckForButtonsBordersVisibilityAndSetGreenColorToButton();
+					}
 					UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex - 1;
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 				}
 			}
 		}
@@ -543,13 +727,15 @@ void APlayerCharacter::InputScrollDown()
 				TArray<UWidget*> MenuVerticalBoxChildrens = BattleMenuWidget->GetMenuVerticalBox()->GetAllChildren();
 				if (MenuVerticalBoxChildrens.Num() > 0) {
 					if (UIManagerWorldSubsystem->PickedButtonIndex == MenuVerticalBoxChildrens.Num() - 1) {
-						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+						if (IsValid(UIManagerWorldSubsystem->PickedButton))
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(MenuVerticalBoxChildrens[0]);
 						UIManagerWorldSubsystem->PickedButtonIndex = 0;
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 					}
 					else {
-						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+						if (IsValid(UIManagerWorldSubsystem->PickedButton))
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(MenuVerticalBoxChildrens[UIManagerWorldSubsystem->PickedButtonIndex + 1]);
 						UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex + 1;
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
@@ -561,7 +747,8 @@ void APlayerCharacter::InputScrollDown()
 				if (InventoryScrollBoxChildrens.Num() > 0) {
 					if (UIManagerWorldSubsystem->PickedButtonIndex == InventoryScrollBoxChildrens.Num() - 1) {
 						UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(InventoryScrollBoxChildrens[0]);
-						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+						if (IsValid(UIManagerWorldSubsystem->PickedButton))
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
 						UIManagerWorldSubsystem->PickedButtonIndex = 0;
 						UIManagerWorldSubsystem->PickedButton = EntryWidget->GetMainButton();
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
@@ -569,7 +756,8 @@ void APlayerCharacter::InputScrollDown()
 						InventoryMenuWidget->GetInventoryScrollBox()->ScrollToStart();
 					}
 					else {
-						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+						if (IsValid(UIManagerWorldSubsystem->PickedButton))
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
 						UIManagerWorldSubsystem->PickedButtonIndex++;
 						UInventoryScrollBoxEntryWidget* EntryWidget = Cast<UInventoryScrollBoxEntryWidget>(InventoryScrollBoxChildrens[UIManagerWorldSubsystem->PickedButtonIndex]);
 						UIManagerWorldSubsystem->PickedButton = EntryWidget->GetMainButton();
@@ -578,19 +766,30 @@ void APlayerCharacter::InputScrollDown()
 					}
 				}
 			}
-			else if (BattleMenuWidget->IsPreparingToAttack) {
+			else if (BattleMenuWidget->IsPreparingToAttack || BattleMenuWidget->IsPreparingToTalk) {
 				TArray<UWidget*> AttackMenuVerticalBoxChildrens = BattleMenuWidget->GetAttackMenuVerticalBox()->GetAllChildren();
 				if (AttackMenuVerticalBoxChildrens.Num() > 0) {
 					if (UIManagerWorldSubsystem->PickedButtonIndex == AttackMenuVerticalBoxChildrens.Num() - 1) {
-						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(AttackMenuVerticalBoxChildrens[0]);
-						UIManagerWorldSubsystem->PickedButtonIndex = 0;
+						if (IsValid(UIManagerWorldSubsystem->PickedButton))
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+						if (BattleMenuWidget->IsPreparingToTalk)
+							UIManagerWorldSubsystem->PickedButtonIndex = 1;
+						else if(BattleMenuWidget->IsPreparingToAttack)
+							UIManagerWorldSubsystem->PickedButtonIndex = 0;
+						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(AttackMenuVerticalBoxChildrens[UIManagerWorldSubsystem->PickedButtonIndex]);
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 					}
 					else {
-						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(AttackMenuVerticalBoxChildrens[UIManagerWorldSubsystem->PickedButtonIndex + 1]);
-						UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex + 1;
+						if (IsValid(UIManagerWorldSubsystem->PickedButton))
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+						if (BattleMenuWidget->IsPreparingToTalk) 
+							UIManagerWorldSubsystem->PickedButtonIndex += 1;
+						else if(BattleMenuWidget->IsPreparingToAttack) {
+							UIManagerWorldSubsystem->PickedButtonIndex += 1;
+							if (UIManagerWorldSubsystem->PickedButtonIndex == 1)
+								UIManagerWorldSubsystem->PickedButtonIndex += 1;
+						}
+						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(AttackMenuVerticalBoxChildrens[UIManagerWorldSubsystem->PickedButtonIndex]);
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 					}
 				}
@@ -601,13 +800,15 @@ void APlayerCharacter::InputScrollDown()
 			PlayerMenuButtons.Add(PlayerMenuWidget->GetInventoryButton());
 			PlayerMenuButtons.Add(PlayerMenuWidget->GetCloseMenuButton());
 			if (UIManagerWorldSubsystem->PickedButtonIndex == PlayerMenuButtons.Num() - 1) {
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(PlayerMenuButtons[0]);
 				UIManagerWorldSubsystem->PickedButtonIndex = 0;
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 			}
 			else {
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(PlayerMenuButtons[UIManagerWorldSubsystem->PickedButtonIndex + 1]);
 				UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex + 1;
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
@@ -620,37 +821,131 @@ void APlayerCharacter::InputScrollDown()
 			PauseMenuButtons.Add(PauseMenuWidget->GetSettingsButton());
 			PauseMenuButtons.Add(PauseMenuWidget->GetMainMenuButton());
 			if (UIManagerWorldSubsystem->PickedButtonIndex == PauseMenuButtons.Num() - 1) {
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(PauseMenuButtons[0]);
 				UIManagerWorldSubsystem->PickedButtonIndex = 0;
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 			}
 			else {
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(PauseMenuButtons[UIManagerWorldSubsystem->PickedButtonIndex + 1]);
 				UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex + 1;
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			}
+		}
+		else if (IsValid(MainMenuWidget) && MainMenuWidget->IsInViewport()) {
+			TArray<UWidget*> MainMenuButtons = MainMenuWidget->GetMainVerticalBox()->GetAllChildren();
+			if (UIManagerWorldSubsystem->PickedButtonIndex == MainMenuButtons.Num() - 1) {
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FColor::FromHex("8C8C8CFF"));
+				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(MainMenuButtons[0]);
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			}
+			else {
+				if(IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FColor::FromHex("8C8C8CFF"));
+				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(MainMenuButtons[UIManagerWorldSubsystem->PickedButtonIndex + 1]);
+				UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex + 1;
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			}
+		}
+		else if (IsValid(SpellBattleMenuWidget) && SpellBattleMenuWidget->IsInViewport() && SpellBattleMenuWidget->CanUseKeyboardButtonSelection) {
+			if (SpellBattleMenuWidget->GetSelectedSpellType() == ESpellType::NONE) {
+				if (UButtonWithNeighbors* PickedButtonWithNeighbors = Cast<UButtonWithNeighbors>(UIManagerWorldSubsystem->PickedButton); IsValid(PickedButtonWithNeighbors)) 
+					for(FSideAndItsButton SideAndItsButton : PickedButtonWithNeighbors->SidesAndTheirButtons)
+						if (SideAndItsButton.Side == ESides::DOWN) {
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+							UIManagerWorldSubsystem->PickedButton = SideAndItsButton.NeighborButton;
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+						}
+			}
+			else {
+				TArray<UWidget*> SpellBattleMenuElementsButtons{};
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetWaterElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetEarthElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetDarkElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetLightningElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetHolyElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetWindElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetFireElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetBloodElementButton());
+				if (UIManagerWorldSubsystem->PickedButtonIndex == SpellBattleMenuElementsButtons.Num() - 1) {
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+					UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SpellBattleMenuElementsButtons[0]);
+					UIManagerWorldSubsystem->PickedButtonIndex = 0;
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+				}
+				else {
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+					UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SpellBattleMenuElementsButtons[UIManagerWorldSubsystem->PickedButtonIndex + 1]);
+					UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex + 1;
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+				}
+			}
+		}
+		else if (IsValid(LearnedSpellsJournalMenuWidget) && LearnedSpellsJournalMenuWidget->IsInViewport() && LearnedSpellsJournalMenuWidget->CanUseKeyboardButtonSelection) {
+			TArray<UWidget*> LearnedSpellsJournalMenuButtons = LearnedSpellsJournalMenuWidget->GetMainScrollBox()->GetAllChildren();
+			if (LearnedSpellsJournalMenuButtons.Num() > 1) {
+				if (UIManagerWorldSubsystem->PickedButtonIndex == LearnedSpellsJournalMenuButtons.Num() - 1) {
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+					UIManagerWorldSubsystem->PickedButton = Cast<ULearnedSpellEntryWidget>(LearnedSpellsJournalMenuButtons[0])->GetMainButton();
+					UIManagerWorldSubsystem->PickedButtonIndex = 0;
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+				}
+				else {
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+					UIManagerWorldSubsystem->PickedButton = Cast<ULearnedSpellEntryWidget>(LearnedSpellsJournalMenuButtons[UIManagerWorldSubsystem->PickedButtonIndex + 1])->GetMainButton();
+					UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex + 1;
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+				}
 			}
 		}
 		else if (IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->SelectedPanelWidget) && InventoryMenuWidget->IsInViewport()) {
 			TArray<UWidget*> SelectedScrollBoxChildren = InventoryMenuWidget->SelectedPanelWidget->GetAllChildren();
 				if (SelectedScrollBoxChildren.Num() > 0) {
 					if (UIManagerWorldSubsystem->PickedButtonIndex == SelectedScrollBoxChildren.Num() - 1) {
-							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
-							if(InventoryMenuWidget->IsSelectingSpecificItem)
-								UIManagerWorldSubsystem->PickedButton = Cast<UInventoryScrollBoxEntryWidget>(SelectedScrollBoxChildren[0])->GetMainButton();
+						if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+							if (InventoryMenuWidget->GetBattleMenuButtonsForItemsBorder()->GetVisibility() == ESlateVisibility::Visible && !InventoryMenuWidget->IsSelectingSpecificItem)
+								UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.6, 0.6, 0.6, 1));
+							else if (InventoryMenuWidget->GetBattleMenuButtonsForItemsBorder()->GetVisibility() == ESlateVisibility::Visible && InventoryMenuWidget->IsSelectingSpecificItem)
+								UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
 							else
-								UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SelectedScrollBoxChildren[0]);
+								UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+						}
+						if (InventoryMenuWidget->IsSelectingSpecificItem) {
+							if (UInventoryScrollBoxEntryWidget* SelectedEntryWidget = Cast<UInventoryScrollBoxEntryWidget>(SelectedScrollBoxChildren[0]); IsValid(SelectedEntryWidget)) {
+								UIManagerWorldSubsystem->PickedButton = SelectedEntryWidget->GetMainButton();
+								InventoryMenuWidget->SetPickedItem(SelectedEntryWidget->GetItem());
+							}
+						}
+						else 
+							UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SelectedScrollBoxChildren[0]);
 							UIManagerWorldSubsystem->PickedButtonIndex = 0;
-							if(IsValid(UIManagerWorldSubsystem->PickedButton))
-								UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+							InventoryMenuWidget->CheckForButtonsBordersVisibilityAndSetGreenColorToButton();
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 					}
 					else {
-						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
-						UE_LOG(LogTemp, Warning, TEXT("The index value is: %d"), UIManagerWorldSubsystem->PickedButtonIndex);
-						UE_LOG(LogTemp, Warning, TEXT("The selected panel widget name is %s"), *InventoryMenuWidget->SelectedPanelWidget->GetName());
-						if (InventoryMenuWidget->IsSelectingSpecificItem && IsValid(Cast<UInventoryScrollBoxEntryWidget>(SelectedScrollBoxChildren[UIManagerWorldSubsystem->PickedButtonIndex + 1])))
-							UIManagerWorldSubsystem->PickedButton = Cast<UInventoryScrollBoxEntryWidget>(SelectedScrollBoxChildren[UIManagerWorldSubsystem->PickedButtonIndex + 1])->GetMainButton();
+						if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+							if (InventoryMenuWidget->GetBattleMenuButtonsForItemsBorder()->GetVisibility() == ESlateVisibility::Visible && !InventoryMenuWidget->IsSelectingSpecificItem)
+								UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.6, 0.6, 0.6, 1));
+							else if (InventoryMenuWidget->GetBattleMenuButtonsForItemsBorder()->GetVisibility() == ESlateVisibility::Visible && InventoryMenuWidget->IsSelectingSpecificItem)
+								UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+							else
+								UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+						}
+						if (InventoryMenuWidget->IsSelectingSpecificItem) {
+							if (UInventoryScrollBoxEntryWidget* SelectedEntryWidget = Cast<UInventoryScrollBoxEntryWidget>(SelectedScrollBoxChildren[UIManagerWorldSubsystem->PickedButtonIndex + 1]); IsValid(SelectedEntryWidget)) {
+								UIManagerWorldSubsystem->PickedButton = SelectedEntryWidget->GetMainButton();
+								InventoryMenuWidget->SetPickedItem(SelectedEntryWidget->GetItem());
+							}
+						}
 						else {
 							UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SelectedScrollBoxChildren[UIManagerWorldSubsystem->PickedButtonIndex + 1]);
 							InventoryMenuWidget->GetInventoryButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
@@ -660,24 +955,12 @@ void APlayerCharacter::InputScrollDown()
 							InventoryMenuWidget->GetTorseButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
 							InventoryMenuWidget->GetHandButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
 							InventoryMenuWidget->GetLowerArmorButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
-							Cast<UButton>(InventoryMenuWidget->GetItemTypeStackBox()->GetAllChildren()[InventoryMenuWidget->SelectedButtonIndex])->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-							if (InventoryMenuWidget->GetInventoryBorder()->GetVisibility() == ESlateVisibility::Visible)
-								InventoryMenuWidget->GetInventoryButton()->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-							if (InventoryMenuWidget->GetMeleeInventoryBorder()->GetVisibility() == ESlateVisibility::Visible)
-								InventoryMenuWidget->GetMeleeButton()->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-							if (InventoryMenuWidget->GetRangeInventoryBorder()->GetVisibility() == ESlateVisibility::Visible)
-								InventoryMenuWidget->GetRangeButton()->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-							if (InventoryMenuWidget->GetHeadInventoryBorder()->GetVisibility() == ESlateVisibility::Visible)
-								InventoryMenuWidget->GetHeadButton()->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-							if (InventoryMenuWidget->GetTorseInventoryBorder()->GetVisibility() == ESlateVisibility::Visible)
-								InventoryMenuWidget->GetTorseButton()->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-							if (InventoryMenuWidget->GetHandInventoryBorder()->GetVisibility() == ESlateVisibility::Visible)
-								InventoryMenuWidget->GetHandButton()->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-							if (InventoryMenuWidget->GetLowerArmorInventoryBorder()->GetVisibility() == ESlateVisibility::Visible)
-								InventoryMenuWidget->GetLowerArmorButton()->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+							Cast<UButton>(InventoryMenuWidget->GetItemTypeStackBox()->GetAllChildren()[InventoryMenuWidget->SelectedTypeButtonIndex])->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+							InventoryMenuWidget->CheckForButtonsBordersVisibilityAndSetGreenColorToButton();
 						}
 						UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex + 1;
-						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+						if(IsValid(UIManagerWorldSubsystem->PickedButton))
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 					}
 				}
 		}
@@ -699,7 +982,108 @@ void APlayerCharacter::InputAction()
 		UIManagerWorldSubsystem->PickedButton->OnClicked.Broadcast();
 }
 
-void APlayerCharacter::ChangeLevel(const AActor* const &ActorResult)
+void APlayerCharacter::InputBack()
+{
+	FString MapName = GetWorld()->GetMapName();
+	if (IsValid(Controller) && IsValid(UIManagerWorldSubsystem)) {
+		if (IsValid(InventoryMenuWidget) && InventoryMenuWidget->IsInViewport() && InventoryMenuWidget->GetBattleMenuButtonsForItemsBorder()->GetVisibility() == ESlateVisibility::Visible) {
+			InventoryMenuWidget->BattleMenuItemsBackButtonOnClicked();
+		}
+		else if (IsValid(InventoryMenuWidget) && InventoryMenuWidget->IsInViewport() && InventoryMenuWidget->IsSelectingSpecificItem) {
+			if (IsValid(UIManagerWorldSubsystem->PickedButton))
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
+			UIManagerWorldSubsystem->PickedButton = Cast<UButton>(InventoryMenuWidget->GetItemTypeStackBox()->GetAllChildren()[InventoryMenuWidget->SelectedTypeButtonIndex]);
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			UIManagerWorldSubsystem->PickedButtonIndex = InventoryMenuWidget->SelectedTypeButtonIndex;
+			InventoryMenuWidget->IsSelectingSpecificItem = false;
+			InventoryMenuWidget->SelectedPanelWidget = InventoryMenuWidget->GetItemTypeStackBox();
+		}
+		else if (IsValid(InventoryMenuWidget) && InventoryMenuWidget->IsInViewport() && !InventoryMenuWidget->IsSelectingSpecificItem) {
+			InventoryMenuWidget->GetInventoryBorder()->SetVisibility(ESlateVisibility::Visible);
+			InventoryMenuWidget->GetLowerArmorInventoryBorder()->SetVisibility(ESlateVisibility::Hidden);
+			InventoryMenuWidget->GetHandInventoryBorder()->SetVisibility(ESlateVisibility::Hidden);
+			InventoryMenuWidget->GetTorseInventoryBorder()->SetVisibility(ESlateVisibility::Hidden);
+			InventoryMenuWidget->GetHeadInventoryBorder()->SetVisibility(ESlateVisibility::Hidden);
+			InventoryMenuWidget->GetRangeInventoryBorder()->SetVisibility(ESlateVisibility::Hidden);
+			InventoryMenuWidget->GetMeleeInventoryBorder()->SetVisibility(ESlateVisibility::Hidden);
+			InventoryMenuWidget->HideNotification();
+			if (IsValid(Cast<UButton>(InventoryMenuWidget->GetItemTypeStackBox()->GetAllChildren()[InventoryMenuWidget->SelectedTypeButtonIndex])))
+				Cast<UButton>(InventoryMenuWidget->GetItemTypeStackBox()->GetAllChildren()[InventoryMenuWidget->SelectedTypeButtonIndex])->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
+			if (IsValid(UIManagerWorldSubsystem)) {
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 0));
+				InventoryMenuWidget->SetPickedItem(nullptr);
+				InventoryMenuWidget->RemoveFromParent();
+				if (InventoryMenuWidget->GetNotInBattleMenuIncludedCanvasPanel()->GetVisibility() == ESlateVisibility::Visible) {
+					PlayerMenuWidget->AddToViewport();
+					UIManagerWorldSubsystem->PickedButton = PlayerMenuWidget->GetInventoryButton();
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				}
+				else if (InventoryMenuWidget->GetNotInBattleMenuIncludedCanvasPanel()->GetVisibility() == ESlateVisibility::Hidden) {
+					BattleMenuWidget->AddToViewport();
+					UIManagerWorldSubsystem->PickedButton = BattleMenuWidget->GetAttackButton();
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				}
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			}
+		}
+		else if (PlayerMenuWidget->IsInViewport()) {
+			PlayerMenuWidget->RemoveFromParent();
+			PlayerController->bShowMouseCursor = false;
+			PlayerController->bEnableClickEvents = false;
+			PlayerController->bEnableMouseOverEvents = false;
+			PlayerController->SetPause(false);
+			UWidgetBlueprintLibrary::SetInputMode_GameOnly(PlayerController);
+			//PlayerController->ActivateTouchInterface(EmptyTouchInterface);
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+			UIManagerWorldSubsystem->PickedButton = nullptr;
+			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			CanOpenOtherMenus = true;
+		}
+		else if (IsValid(BattleMenuWidget) && BattleMenuWidget->IsInViewport() && BattleMenuWidget->GetAttackMenuBorder()->GetVisibility() == ESlateVisibility::Visible) {
+			BattleMenuWidget->AttackMenuBackButtonOnClicked();
+		}
+		else if (PauseMenuWidget->IsInViewport()) {
+			PauseMenuWidget->RemoveFromParent();
+			SettingsMenuWidget->RemoveFromParent();
+			PlayerController->bShowMouseCursor = false;
+			PlayerController->bEnableClickEvents = false;
+			PlayerController->bEnableMouseOverEvents = false;
+			PlayerController->SetPause(false);
+			UWidgetBlueprintLibrary::SetInputMode_GameOnly(PlayerController);
+			//PlayerController->ActivateTouchInterface(EmptyTouchInterface);
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+			UIManagerWorldSubsystem->PickedButton = nullptr;
+			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			CanOpenOtherMenus = true;
+		}
+		else if (SpellBattleMenuWidget->IsInViewport() && !LearnedSpellsJournalMenuWidget->IsInViewport()) {
+			if (SpellBattleMenuWidget->GetSpellInfoBorder()->GetVisibility() != ESlateVisibility::Visible)
+				SpellBattleMenuWidget->BackButtonOnClicked();
+			else
+				SpellBattleMenuWidget->BackToSpellCreationButtonOnClicked();
+		}
+		else if (LearnedSpellsJournalMenuWidget->IsInViewport()) {
+			LearnedSpellsJournalMenuWidget->BackButtonOnClicked();
+		}
+		else if (SettingsMenuWidget->IsInViewport() && MapName != "UEDPIE_0_MainMenu") {
+			SettingsMenuWidget->RemoveFromParent();
+			PauseMenuWidget->AddToViewport();
+			PauseMenuWidget->GetResumeButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			UIManagerWorldSubsystem->PickedButton = PauseMenuWidget->GetResumeButton();
+			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+		}
+		if (SettingsMenuWidget->IsInViewport() && MapName == "UEDPIE_0_MainMenu") {
+			SettingsMenuWidget->RemoveFromParent();
+			MainMenuWidget->AddToViewport();
+			MainMenuWidget->GetNewGameButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			UIManagerWorldSubsystem->PickedButton = MainMenuWidget->GetNewGameButton();
+			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+		}
+	}
+}
+
+void APlayerCharacter::ChangeLevel(const AActor* const ActorResult)
 {
 	//If ray result isn't null and is level change trigger,loading screen is set, then load level 
 	if (IsValid(LoadingScreenClass) && IsValid(PlayerController) && IsValid(GameInstance)) {
@@ -722,7 +1106,7 @@ void APlayerCharacter::ChangeLevel(const AActor* const &ActorResult)
 	}
 }
 
-void APlayerCharacter::NotificationActions(const AActor* const& ActorResult)
+void APlayerCharacter::NotificationActions(const AActor* const ActorResult)
 {
 	if (ActorResult->ActorHasTag(FName(TEXT("FinishGame"))) && IsValid(GameInstance) && IsValid(NotificationWidget)) {
 		if (GameInstance->InstanceKilledEnemies < 3) {
@@ -739,13 +1123,13 @@ void APlayerCharacter::NotificationActions(const AActor* const& ActorResult)
 	}
 }
 
-void APlayerCharacter::PickUpItem(AActor* const& ActorResult)
+void APlayerCharacter::PickUpItem(AActor* const ActorResult)
 {
 		if (ActorResult->ActorHasTag(FName(TEXT("Loot")))) {
 			ALootInTheWorld* LootInTheWorld = Cast<ALootInTheWorld>(ActorResult);
 			bool IsInInventory = false;
 			if (IsValid(LootInTheWorld)) {
-				for (int i = 0; i < LootInTheWorld->GetItemsClasses().Num(); i++) {
+				for (uint8 i = 0; i < LootInTheWorld->GetItemsClasses().Num(); i++) {
 					AGameItem* GameItem = NewObject<AGameItem>(this, LootInTheWorld->GetItemsClasses()[i]);
 					GameInstance->InstanceItemsInTheInventory.Add(LootInTheWorld->GetItemsClasses()[i]);
 					if (IsValid(GameItem)) {
@@ -761,12 +1145,12 @@ void APlayerCharacter::PickUpItem(AActor* const& ActorResult)
 		}
 }
 
-void APlayerCharacter::DialogueInteract(AActor* const &ActorResult)
+void APlayerCharacter::DialogueInteract(const AActor* const ActorResult)
 {
 	//If hit result from forward vector is NPC with a dialogue, start the dialogue 
 	if (IsValid(ActorResult))
 		if (ActorResult->GetClass()->ImplementsInterface(UDialogueActionsInterface::StaticClass())) {
-			if(ATownNPC* TownNPC = Cast<ATownNPC>(ActorResult); IsValid(TownNPC))
+			if(ATownNPC* TownNPC = const_cast<ATownNPC*>(Cast<ATownNPC>(ActorResult)); IsValid(TownNPC))
 				TownNPC->Execute_StartADialogue(TownNPC);
 			//if(IsValid(PlayerController))
 			//	PlayerController->ActivateTouchInterface(EmptyTouchInterface);
@@ -839,6 +1223,10 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 		PEI->BindAction(InputActions->InputScrollDown, ETriggerEvent::Started, this, &APlayerCharacter::InputScrollDown);
 		PEI->BindAction(InputActions->InputPause, ETriggerEvent::Started, this, &APlayerCharacter::InputOpenPauseMenu);
 		PEI->BindAction(InputActions->InputBack, ETriggerEvent::Started, this, &APlayerCharacter::InputBack);
+		PEI->BindAction(InputActions->InputSpellUse, ETriggerEvent::Started, this, &APlayerCharacter::InputSpellUse);
+		PEI->BindAction(InputActions->InputUniqueSpellUseSpellInfoToggle, ETriggerEvent::Started, this, &APlayerCharacter::InputUniqueSpellUseSpellInfoToggle);
+		PEI->BindAction(InputActions->InputSpellReset, ETriggerEvent::Started, this, &APlayerCharacter::InputSpellReset);
+		PEI->BindAction(InputActions->InputOpenLearnedSpells, ETriggerEvent::Started, this, &APlayerCharacter::InputOpenLearnedSpells);
 	}
 }
 //Ray of detecting objects in front of a player
@@ -1023,9 +1411,9 @@ class UAlliesInfoBars* APlayerCharacter::GetAlliesInfoBarsWidget() const
 	return AlliesInfoBarsWidget;
 }
 
-void APlayerCharacter::SetInventoryScrollBoxEntryWidget(UInventoryScrollBoxEntryWidget* NewWidget) 
+void APlayerCharacter::SetInventoryScrollBoxEntryWidget(const UInventoryScrollBoxEntryWidget* const NewWidget) 
 {
-	InventoryScrollBoxEntryWidget = NewWidget;
+	InventoryScrollBoxEntryWidget = const_cast<UInventoryScrollBoxEntryWidget*>(NewWidget);
 }
 
 void APlayerCharacter::SetCanInput(bool Value)
@@ -1033,17 +1421,17 @@ void APlayerCharacter::SetCanInput(bool Value)
 	CanOpenOtherMenus = Value;
 }
 
-void APlayerCharacter::SetGameManager(AGameManager* const &NewGameManager)
+void APlayerCharacter::SetGameManager(const AGameManager* const NewGameManager)
 {
-	GameManager = NewGameManager;
+	GameManager = const_cast<AGameManager*>(NewGameManager);
 }
 
-void APlayerCharacter::SetBattleManager(ABattleManager* const &NewBattleManager)
+void APlayerCharacter::SetBattleManager(const ABattleManager* const NewBattleManager)
 {
-	BattleManager = NewBattleManager;
+	BattleManager = const_cast<ABattleManager*>(NewBattleManager);
 }
 
-void APlayerCharacter::SetAudioManager(AAudioManager* const &NewAudioManager)
+void APlayerCharacter::SetAudioManager(const AAudioManager* const NewAudioManager)
 {
-	AudioManager = NewAudioManager;
+	AudioManager = const_cast<AAudioManager*>(NewAudioManager);
 }

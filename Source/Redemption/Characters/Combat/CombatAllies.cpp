@@ -7,6 +7,7 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\SkillsSpellsAndEffectsActions.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ElementsActions.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\FloatingManaBarWidget.h"
 
 ACombatAllies::ACombatAllies()
@@ -53,7 +54,7 @@ void ACombatAllies::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEf
 				FString TextForCombatFloatingInformationActor = FString();
 				uint8 EvasionRandomNumber = FMath::RandRange(0, 100);
 				int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance + Agility * 2,
-					Effects, EEffectArea::EVASION), Effects, Resistances, PlayerCharacter->GetSpellBattleMenuWidget()->GetCreatedSpell()->GetElementsAndTheirPercentagesStructs());
+					Effects, EEffectArea::EVASION), Effects, Resistances, ElementsActions::FindContainedElements(PlayerCharacter->GetSpellBattleMenuWidget()->GetCreatedSpell()->GetSpellElements()));
 				if (EvasionRandomNumber <= ChanceOfEvasion) {
 					TextForCombatFloatingInformationActor.Append("Miss!");
 					CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));

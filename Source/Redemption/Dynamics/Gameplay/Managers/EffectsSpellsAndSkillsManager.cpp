@@ -114,6 +114,11 @@ UTexture* AEffectsSpellsAndSkillsManager::GetDarkElementIcon() const
 	return DarkElementIcon;
 }
 
+UTexture* AEffectsSpellsAndSkillsManager::GetMultielementalIcon() const
+{
+	return MultielementalIcon;
+}
+
 UTexture* AEffectsSpellsAndSkillsManager::GetAssaultSpellTypeIcon() const
 {
 	return AssaultSpellTypeIcon;
@@ -132,5 +137,45 @@ UTexture* AEffectsSpellsAndSkillsManager::GetRestorationSpellTypeIcon() const
 UTexture* AEffectsSpellsAndSkillsManager::GetBuffSpellTypeIcon() const
 {
 	return BuffSpellTypeIcon;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetSpellTypeImageTexture(ESpellType SpellType)
+{
+	switch (SpellType) {
+	case ESpellType::ASSAULT:
+		return AssaultSpellTypeIcon;
+	case ESpellType::DEBUFF:
+		return DebuffSpellTypeIcon;
+	case ESpellType::RESTORATION:
+		return RestorationSpellTypeIcon;
+	case ESpellType::BUFF:
+		return BuffSpellTypeIcon;
+	}
+	return nullptr;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetMainSpellElementImageTexture(ESpellElements MainSpellElement)
+{
+	switch (MainSpellElement) {
+	case ESpellElements::WATER:
+		return WaterElementIcon;
+	case ESpellElements::EARTH:
+		return EarthElementIcon;
+	case ESpellElements::DARK:
+		return DarkElementIcon;
+	case ESpellElements::LIGHTNING:
+		return LightningElementIcon;
+	case ESpellElements::HOLY:
+		return HolyElementIcon;
+	case ESpellElements::WIND:
+		return WindElementIcon;
+	case ESpellElements::FIRE:
+		return FireElementIcon;
+	case ESpellElements::BLOOD:
+		return BloodElementIcon;
+	case ESpellElements::MULTIELEMENTAL:
+		return MultielementalIcon;
+	}
+	return nullptr;
 }
 
