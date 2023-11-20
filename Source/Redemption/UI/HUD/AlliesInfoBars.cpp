@@ -24,6 +24,10 @@ bool UAlliesInfoBars::Initialize()
 	AlliesNameTextBlockes.Add(Ally2NameTextBlock);
 	AlliesNameTextBlockes.Add(Ally3NameTextBlock);
 	AlliesNameTextBlockes.Add(Ally4NameTextBlock);
+	AlliesNameBorders.Add(Ally1NameBorder);
+	AlliesNameBorders.Add(Ally2NameBorder);
+	AlliesNameBorders.Add(Ally3NameBorder);
+	AlliesNameBorders.Add(Ally4NameBorder);
 	if (!bSuccess) return false;
 	return bSuccess;
 }
@@ -150,6 +154,11 @@ TArray<UVerticalBox*> UAlliesInfoBars::GetAlliesInfoVerticalBoxes() const
 TArray<UTextBlock*> UAlliesInfoBars::GetAlliesNameTextBlockes() const
 {
 	return AlliesNameTextBlockes;
+}
+
+TArray<UBorder*> UAlliesInfoBars::GetAlliesNameBorders() const
+{
+	return AlliesNameBorders;
 }
 
 UCanvasPanel* UAlliesInfoBars::GetAlliesInfoBarsCanvasPanel() const

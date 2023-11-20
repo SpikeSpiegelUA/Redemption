@@ -37,6 +37,8 @@ public:
 	int GetRangeAmmo() const;
 	AActor* GetStartLocation() const;
 	TSubclassOf<ASmartObject> GetAIClass() const;
+	const TArray<TSubclassOf<ASpell>>& GetAvailableSkills() const;
+
 
 	void SetRangeAmmo(int8 NewRangeAmmo);
 	void SetStartLocation(const AActor* const NewLocation);
@@ -64,6 +66,11 @@ public:
 		float GetHealthPercentage();
 	UFUNCTION()
 		float GetManaPercentage();
+
+	//Function to call, when a NPC got hit. Parameters for a standard attack.
+	void GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, bool ForcedMiss = false) override;
+	//Function to call, when a NPC got hit. Parameters for a buff/debuff attack.
+	void GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements) override;
 protected:
 
 	virtual void BeginPlay() override;
@@ -109,4 +116,7 @@ protected:
 		UWidgetComponent* FloatingHealthBarComponentWidget;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true))
 		TSubclassOf<ASmartObject> AIClass;
+	//Spells and skills classes for the SkillBattleMenu.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Spells")
+		TArray<TSubclassOf<ASpell>> AvailableSkills{};
 };

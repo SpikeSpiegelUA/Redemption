@@ -19,10 +19,7 @@ class REDEMPTION_API AAssaultItem : public AGameItemWithItemObject
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		int AttackValue = 0;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
-		TArray<FElementAndItsPercentageStruct> ElementsAndTheirPercentagesStructs {};
 
 public:
 	int GetAttackValue() const;
-	TArray<FElementAndItsPercentageStruct> GetElementsAndTheirPercentagesStructs() const;
 };

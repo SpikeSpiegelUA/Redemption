@@ -59,7 +59,7 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 				TArray<AEffect*> EffectsArray;
 				for (TSubclassOf<AEffect> EffectClass : DebuffItem->GetEffectsClasses())
 					EffectsArray.Add(Cast<AEffect>(EffectClass->GetDefaultObject()));
-				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedCombatNPC, EffectsArray);
+				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedCombatNPC, EffectsArray, DebuffItem->GetElementsAndTheirPercentagesStructs());
 				OnOverlapBeginsActions(PlayerCharacter);
 			}
 		}

@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/ScrollBox.h"
 #include "Components/Button.h"
+#include "Components/TextBlock.h"
+#include "Components/Border.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\LearnedSpellEntryWidget.h"
 #include "LearnedSpellsJournalMenu.generated.h"
 
@@ -28,6 +30,10 @@ private:
 		class UButtonWithNeighbors* BackButtonWithNeighbors{};
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UButtonWithNeighbors* UseButtonWithNeighbors{};
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UTextBlock* NotificationTextBlock{};
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UBorder* NotificationBorder{};
 
 	UFUNCTION()
 	void UseButtonOnClicked();
@@ -35,6 +41,8 @@ private:
 	void UseButtonOnHovered();
 	UFUNCTION()
 	void BackButtonOnHovered();
+	UFUNCTION()
+		void HideNotificationAndClearItsTimer();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 		TSubclassOf<ULearnedSpellEntryWidget> LearnedSpellEntryWidgetClass{};
@@ -43,6 +51,9 @@ private:
 	UPROPERTY()
 		class APlayerCharacter* PlayerCharacter{};
 
+	FTimerHandle HideNotificationTimerHandle{};
+
+	void CreateNotification(const FText& NotificationText);
 public:
 	void AddLearnedSpellEntryToMainScrollBox(const class ASpell* const SpellToAdd);
 

@@ -112,11 +112,20 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 			BattleManager->AlliesPlayerTurnQueue.Add(BattleManager->BattleAlliesPlayer.Num() - 1);
 			ArrayActions::ShuffleArray<int>(BattleManager->AlliesPlayerTurnQueue);
 			//Set camera position and set non combat player position to PlayerPlane's position
-			PlayerCharacter->GetBattleManager()->CurrentTurnAllyPlayerIndex = BattleManager->AlliesPlayerTurnQueue[0];
-			PlayerCharacter->GetBattleManager()->SetBehindPlayerCameraLocation(Cast<ACombatStartLocation>(BattleManager->BattleAlliesPlayer[BattleManager->AlliesPlayerTurnQueue[0]]->GetStartLocation())->CombatCameraLocation);
+			BattleManager->CurrentTurnAllyPlayerIndex = BattleManager->AlliesPlayerTurnQueue[0];
+			BattleManager->SetBehindPlayerCameraLocation(Cast<ACombatStartLocation>(BattleManager->BattleAlliesPlayer[BattleManager->AlliesPlayerTurnQueue[0]]->GetStartLocation())->CombatCameraLocation);
 			PlayerCharacter->SetCanInput(false);
 			PlayerCharacter->SetActorLocation(FVector(1350, 5610, -960));
 			PlayerCharacter->GetAlliesInfoBarsWidget()->AddToViewport();
+			PlayerCharacter->GetSkillBattleMenuWidget()->ResetSkillsScrollBox();
+			for (TSubclassOf<ASpell> SpellClass : BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnAllyPlayerIndex]->GetAvailableSkills())
+				PlayerCharacter->GetSkillBattleMenuWidget()->AddSkillEntryToSkillsScrollBox(Cast<ASpell>(SpellClass->GetDefaultObject()));
+			if (UAlliesInfoBars* AlliesInfoBarsWidget = PlayerCharacter->GetAlliesInfoBarsWidget(); IsValid(AlliesInfoBarsWidget)) {
+				if(AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder < AlliesInfoBarsWidget->GetAlliesNameBorders().Num())
+					AlliesInfoBarsWidget->GetAlliesNameBorders()[AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder]->SetBrushColor(FLinearColor(0.3f, 0.3f, 0.3f, 1.f));
+				AlliesInfoBarsWidget->GetAlliesNameBorders()[BattleManager->CurrentTurnAllyPlayerIndex]->SetBrushColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+				AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder = BattleManager->CurrentTurnAllyPlayerIndex;
+			}
 			BattleManager->AlliesPlayerTurnQueue.RemoveAt(0);
 			PC->bShowMouseCursor = true;
 			PC->bEnableClickEvents = true;
@@ -164,14 +173,19 @@ void AGameManager::EndBattle()
 		PlayerCharacter->GetBattleResultsScreenWidget()->RemoveFromParent();
 		BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
 		BattleManager->SetCanTurnBehindPlayerCameraToTarget(false);
-		for (int i = 0; i < BattleManager->BattleEnemies.Num(); i++) {
+		for (int i = BattleManager->BattleEnemies.Num() - 1; i >= 0; i--) {
 			PlayerCharacter->Gold += BattleManager->BattleEnemies[i]->GetGoldReward();
 			BattleManager->BattleEnemies[i]->Destroy();
 		}
+		PlayerCharacter->CurrentHP = BattleManager->CombatPlayerCharacter->CurrentHP;
+		PlayerCharacter->CurrentMana = BattleManager->CombatPlayerCharacter->CurrentMana;
+		for (int i = BattleManager->BattleAlliesPlayer.Num() - 1; i >= 0; i--)
+			BattleManager->BattleAlliesPlayer[i]->Destroy();
 		GameInstance->InstanceGold = PlayerCharacter->Gold;
 		BattleManager->BattleEnemies.Empty();
 		PlayerCharacter->RestartBattleMenuWidget();
 		PlayerCharacter->RestartBattleResultsScreenWidget();
+		PlayerCharacter->GetAlliesInfoBarsWidget()->RemoveFromParent();
 		RestartBattleTransitionScreenWidget();
 		//Background Music set
 		PlayerCharacter->GetAudioManager()->GetDungeonBattleResultsBackgroundMusicAudioComponent()->SetPaused(true);

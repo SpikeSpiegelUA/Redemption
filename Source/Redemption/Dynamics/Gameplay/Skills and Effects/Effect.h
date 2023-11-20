@@ -47,6 +47,8 @@ enum class EEffectType :uint8
 {
 	BUFF UMETA(DisplayName = "Buff"),
 	DEBUFF UMETA(DisplayName = "Debuff"),
+	PLAINBUFF UMETA(DisplayName = "Plain Buff"),
+	PLAINDEBUFF UMETA(DisplayName = "Plain Debuff")
 };
 
 UCLASS()
@@ -77,14 +79,14 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	EEffectArea GetAreaOfEffect() const;
-	EEffectType GetTypeOfEffect() const;
+	EEffectArea GetEffectArea() const;
+	EEffectType GetEffectType() const;
 	FText GetEffectName() const;
 	int GetEffectStat() const;
 	int GetDuration() const;
 
-	void SetAreaOfEffect(EEffectArea NewAreaOfEffect);
-	void SetTypeOfEffect(EEffectType NewTypeOfEffect);
+	void SetEffectArea(EEffectArea NewAreaOfEffect);
+	void SetEffectType(EEffectType NewTypeOfEffect);
 	void SetEffectName(const FText& NewEffectName);
 	void SetEffectStat(int NewEffectStat);
 	void SetDuration(int NewDuration);

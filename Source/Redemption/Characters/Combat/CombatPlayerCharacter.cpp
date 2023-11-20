@@ -24,13 +24,16 @@ void ACombatPlayerCharacter::BeginPlay()
 		Agility = PlayerCharacter->Agility;
 		Luck = PlayerCharacter->Luck;
 		if (IsValid(PlayerCharacter->GetInventoryMenuWidget())) {
-			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee))
+			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee)) {
 				MeleeAttackValue = PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee->GetAttackValue();
+				MeleeWeaponElements = PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee->GetElementsAndTheirPercentagesStructs();
+			}
 			else
 				MeleeAttackValue = 10;
 			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedRange)) {
 				RangeAmmo = PlayerCharacter->GetInventoryMenuWidget()->EquipedRange->GetAmmo();
 				RangeAttackValue = PlayerCharacter->GetInventoryMenuWidget()->EquipedRange->GetAttackValue();
+				RangeWeaponElements = PlayerCharacter->GetInventoryMenuWidget()->EquipedRange->GetElementsAndTheirPercentagesStructs();
 			} 
 			else {
 				RangeAmmo = 0;
@@ -46,6 +49,11 @@ void ACombatPlayerCharacter::BeginPlay()
 				ArmorValue += PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetArmorValue();
 		}
 		GetResistancesFromEquipedItems();
+		AvailableSkills = PlayerCharacter->GetAvailableSkills();
+		CurrentHP = PlayerCharacter->CurrentHP;
+		MaxHP = PlayerCharacter->MaxHP;
+		CurrentMana = PlayerCharacter->CurrentMana;
+		MaxMana = PlayerCharacter->MaxMana;
 	}
 }
 
@@ -84,4 +92,9 @@ void ACombatPlayerCharacter::GetResistancesFromEquipedItems()
 						}
 			}
 	}
+}
+
+ACombatPlayerCharacter& ACombatPlayerCharacter::operator=(const APlayerCharacter& PlayerCharacter)
+{
+	return *this;
 }

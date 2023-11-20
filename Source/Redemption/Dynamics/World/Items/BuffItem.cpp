@@ -13,8 +13,3 @@ TArray<TSubclassOf<AEffect>> ABuffItem::GetEffectsClasses() const
 {
     return EffectsClasses;
 }
-
-TArray<FElementAndItsPercentageStruct> ABuffItem::GetElementsAndTheirPercentagesStructs() const
-{
-    return ElementsAndTheirPercentagesStructs;
-}

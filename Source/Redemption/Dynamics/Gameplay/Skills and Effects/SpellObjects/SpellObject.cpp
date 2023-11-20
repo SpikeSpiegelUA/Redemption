@@ -62,11 +62,11 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 				TArray<AEffect*> EffectsArray;
 				for (TSubclassOf<AEffect> EffectClass : PresetDebuffSpell->GetEffectsClasses())
 					EffectsArray.Add(Cast<AEffect>(EffectClass->GetDefaultObject()));
-				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedCombatNPC, EffectsArray);
+				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedCombatNPC, EffectsArray, ElementsActions::FindContainedElements(PresetDebuffSpell->GetSpellElements()));
 				OnOverlapBeginsActions(PlayerCharacter);
 			}
 			else if (ACreatedDebuffSpell* CreatedDebuffSpell = Cast<ACreatedDebuffSpell>(Spell); IsValid(CreatedDebuffSpell)) {
-				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedCombatNPC, CreatedDebuffSpell->GetEffects());
+				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedCombatNPC, CreatedDebuffSpell->GetEffects(), ElementsActions::FindContainedElements(CreatedDebuffSpell->GetSpellElements()));
 				OnOverlapBeginsActions(PlayerCharacter);
 			}
 		}

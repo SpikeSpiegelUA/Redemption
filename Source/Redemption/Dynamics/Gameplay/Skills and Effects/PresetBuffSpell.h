@@ -15,8 +15,9 @@ class REDEMPTION_API APresetBuffSpell : public ABuffSpell
 {
 	GENERATED_BODY()
 private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
-	TArray<TSubclassOf<AEffect>> EffectsClasses{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
+		TArray<TSubclassOf<AEffect>> EffectsClasses{};
 	
 public:
 	TArray<TSubclassOf<AEffect>> GetEffectsClasses() const;

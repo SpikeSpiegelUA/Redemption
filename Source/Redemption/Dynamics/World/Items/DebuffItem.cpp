@@ -13,13 +13,3 @@ TArray<TSubclassOf<AEffect>> ADebuffItem::GetEffectsClasses() const
 	return EffectsClasses;
 }
 
-TSubclassOf<AItemObject> ADebuffItem::GetItemObjectClass() const
-{
-	return ItemObjectClass;
-}
-
-TArray<FElementAndItsPercentageStruct> ADebuffItem::GetElementsAndTheirPercentagesStructs() const
-{
-	return ElementsAndTheirPercentagesStructs;
-}
-

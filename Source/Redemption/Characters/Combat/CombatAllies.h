@@ -44,11 +44,5 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
 		float CenterMarkMovingSpeed{};
 
-	//Function to call, when an enemy got hit. Parameters for a standard attack.
-	void GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, bool ForcedMiss = false) override;
-	//Function to call, when an enemy got hit. Parameters for a buff/debuff attack.
-	void GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects) override;
-
 	UFloatingManaBarWidget* GetFloatingManaBarWidget() const;
-
 };

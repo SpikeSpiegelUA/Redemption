@@ -7,6 +7,7 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
 #include "Components\VerticalBox.h"
 #include "Components\TextBlock.h"
+#include "Components\Border.h"
 #include "AlliesInfoBars.generated.h"
 /**
  * 
@@ -27,6 +28,8 @@ private:
 		TArray<UVerticalBox*> AlliesInfoVerticalBoxes;
 	UPROPERTY()
 		TArray<UTextBlock*> AlliesNameTextBlockes;
+	UPROPERTY()
+		TArray<UBorder*> AlliesNameBorders;
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		UVerticalBox* Ally1InfoVerticalBox;
@@ -37,6 +40,8 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UProgressBar* Ally1ManaBar;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UBorder* Ally1NameBorder;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		UVerticalBox* Ally2InfoVerticalBox;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		UTextBlock* Ally2NameTextBlock;
@@ -44,6 +49,8 @@ protected:
 		class UProgressBar* Ally2HealthBar;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UProgressBar* Ally2ManaBar;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UBorder* Ally2NameBorder;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		UVerticalBox* Ally3InfoVerticalBox;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -53,6 +60,8 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UProgressBar* Ally3ManaBar;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UBorder* Ally3NameBorder;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		UVerticalBox* Ally4InfoVerticalBox;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		UTextBlock* Ally4NameTextBlock;
@@ -60,6 +69,8 @@ protected:
 		class UProgressBar* Ally4HealthBar;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UProgressBar* Ally4ManaBar;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UBorder* Ally4NameBorder;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UCanvasPanel* AlliesInfoBarsCanvasPanel;
 
@@ -95,6 +106,9 @@ public:
 	TArray<UProgressBar*> GetAlliesManaBars() const;
 	TArray<UVerticalBox*> GetAlliesInfoVerticalBoxes() const;
 	TArray<UTextBlock*> GetAlliesNameTextBlockes() const;
+	TArray<UBorder*> GetAlliesNameBorders() const;
 
 	UCanvasPanel* GetAlliesInfoBarsCanvasPanel() const;
+
+	uint8 IndexOfCurrentTurnCharacterNameBorder{};
 };

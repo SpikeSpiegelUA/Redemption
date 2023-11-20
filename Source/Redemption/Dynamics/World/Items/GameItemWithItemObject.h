@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameItem.h"
+#include "GameItemWithElements.h"
 #include "Redemption/Dynamics/Gameplay/Combat/ItemObject.h"
 #include "GameItemWithItemObject.generated.h"
 
@@ -11,7 +11,7 @@
  * 
  */
 UCLASS()
-class REDEMPTION_API AGameItemWithItemObject : public AGameItem
+class REDEMPTION_API AGameItemWithItemObject : public AGameItemWithElements
 {
 	GENERATED_BODY()
 private:

@@ -39,3 +39,8 @@ FText AGameItem::GetDescription() const
 {
 	return Description;
 }
+
+EItemType AGameItem::GetItemType() const
+{
+	return ItemType;
+}

@@ -63,9 +63,9 @@ bool UBattleMenu::Initialize()
 		AttackMenuBackButton->OnClicked.AddDynamic(this, &UBattleMenu::AttackMenuBackButtonOnClicked);
 		AttackMenuBackButton->OnHovered.AddDynamic(this, &UBattleMenu::AttackMenuBackButtonOnHovered);
 	}
-	if (IsValid(AttackActionButton)) {
-		AttackActionButton->OnClicked.AddDynamic(this, &UBattleMenu::AttackActionButtonOnClicked);
-		AttackActionButton->OnHovered.AddDynamic(this, &UBattleMenu::AttackActionButtonOnHovered);
+	if (IsValid(AttackTalkInfoActionButton)) {
+		AttackTalkInfoActionButton->OnClicked.AddDynamic(this, &UBattleMenu::AttackTalkInfoActionButtonOnClicked);
+		AttackTalkInfoActionButton->OnHovered.AddDynamic(this, &UBattleMenu::AttackTalkInfoActionButtonOnHovered);
 	}
 	if (IsValid(LeftButton)) {
 		LeftButton->OnClicked.AddDynamic(this, &UBattleMenu::LeftButtonOnClicked);
@@ -79,6 +79,10 @@ bool UBattleMenu::Initialize()
 		SpellButton->OnClicked.AddDynamic(this, &UBattleMenu::SpellButtonOnClicked);
 		SpellButton->OnHovered.AddDynamic(this, &UBattleMenu::SpellButtonOnHovered);
 	}
+	if (IsValid(SkillButton)) {
+		SkillButton->OnClicked.AddDynamic(this, &UBattleMenu::SkillButtonOnClicked);
+		SkillButton->OnHovered.AddDynamic(this, &UBattleMenu::SkillButtonOnHovered);
+	}
 	if (IsValid(RangeButton)) {
 		RangeButton->OnClicked.AddDynamic(this, &UBattleMenu::RangeButtonOnClicked);
 		RangeButton->OnHovered.AddDynamic(this, &UBattleMenu::RangeButtonOnHovered);
@@ -87,9 +91,9 @@ bool UBattleMenu::Initialize()
 		TalkButton->OnClicked.AddDynamic(this, &UBattleMenu::TalkButtonOnClicked);
 		TalkButton->OnHovered.AddDynamic(this, &UBattleMenu::TalkButtonOnHovered);
 	}
-	if (IsValid(TalkActionButton)) {
-		TalkActionButton->OnClicked.AddDynamic(this, &UBattleMenu::TalkActionButtonOnClicked);
-		TalkActionButton->OnHovered.AddDynamic(this, &UBattleMenu::TalkActionButtonOnHovered);
+	if (IsValid(InfoButton)) {
+		InfoButton->OnClicked.AddDynamic(this, &UBattleMenu::InfoButtonOnClicked);
+		InfoButton->OnHovered.AddDynamic(this, &UBattleMenu::InfoButtonOnHovered);
 	}
 	if (!bSuccess) return false;
 	return bSuccess;
@@ -101,6 +105,7 @@ void UBattleMenu::NativeConstruct()
 	CenterMarkIsMovingToTarget = false;
 	if (IsValid(GetWorld()))
 		UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
+	ensure(UIManagerWorldSubsystem);
 }
 
 void UBattleMenu::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -118,8 +123,7 @@ void UBattleMenu::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 			CenterMarkIsMovingToTarget = true;
 			MoveCounter++;
 		}
-		UCanvasPanelSlot* CenterMarkCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(CenterMarkCanvasPanel);
-		if (IsValid(CenterMarkCanvasSlot)) {
+		if (UCanvasPanelSlot* CenterMarkCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(CenterMarkCanvasPanel); IsValid(CenterMarkCanvasSlot)) {
 			ACombatNPC* CurrentTurnAlliesNPC = Cast<ACombatNPC>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnAllyPlayerIndex]);
 			CenterMarkCanvasSlot->SetPosition(UKismetMathLibrary::Vector2DInterpTo_Constant(CenterMarkCanvasSlot->GetPosition(), RandomTargetForCenterMark, InDeltaTime, 740.f));
 			if ((RandomTargetForCenterMark - CenterMarkCanvasSlot->GetPosition()).Length() <= 2.f) {
@@ -133,118 +137,84 @@ void UBattleMenu::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
 void UBattleMenu::AttackButtonOnClicked()
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	ACombatNPC* CurrentTurnAlliesNPC = Cast<ACombatNPC>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnAllyPlayerIndex]);
-	if (IsValid(BattleManager) && IsValid(PlayerCharacter) && IsValid(CurrentTurnAlliesNPC)) {
-		//Remove player and menu render and turn on target selection
-		IsPreparingToAttack = true;
-		IsChoosingAction = false;
-		IsAttackingWithMelee = true;
-		//PlayerCharacter->GetMesh()->bHiddenInGame = true;
-		BattleManager->SelectedCombatNPC = PlayerCharacter->GetBattleManager()->BattleEnemies[0];
-		CurrentTurnAlliesNPC->Target = BattleManager->SelectedCombatNPC;
-		BattleManager->SelectedCombatNPCIndex = 0;
-		TalkActionButton->SetVisibility(ESlateVisibility::Collapsed);
-		MenuBorder->SetVisibility(ESlateVisibility::Hidden);
-		CenterMarkCanvasPanel->SetVisibility(ESlateVisibility::Visible);
-		EnemyNameBorder->SetVisibility(ESlateVisibility::Visible);
-		LeftRightMenuBorder->SetVisibility(ESlateVisibility::Visible);
-		AttackMenuBorder->SetVisibility(ESlateVisibility::Visible);
-		AttackButton->SetBackgroundColor(FColor(1, 1, 1, 1));
-		if(IsValid(UIManagerWorldSubsystem->PickedButton))
-			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FColor(1, 1, 1, 1));
-		BattleManager->SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
-		UIManagerWorldSubsystem->PickedButton = AttackActionButton;
-		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-		UIManagerWorldSubsystem->PickedButtonIndex = 0;
-		BattleManager->SetCanTurnBehindPlayerCameraToTarget(true);
-		BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
-		EnemyNameTextBlock->SetText(FText::FromName(PlayerCharacter->GetBattleManager()->BattleEnemies[0]->GetCharacterName()));
-	}
+	IsPreparingToAttack = true;
+	IsAttackingWithMelee = true;
+	OpenActionMenu(FText::FromString("Attack"));
 }
 
 void UBattleMenu::RangeButtonOnClicked()
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	ACombatNPC* CurrentTurnAlliesNPC = Cast<ACombatNPC>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnAllyPlayerIndex]);
-	if (IsValid(BattleManager) && IsValid(PlayerCharacter) && IsValid(CurrentTurnAlliesNPC) && CurrentTurnAlliesNPC->GetRangeAmmo() > 0) {
-		//Remove player and menu render and turn on target selection
-		IsPreparingToAttack = true;
-		IsChoosingAction = false;
-		IsAttackingWithRange = true;
-		//PlayerCharacter->GetMesh()->bHiddenInGame = true;
-		BattleManager->SelectedCombatNPC = BattleManager->BattleEnemies[0];
-		CurrentTurnAlliesNPC->Target = BattleManager->SelectedCombatNPC;
-		BattleManager->SelectedCombatNPCIndex = 0;
-		TalkActionButton->SetVisibility(ESlateVisibility::Collapsed);
-		MenuBorder->SetVisibility(ESlateVisibility::Hidden);
-		CenterMarkCanvasPanel->SetVisibility(ESlateVisibility::Visible);
-		EnemyNameBorder->SetVisibility(ESlateVisibility::Visible);
-		LeftRightMenuBorder->SetVisibility(ESlateVisibility::Visible);
-		AttackMenuBorder->SetVisibility(ESlateVisibility::Visible);
-		AttackButton->SetBackgroundColor(FColor(1, 1, 1, 1));
-		if (IsValid(UIManagerWorldSubsystem->PickedButton))
-			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FColor(1, 1, 1, 1));
-		BattleManager->SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
-		UIManagerWorldSubsystem->PickedButton = AttackActionButton;
-		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-		UIManagerWorldSubsystem->PickedButtonIndex = 0;
-		BattleManager->SetCanTurnBehindPlayerCameraToTarget(true);
-		BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
-		EnemyNameTextBlock->SetText(FText::FromName(PlayerCharacter->GetBattleManager()->BattleEnemies[0]->GetCharacterName()));
-		if (UCombatCharacterAnimInstance* AnimInstance = Cast<UCombatCharacterAnimInstance>(CurrentTurnAlliesNPC->GetMesh()->GetAnimInstance()); IsValid(AnimInstance))
-			AnimInstance->ToggleCombatCharacterIsAiming(true);
+	if (ACombatNPC* CurrentTurnAlliesNPC = Cast<ACombatNPC>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnAllyPlayerIndex]); IsValid(CurrentTurnAlliesNPC)) {
+		if (CurrentTurnAlliesNPC->GetRangeAmmo() > 0) {
+			IsPreparingToAttack = true;
+			IsAttackingWithRange = true;
+			OpenActionMenu(FText::FromString("Attack"));
+			if (UCombatCharacterAnimInstance* AnimInstance = Cast<UCombatCharacterAnimInstance>(CurrentTurnAlliesNPC->GetMesh()->GetAnimInstance()); IsValid(AnimInstance))
+				AnimInstance->ToggleCombatCharacterIsAiming(true);
+			const FVector2D ViewportSize = FVector2D(GEngine->GameViewport->Viewport->GetSizeXY());
+			if (UCanvasPanelSlot* CenterMarkCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(CenterMarkCanvasPanel); IsValid(CenterMarkCanvasSlot))
+				CenterMarkCanvasSlot->SetPosition(FVector2D(FMath::RandRange(-ViewportSize.X / 2 + 250, ViewportSize.X / 2 - 250), FMath::RandRange(-ViewportSize.Y / 2 + 250, ViewportSize.Y / 2 - 250)));
+		}
+		else if (CurrentTurnAlliesNPC->GetRangeAmmo() <= 0)
+			CreateNotification(FText::FromString("You don't have any ammo"));
 	}
-	else if(IsValid(BattleManager) && IsValid(PlayerCharacter) && IsValid(CurrentTurnAlliesNPC) && CurrentTurnAlliesNPC->GetRangeAmmo() <= 0)
-		CreateNotification(FText::FromString("You don't have any ammo"));
 }
 
 void UBattleMenu::TalkButtonOnClicked()
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	ACombatNPC* CurrentTurnAlliesNPC = Cast<ACombatNPC>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnAllyPlayerIndex]);
-	if (IsValid(BattleManager) && IsValid(PlayerCharacter) && IsValid(CurrentTurnAlliesNPC)) {
-		//Remove player and menu render and turn on target selection
-		IsPreparingToTalk = true;
-		IsChoosingAction = false;
-		//PlayerCharacter->GetMesh()->bHiddenInGame = true;
-		BattleManager->SelectedCombatNPC = PlayerCharacter->GetBattleManager()->BattleEnemies[0];
-		CurrentTurnAlliesNPC->Target = BattleManager->SelectedCombatNPC;
-		BattleManager->SelectedCombatNPCIndex = 0;
-		AttackActionButton->SetVisibility(ESlateVisibility::Collapsed);
-		MenuBorder->SetVisibility(ESlateVisibility::Hidden);
-		CenterMarkCanvasPanel->SetVisibility(ESlateVisibility::Visible);
-		EnemyNameBorder->SetVisibility(ESlateVisibility::Visible);
-		LeftRightMenuBorder->SetVisibility(ESlateVisibility::Visible);
-		AttackMenuBorder->SetVisibility(ESlateVisibility::Visible);
-		TalkActionButton->SetVisibility(ESlateVisibility::Visible); 
-		AttackButton->SetBackgroundColor(FColor(1, 1, 1, 1));
-		if (IsValid(UIManagerWorldSubsystem->PickedButton))
-			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-		BattleManager->SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
-		UIManagerWorldSubsystem->PickedButton = TalkActionButton;
-		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-		UIManagerWorldSubsystem->PickedButtonIndex = 1;
-		BattleManager->SetCanTurnBehindPlayerCameraToTarget(true);
-		BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
-		EnemyNameTextBlock->SetText(FText::FromName(PlayerCharacter->GetBattleManager()->BattleEnemies[0]->GetCharacterName()));
+	IsPreparingToTalk = true;
+	OpenActionMenu(FText::FromString("Talk"));
+}
+
+void UBattleMenu::InfoButtonOnClicked()
+{
+	IsPreparingToViewInfo = true;
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+		PlayerCharacter->CanSelectEveryoneAsATarget = true;
+		OpenActionMenu(FText::FromString("View"));
 	}
 }
 
-void UBattleMenu::TalkActionButtonOnClicked()
+void UBattleMenu::OpenActionMenu(const FText& NewAttackTalkInfoActionButtonText)
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	ACombatNPC* CurrentTurnAlliesNPC = Cast<ACombatNPC>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnAllyPlayerIndex]);
-	if (IsValid(CurrentTurnAlliesNPC) && IsValid(CurrentTurnAlliesNPC->Target))
-		if (CurrentTurnAlliesNPC->Target->GetClass()->ImplementsInterface(UDialogueActionsInterface::StaticClass())) {
-			if (ACombatEnemyNPC* Enemy = Cast<ACombatEnemyNPC>(CurrentTurnAlliesNPC->Target); IsValid(Enemy)) {
-				PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(true);
-				PlayerCharacter->GetAudioManager()->GetDungeonTalkBackgroundMusicAudioComponent_Daat()->Play();
-				PlayerCharacter->GetAudioManager()->GetDungeonTalkBackgroundMusicAudioComponent_Daat()->SetPaused(false);
-				Enemy->Execute_StartADialogue(Enemy);
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(BattleManager) && IsValid(PlayerCharacter)) 
+		if(ACombatNPC* CurrentTurnAlliesNPC = Cast<ACombatNPC>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnAllyPlayerIndex]); IsValid(CurrentTurnAlliesNPC)){
+			//Remove menu render and turn on target selection
+			IsChoosingAction = false;
+			if (IsPreparingToViewInfo || BattleManager->IsSelectingAllyAsTarget) {
+				for(ACombatNPC* AllyPlayerNPC : PlayerCharacter->GetBattleManager()->BattleAlliesPlayer)
+					if (AllyPlayerNPC->CurrentHP > 0) {
+						BattleManager->SelectedCombatNPC = AllyPlayerNPC;
+						EnemyNameTextBlock->SetText(FText::FromName(AllyPlayerNPC->GetCharacterName()));
+						break;
+					}
 			}
-			//if (APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()); IsValid(PlayerController))
-			//	PlayerController->ActivateTouchInterface(PlayerCharacter->GetEmptyTouchInterface());
+			else if (!BattleManager->IsSelectingAllyAsTarget) {
+				for(ACombatNPC* EnemyNPC : PlayerCharacter->GetBattleManager()->BattleEnemies)
+					if (EnemyNPC->CurrentHP > 0) {
+						BattleManager->SelectedCombatNPC = EnemyNPC;
+						EnemyNameTextBlock->SetText(FText::FromName(EnemyNPC->GetCharacterName()));
+						break;
+					}
+			}
+			CurrentTurnAlliesNPC->Target = BattleManager->SelectedCombatNPC;
+			BattleManager->SelectedCombatNPCIndex = 0;
+			MenuBorder->SetVisibility(ESlateVisibility::Hidden);
+			CenterMarkCanvasPanel->SetVisibility(ESlateVisibility::Visible);
+			EnemyNameBorder->SetVisibility(ESlateVisibility::Visible);
+			LeftRightMenuBorder->SetVisibility(ESlateVisibility::Visible);
+			AttackMenuBorder->SetVisibility(ESlateVisibility::Visible);
+			AttackButton->SetBackgroundColor(FColor(1, 1, 1, 1));
+			if (IsValid(UIManagerWorldSubsystem->PickedButton))
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+			BattleManager->SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
+			UIManagerWorldSubsystem->PickedButton = AttackTalkInfoActionButton;
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			if (UTextBlock* AttackTalkInfoTextBlock = Cast<UTextBlock>(AttackTalkInfoActionButton->GetChildAt(0)); IsValid(AttackTalkInfoTextBlock))
+				AttackTalkInfoTextBlock->SetText(NewAttackTalkInfoActionButtonText);
+			BattleManager->SetCanTurnBehindPlayerCameraToTarget(true);
+			BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
 		}
 }
 
@@ -282,25 +252,29 @@ void UBattleMenu::DefendButtonOnClicked()
 void UBattleMenu::AttackMenuBackButtonOnClicked()
 {
 	//Attack menu back button function
-	if (IsPreparingToAttack || IsPreparingToTalk) {
+	if (IsPreparingToAttack || IsPreparingToTalk || IsPreparingToViewInfo) {
 		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 		if (IsValid(PlayerCharacter) && IsValid(BattleManager) && IsValid(UIManagerWorldSubsystem)) {
 			CenterMarkCanvasPanel->SetVisibility(ESlateVisibility::Hidden);
 			EnemyNameBorder->SetVisibility(ESlateVisibility::Hidden);
 			AttackMenuBorder->SetVisibility(ESlateVisibility::Hidden);
 			LeftRightMenuBorder->SetVisibility(ESlateVisibility::Hidden);
-			AttackActionButton->SetVisibility(ESlateVisibility::Visible);
-			TalkActionButton->SetVisibility(ESlateVisibility::Collapsed);
+			AttackTalkInfoActionButton->SetVisibility(ESlateVisibility::Visible);
+			//TalkActionButton->SetVisibility(ESlateVisibility::Collapsed);
 			BattleManager->SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
 			if (IsValid(Cast<ACombatAllies>(BattleManager->SelectedCombatNPC)))
 				Cast<ACombatAllies>(BattleManager->SelectedCombatNPC)->GetFloatingManaBarWidget()->GetManaBar()->SetVisibility(ESlateVisibility::Hidden);
 			IsPreparingToAttack = false;
 			IsPreparingToTalk = false;
+			IsPreparingToViewInfo = false;
 			//PlayerCharacter->GetMesh()->bHiddenInGame = false;
 			BattleManager->SetCanTurnBehindPlayerCameraToTarget(false);
 			BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(true);
 			if(IsValid(UIManagerWorldSubsystem->PickedButton))
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+			if(IsAttackingWithRange)
+				if (UCanvasPanelSlot* CenterMarkCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(CenterMarkCanvasPanel); IsValid(CenterMarkCanvasSlot))
+					CenterMarkCanvasSlot->SetPosition(FVector2D(-164.960938, -88.540527));
 			//If attacking with item, back to item menu, otherwise back to main menu
 			UInventoryMenu* Inventory = PlayerCharacter->GetInventoryMenuWidget();
 			USpellBattleMenu* SpellBattleMenu = PlayerCharacter->GetSpellBattleMenuWidget();
@@ -317,9 +291,8 @@ void UBattleMenu::AttackMenuBackButtonOnClicked()
 					UIManagerWorldSubsystem->PickedButtonIndex = 0;
 				}
 			}
-			else if (IsAttackingWithSpell && !IsChoosingLearnedSpell && IsValid(SpellBattleMenu) ) {
+			else if (IsAttackingWithSpell && !IsChoosingLearnedSpell && !IsChoosingSkill && IsValid(SpellBattleMenu) ) {
 				IsChoosingSpell = true;
-				IsChoosingLearnedSpell = false;
 				IsAttackingWithSpell = false;
 				this->RemoveFromParent();
 				SpellBattleMenu->AddToViewport();
@@ -330,10 +303,8 @@ void UBattleMenu::AttackMenuBackButtonOnClicked()
 			}
 			else if (IsAttackingWithSpell && IsChoosingLearnedSpell && IsValid(SpellBattleMenu)) {
 				IsChoosingSpell = true;
-				IsChoosingLearnedSpell = true;
 				IsAttackingWithSpell = false;
 				this->RemoveFromParent();
-				SpellBattleMenu->AddToViewport();
 				if(IsValid(PlayerCharacter->GetLearnedSpellsJournalMenu())){
 					PlayerCharacter->GetLearnedSpellsJournalMenu()->AddToViewport();
 					if (PlayerCharacter->GetLearnedSpellsJournalMenu()->GetMainScrollBox()->GetAllChildren().Num() > 0) {
@@ -343,6 +314,22 @@ void UBattleMenu::AttackMenuBackButtonOnClicked()
 					}
 					else {
 						UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetLearnedSpellsJournalMenu()->GetUseButtonWithNeighbors();
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+					}
+				}
+			}
+			else if (IsAttackingWithSpell && IsChoosingSkill && IsValid(SpellBattleMenu)) {
+				IsAttackingWithSpell = false;
+				this->RemoveFromParent();
+				if (IsValid(PlayerCharacter->GetSkillBattleMenuWidget())) {
+					PlayerCharacter->GetSkillBattleMenuWidget()->AddToViewport();
+					if (PlayerCharacter->GetSkillBattleMenuWidget()->GetSkillsScrollBox()->GetAllChildren().Num() > 0) {
+						UIManagerWorldSubsystem->PickedButton = Cast<ULearnedSpellEntryWidget>(PlayerCharacter->GetSkillBattleMenuWidget()->GetSkillsScrollBox()->GetAllChildren()[0])->GetMainButton();
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+						UIManagerWorldSubsystem->PickedButtonIndex = 0;
+					}
+					else {
+						UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetSkillBattleMenuWidget()->GetUseButtonWithNeighbors();
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 					}
 				}
@@ -363,7 +350,7 @@ void UBattleMenu::AttackMenuBackButtonOnClicked()
 	}
 }
 
-void UBattleMenu::AttackActionButtonOnClicked()
+void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 {
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	ACombatAllies* CurrentTurnAlliesNPC{};
@@ -451,33 +438,28 @@ void UBattleMenu::AttackActionButtonOnClicked()
 			}
 		}
 		if(IsAttackingWithSpell){
-			USpellBattleMenu* SkillBattleMenu = PlayerCharacter->GetSpellBattleMenuWidget();
-			if (IsValid(SkillBattleMenu) && SkillBattleMenu->GetSelectedSpellType() != ESpellType::NONE && SkillBattleMenu->GetSelectedElementsHorizontalBox()->GetAllChildren().Num() > 0) {
-				if (!IsValid(SkillBattleMenu->GetCreatedSpell()))
-					SkillBattleMenu->CreateSpellAndSetCreatedSpell(SkillBattleMenu->GetSelectedSpellElements(), SkillBattleMenu->GetSelectedSpellType());
-				if (IsValid(SkillBattleMenu->GetCreatedSpell()) && IsValid(BattleManager) && IsValid(UIManagerWorldSubsystem) && IsValid(PlayerCharacter)) {
-					switch (SkillBattleMenu->GetCreatedSpell()->GetTypeOfSpell()) {
-					case ESpellType::ASSAULT:
-						if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(SkillBattleMenu->GetCreatedSpell()); IsValid(AssaultSpell))
-							AssaultSpellUse(this, CurrentTurnAlliesNPC);
-						break;
-					case ESpellType::RESTORATION:
-						if (ARestorationSpell* RestorationSpell = Cast<ARestorationSpell>(SkillBattleMenu->GetCreatedSpell()); IsValid(RestorationSpell))
-							RestorationSpellUse(RestorationSpell, this, CurrentTurnAlliesNPC);
-						break;
-					case ESpellType::BUFF:
-						if (ACreatedBuffSpell* CreatedBuffSpell = Cast<ACreatedBuffSpell>(SkillBattleMenu->GetCreatedSpell()); IsValid(CreatedBuffSpell))
-							BuffSpellUse(CreatedBuffSpell, this, CurrentTurnAlliesNPC);
-						else if (APresetBuffSpell* PresetBuffSpell = Cast<APresetBuffSpell>(SkillBattleMenu->GetCreatedSpell()); IsValid(PresetBuffSpell))
-							BuffSpellUse(PresetBuffSpell, this, CurrentTurnAlliesNPC);
-						break;
-					case ESpellType::DEBUFF:
-						if (ACreatedDebuffSpell* CreatedDebuffSpell = Cast<ACreatedDebuffSpell>(SkillBattleMenu->GetCreatedSpell()); IsValid(CreatedDebuffSpell))
-							DebuffSpellUse(this, CurrentTurnAlliesNPC);
-						break;
-					}
-					IsAttackingWithSpell = false;
+			if (IsValid(CurrentTurnAlliesNPC->SpellToUse) && IsValid(BattleManager) && IsValid(UIManagerWorldSubsystem) && IsValid(PlayerCharacter)) {
+				switch (CurrentTurnAlliesNPC->SpellToUse->GetTypeOfSpell()) {
+				case ESpellType::ASSAULT:
+					if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(CurrentTurnAlliesNPC->SpellToUse); IsValid(AssaultSpell))
+						AssaultSpellUse(this, CurrentTurnAlliesNPC);
+					break;
+				case ESpellType::RESTORATION:
+					if (ARestorationSpell* RestorationSpell = Cast<ARestorationSpell>(CurrentTurnAlliesNPC->SpellToUse); IsValid(RestorationSpell))
+						RestorationSpellUse(RestorationSpell, this, CurrentTurnAlliesNPC);
+					break;
+				case ESpellType::BUFF:
+					if (ACreatedBuffSpell* CreatedBuffSpell = Cast<ACreatedBuffSpell>(CurrentTurnAlliesNPC->SpellToUse); IsValid(CreatedBuffSpell))
+						BuffSpellUse(CreatedBuffSpell, this, CurrentTurnAlliesNPC);
+					else if (APresetBuffSpell* PresetBuffSpell = Cast<APresetBuffSpell>(CurrentTurnAlliesNPC->SpellToUse); IsValid(PresetBuffSpell))
+						BuffSpellUse(PresetBuffSpell, this, CurrentTurnAlliesNPC);
+					break;
+				case ESpellType::DEBUFF:
+					if (ACreatedDebuffSpell* CreatedDebuffSpell = Cast<ACreatedDebuffSpell>(CurrentTurnAlliesNPC->SpellToUse); IsValid(CreatedDebuffSpell))
+						DebuffSpellUse(this, CurrentTurnAlliesNPC);
+					break;
 				}
+				IsAttackingWithSpell = false;
 			}
 		}
 		if (IsAttackingWithMelee) {
@@ -485,8 +467,7 @@ void UBattleMenu::AttackActionButtonOnClicked()
 			CurrentTurnAlliesNPC->StartMovingToEnemy();
 		}
 		if (IsAttackingWithRange) {
-			UCanvasPanelSlot* CenterMarkCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(CenterMarkCanvasPanel);
-			if (IsValid(CenterMarkCanvasSlot)) {
+			if (UCanvasPanelSlot* CenterMarkCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(CenterMarkCanvasPanel); IsValid(CenterMarkCanvasSlot)) {
 				FVector2D TargetForCenterMark = FVector2D(-220,0);
 				CurrentTurnAlliesNPC->Target = SelectedCombatNPC;
 				if ((CenterMarkCanvasSlot->GetPosition() - TargetForCenterMark).Length() <= 90.0) 
@@ -501,6 +482,38 @@ void UBattleMenu::AttackActionButtonOnClicked()
 				}
 				CurrentTurnAlliesNPC->SetRangeAmmo(CurrentTurnAlliesNPC->GetRangeAmmo() - 1);
 				IsAttackingWithRange = false;
+				CenterMarkCanvasSlot->SetPosition(FVector2D(-164.960938, -88.540527));
+			}
+		}
+		if (IsPreparingToTalk && IsValid(CurrentTurnAlliesNPC->Target))
+			if (CurrentTurnAlliesNPC->Target->GetClass()->ImplementsInterface(UDialogueActionsInterface::StaticClass())) {
+				if (ACombatEnemyNPC* Enemy = Cast<ACombatEnemyNPC>(CurrentTurnAlliesNPC->Target); IsValid(Enemy)) {
+					PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(true);
+					PlayerCharacter->GetAudioManager()->GetDungeonTalkBackgroundMusicAudioComponent_Daat()->Play();
+					PlayerCharacter->GetAudioManager()->GetDungeonTalkBackgroundMusicAudioComponent_Daat()->SetPaused(false);
+					Enemy->Execute_StartADialogue(Enemy);
+				}
+				//if (APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()); IsValid(PlayerController))
+				//	PlayerController->ActivateTouchInterface(PlayerCharacter->GetEmptyTouchInterface());
+			}
+		if (IsPreparingToViewInfo) {
+			PlayerCharacter->GetCombatCharacterInfoMenuWidget()->AddToViewport();
+			PlayerCharacter->GetCombatCharacterInfoMenuWidget()->ResetActiveEffectsScrollBox();
+			PlayerCharacter->GetCombatCharacterInfoMenuWidget()->SetCharacterInfo(SelectedCombatNPC);
+			if (IsValid(UIManagerWorldSubsystem->PickedButton))
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+			if (PlayerCharacter->GetCombatCharacterInfoMenuWidget()->GetActiveEffectsScrollBox()->GetAllChildren().Num() > 0) {
+				if (auto* ActiveEffectEntryWidget = Cast<UActiveEffectEntryWidget>(PlayerCharacter->GetCombatCharacterInfoMenuWidget()->GetActiveEffectsScrollBox()->GetAllChildren()[0]);
+					IsValid(ActiveEffectEntryWidget))
+					UIManagerWorldSubsystem->PickedButton = ActiveEffectEntryWidget->GetMainButton();
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			}
+			else {
+				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetCombatCharacterInfoMenuWidget()->GetBackButton();
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				PlayerCharacter->GetCombatCharacterInfoMenuWidget()->CanUseKeyboardButtonSelection = false;
 			}
 		}
 		if ((!IsAttackingWithItem) || (IsAttackingWithItem && ItemHasBeenUsed)) {
@@ -508,12 +521,14 @@ void UBattleMenu::AttackActionButtonOnClicked()
 			LeftRightMenuBorder->SetVisibility(ESlateVisibility::Hidden);
 			CenterMarkCanvasPanel->SetVisibility(ESlateVisibility::Hidden);
 			EnemyNameBorder->SetVisibility(ESlateVisibility::Hidden);
-			IsPreparingToAttack = false;
-			if (IsValid(UIManagerWorldSubsystem->PickedButton))
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-			UIManagerWorldSubsystem->PickedButton = AttackButton;
-			UIManagerWorldSubsystem->PickedButtonIndex = 0;
-			this->RemoveFromParent();
+			if (!IsPreparingToViewInfo) {
+				IsPreparingToAttack = false;
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+				UIManagerWorldSubsystem->PickedButton = AttackButton;
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+				this->RemoveFromParent();
+			}
 		}
 	}
 }
@@ -602,10 +617,9 @@ void UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 void UBattleMenu::BuffSpellUse(const class ACreatedBuffSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC)
 {
 	if (APlayerCharacter* PC = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PC)) {
-		CurrentTurnNPC->Execute_GetHitWithBuffOrDebuff(CurrentTurnNPC, SpellToUse->GetEffects());
+		BattleManager->SelectedCombatNPC->Execute_GetHitWithBuffOrDebuff(BattleManager->SelectedCombatNPC, SpellToUse->GetEffects(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 		UGameplayStatics::PlaySound2D(GetWorld(), PC->GetAudioManager()->GetUseHealOrBuffSoundCue());
 		GetWorld()->GetTimerManager().SetTimer(PlayerTurnControllerTimerHandle, BattleManager, &ABattleManager::PlayerTurnController, 1.5f, false);
-		CurrentTurnNPC->CurrentMana -= SpellToUse->GetCost();
 		BattleMenu->IsChoosingSpell = false;
 		if (SpellToUse->GetSpellCostType() == ESpellCostType::MANA) {
 			CurrentTurnNPC->CurrentMana -= SpellToUse->GetCost();
@@ -629,10 +643,10 @@ void UBattleMenu::BuffSpellUse(const class APresetBuffSpell* const SpellToUse, c
 			AEffect* NewEffect = NewObject<AEffect>(this, EffectClass);
 			CreatedEffectsFromClasses.Add(NewEffect);
 		}
-		CurrentTurnNPC->Execute_GetHitWithBuffOrDebuff(CurrentTurnNPC, CreatedEffectsFromClasses);
+		BattleManager->SelectedCombatNPC->Execute_GetHitWithBuffOrDebuff(BattleManager->SelectedCombatNPC, CreatedEffectsFromClasses, 
+			ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 		UGameplayStatics::PlaySound2D(GetWorld(), PC->GetAudioManager()->GetUseHealOrBuffSoundCue());
 		GetWorld()->GetTimerManager().SetTimer(PlayerTurnControllerTimerHandle, BattleManager, &ABattleManager::PlayerTurnController, 1.5f, false);
-		CurrentTurnNPC->CurrentMana -= SpellToUse->GetCost();
 		BattleMenu->IsChoosingSpell = false;
 		if (SpellToUse->GetSpellCostType() == ESpellCostType::MANA) {
 			CurrentTurnNPC->CurrentMana -= SpellToUse->GetCost();
@@ -689,13 +703,40 @@ void UBattleMenu::SpellButtonOnClicked()
 	IsChoosingAction = false;
 	IsAttackingWithSpell = false;
 	IsPreparingToAttack = false;
-	MenuBorder->SetVisibility(ESlateVisibility::Hidden);
 	if (IsValid(UIManagerWorldSubsystem->PickedButton))
 		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
 		if (USpellBattleMenu* SpellBattleMenu = PlayerCharacter->GetSpellBattleMenuWidget(); IsValid(SpellBattleMenu)) {
 			SpellBattleMenu->AddToViewport();
+			MenuBorder->SetVisibility(ESlateVisibility::Hidden);
 			SpellBattleMenu->ResetUIKeyboardControlLogic();
+			this->RemoveFromParent();
+		}
+	}
+}
+
+void UBattleMenu::SkillButtonOnClicked()
+{
+	IsChoosingSkill = true;
+	IsChoosingAction = false;
+	IsAttackingWithSpell = false;
+	IsPreparingToAttack = false;
+	SkillButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+		if (USkillBattleMenu* SkillBattleMenu = PlayerCharacter->GetSkillBattleMenuWidget(); IsValid(SkillBattleMenu)) {
+			SkillBattleMenu->AddToViewport();
+			MenuBorder->SetVisibility(ESlateVisibility::Hidden);
+			if (SkillBattleMenu->GetSkillsScrollBox()->GetAllChildren().Num() > 0) {
+				ULearnedSpellEntryWidget* EntryWidget = Cast<ULearnedSpellEntryWidget>(SkillBattleMenu->GetSkillsScrollBox()->GetAllChildren()[0]);
+				EntryWidget->GetMainButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				UIManagerWorldSubsystem->PickedButton = EntryWidget->GetMainButton();
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+				//EntryWidget->SetPickedItem(EntryWidget->GetItem());
+			}
+			else {
+				UIManagerWorldSubsystem->PickedButton = SkillBattleMenu->GetUseButtonWithNeighbors();
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			}
 			this->RemoveFromParent();
 		}
 	}
@@ -751,17 +792,17 @@ void UBattleMenu::DefendButtonOnHovered()
 
 void UBattleMenu::ItemButtonOnHovered()
 {
-	ButtonOnHoveredActions(ItemButton, 5);
+	ButtonOnHoveredActions(ItemButton, 6);
 }
 
 void UBattleMenu::AttackMenuBackButtonOnHovered()
 {
-	ButtonOnHoveredActions(AttackMenuBackButton, 2);
+	ButtonOnHoveredActions(AttackMenuBackButton, 1);
 }
 
-void UBattleMenu::AttackActionButtonOnHovered()
+void UBattleMenu::AttackTalkInfoActionButtonOnHovered()
 {
-	ButtonOnHoveredActions(AttackActionButton, 0);
+	ButtonOnHoveredActions(AttackTalkInfoActionButton, 0);
 }
 
 void UBattleMenu::LeftButtonOnHovered()
@@ -776,7 +817,12 @@ void UBattleMenu::RightButtonOnHovered()
 
 void UBattleMenu::SpellButtonOnHovered()
 {
-	ButtonOnHoveredActions(SpellButton, 3);
+	ButtonOnHoveredActions(SpellButton, 2);
+}
+
+void UBattleMenu::SkillButtonOnHovered()
+{
+	ButtonOnHoveredActions(SkillButton, 3);
 }
 
 void UBattleMenu::RangeButtonOnHovered()
@@ -786,12 +832,12 @@ void UBattleMenu::RangeButtonOnHovered()
 
 void UBattleMenu::TalkButtonOnHovered()
 {
-	ButtonOnHoveredActions(TalkButton, 2);
+	ButtonOnHoveredActions(TalkButton, 5);
 }
 
-void UBattleMenu::TalkActionButtonOnHovered()
+void UBattleMenu::InfoButtonOnHovered()
 {
-	ButtonOnHoveredActions(TalkActionButton, 1);
+	ButtonOnHoveredActions(InfoButton, 7);
 }
 
 void UBattleMenu::ButtonOnHoveredActions(UButton* const HoveredButton, int8 Index)
@@ -883,9 +929,9 @@ UButton* UBattleMenu::GetAttackMenuBackButton() const
 	return AttackMenuBackButton;
 }
 
-UButton* UBattleMenu::GetAttackActionButton() const
+UButton* UBattleMenu::GetAttackTalkInfoActionButton() const
 {
-	return AttackActionButton;
+	return AttackTalkInfoActionButton;
 }
 
 UTextBlock* UBattleMenu::GetEnemyNameTextBlock() const

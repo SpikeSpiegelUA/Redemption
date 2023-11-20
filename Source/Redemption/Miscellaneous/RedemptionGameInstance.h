@@ -26,6 +26,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory")
 		TArray<TSubclassOf<class AGameItem>> InstanceItemsInTheInventory;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+		TArray<TSubclassOf<class ASpell>> InstanceLearnedSpells{};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 		TSubclassOf<class AWeaponItem> InstanceEquipedMelee{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 		TSubclassOf<class ARangeWeapon> InstanceEquipedRange{};

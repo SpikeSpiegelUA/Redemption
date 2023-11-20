@@ -18,6 +18,7 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\GameManager.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\AudioManager.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\CombatCharacterInfoMenu.h"
 #include "UIManagerWorldSubsystem.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\DialogueBox.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\ResponsesBox.h"
@@ -29,7 +30,7 @@
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\DeathMenu.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\LearnedSpellsJournalMenu.h"
 #include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatAllies.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\SkillEntryWidget.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\SpecificFunction\SpellInfo.h"
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
@@ -140,7 +141,9 @@ public:
 	AAudioManager* GetAudioManager() const;
 	UDeathMenu* GetDeathMenuWidget() const;
 	USettingsMenu* GetSettingsMenuWidget() const;
+	USkillBattleMenu* GetSkillBattleMenuWidget() const;
 	class USpellBattleMenu* GetSpellBattleMenuWidget() const;
+	class USpellInfo* GetSpellInfoWidget() const;
 	class AEffectsSpellsAndSkillsManager* GetEffectsSpellsAndSkillsManager() const;
 	URedemptionGameInstance* GetGameInstance() const;
 	UInventoryScrollBoxEntryWidget* GetInventoryScrollBoxEntryWidget() const;
@@ -148,6 +151,7 @@ public:
 	UForwardRayInfo* GetForwardRayInfoWidget() const;
 	UPauseMenu* GetPauseMenuWidget() const;
 	UMainMenu* GetMainMenuWidget() const;
+	UCombatCharacterInfoMenu* GetCombatCharacterInfoMenuWidget() const;
 	UResponsesBox* GetResponsesBox() const;
 	UTouchInterface* GetEmptyTouchInterface() const;
 	UTouchInterface* GetStandardTouchInterface() const;
@@ -205,8 +209,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class UInventoryScrollBoxEntryWidget> InventoryScrollBoxEntryClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class USkillEntryWidget> SkillEntryClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class UInventoryMenu> InventoryMenuClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class UPauseMenu> PauseMenuClass{};
@@ -234,6 +236,10 @@ protected:
 		TSubclassOf<class ULearnedSpellsJournalMenu> LearnedSpellsJournalMenuClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class USkillBattleMenu> SkillBattleMenuClass{};
+	UPROPERTY(EditAnywhere, Category = "UI")
+		TSubclassOf<class USpellInfo> SpellInfoClass{};
+	UPROPERTY(EditAnywhere, Category = "UI")
+		TSubclassOf<class UCombatCharacterInfoMenu> CombatCharacterInfoMenuClass{};
 	//The widget instances
 	UPROPERTY()
 		class UForwardRayInfo* ForwardRayInfoWidget{};
@@ -241,8 +247,6 @@ protected:
 		class UPlayerMenu* PlayerMenuWidget{};
 	UPROPERTY()
 		class UInventoryScrollBoxEntryWidget* InventoryScrollBoxEntryWidget{};
-	UPROPERTY()
-		USkillEntryWidget* SkillEntryWidget{};
 	UPROPERTY()
 		class UInventoryMenu* InventoryMenuWidget{};
 	UPROPERTY()
@@ -271,7 +275,13 @@ protected:
 		class ULearnedSpellsJournalMenu* LearnedSpellsJournalMenuWidget{};
 	UPROPERTY()
 		class USkillBattleMenu* SkillBattleMenuWidget{};
+	UPROPERTY()
+		class USpellInfo* SpellInfoWidget{};
+	UPROPERTY()
+		class UCombatCharacterInfoMenu* CombatCharacterInfoMenuWidget{};
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells")
+		TArray<TSubclassOf<ASpell>> AvailableSkills{};
 public:
 #pragma region
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
@@ -292,11 +302,10 @@ public:
 		int Gold = 0;
 	UPROPERTY(VisibleAnywhere, Category = "Combat")
 		TArray<AEffect*> Effects;
-	//Ultimately just spells, that I couldn't come up with crafting  formula for. Like armor debuff, weapon boost, etc.
-	UPROPERTY(EditAnywhere, Category = "Combat")
-		TArray<class ASpell*> Skills;
 
 	bool IsInDialogue = false;
+	//When the player wants to check Info of characters, he can select enemies as well as allies.
+	bool CanSelectEveryoneAsATarget = false;
 	//If a player opened an inventory menu, he can't open a pause menu.
 	bool CanOpenOtherMenus = true;
 
@@ -323,6 +332,8 @@ public:
 	//This is used by left button in the battle menu.
 	void InputScrollLeft();
 
+	const TArray<TSubclassOf<ASpell>> GetAvailableSkills() const;
+
 private:
 #pragma region
 	// Handle move input
@@ -338,6 +349,7 @@ private:
 	void InputUniqueSpellUseSpellInfoToggle();
 	void InputSpellReset();
 	void InputOpenLearnedSpells();
+	void InputOpenSpellInfo();
 
 	//Action button input for binding
 	void InputAction();

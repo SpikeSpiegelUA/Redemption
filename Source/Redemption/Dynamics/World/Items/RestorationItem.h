@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItemWithElements.h"
 #include "RestorationItem.generated.h"
 
 /**
@@ -17,7 +17,7 @@ enum class EItemRestorationType :uint8
 };
 
 UCLASS()
-class REDEMPTION_API ARestorationItem : public AGameItem
+class REDEMPTION_API ARestorationItem : public AGameItemWithElements
 {
 	GENERATED_BODY()
 	
@@ -28,11 +28,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		int RestorationValuePercent{};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
-		TArray<FElementAndItsPercentageStruct> ElementsAndTheirPercentagesStructs {};
-
 public:
 	EItemRestorationType GetTypeOfRestoration() const;
 	int GetRestorationValuePercent() const;
-	TArray<FElementAndItsPercentageStruct> GetElementsAndTheirPercentagesStructs() const;
 };

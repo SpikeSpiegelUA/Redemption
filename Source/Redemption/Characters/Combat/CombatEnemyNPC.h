@@ -25,11 +25,6 @@ public:
 	// Sets default values for this character's properties
 	ACombatEnemyNPC();
 
-	//Function to call, when an enemy got hit. Parameters for a standard attack.
-	void GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, bool ForcedMiss = false) override;
-	//Function to call, when an enemy got hit. Parameters for a buff/debuff attack.
-	void GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects) override;
-
 	int GetGoldReward() const;
 
 	void StartADialogue_Implementation() override;

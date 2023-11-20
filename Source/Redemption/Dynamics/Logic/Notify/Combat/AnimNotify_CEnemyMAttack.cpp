@@ -21,17 +21,17 @@ int UAnimNotify_CEnemyMAttack::CalculateAttackValueAfterEffects(int AttackValue,
 {
 	int AttackValueBeforeEffects = AttackValue;
 	for (AEffect* Effect : CombatNPC->GetEffects()) {
-		if (IsValid(Effect) && Effect->GetAreaOfEffect() == EEffectArea::DAMAGE) {
-			if (AEffectWithPlainModifier* EffectWithPlainModifier = Cast<AEffectWithPlainModifier>(Effect); IsValid(EffectWithPlainModifier)) {
-				if (Effect->GetTypeOfEffect() == EEffectType::BUFF)
+		if (IsValid(Effect) && Effect->GetEffectArea() == EEffectArea::DAMAGE) {
+			if (IsValid(Cast<AEffectWithPlainModifier>(Effect))) {
+				if (Effect->GetEffectType() == EEffectType::PLAINBUFF)
 					AttackValue += AttackValueBeforeEffects + Effect->GetEffectStat();
-				else
+				else if (Effect->GetEffectType() == EEffectType::PLAINDEBUFF)
 					AttackValue += AttackValueBeforeEffects - Effect->GetEffectStat();
 			}
-			else {
-				if (Effect->GetTypeOfEffect() == EEffectType::BUFF)
+			else if(IsValid(Cast<AEffect>(Effect))) {
+				if (Effect->GetEffectType() == EEffectType::BUFF)
 					AttackValue += AttackValueBeforeEffects * (Effect->GetEffectStat() - 1);
-				else
+				else if (Effect->GetEffectType() == EEffectType::DEBUFF)
 					AttackValue -= AttackValueBeforeEffects / Effect->GetEffectStat();
 			}
 		}

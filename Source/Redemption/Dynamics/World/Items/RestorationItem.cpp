@@ -13,8 +13,3 @@ int ARestorationItem::GetRestorationValuePercent() const
     return RestorationValuePercent;
 }
 
-TArray<FElementAndItsPercentageStruct> ARestorationItem::GetElementsAndTheirPercentagesStructs() const
-{
-    return ElementsAndTheirPercentagesStructs;
-}
-

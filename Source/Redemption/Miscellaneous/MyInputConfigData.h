@@ -46,4 +46,6 @@ public:
 		UInputAction* InputSpellReset{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 		UInputAction* InputOpenLearnedSpells{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		UInputAction* InputOpenSpellInfo{};
 };

@@ -73,6 +73,10 @@ private:
 		UTexture* RestorationSpellTypeIcon {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
 		UTexture* BuffSpellTypeIcon {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* ArmorEffectAreaIcon{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* EvasionEffectAreaIcon{};
 public:	
 	// Sets default values for this actor's properties
 	AEffectsSpellsAndSkillsManager();
@@ -108,6 +112,8 @@ public:
 	UTexture* GetDebuffSpellTypeIcon() const;
 	UTexture* GetRestorationSpellTypeIcon() const;
 	UTexture* GetBuffSpellTypeIcon() const;
+	UTexture* GetArmorEffectAreaIcon() const;
+	UTexture* GetEvasionEffectAreaIcon() const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells")
 		TArray<TSubclassOf<ASpell>> ThreeElementsUniqueSpellsClasses{};
@@ -118,4 +124,6 @@ public:
 
 	UTexture* GetSpellTypeImageTexture(ESpellType SpellType);
 	UTexture* GetMainSpellElementImageTexture(ESpellElements MainSpellElement);
+	UTexture* GetEffectAreaImageTexture(EEffectArea EffectArea);
+	UTexture* GetEffectTypeImageTexture(EEffectType EffectType);
 };

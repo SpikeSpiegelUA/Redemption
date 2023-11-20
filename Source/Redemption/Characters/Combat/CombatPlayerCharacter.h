@@ -23,4 +23,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void GetResistancesFromEquipedItems();
+
+	class ACombatPlayerCharacter& ACombatPlayerCharacter::operator =(const class APlayerCharacter& PlayerCharacter);
 };
