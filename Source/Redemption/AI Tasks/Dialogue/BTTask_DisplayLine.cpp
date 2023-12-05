@@ -3,11 +3,11 @@
 
 #include "BTTask_DisplayLine.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\DialogueBox.h"
+#include "..\UI\HUD\Dialogue\DialogueBox.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "InputAction.h"
 #include "EnhancedPlayerInput.h"
-#include <GameFramework/InputSettings.h>
+#include "GameFramework/InputSettings.h"
 
 UBTTask_DisplayLine::UBTTask_DisplayLine(const FObjectInitializer& ObjectInitializer)
 {

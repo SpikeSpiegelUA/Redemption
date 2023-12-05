@@ -1,18 +1,19 @@
 
 #include "SkillBattleMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\SkillEntryWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
+#include "..\Characters\Player\PlayerCharacter.h"
+#include "..\Miscellaneous\ElementsActions.h"
+#include "..\UI\HUD\FloatingManaBarWidget.h"
 
 bool USkillBattleMenu::Initialize()
 {
 	const bool bSuccess = Super::Initialize();
-	if (IsValid(UseButton)) {
-		UseButton->OnClicked.AddDynamic(this, &USkillBattleMenu::UseButtonOnClicked);
-		UseButton->OnHovered.AddDynamic(this, &USkillBattleMenu::UseButtonOnHovered);
+	if (IsValid(UseButtonWithNeighbors)) {
+		UseButtonWithNeighbors->OnClicked.AddDynamic(this, &USkillBattleMenu::UseButtonWithNeighborsOnClicked);
+		UseButtonWithNeighbors->OnHovered.AddDynamic(this, &USkillBattleMenu::UseButtonWithNeighborsOnHovered);
 	}
-	if (IsValid(BackButton)) {
-		BackButton->OnClicked.AddDynamic(this, &USkillBattleMenu::BackButtonOnClicked);
-		BackButton->OnHovered.AddDynamic(this, &USkillBattleMenu::BackButtonOnHovered);
+	if (IsValid(BackButtonWithNeighbors)) {
+		BackButtonWithNeighbors->OnClicked.AddDynamic(this, &USkillBattleMenu::BackButtonWithNeighborsOnClicked);
+		BackButtonWithNeighbors->OnHovered.AddDynamic(this, &USkillBattleMenu::BackButtonWithNeighborsOnHovered);
 	}
 	if (!bSuccess) return false;
 	return bSuccess;
@@ -23,19 +24,22 @@ void USkillBattleMenu::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void USkillBattleMenu::UseButtonOnClicked()
+void USkillBattleMenu::UseButtonWithNeighborsOnClicked()
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
-		PlayerCharacter->GetSpellBattleMenuWidget()->UseUniqueSpellButtonOnClicked();
-		this->RemoveFromParent();
-	}
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
+		PlayerCharacter->GetSpellBattleMenuWidget()->UseSpell();
 }
 
-void USkillBattleMenu::BackButtonOnClicked()
+void USkillBattleMenu::BackButtonWithNeighborsOnClicked()
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter())) {
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
 		this->RemoveFromParent();
 		PlayerCharacter->GetBattleMenuWidget()->AddToViewport();
+		PlayerCharacter->GetBattleMenuWidget()->GetMenuBorder()->SetVisibility(ESlateVisibility::Visible);
+		PlayerCharacter->GetSpellInfoWidget()->RemoveFromParent();
+		PlayerCharacter->GetBattleMenuWidget()->IsChoosingSkill = false;
+		PlayerCharacter->GetBattleManager()->IsSelectingAllyAsTarget = false;
+		PlayerCharacter->GetBattleMenuWidget()->IsChoosingAction = true;
 		if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
 			if (IsValid(UIManagerWorldSubsystem->PickedButton))
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.6f, 0.6f, 0.6f, 1.f));
@@ -43,10 +47,12 @@ void USkillBattleMenu::BackButtonOnClicked()
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 			UIManagerWorldSubsystem->PickedButtonIndex = 0;
 		}
+		PlayerCharacter->GetSpellBattleMenuWidget()->SetCreatedSpell(nullptr);
+		HideNotificationAndClearItsTimer();
 	}
 }
 
-void USkillBattleMenu::UseButtonOnHovered()
+void USkillBattleMenu::UseButtonWithNeighborsOnHovered()
 {
 	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
 		if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
@@ -55,13 +61,13 @@ void USkillBattleMenu::UseButtonOnHovered()
 			else
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.6f, 0.6f, 0.6f, 1.f));
 		}
-		UIManagerWorldSubsystem->PickedButton = UseButton;
+		UIManagerWorldSubsystem->PickedButton = UseButtonWithNeighbors;
 		UIManagerWorldSubsystem->PickedButtonIndex = 0;
 		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 	}
 }
 
-void USkillBattleMenu::BackButtonOnHovered()
+void USkillBattleMenu::BackButtonWithNeighborsOnHovered()
 {
 	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
 		if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
@@ -70,21 +76,56 @@ void USkillBattleMenu::BackButtonOnHovered()
 			else
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.6f, 0.6f, 0.6f, 1.f));
 		}
-		UIManagerWorldSubsystem->PickedButton = BackButton;
+		UIManagerWorldSubsystem->PickedButton = BackButtonWithNeighbors;
 		UIManagerWorldSubsystem->PickedButtonIndex = 1;
 		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 	}
 }
 
+void USkillBattleMenu::HideNotificationAndClearItsTimer()
+{
+	NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
+	NotificationTextBlock->SetText(FText::FromString(""));
+	GetWorld()->GetTimerManager().ClearTimer(HideNotificationTimerHandle);
+}
+
+void USkillBattleMenu::CreateNotification(const FText& NotificationText)
+{
+	NotificationBorder->SetVisibility(ESlateVisibility::Visible);
+	NotificationTextBlock->SetText(NotificationText);
+	GetWorld()->GetTimerManager().SetTimer(HideNotificationTimerHandle, this, &USkillBattleMenu::HideNotificationAndClearItsTimer, 3.f, false);
+}
+
+const UScrollBox* USkillBattleMenu::GetSkillsScrollBox() const
+{
+	return SkillsScrollBox;
+}
+
+UButtonWithNeighbors* USkillBattleMenu::GetUseButtonWithNeighbors() const
+{
+	return UseButtonWithNeighbors;
+}
+
+UButtonWithNeighbors* USkillBattleMenu::GetBackButtonWithNeighbors() const
+{
+	return BackButtonWithNeighbors;
+}
+
 void USkillBattleMenu::AddSkillEntryToSkillsScrollBox(const class ASpell* const SpellToAdd)
 {
-	/*if (IsValid(SkillEntryClass))
-		SkillEntryWidget = CreateWidget<USkillEntryWidget>(GetWorld(), SkillEntryClass);
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter) && IsValid(SkillEntryWidget)) {
+	if(IsValid(LearnedSpellEntryClass))
+		LearnedSpellEntryWidget = CreateWidget<ULearnedSpellEntryWidget>(GetWorld(), LearnedSpellEntryClass);
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter) && IsValid(LearnedSpellEntryWidget)) {
 		LearnedSpellEntryWidget->SetSpellTypeImage(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetSpellTypeImageTexture(SpellToAdd->GetTypeOfSpell()));
 		LearnedSpellEntryWidget->SetSpellMainElementImage(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetMainSpellElementImageTexture(ElementsActions::FindSpellsMainElement(SpellToAdd->GetSpellElements())));
 		LearnedSpellEntryWidget->SetSpellNameText(SpellToAdd->GetSpellName());
 		LearnedSpellEntryWidget->EntrySpell = const_cast<ASpell*>(SpellToAdd);
-		MainScrollBox->AddChild(LearnedSpellEntryWidget);
-	}*/
+		SkillsScrollBox->AddChild(LearnedSpellEntryWidget);
+	}
+}
+
+void USkillBattleMenu::ResetSkillsScrollBox()
+{
+	SkillsScrollBox->ClearChildren();
+	LearnedSpellEntryWidget = nullptr;
 }

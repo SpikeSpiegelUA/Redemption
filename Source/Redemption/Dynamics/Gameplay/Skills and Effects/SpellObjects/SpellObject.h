@@ -5,8 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
+#include "..\Dynamics\World\Items\GameItem.h"
+#include "..\Characters\Player\PlayerCharacter.h"
 #include "SpellObject.generated.h"
 
 //Spell's "object" class. For example, player is throwind red rectangle(well, this is a spell's object) when using a fire arrow.

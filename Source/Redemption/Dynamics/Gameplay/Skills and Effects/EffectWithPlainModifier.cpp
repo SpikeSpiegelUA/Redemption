@@ -3,3 +3,13 @@
 
 #include "EffectWithPlainModifier.h"
 
+AEffectWithPlainModifier::AEffectWithPlainModifier()
+{
+
+}
+
+void AEffectWithPlainModifier::BeginPlay()
+{
+	Super::BeginPlay();
+
+}

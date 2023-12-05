@@ -1,7 +1,7 @@
 
 #include "BTTask_PassATurn.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "..\Characters\Player\PlayerCharacter.h"
+#include "..\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 UBTTask_PassATurn::UBTTask_PassATurn(const FObjectInitializer& ObjectInitializer)

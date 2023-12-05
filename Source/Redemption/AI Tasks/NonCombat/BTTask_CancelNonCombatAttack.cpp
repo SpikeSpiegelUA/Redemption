@@ -2,7 +2,7 @@
 
 
 #include "BTTask_CancelNonCombatAttack.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\NonCombat\NonCombatEnemyNPCAnimInstance.h"
+#include "..\Characters\Animation\NonCombat\NonCombatEnemyNPCAnimInstance.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
 

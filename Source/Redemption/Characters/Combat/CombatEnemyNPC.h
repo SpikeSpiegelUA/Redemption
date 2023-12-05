@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatNPC.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Characters\Combat\CombatNPC.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\Interfaces\DialogueActionsInterface.h"
+#include "..\Dynamics\Logic\Interfaces\DialogueActionsInterface.h"
 #include "CombatEnemyNPC.generated.h"
 
 /**
@@ -24,11 +24,6 @@ public:
 
 	// Sets default values for this character's properties
 	ACombatEnemyNPC();
-
-	//Function to call, when an enemy got hit. Parameters for a standard attack.
-	void GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, bool ForcedMiss = false) override;
-	//Function to call, when an enemy got hit. Parameters for a buff/debuff attack.
-	void GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects) override;
 
 	int GetGoldReward() const;
 

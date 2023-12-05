@@ -1,7 +1,7 @@
 #pragma once
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\World\Items\EquipmentItem.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "CombatActionsInterface.generated.h"
 
 UINTERFACE(MinimalAPI, Blueprintable, BlueprintType)
@@ -21,5 +21,5 @@ public:
        void GetHit(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, bool ForcedMiss = false);
     //Function to call, when an enemy got hit. Parameters for a buff/debuff attack.
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
-       void GetHitWithBuffOrDebuff(const TArray<class AEffect*>& HitEffects);
+       void GetHitWithBuffOrDebuff(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements);
 };

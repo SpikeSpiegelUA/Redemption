@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SettingsMenu.h"
+#include "..\UI\Menus\SettingsMenu.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Kismet\GameplayStatics.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\MainMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\PauseMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
-#include "Redemption/Characters/Player/PlayerCharacter.h"
+#include "..\UI\Menus\MainMenu.h"
+#include "..\UI\Menus\PauseMenu.h"
+#include "..\GameInstance\RedemptionGameInstance.h"
+#include "..\Characters\Player\PlayerCharacter.h"
 
 bool USettingsMenu::Initialize()
 {
@@ -87,27 +87,26 @@ void USettingsMenu::BackgroundMusicSliderOnValueChanged(float Value)
 void USettingsMenu::BackButtonOnClicked()
 {
 	if(APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-		if(UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
-			if (APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()); IsValid(PlayerController)) {
-				this->RemoveFromParent();
-				FString MapName = GetWorld()->GetMapName();
-				UMainMenu* MainMenuWidget = nullptr;
-				UPauseMenu* PauseMenuWidget = nullptr;
-				if (MapName == "UEDPIE_0_MainMenu") {
-					if (IsValid(PlayerCharacter->GetMainMenuWidget()))
-						PlayerCharacter->GetMainMenuWidget()->AddToViewport();
-					UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetMainMenuWidget()->GetNewGameButton();
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-					UIManagerWorldSubsystem->PickedButtonIndex = 0;
-				}
-				else if (MapName == "UEDPIE_0_Town" || MapName == "UEDPIE_0_Dungeon") {
-					if (IsValid(PlayerCharacter->GetPauseMenuWidget()))
-						PlayerCharacter->GetPauseMenuWidget()->AddToViewport();
-					UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetPauseMenuWidget()->GetResumeButton();
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-					UIManagerWorldSubsystem->PickedButtonIndex = 0;
-				}
+		if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+			this->RemoveFromParent();
+			FString MapName = GetWorld()->GetMapName();
+			UMainMenu* MainMenuWidget = nullptr;
+			UPauseMenu* PauseMenuWidget = nullptr;
+			if (MapName == "UEDPIE_0_MainMenu") {
+				if (IsValid(PlayerCharacter->GetMainMenuWidget()))
+					PlayerCharacter->GetMainMenuWidget()->AddToViewport();
+				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetMainMenuWidget()->GetNewGameButton();
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
 			}
+			else if (MapName == "UEDPIE_0_Town" || MapName == "UEDPIE_0_Dungeon") {
+				if (IsValid(PlayerCharacter->GetPauseMenuWidget()))
+					PlayerCharacter->GetPauseMenuWidget()->AddToViewport();
+				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetPauseMenuWidget()->GetResumeButton();
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			}
+		}
 }
 
 UButton* USettingsMenu::GetBackButton() const

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\NPCAIController.h"
+#include "..\Characters\AI Controllers\NPCAIController.h"
 #include "TownNPCAIController.generated.h"
 
 /**

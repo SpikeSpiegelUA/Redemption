@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\SelectedElementEntryWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SpellBattleMenu.h"
+#include "..\UI\Miscellaneous\SelectedElementEntryWidget.h"
+#include "..\Characters\Player\PlayerCharacter.h"
+#include "..\UI\Menus\SpellBattleMenu.h"
 
 bool USelectedElementEntryWidget::Initialize()
 {

@@ -30,5 +30,6 @@ ARestorationSpell& ARestorationSpell::operator=(const ASpell& Spell)
 	SetSpellElements(Spell.GetSpellElements());
 	SetTypeOfSpell(Spell.GetTypeOfSpell());
 	SetDescription(Spell.GetDescription());
+	SetSpellCostType(Spell.GetSpellCostType());
 	return *this;
 }

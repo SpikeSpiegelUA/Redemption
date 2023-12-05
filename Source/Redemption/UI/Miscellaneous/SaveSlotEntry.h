@@ -6,25 +6,35 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
-#include "SkillEntryWidget.generated.h"
+#include "SaveSlotEntry.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class REDEMPTION_API USkillEntryWidget : public UUserWidget
+class REDEMPTION_API USaveSlotEntry : public UUserWidget
 {
 	GENERATED_BODY()
-		
+
 private:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
-		class UButton* MainButton;
+		class UButton* SlotButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
-		class UTextBlock* MainTextBlock;
+		class UTextBlock* NameTextBlock;
 
 	UFUNCTION()
-		void MainButtonOnClicked();
+	void SlotButtonOnClicked();
+	UFUNCTION()
+	void SlotButtonOnHovered();
+
+	uint16 SlotIndex{};
 protected:
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
+public:
+	uint16 GetSlotIndex() const;
+	UButton* GetSlotButton() const;
+	UTextBlock* GetNameTextBlock() const;
+
+	void SetSlotIndex(const uint16 NewSlotIndex);
 };

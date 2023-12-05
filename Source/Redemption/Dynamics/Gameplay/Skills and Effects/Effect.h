@@ -38,15 +38,19 @@ enum class ESpellElements :uint8
 	BLOOD UMETA(DisplayName = "Blood"),
 
 	//Need this for some logic. Basically spell/weapon has different elements with the same count.
-	MULTIELEMENTAL UMETA(DisplayName = "Multielemental"),
+	MULTIELEMENTAL UMETA(DisplayName = "Multielemental")
 };
-ENUM_RANGE_BY_FIRST_AND_LAST(ESpellElements, ESpellElements::FIRE, ESpellElements::BLOOD);
+ENUM_RANGE_BY_FIRST_AND_LAST(ESpellElements, ESpellElements::FIRE, ESpellElements::MULTIELEMENTAL);
 
 UENUM(BlueprintType)
 enum class EEffectType :uint8
 {
 	BUFF UMETA(DisplayName = "Buff"),
 	DEBUFF UMETA(DisplayName = "Debuff"),
+	PLAINBUFF UMETA(DisplayName = "Plain Buff"),
+	PLAINDEBUFF UMETA(DisplayName = "Plain Debuff"),
+	TURNSTARTDAMAGE UMETA(DisplayName = "Turn start damage"),
+	TURNSKIP UMETA(DisplayName = "Turn skip")
 };
 
 UCLASS()
@@ -77,14 +81,14 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	EEffectArea GetAreaOfEffect() const;
-	EEffectType GetTypeOfEffect() const;
+	EEffectArea GetEffectArea() const;
+	EEffectType GetEffectType() const;
 	FText GetEffectName() const;
 	int GetEffectStat() const;
 	int GetDuration() const;
 
-	void SetAreaOfEffect(EEffectArea NewAreaOfEffect);
-	void SetTypeOfEffect(EEffectType NewTypeOfEffect);
+	void SetEffectArea(EEffectArea NewAreaOfEffect);
+	void SetEffectType(EEffectType NewTypeOfEffect);
 	void SetEffectName(const FText& NewEffectName);
 	void SetEffectStat(int NewEffectStat);
 	void SetDuration(int NewDuration);

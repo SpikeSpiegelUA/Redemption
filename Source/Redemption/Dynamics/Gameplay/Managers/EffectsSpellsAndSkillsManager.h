@@ -4,12 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "Engine/DataTable.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Skill.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\SpellObjects\SpellObject.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Skill.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Spell.h"
+#include "..\Dynamics\World\Items\GameItem.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\SpellObjects\SpellObject.h"
 #include "EffectsSpellsAndSkillsManager.generated.h"
 
 USTRUCT(BlueprintType)
@@ -73,6 +73,10 @@ private:
 		UTexture* RestorationSpellTypeIcon {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
 		UTexture* BuffSpellTypeIcon {};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* ArmorEffectAreaIcon{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* EvasionEffectAreaIcon{};
 public:	
 	// Sets default values for this actor's properties
 	AEffectsSpellsAndSkillsManager();
@@ -108,6 +112,8 @@ public:
 	UTexture* GetDebuffSpellTypeIcon() const;
 	UTexture* GetRestorationSpellTypeIcon() const;
 	UTexture* GetBuffSpellTypeIcon() const;
+	UTexture* GetArmorEffectAreaIcon() const;
+	UTexture* GetEvasionEffectAreaIcon() const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells")
 		TArray<TSubclassOf<ASpell>> ThreeElementsUniqueSpellsClasses{};
@@ -118,4 +124,6 @@ public:
 
 	UTexture* GetSpellTypeImageTexture(ESpellType SpellType);
 	UTexture* GetMainSpellElementImageTexture(ESpellElements MainSpellElement);
+	UTexture* GetEffectAreaImageTexture(EEffectArea EffectArea);
+	UTexture* GetEffectTypeImageTexture(EEffectType EffectType);
 };

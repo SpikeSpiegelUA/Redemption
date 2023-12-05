@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\EffectsSpellsAndSkillsManager.h"
+#include "..\Dynamics\Gameplay\Managers\EffectsSpellsAndSkillsManager.h"
 
 // Sets default values
 AEffectsSpellsAndSkillsManager::AEffectsSpellsAndSkillsManager()
@@ -139,6 +139,16 @@ UTexture* AEffectsSpellsAndSkillsManager::GetBuffSpellTypeIcon() const
 	return BuffSpellTypeIcon;
 }
 
+UTexture* AEffectsSpellsAndSkillsManager::GetArmorEffectAreaIcon() const
+{
+	return ArmorEffectAreaIcon;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetEvasionEffectAreaIcon() const
+{
+	return EvasionEffectAreaIcon;
+}
+
 UTexture* AEffectsSpellsAndSkillsManager::GetSpellTypeImageTexture(ESpellType SpellType)
 {
 	switch (SpellType) {
@@ -150,8 +160,9 @@ UTexture* AEffectsSpellsAndSkillsManager::GetSpellTypeImageTexture(ESpellType Sp
 		return RestorationSpellTypeIcon;
 	case ESpellType::BUFF:
 		return BuffSpellTypeIcon;
+	default:
+		return nullptr;
 	}
-	return nullptr;
 }
 
 UTexture* AEffectsSpellsAndSkillsManager::GetMainSpellElementImageTexture(ESpellElements MainSpellElement)
@@ -175,7 +186,56 @@ UTexture* AEffectsSpellsAndSkillsManager::GetMainSpellElementImageTexture(ESpell
 		return BloodElementIcon;
 	case ESpellElements::MULTIELEMENTAL:
 		return MultielementalIcon;
+	default:
+		return nullptr;
 	}
-	return nullptr;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetEffectAreaImageTexture(EEffectArea EffectArea)
+{
+	switch (EffectArea) {
+		case EEffectArea::DAMAGE:
+			return AssaultSpellTypeIcon;
+		case EEffectArea::ARMOR:
+			return FireElementIcon;
+		case EEffectArea::EVASION:
+			return FireElementIcon;
+		case EEffectArea::FIRERESISTANCE:
+			return FireElementIcon;
+		case EEffectArea::WATERRESISTANCE:
+			return WaterElementIcon;
+		case EEffectArea::WINDRESISTANCE:
+			return WindElementIcon;
+		case EEffectArea::EARTHRESISTANCE:
+			return EarthElementIcon;
+		case EEffectArea::LIGHTNINGRESISTANCE:
+			return LightningElementIcon;
+		case EEffectArea::HOLYRESISTANCE:
+			return HolyElementIcon;
+		case EEffectArea::DARKRESISTANCE:
+			return DarkElementIcon;
+		case EEffectArea::BLOODRESISTANCE:
+			return BloodElementIcon;
+		case EEffectArea::MULTIELEMENTALRESISTANCE:
+			return MultielementalIcon;
+		default:
+			return nullptr;
+	}
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetEffectTypeImageTexture(EEffectType EffectType)
+{
+	switch (EffectType) {
+	case EEffectType::BUFF:
+		return BuffSpellTypeIcon;
+	case EEffectType::PLAINBUFF:
+		return BuffSpellTypeIcon;
+	case EEffectType::DEBUFF:
+		return DebuffSpellTypeIcon;
+	case EEffectType::PLAINDEBUFF:
+		return DebuffSpellTypeIcon;
+	default:
+		return nullptr;
+	}
 }
 

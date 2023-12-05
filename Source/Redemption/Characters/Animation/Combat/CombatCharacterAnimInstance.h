@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatNPC.h"
+#include "..\Characters\Combat\CombatNPC.h"
 #include "CombatCharacterAnimInstance.generated.h"
 
 /**

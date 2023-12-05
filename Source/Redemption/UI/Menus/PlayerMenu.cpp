@@ -2,7 +2,7 @@
 
 
 #include "PlayerMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
+#include "..\Characters\Player\PlayerCharacter.h"
 #include "Components/Button.h"
 #include "Components/StackBox.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"

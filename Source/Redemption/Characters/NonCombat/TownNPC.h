@@ -3,15 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\CharacterInTheWorld.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\Interfaces\DialogueActionsInterface.h"
+#include "..\Characters\CharacterInTheWorld.h"
+#include "..\Dynamics\Logic\Interfaces\DialogueActionsInterface.h"
+#include "..\SaveSystem\Interfaces\SavableObjectInterface.h"
 #include "TownNPC.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class ATownNPC : public ACharacterInTheWorld, public IDialogueActionsInterface
+class ATownNPC : public ACharacterInTheWorld, public IDialogueActionsInterface, public ISavableObjectInterface
 {
 	GENERATED_BODY()
 protected:
@@ -19,6 +20,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Dialogue")
 		UBehaviorTree* DialogueTree {};
+
+	void LoadObjectFromGameInstance_Implementation(const URedemptionGameInstance* const GameInstance) override;
 public:
 
 	// Sets default values for this character's properties

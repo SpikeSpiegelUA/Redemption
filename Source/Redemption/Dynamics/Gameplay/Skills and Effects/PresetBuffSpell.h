@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\BuffSpell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\BuffSpell.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "PresetBuffSpell.generated.h"
 
 /**
@@ -15,8 +15,9 @@ class REDEMPTION_API APresetBuffSpell : public ABuffSpell
 {
 	GENERATED_BODY()
 private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
-	TArray<TSubclassOf<AEffect>> EffectsClasses{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
+		TArray<TSubclassOf<AEffect>> EffectsClasses{};
 	
 public:
 	TArray<TSubclassOf<AEffect>> GetEffectsClasses() const;

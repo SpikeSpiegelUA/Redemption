@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\BuffItem.h"
+#include "..\Dynamics\World\Items\BuffItem.h"
 #include "BuffItem.h"
 
 EBuffDebuffType ABuffItem::GetTypeOfBuff() const
@@ -12,9 +12,4 @@ EBuffDebuffType ABuffItem::GetTypeOfBuff() const
 TArray<TSubclassOf<AEffect>> ABuffItem::GetEffectsClasses() const
 {
     return EffectsClasses;
-}
-
-TArray<FElementAndItsPercentageStruct> ABuffItem::GetElementsAndTheirPercentagesStructs() const
-{
-    return ElementsAndTheirPercentagesStructs;
 }

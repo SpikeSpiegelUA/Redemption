@@ -4,42 +4,44 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\CharacterInTheWorld.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\MyInputConfigData.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\InventoryMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\PauseMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\PlayerMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SpellBattleMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SkillBattleMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\BattleResultsScreen.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\GameManager.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\AudioManager.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
-#include "UIManagerWorldSubsystem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\DialogueBox.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\ResponsesBox.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\ResponseEntry.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\ForwardRayInfo.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Notification.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\EffectsSpellsAndSkillsManager.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\DeathMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\LearnedSpellsJournalMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatAllies.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\SkillEntryWidget.h"
+#include "..\Characters\CharacterInTheWorld.h"
+#include "..\Miscellaneous\MyInputConfigData.h"
+#include "..\Dynamics\World\Items\EquipmentItem.h"
+#include "..\UI\Menus\BattleMenu.h"
+#include "..\UI\Menus\InventoryMenu.h"
+#include "..\UI\Menus\PauseMenu.h"
+#include "..\UI\Menus\PlayerMenu.h"
+#include "..\UI\Menus\SpellBattleMenu.h"
+#include "..\UI\Menus\SkillBattleMenu.h"
+#include "..\UI\Screens\BattleResultsScreen.h"
+#include "..\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "..\Dynamics\Gameplay\Managers\GameManager.h"
+#include "..\Dynamics\Gameplay\Managers\AudioManager.h"
+#include "..\GameInstance\RedemptionGameInstance.h"
+#include "..\UI\Menus\CombatCharacterInfoMenu.h"
+#include "..\Public\UIManagerWorldSubsystem.h"
+#include "..\UI\HUD\Dialogue\DialogueBox.h"
+#include "..\UI\HUD\Dialogue\ResponsesBox.h"
+#include "..\UI\HUD\Dialogue\ResponseEntry.h"
+#include "..\UI\HUD\ForwardRayInfo.h"
+#include "..\UI\HUD\Notification.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\Gameplay\Managers\EffectsSpellsAndSkillsManager.h"
+#include "..\UI\Menus\DeathMenu.h"
+#include "..\UI\Menus\LearnedSpellsJournalMenu.h"
+#include "..\UI\Menus\SaveLoadGameMenu.h"
+#include "..\Characters\Combat\CombatAllies.h"
+#include "..\UI\SpecificFunction\SpellInfo.h"
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
 #include "Components/Border.h"
 #include "Components/VerticalBox.h"
-#include <EnhancedInputComponent.h>
-#include <InputActionValue.h>
+#include "EnhancedInputComponent.h"
+#include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\PlayerCharacterAnimInstance.h"
+#include "..\Characters\Animation\PlayerCharacterAnimInstance.h"
 #include "InputMappingContext.h"
 #include "InputActionValue.h"
 #include "Camera/CameraComponent.h"
@@ -50,14 +52,15 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Containers/EnumAsByte.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\AlliesInfoBars.h"
+#include "..\UI\HUD\AlliesInfoBars.h"
+#include "..\SaveSystem\Interfaces\SavableObjectInterface.h"
 #include "PlayerCharacter.generated.h"
 
 /**
  * 
  */
 UCLASS(Config=Game)
-class APlayerCharacter : public ACharacter
+class APlayerCharacter : public ACharacter, public ISavableObjectInterface
 {
 	GENERATED_BODY()
 	/** Camera boom positioning the camera behind the character*/
@@ -85,9 +88,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		class AEffectsSpellsAndSkillsManager* EffectsManager {};
 	UPROPERTY(BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
-		URedemptionGameInstance* GameInstance {};
+		URedemptionGameInstance* RedemptionGameInstance {};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true), SaveGame)
 		TArray<TSubclassOf<ACombatAllies>> Allies{};
 
 	UPROPERTY()
@@ -140,7 +143,9 @@ public:
 	AAudioManager* GetAudioManager() const;
 	UDeathMenu* GetDeathMenuWidget() const;
 	USettingsMenu* GetSettingsMenuWidget() const;
+	USkillBattleMenu* GetSkillBattleMenuWidget() const;
 	class USpellBattleMenu* GetSpellBattleMenuWidget() const;
+	class USpellInfo* GetSpellInfoWidget() const;
 	class AEffectsSpellsAndSkillsManager* GetEffectsSpellsAndSkillsManager() const;
 	URedemptionGameInstance* GetGameInstance() const;
 	UInventoryScrollBoxEntryWidget* GetInventoryScrollBoxEntryWidget() const;
@@ -148,10 +153,12 @@ public:
 	UForwardRayInfo* GetForwardRayInfoWidget() const;
 	UPauseMenu* GetPauseMenuWidget() const;
 	UMainMenu* GetMainMenuWidget() const;
+	UCombatCharacterInfoMenu* GetCombatCharacterInfoMenuWidget() const;
+	USaveLoadGameMenu* GetSaveLoadGameMenuWidget() const;
 	UResponsesBox* GetResponsesBox() const;
 	UTouchInterface* GetEmptyTouchInterface() const;
 	UTouchInterface* GetStandardTouchInterface() const;
-	TArray<TSubclassOf<ACombatAllies>> GetAllies() const;
+	TArray<TSubclassOf<ACombatAllies>> GetAllies();
 
 	//Restore widgets to default state
 	void RestartBattleMenuWidget();
@@ -161,6 +168,7 @@ public:
 	void SetGameManager(const AGameManager* const NewGameManager);
 	void SetBattleManager(const ABattleManager* const NewBattleManager);
 	void SetAudioManager(const AAudioManager* const NewAudioManager);
+	void SetAllies(const TArray<TSubclassOf<ACombatAllies>>& NewAllies);
 protected:
 	/**Called for forwards/backward input*/
 	void MoveForward(float Value);
@@ -189,6 +197,8 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
 	
+	void LoadObjectFromGameInstance_Implementation(const URedemptionGameInstance* const GameInstance) override;
+
 	//Ray of detecting objects in front of a player
 	FHitResult ForwardRay();
 
@@ -204,8 +214,6 @@ protected:
 		TSubclassOf<class UPlayerMenu> PlayerMenuClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class UInventoryScrollBoxEntryWidget> InventoryScrollBoxEntryClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class USkillEntryWidget> SkillEntryClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class UInventoryMenu> InventoryMenuClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
@@ -234,6 +242,14 @@ protected:
 		TSubclassOf<class ULearnedSpellsJournalMenu> LearnedSpellsJournalMenuClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class USkillBattleMenu> SkillBattleMenuClass{};
+	UPROPERTY(EditAnywhere, Category = "UI")
+		TSubclassOf<class USaveLoadGameMenu> SaveLoadGameMenuClass{};
+	UPROPERTY(EditAnywhere, Category = "UI")
+		TSubclassOf<class USpellInfo> SpellInfoClass{};
+	UPROPERTY(EditAnywhere, Category = "UI")
+		TSubclassOf<class UCombatCharacterInfoMenu> CombatCharacterInfoMenuClass{};
+	UPROPERTY(EditAnywhere, Category = "UI")
+		TSubclassOf<class ALootInTheWorld> LootInTheWorldClass{};
 	//The widget instances
 	UPROPERTY()
 		class UForwardRayInfo* ForwardRayInfoWidget{};
@@ -241,8 +257,6 @@ protected:
 		class UPlayerMenu* PlayerMenuWidget{};
 	UPROPERTY()
 		class UInventoryScrollBoxEntryWidget* InventoryScrollBoxEntryWidget{};
-	UPROPERTY()
-		USkillEntryWidget* SkillEntryWidget{};
 	UPROPERTY()
 		class UInventoryMenu* InventoryMenuWidget{};
 	UPROPERTY()
@@ -271,7 +285,15 @@ protected:
 		class ULearnedSpellsJournalMenu* LearnedSpellsJournalMenuWidget{};
 	UPROPERTY()
 		class USkillBattleMenu* SkillBattleMenuWidget{};
+	UPROPERTY()
+		class USaveLoadGameMenu* SaveLoadGameMenuWidget{};
+	UPROPERTY()
+		class USpellInfo* SpellInfoWidget{};
+	UPROPERTY()
+		class UCombatCharacterInfoMenu* CombatCharacterInfoMenuWidget{};
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells")
+		TArray<TSubclassOf<ASpell>> AvailableSkills{};
 public:
 #pragma region
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
@@ -280,41 +302,40 @@ public:
 		class UMyInputConfigData* InputActions{};
 #pragma endregion
 	//Battle mode regarding variables
-	UPROPERTY(EditAnywhere, Category = "Combat")
+	UPROPERTY(EditAnywhere, Category = "Combat", SaveGame)
 		float CurrentHP = 100;
-	UPROPERTY(EditAnywhere, Category = "Combat")
+	UPROPERTY(EditAnywhere, Category = "Combat", SaveGame)
 		float MaxHP = 100;
-	UPROPERTY(EditAnywhere, Category = "Combat")
+	UPROPERTY(EditAnywhere, Category = "Combat", SaveGame)
 		float CurrentMana = 100;
-	UPROPERTY(EditAnywhere, Category = "Combat")
+	UPROPERTY(EditAnywhere, Category = "Combat", SaveGame)
 		float MaxMana = 100;
-	UPROPERTY(EditAnywhere, Category = "Inventory")
+	UPROPERTY(EditAnywhere, Category = "Inventory", SaveGame)
 		int Gold = 0;
 	UPROPERTY(VisibleAnywhere, Category = "Combat")
 		TArray<AEffect*> Effects;
-	//Ultimately just spells, that I couldn't come up with crafting  formula for. Like armor debuff, weapon boost, etc.
-	UPROPERTY(EditAnywhere, Category = "Combat")
-		TArray<class ASpell*> Skills;
 
 	bool IsInDialogue = false;
+	//When the player wants to check Info of characters, he can select enemies as well as allies.
+	bool CanSelectEveryoneAsATarget = false;
 	//If a player opened an inventory menu, he can't open a pause menu.
 	bool CanOpenOtherMenus = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
 		int Strength = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
 		int Perception = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
 		int Endurance = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
 		int Charisma = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
 		int Intelligence = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
 		int Will = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
 		int Agility = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
 		int Luck = 1;
 
 
@@ -322,6 +343,8 @@ public:
 	void InputScrollRight();
 	//This is used by left button in the battle menu.
 	void InputScrollLeft();
+
+	const TArray<TSubclassOf<ASpell>> GetAvailableSkills() const;
 
 private:
 #pragma region
@@ -334,10 +357,11 @@ private:
 	//Jump input for binding
 	void InputJump();
 
-	void InputSpellUse();
+	void InputSpellUseSaveLoad();
 	void InputUniqueSpellUseSpellInfoToggle();
 	void InputSpellReset();
 	void InputOpenLearnedSpells();
+	void InputOpenSpellInfo();
 
 	//Action button input for binding
 	void InputAction();

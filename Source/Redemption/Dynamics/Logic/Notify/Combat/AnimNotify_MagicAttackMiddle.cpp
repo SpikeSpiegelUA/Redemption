@@ -2,9 +2,9 @@
 
 
 #include "AnimNotify_MagicAttackMiddle.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\SpellObjects\SpellObject.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SpellBattleMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\SpellObjects\SpellObject.h"
+#include "..\UI\Menus\SpellBattleMenu.h"
+#include "..\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "Kismet/KismetMathLibrary.h"
 
 void UAnimNotify_MagicAttackMiddle::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)

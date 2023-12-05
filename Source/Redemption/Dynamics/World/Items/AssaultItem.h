@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItemWithItemObject.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
+#include "..\Dynamics\World\Items\GameItemWithItemObject.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "Containers/EnumAsByte.h"
 #include "AssaultItem.generated.h"
 
@@ -19,10 +19,7 @@ class REDEMPTION_API AAssaultItem : public AGameItemWithItemObject
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		int AttackValue = 0;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
-		TArray<FElementAndItsPercentageStruct> ElementsAndTheirPercentagesStructs {};
 
 public:
 	int GetAttackValue() const;
-	TArray<FElementAndItsPercentageStruct> GetElementsAndTheirPercentagesStructs() const;
 };

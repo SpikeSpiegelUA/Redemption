@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/Button.h"
-#include "Miscellaneous/SideAndItsButton.h"
+#include "../Miscellaneous/SideAndItsButton.h"
 #include "ButtonWithNeighbors.generated.h"
 
 /**

@@ -5,8 +5,8 @@
 #include "CoreMinimal.h"
 #include "../Dynamics/Gameplay/Skills and Effects/Effect.h"
 #include "Containers/EnumAsByte.h"
-#include <Redemption/Dynamics/Miscellaneous/ElementAndItsPercentage.h>
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\PhysicalTypeAndItsPercentage.h"
+#include "..\Dynamics/Miscellaneous/ElementAndItsPercentage.h"
+#include "..\Dynamics\Miscellaneous\PhysicalTypeAndItsPercentage.h"
 
 
 /**
@@ -24,7 +24,7 @@ namespace SkillsSpellsAndEffectsActions {
 	//For the logic to work we need to have resistances for each element. Call this function in a BeginPlay() of CombatEnemies and the Player.
 	void InitializeElementalResistances(TArray<FElementAndItsPercentageStruct>& ElementalResistances);
 	//Same as the function above, just for physical resistances;
-	void InitializePhysicalResistances(TArray<FPhysicalTypeAndItsPercentageStruct>& ResistancesResistances);
+	void InitializePhysicalResistances(TArray<FPhysicalTypeAndItsPercentageStruct>& PhysicalResistances);
 	template<typename T>
 	FText GetEnumDisplayName(T EnumValue)
 	{

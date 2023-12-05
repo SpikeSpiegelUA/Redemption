@@ -2,7 +2,7 @@
 
 
 #include "NonCombatEnemyNPCAnimInstance.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\NonCombat\NonCombatEnemyNPCAIController.h"
+#include "..\Characters\AI Controllers\NonCombat\NonCombatEnemyNPCAIController.h"
 
 
 UNonCombatEnemyNPCAnimInstance::UNonCombatEnemyNPCAnimInstance()

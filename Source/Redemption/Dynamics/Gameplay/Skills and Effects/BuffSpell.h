@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\SpellWithSpellObject.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\SpellWithSpellObject.h"
 #include "BuffSpell.generated.h"
 
 /**

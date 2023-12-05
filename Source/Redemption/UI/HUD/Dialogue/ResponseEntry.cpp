@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\ResponseEntry.h"
+#include "..\UI\HUD\Dialogue\ResponseEntry.h"
 
 bool UResponseEntry::Initialize()
 {

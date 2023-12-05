@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\CharacterInTheWorld.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
+#include "..\Characters\CharacterInTheWorld.h"
+#include "..\Dynamics\World\Items\EquipmentItem.h"
 #include "NonCombatNPC.generated.h"
 
 /**

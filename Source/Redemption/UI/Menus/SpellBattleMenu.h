@@ -4,21 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\SelectedElementEntryWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\SelectedSpellTypeEntryWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\BuffSpell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\DebuffSpell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\RestorationSpell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\AssaultSpell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Tooltips\SimpleTooltip.h"
+#include "..\UI\Miscellaneous\SelectedElementEntryWidget.h"
+#include "..\UI\Miscellaneous\SelectedSpellTypeEntryWidget.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Spell.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\BuffSpell.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\DebuffSpell.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\RestorationSpell.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\AssaultSpell.h"
+#include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
+#include "..\UI\Tooltips\SimpleTooltip.h"
 #include "Components/HorizontalBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/ScaleBox.h"
-#include "..\ButtonWithNeighbors.h"
+#include "..\Overwrites\ButtonWithNeighbors.h"
 #include "SpellBattleMenu.generated.h"
 
 /**
@@ -75,21 +75,9 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UHorizontalBox* SelectedSpellTypeHorizontalBox;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
-		class UTextBlock* SpellNameTextBlock;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
-		class UTextBlock* SpellTypeTextBlock;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
-		class UTextBlock* SpellEffectValueTextBlock;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
-		class UTextBlock* SpellManaCostTextBlock;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
-		class UTextBlock* SpellDescriptionTextBlock;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UTextBlock* NotificationTextBlock;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UTextBlock* ToggleSpellInfoTextBlock;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
-		class UBorder* SpellInfoBorder;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UBorder* SelectedElementsBorder;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
@@ -229,7 +217,6 @@ public:
 	UHorizontalBox* GetSelectedElementsHorizontalBox() const;
 	UHorizontalBox* GetSelectedSpellTypeHorizontalBox() const;
 	UBorder* GetSelectedSpellTypeBorder() const;
-	UBorder* GetSpellInfoBorder() const;
 	TArray<ESpellElements> GetSelectedSpellElements() const;
 	ASpell* GetCreatedSpell() const;
 	ESpellType GetSelectedSpellType() const;
@@ -242,6 +229,7 @@ public:
 	UButton* GetWindElementButton() const;
 	UButton* GetFireElementButton() const;
 	UButton* GetBloodElementButton() const;
+	UButton* GetToggleSpellInfoButton() const;
 	UScaleBox* GetHintScaleBox() const;
 
 	void SelectedSpellElementsRemoveSingleItem(ESpellElements ElementToRemove);
@@ -255,12 +243,6 @@ public:
 	void CreateNotification(const FText& NotificationText);
 	void ShowSpellTypesButtonsHideElementsButtons();
 	void ShowElementsButtonsHideSpellTypesButtons();
-	//Show info about created spell and hide notification.
-	void SetSpellInfo(const ASpell* const SpellToShow);
-	//Fully hides menu.
-	void HideSpellBattleMenu();
-	//Fully shows menu(except spell info and related buttons).
-	void ShowSpellBattleMenu();
 	//For example, we go back from LearnedSpellJournal to this. We need to set correct PickedButtonIndex and whether picked button is AssaultType or WaterElement
 	//(depends, whether SelectedSpellType is NONE).
 	void OnMenuOpenUIManagerLogic();
@@ -270,6 +252,9 @@ public:
 	void Reset(const bool SetCreatedSpellToNullPtr = true);
 	//Set PickedButton to AssaultSpellType, Index to 0, and PickedButton's color to red. Set previous PickedButton to standard color.
 	void ResetUIKeyboardControlLogic();
+	//Works for standars spells as well as for unique spells.
+	//CreateNotificationIfCreatedSpellIsNotValid - if true, then will create "Unique spell does not exist"  notification if CreatedSpell is not valid.
+	void UseSpell(bool CreateNotificationIfCreatedSpellIsNotValid = false);
 
 	UFUNCTION()
 	void BackButtonOnClicked();

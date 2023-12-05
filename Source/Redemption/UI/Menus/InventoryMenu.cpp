@@ -8,20 +8,20 @@
 #include "Components/TextBlock.h"
 #include "Components/CanvasPanel.h"
 #include "Components/ScrollBox.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\BuffItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\RestorationItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\AssaultItem.h"
-#include "Redemption/Dynamics/World/Items/DebuffItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\MiscellaneousItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
-#include "Redemption/Characters/Player/PlayerCharacter.h"
-#include <Kismet/GameplayStatics.h>
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\InventoryActions.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\SkillsSpellsAndEffectsActions.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\FloatingManaBarWidget.h"
+#include "..\Dynamics\World\Items\WeaponItem.h"
+#include "..\Dynamics\World\Items\BuffItem.h"
+#include "..\Dynamics\World\Items\RestorationItem.h"
+#include "..\Dynamics\World\Items\AssaultItem.h"
+#include "..\Dynamics\World\Items\DebuffItem.h"
+#include "..\Dynamics\World\Items\ArmorItem.h"
+#include "..\Dynamics\World\Items\MiscellaneousItem.h"
+#include "..\UI\Menus\BattleMenu.h"
+#include "..\Characters\Player\PlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
+#include "..\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
+#include "..\Miscellaneous\InventoryActions.h"
+#include "..\Miscellaneous\SkillsSpellsAndEffectsActions.h"
+#include "..\UI\HUD\FloatingManaBarWidget.h"
 
 
 bool UInventoryMenu::Initialize()
@@ -647,11 +647,14 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 		}
 		if (IsValid(GameInstance) && IsValid(PlayerCharacter) && IsValid(BattleManager) && IsValid(BattleMenu) && IsValid(PickedItem) && IsValid(UIManagerWorldSubsystem)) 
 			if ((IsValid(Cast<AAssaultItem>(PickedItem)) || IsValid(Cast<ADebuffItem>(PickedItem)) || IsValid(Cast<ARestorationItem>(PickedItem)) || IsValid(Cast<ABuffItem>(PickedItem)))) {
-				if (Cast<ARestorationItem>(PickedItem) || Cast<ABuffItem>(PickedItem)) {
+				if (IsValid(Cast<ARestorationItem>(PickedItem)) || IsValid(Cast<ABuffItem>(PickedItem))) {
 					BattleManager->IsSelectingAllyAsTarget = true;
-					BattleManager->SelectedCombatNPC = BattleManager ->BattleAlliesPlayer[0];
-					if(ACombatAllies* Ally = Cast<ACombatAllies>(BattleManager->BattleAlliesPlayer[0]); IsValid(Ally))
-						BattleMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(Ally->GetCharacterName()));
+					for(ACombatNPC* AllyPlayerNPC : BattleManager->BattleAlliesPlayer)
+						if (AllyPlayerNPC->CurrentHP > 0) {
+							BattleManager->SelectedCombatNPC = AllyPlayerNPC;
+							BattleMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(AllyPlayerNPC->GetCharacterName()));
+							break;
+						}
 					if (IsValid(Cast<ARestorationItem>(PickedItem))) {
 						if (Cast<ARestorationItem>(PickedItem)->GetTypeOfRestoration() == EItemRestorationType::HEALTH)
 							BattleManager->SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
@@ -659,10 +662,14 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 							Cast<ACombatAllies>(BattleManager->SelectedCombatNPC)->GetFloatingManaBarWidget()->GetManaBar()->SetVisibility(ESlateVisibility::Visible);
 					}
 				}
-				else if (Cast<AAssaultItem>(PickedItem) || Cast<ADebuffItem>(PickedItem)) {
+				else if (IsValid(Cast<AAssaultItem>(PickedItem)) || IsValid(Cast<ADebuffItem>(PickedItem))) {
 					BattleManager->IsSelectingAllyAsTarget = false;
-					BattleManager->SelectedCombatNPC = BattleManager->BattleEnemies[0];
-					BattleMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(BattleManager->BattleEnemies[0]->GetCharacterName()));
+					for (ACombatNPC* EnemyNPC : BattleManager->BattleEnemies)
+						if (EnemyNPC->CurrentHP > 0) {
+							BattleManager->SelectedCombatNPC = EnemyNPC;
+							BattleMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(EnemyNPC->GetCharacterName()));
+							break;
+						}
 					BattleManager->SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
 				}
 				BattleMenu->AddToViewport();
@@ -679,7 +686,7 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 				BattleMenu->GetAttackMenuBorder()->SetVisibility(ESlateVisibility::Visible);
 				BattleMenu->GetLeftRightMenuBorder()->SetVisibility(ESlateVisibility::Visible);
 				BattleMenu->GetAttackButton()->SetBackgroundColor(FColor(1, 1, 1, 1));
-				UIManagerWorldSubsystem->PickedButton = BattleMenu->GetAttackActionButton();
+				UIManagerWorldSubsystem->PickedButton = BattleMenu->GetAttackTalkInfoActionButton();
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 				UIManagerWorldSubsystem->PickedButtonIndex = 0;
 				BattleManager->SetCanTurnBehindPlayerCameraToTarget(true);
@@ -702,6 +709,7 @@ void UInventoryMenu::BattleMenuItemsBackButtonOnClicked()
 			UIManagerWorldSubsystem->PickedButton = BattleMenu->GetAttackButton();
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 			SelectedPanelWidget = nullptr;
+			PlayerCharacter->GetBattleManager()->IsSelectingAllyAsTarget = false;
 	    }
 }
 
@@ -793,7 +801,7 @@ void UInventoryMenu::SetItemInfo(const AGameItem* const GameItem)
 		else if (ABuffItem* BuffItem = const_cast<ABuffItem*>(Cast<ABuffItem>(GameItem)); IsValid(BuffItem)) {
 			StringToSet = FString("Item's effects: ");
 				for (int i = 0; i < BuffItem->GetEffectsClasses().Num(); i++) {
-					StringToSet.Append(*SkillsSpellsAndEffectsActions::GetEnumDisplayName<EEffectArea>(Cast<AEffect>(BuffItem->GetEffectsClasses()[i]->GetDefaultObject())->GetAreaOfEffect()).ToString());
+					StringToSet.Append(*SkillsSpellsAndEffectsActions::GetEnumDisplayName<EEffectArea>(Cast<AEffect>(BuffItem->GetEffectsClasses()[i]->GetDefaultObject())->GetEffectArea()).ToString());
 					StringToSet.Append(" -");
 					StringToSet.AppendInt(Cast<AEffect>(BuffItem->GetEffectsClasses()[i]->GetDefaultObject())->GetEffectStat());
 					if (i != BuffItem->GetEffectsClasses().Num() - 1)

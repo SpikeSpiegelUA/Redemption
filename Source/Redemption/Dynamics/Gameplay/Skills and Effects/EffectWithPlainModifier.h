@@ -14,4 +14,7 @@ class REDEMPTION_API AEffectWithPlainModifier : public AEffect
 {
 	GENERATED_BODY()
 	
+protected:
+	AEffectWithPlainModifier();
+	void BeginPlay();
 };

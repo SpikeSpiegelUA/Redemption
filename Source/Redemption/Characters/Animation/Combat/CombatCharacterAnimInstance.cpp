@@ -2,7 +2,7 @@
 
 
 #include "CombatCharacterAnimInstance.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\BitmapsActions.h"
+#include "..\Miscellaneous\BitmapsActions.h"
 
 UCombatCharacterAnimInstance::UCombatCharacterAnimInstance()
 {

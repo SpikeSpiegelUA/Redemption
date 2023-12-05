@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatEnemyNPC.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
+#include "..\Characters\Combat\CombatEnemyNPC.h"
+#include "..\GameInstance\RedemptionGameInstance.h"
+#include "..\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
 #include "UIManagerWorldSubsystem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "..\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "BattleMenu.generated.h"
 
 /**
@@ -46,6 +46,8 @@ private:
 	void BuffSpellUse(const class APresetBuffSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
 	void DebuffSpellUse(class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
 	void RangeAttackUse(UCombatAlliesAnimInstance* CurrentTurnAlliesNPCAnimInstance);
+	//Turn on target selection and AttackMenuBorder.
+	void OpenActionMenu(const FText& NewAttackTalkInfoActionButtonText);
 
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -59,9 +61,7 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* AttackMenuBackButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		class UButton* AttackActionButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		class UButton* TalkActionButton;
+		class UButton* AttackTalkInfoActionButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* LeftButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -69,7 +69,11 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* SpellButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UButton* SkillButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* TalkButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UButton* InfoButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* MenuBorder;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -111,7 +115,7 @@ public:
 	UButton* GetItemButton() const;
 	UButton* GetSpellButton() const;
 	UButton* GetAttackMenuBackButton() const;
-	UButton* GetAttackActionButton() const;
+	UButton* GetAttackTalkInfoActionButton() const;
 	UTextBlock* GetEnemyNameTextBlock() const;
 
 	bool IsPreparingToAttack = false;
@@ -120,10 +124,12 @@ public:
 	bool IsAttackingWithItem = false;
 	bool IsChoosingSpell = false;
 	bool IsChoosingLearnedSpell = false;
+	bool IsChoosingSkill = false;
 	bool IsAttackingWithSpell = false;
 	bool IsAttackingWithMelee = false;
 	bool IsAttackingWithRange = false;
 	bool IsPreparingToTalk = false;
+	bool IsPreparingToViewInfo = false;
 
 	UFUNCTION()
 		void AttackButtonOnClicked();
@@ -134,7 +140,7 @@ public:
 	UFUNCTION()
 		void AttackMenuBackButtonOnClicked();
 	UFUNCTION()
-		void AttackActionButtonOnClicked();
+		void AttackTalkInfoActionButtonOnClicked();
 	UFUNCTION()
 		void LeftButtonOnClicked();
 	UFUNCTION()
@@ -142,11 +148,13 @@ public:
 	UFUNCTION()
 		void SpellButtonOnClicked();
 	UFUNCTION()
+		void SkillButtonOnClicked();
+	UFUNCTION()
 		void RangeButtonOnClicked();
 	UFUNCTION()
 		void TalkButtonOnClicked();
 	UFUNCTION()
-		void TalkActionButtonOnClicked();
+		void InfoButtonOnClicked();
 	UFUNCTION()
 		void AttackButtonOnHovered();
 	UFUNCTION()
@@ -156,7 +164,7 @@ public:
 	UFUNCTION()
 		void AttackMenuBackButtonOnHovered();
 	UFUNCTION()
-		void AttackActionButtonOnHovered();
+		void AttackTalkInfoActionButtonOnHovered();
 	UFUNCTION()
 		void LeftButtonOnHovered();
 	UFUNCTION()
@@ -164,11 +172,13 @@ public:
 	UFUNCTION()
 		void SpellButtonOnHovered();
 	UFUNCTION()
+		void SkillButtonOnHovered();
+	UFUNCTION()
 		void RangeButtonOnHovered();
 	UFUNCTION()
 		void TalkButtonOnHovered();
 	UFUNCTION()
-		void TalkActionButtonOnHovered();
+		void InfoButtonOnHovered();
 
 	void ButtonOnHoveredActions(UButton* const HoveredButton, int8 Index);
 };

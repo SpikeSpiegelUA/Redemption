@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\Combat\CombatNPCAIController.h"
+#include "..\Characters\AI Controllers\Combat\CombatNPCAIController.h"
 #include "CombatEnemyNPCAIController.generated.h"
 
 /**

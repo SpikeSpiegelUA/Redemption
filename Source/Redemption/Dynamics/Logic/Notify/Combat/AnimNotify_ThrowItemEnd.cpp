@@ -2,7 +2,7 @@
 
 
 #include "AnimNotify_ThrowItemEnd.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
+#include "..\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
 
 void UAnimNotify_ThrowItemEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {

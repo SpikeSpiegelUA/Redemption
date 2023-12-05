@@ -2,10 +2,10 @@
 
 
 #include "ItemObject.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
-#include <Kismet/GameplayStatics.h>
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\AssaultItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\DebuffItem.h"
+#include "..\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "..\Dynamics\World\Items\AssaultItem.h"
+#include "..\Dynamics\World\Items\DebuffItem.h"
 #include "Kismet/KismetMathLibrary.h"
 // Sets default values
 AItemObject::AItemObject()
@@ -59,7 +59,7 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 				TArray<AEffect*> EffectsArray;
 				for (TSubclassOf<AEffect> EffectClass : DebuffItem->GetEffectsClasses())
 					EffectsArray.Add(Cast<AEffect>(EffectClass->GetDefaultObject()));
-				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedCombatNPC, EffectsArray);
+				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedCombatNPC, EffectsArray, DebuffItem->GetElementsAndTheirPercentagesStructs());
 				OnOverlapBeginsActions(PlayerCharacter);
 			}
 		}

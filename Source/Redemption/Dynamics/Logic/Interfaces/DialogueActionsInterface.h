@@ -7,7 +7,7 @@
 #include "DialogueActionsInterface.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI)
+UINTERFACE(MinimalAPI, Blueprintable, BlueprintType)
 class UDialogueActionsInterface : public UInterface
 {
 	GENERATED_BODY()

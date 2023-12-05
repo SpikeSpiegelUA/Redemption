@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
+#include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 
 /**
  * 
@@ -41,8 +41,8 @@ namespace ElementsActions {
 			int8 PercentOfOneElement = 100 / ElementsArray.Num();
 			for (int8 i = 0; i < CountCorrespondingElement.Num(); i++) {
 				FElementAndItsPercentageStruct NewElementAndItsPercent;
-				NewElementAndItsPercent.SetElement(CountCorrespondingElement[i]);
-				NewElementAndItsPercent.SetPercent(Counts[i] * PercentOfOneElement);
+				NewElementAndItsPercent.Element = CountCorrespondingElement[i];
+				NewElementAndItsPercent.Percent = Counts[i] * PercentOfOneElement;
 				ArrayToReturn.Add(NewElementAndItsPercent);
 			}
 		}

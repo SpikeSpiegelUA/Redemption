@@ -8,7 +8,7 @@
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\SkillEntryWidget.h"
+#include "..\UI\Miscellaneous\LearnedSpellEntryWidget.h"
 #include "SkillBattleMenu.generated.h"
 
 /**
@@ -21,44 +21,45 @@ class REDEMPTION_API USkillBattleMenu : public UUserWidget
 	GENERATED_BODY()
 private:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
-		class UButton* UseButton;
+		class UButtonWithNeighbors* UseButtonWithNeighbors;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
-		class UButton* BackButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
-		class UTextBlock* SkillNameTextBlock;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
-		class UTextBlock* SkillTypeTextBlock;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
-		class UTextBlock* SkillValueTextBlock;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
-		class UTextBlock* SkillManaCostTextBlock;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
-		class UTextBlock* SkillDescriptionTextBlock;
+		class UButtonWithNeighbors* BackButtonWithNeighbors;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UScrollBox* SkillsScrollBox;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UTextBlock* NotificationTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UBorder* NotificationBorder;
 
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-		USkillEntryWidget* SkillEntryWidget{};
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-		TSubclassOf<USkillEntryWidget> SkillEntryClass{};
-
+		ULearnedSpellEntryWidget* LearnedSpellEntryWidget{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+		TSubclassOf<ULearnedSpellEntryWidget> LearnedSpellEntryClass{};
 	UFUNCTION()
-		void UseButtonOnClicked();
+		void UseButtonWithNeighborsOnHovered();
 	UFUNCTION()
-		void UseButtonOnHovered();
+		void BackButtonWithNeighborsOnHovered();
 	UFUNCTION()
-		void BackButtonOnHovered();
-
+		void HideNotificationAndClearItsTimer();
+	FTimerHandle HideNotificationTimerHandle{};
 protected:
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
 
-	UFUNCTION()
-		void BackButtonOnClicked();
-
 public:
 	//Selected skill button in scroll box, whose info is shown. Need this, to control which button to make green.
 	UButton* SelectedSkillButton{};
+	bool CanUseKeyboardButtonSelection = true;
 
+	const class UScrollBox* GetSkillsScrollBox() const;
+	UButtonWithNeighbors* GetUseButtonWithNeighbors() const;
+	UButtonWithNeighbors* GetBackButtonWithNeighbors() const;
 	void AddSkillEntryToSkillsScrollBox(const class ASpell* const SpellToAdd);
+	void ResetSkillsScrollBox();
+	void CreateNotification(const FText& NotificationText);
+
+	UFUNCTION()
+		void UseButtonWithNeighborsOnClicked();
+	UFUNCTION()
+		void BackButtonWithNeighborsOnClicked();
 };

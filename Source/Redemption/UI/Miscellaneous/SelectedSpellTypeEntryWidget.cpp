@@ -2,8 +2,8 @@
 
 
 #include "SelectedSpellTypeEntryWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SpellBattleMenu.h"
+#include "..\Characters\Player\PlayerCharacter.h"
+#include "..\UI\Menus\SpellBattleMenu.h"
 
 bool USelectedSpellTypeEntryWidget::Initialize()
 {
