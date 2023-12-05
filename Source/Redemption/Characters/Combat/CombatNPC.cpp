@@ -2,9 +2,9 @@
 
 
 #include "CombatNPC.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\SkillsSpellsAndEffectsActions.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ElementsActions.h"
+#include "..\Miscellaneous\SkillsSpellsAndEffectsActions.h"
+#include "..\Characters\Player\PlayerCharacter.h"
+#include "..\Miscellaneous\ElementsActions.h"
 
 ACombatNPC::ACombatNPC()
 {
@@ -26,7 +26,8 @@ void ACombatNPC::BeginPlay()
 		FloatingHealthBarWidget->HP = CurrentHP;
 		FloatingHealthBarWidget->MaxHP = CurrentHP;
 	}
-	SkillsSpellsAndEffectsActions::InitializeElementalResistances(Resistances);
+	SkillsSpellsAndEffectsActions::InitializeElementalResistances(ElementalResistances);
+	SkillsSpellsAndEffectsActions::InitializePhysicalResistances(PhysicalResistances);
 }
 // Called every frame
 void ACombatNPC::Tick(float DeltaTime)
@@ -44,7 +45,7 @@ void ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffec
 			FString TextForCombatFloatingInformationActor = FString();
 			uint8 EvasionRandomNumber = FMath::RandRange(0, 100);
 			int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance + Agility * 2,
-				Effects, EEffectArea::EVASION), Effects, Resistances, ContainedElements);
+				Effects, EEffectArea::EVASION), Effects, ElementalResistances, ContainedElements);
 			if (EvasionRandomNumber <= ChanceOfEvasion) {
 				TextForCombatFloatingInformationActor.Append("Miss!");
 				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
@@ -72,7 +73,7 @@ void ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementA
 			}
 			else {
 				int ValueOfArmor = SkillsSpellsAndEffectsActions::GetValueAfterEffects(ArmorValue, Effects, EEffectArea::ARMOR);
-				int ValueOfAttackWithResistances = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(ValueOfAttack, Effects, Resistances, ContainedElements);
+				int ValueOfAttackWithResistances = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(ValueOfAttack, Effects, ElementalResistances, ContainedElements);
 				if (CurrentHP - (ValueOfAttackWithResistances - ValueOfArmor / 10) < 0)
 					CurrentHP = 0;
 				else
@@ -86,9 +87,14 @@ void ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementA
 			if (IsValid(AnimInstance)) {
 				if (CurrentHP <= 0)
 					AnimInstance->ToggleCombatCharacterIsDead(true);
-				else if (UCombatAlliesAnimInstance* CombatAlliesAnimInstance = Cast<UCombatAlliesAnimInstance>(GetMesh()->GetAnimInstance()); IsValid(CombatAlliesAnimInstance))
+				else if (UCombatAlliesAnimInstance* CombatAlliesAnimInstance = Cast<UCombatAlliesAnimInstance>(GetMesh()->GetAnimInstance()); IsValid(CombatAlliesAnimInstance)) {
 					if (CurrentHP > 0 && !CombatAlliesAnimInstance->GetCombatAlliesIsBlocking())
 						AnimInstance->ToggleCombatCharacterGotHit(true);
+				}
+				else {
+					if (CurrentHP > 0)
+						AnimInstance->ToggleCombatCharacterGotHit(true);
+				}
 			}
 		}
 }
@@ -98,9 +104,14 @@ UFloatingHealthBarWidget* ACombatNPC::GetFloatingHealthBarWidget() const
 	return FloatingHealthBarWidget;
 }
 
-TArray<FElementAndItsPercentageStruct> ACombatNPC::GetResistances() const
+TArray<FElementAndItsPercentageStruct> ACombatNPC::GetElementalResistances() const
 {
-	return Resistances;
+	return ElementalResistances;
+}
+
+TArray<FPhysicalTypeAndItsPercentageStruct> ACombatNPC::GetPhysicalResistances() const
+{
+	return PhysicalResistances;
 }
 
 TArray<FElementAndItsPercentageStruct> ACombatNPC::GetMeleeWeaponElements() const

@@ -8,7 +8,7 @@
 #include "Components/Button.h"
 #include "Components/ScrollBox.h"
 #include "Components/Border.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\ActiveEffectEntryWidget.h"
+#include "..\UI\Miscellaneous\ActiveEffectEntryWidget.h"
 #include "CombatCharacterInfoMenu.generated.h"
 
 /**
@@ -20,7 +20,9 @@ class REDEMPTION_API UCombatCharacterInfoMenu : public UUserWidget
 	GENERATED_BODY()
 private:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
-		class UButton* BackButton;
+		class UButtonWithNeighbors* BackButtonWithNeighbors;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UButtonWithNeighbors* EffectsResistancesToggleButtonWithNeighbors;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UTextBlock* CharacterNameTextBlock;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
@@ -36,9 +38,39 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UTextBlock* EffectDurationTextBlock;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UTextBlock* FireResistanceTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UTextBlock* WaterResistanceTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UTextBlock* WindResistanceTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UTextBlock* EarthResistanceTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UTextBlock* LightningResistanceTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UTextBlock* HolyResistanceTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UTextBlock* DarkResistanceTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UTextBlock* BloodResistanceTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UTextBlock* MultielementalResistanceTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UTextBlock* SlashingResistanceTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UTextBlock* CrushingResistanceTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UTextBlock* PiercingResistanceTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UTextBlock* EffectsResistancesToggleTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UScrollBox* ActiveEffectsScrollBox;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UBorder* EffectInfoBorder;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UBorder* GeneralInformationBorder;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UBorder* ResistancesBorder;
 
 	UPROPERTY()
 		class UActiveEffectEntryWidget* ActiveEffectEntryWidget;
@@ -47,6 +79,8 @@ private:
 
 	UFUNCTION()
 	void BackButtonOnHovered();
+	UFUNCTION()
+	void EffectsResistancesToggleButtonOnHovered();
 
 protected:
 	virtual bool Initialize() override;
@@ -61,11 +95,13 @@ public:
 	UTextBlock* GetEffectValueTextBlock() const;
 	UTextBlock* GetEffectDurationTextBlock() const;
 	UScrollBox* GetActiveEffectsScrollBox() const;
-	UButton* GetBackButton() const;
+	UButtonWithNeighbors* GetBackButtonWithNeighbors() const;
+	UButtonWithNeighbors* GetEffectsResistancesToggleButtonWithNeighbors() const;
 	UBorder* GetEffectInfoBorder() const;
 
 	void SetCharacterInfo(const class ACombatNPC* const NPCToViewInfoOf);
 	void SetEffectInfo(const class AEffect* const EffectToViewInfoOf);
+	void SetCharacterResistances(const class ACombatNPC* const NPCToViewInfoOf);
 	void AddActiveEffectEntryToActiveEffectsScrollBox(const class AEffect* const EffectToAdd);
 	void ResetActiveEffectsScrollBox();
 
@@ -76,4 +112,6 @@ public:
 
 	UFUNCTION()
 	void BackButtonOnClicked();
+	UFUNCTION()
+	void EffectsResistancesToggleButtonOnClicked();
 };

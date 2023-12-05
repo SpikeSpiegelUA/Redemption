@@ -24,3 +24,8 @@ AAssaultSpell& AAssaultSpell::operator=(const ASpell& Spell)
 	SetSpellCostType(Spell.GetSpellCostType());
 	return *this;
 }
+
+TArray<FEffectAndItsChanceStruct> AAssaultSpell::GetEffectsAndTheirChances() const
+{
+	return EffectsAndTheirChances;
+}

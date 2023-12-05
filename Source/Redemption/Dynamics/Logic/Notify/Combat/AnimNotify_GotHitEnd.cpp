@@ -2,7 +2,7 @@
 
 
 #include "AnimNotify_GotHitEnd.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\Combat\CombatCharacterAnimInstance.h"
+#include "..\Characters\Animation\Combat\CombatCharacterAnimInstance.h"
 
 void UAnimNotify_GotHitEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {

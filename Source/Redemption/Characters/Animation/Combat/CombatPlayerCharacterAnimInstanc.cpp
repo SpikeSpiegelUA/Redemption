@@ -2,7 +2,7 @@
 
 
 #include "CombatPlayerCharacterAnimInstanc.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\BitmapsActions.h"
+#include "..\Miscellaneous\BitmapsActions.h"
 
 UCombatPlayerCharacterAnimInstanc::UCombatPlayerCharacterAnimInstanc()
 {

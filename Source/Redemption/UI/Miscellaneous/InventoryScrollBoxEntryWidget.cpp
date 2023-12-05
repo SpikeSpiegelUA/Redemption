@@ -8,12 +8,12 @@
 #include "Components/Button.h"
 #include "Components/StackBox.h"
 #include "UIManagerWorldSubsystem.h"
-#include <Kismet/GameplayStatics.h>
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\InventoryActions.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\InventoryMenu.h"
+#include "Kismet/GameplayStatics.h"
+#include "..\Dynamics\World\Items\ArmorItem.h"
+#include "..\Dynamics\World\Items\WeaponItem.h"
+#include "..\Characters\Player\PlayerCharacter.h"
+#include "..\Miscellaneous\InventoryActions.h"
+#include "..\UI\Menus\InventoryMenu.h"
 
 bool UInventoryScrollBoxEntryWidget::Initialize()
 {

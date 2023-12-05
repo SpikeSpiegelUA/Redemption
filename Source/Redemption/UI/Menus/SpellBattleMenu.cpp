@@ -2,25 +2,25 @@
 
 #pragma once
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SpellBattleMenu.h"
+#include "..\UI\Menus\SpellBattleMenu.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/BorderSlot.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\EffectsSpellsAndSkillsManager.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\SkillsSpellsAndEffectsActions.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\CreatedBuffSpell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\PresetBuffSpell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\CreatedDebuffSpell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\PresetDebuffSpell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "..\Dynamics\Gameplay\Managers\EffectsSpellsAndSkillsManager.h"
+#include "..\Miscellaneous\SkillsSpellsAndEffectsActions.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\CreatedBuffSpell.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\PresetBuffSpell.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\CreatedDebuffSpell.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\PresetDebuffSpell.h"
+#include "..\UI\Menus\BattleMenu.h"
+#include "..\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "UIManagerWorldSubsystem.h"
 #include "Kismet/KismetRenderingLibrary.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatAllyNPC.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\EffectWithPlainModifier.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\FloatingManaBarWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ElementsActions.h"
+#include "..\Characters\Combat\CombatAllyNPC.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\EffectWithPlainModifier.h"
+#include "..\Characters\Player\PlayerCharacter.h"
+#include "..\UI\HUD\FloatingManaBarWidget.h"
+#include "..\Miscellaneous\ElementsActions.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -1071,10 +1071,18 @@ void USpellBattleMenu::UseSpell(bool CreateNotificationIfCreatedSpellIsNotValid)
 						BManager->SetCanTurnBehindPlayerCameraToTarget(true);
 						BManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
 					}
-					else if (CreatedSpell->GetSpellCostType() == ESpellCostType::HEALTH)
-						CreateNotification(FText::FromString("Not enough health!!!"));
-					else if (CreatedSpell->GetSpellCostType() == ESpellCostType::MANA)
-						CreateNotification(FText::FromString("Not enough mana!!!"));
+					else if (CreatedSpell->GetSpellCostType() == ESpellCostType::HEALTH) {
+						if (PlayerCharacter->GetSkillBattleMenuWidget()->IsInViewport())
+							PlayerCharacter->GetSkillBattleMenuWidget()->CreateNotification(FText::FromString("Not enough health!!!"));
+						else
+							CreateNotification(FText::FromString("Not enough health!!!"));
+					}
+					else if (CreatedSpell->GetSpellCostType() == ESpellCostType::MANA) {
+						if (PlayerCharacter->GetSkillBattleMenuWidget()->IsInViewport())
+							PlayerCharacter->GetSkillBattleMenuWidget()->CreateNotification(FText::FromString("Not enough mana!!!"));
+						else
+							CreateNotification(FText::FromString("Not enough mana!!!"));
+					}
 				}
 				else if(!IsValid(CreatedSpell) && CreateNotificationIfCreatedSpellIsNotValid)
 					CreateNotification(FText::FromString("Unique spell does not exist"));

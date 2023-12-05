@@ -8,7 +8,7 @@
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\LearnedSpellEntryWidget.h"
+#include "..\UI\Miscellaneous\LearnedSpellEntryWidget.h"
 #include "SkillBattleMenu.generated.h"
 
 /**

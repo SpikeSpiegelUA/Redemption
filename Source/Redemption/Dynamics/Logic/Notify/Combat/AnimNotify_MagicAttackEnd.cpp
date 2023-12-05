@@ -2,7 +2,7 @@
 
 
 #include "AnimNotify_MagicAttackEnd.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\Combat\CombatCharacterAnimInstance.h"
+#include "..\Characters\Animation\Combat\CombatCharacterAnimInstance.h"
 
 void UAnimNotify_MagicAttackEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {

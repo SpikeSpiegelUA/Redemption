@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
+#include "..\Dynamics\World\Items\EquipmentItem.h"
+#include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "ArmorItem.generated.h"
 
 /**

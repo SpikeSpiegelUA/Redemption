@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\DebuffItem.h"
+#include "..\Dynamics\World\Items\DebuffItem.h"
 
 EBuffDebuffType ADebuffItem::GetTypeOfDebuff() const
 {

@@ -4,8 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\MainMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionSaveGame.h"
+#include "..\UI\Menus\MainMenu.h"
 #include "RedemptionGameModeBase.generated.h"
 
 /**
@@ -15,12 +14,15 @@ UCLASS()
 class REDEMPTION_API ARedemptionGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+	//All actors are loaded a little later that BeginPlay, so we need a dedicated function, that is triggered by a timer, which is gonna spawn saved spawned objects and save slots.
+	UFUNCTION()
+	void SpawnSavedObjectsAndSaveSlots();
+	
 protected:
 	ARedemptionGameModeBase();
 	virtual void BeginPlay() override;
+	virtual void PostLoad() override;
 public:
 	virtual void Tick(float DeltaTime) override;
-	void InitLevelSaveData();
-
-	URedemptionSaveGame* RedemptionSaveGame{};
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 };

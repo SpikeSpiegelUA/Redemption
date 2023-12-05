@@ -1,18 +1,18 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\MainMenu.h"
+#include "..\UI\Menus\MainMenu.h"
 #include "Kismet\GameplayStatics.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SettingsMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\LoadingScreen.h"
+#include "..\GameInstance\RedemptionGameInstance.h"
+#include "..\UI\Menus\SettingsMenu.h"
+#include "..\UI\Screens\LoadingScreen.h"
 #include "GameFramework/GameUserSettings.h"
-#include"Kismet/KismetSystemLibrary.h"
-#include "Redemption/Characters/Player/PlayerCharacter.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "..\Characters\Player\PlayerCharacter.h"
 #include "UIManagerWorldSubsystem.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
-
+#include "..\UI\Miscellaneous\SaveSlotEntry.h"
 bool UMainMenu::Initialize()
 {
 	const bool bSuccess = Super::Initialize();
@@ -55,16 +55,16 @@ void UMainMenu::NewGameButtonOnClicked()
 		UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
 		UWidgetBlueprintLibrary::SetInputMode_GameOnly(PlayerController);
 		GameInstance->InstanceItemsInTheInventory.Empty();
+		GameInstance->InstanceLearnedSpells.Empty();
 		GameInstance->InstanceEquipedMelee = nullptr;
 		GameInstance->InstanceEquipedRange = nullptr;
 		GameInstance->InstanceEquipedHead = nullptr;
 		GameInstance->InstanceEquipedTorse = nullptr;
 		GameInstance->InstanceEquipedHand = nullptr;
 		GameInstance->InstanceEquipedLowerArmor = nullptr;
-		GameInstance->InstancePlayerMaxHP = 100;
-		GameInstance->InstancePlayerMaxMana = 100;
-		GameInstance->InstancePlayerCurrentHP = GameInstance->InstancePlayerMaxHP;
-		GameInstance->InstancePlayerCurrentMana = GameInstance->InstancePlayerMaxMana;
+		GameInstance->PlayerCharacterInstanceDataStruct.ByteData.Empty();
+		GameInstance->TownActors.Empty();
+		GameInstance->DungeonActors.Empty();
 		ULoadingScreen* LoadingScreen = CreateWidget<ULoadingScreen>(PlayerController, LoadingScreenClass);
 		LoadingScreen->AddToViewport();
 		UGameplayStatics::OpenLevel(GetWorld(), "Town");
@@ -73,11 +73,20 @@ void UMainMenu::NewGameButtonOnClicked()
 
 void UMainMenu::LoadGameButtonOnClicked()
 {
-	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
-		if (IsValid(UIManagerWorldSubsystem->PickedButton))
-			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FColor::FromHex("8C8C8CFF"));
-		UIManagerWorldSubsystem->PickedButton = nullptr;
-	}
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) 
+		if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+			if (IsValid(UIManagerWorldSubsystem->PickedButton))
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FColor::FromHex("8C8C8CFF"));
+			if (PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren().Num() > 0)
+				UIManagerWorldSubsystem->PickedButton = Cast<USaveSlotEntry>(PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren()[0])->GetSlotButton();
+			else
+				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveLoadButtonWithNeighbors();
+			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+			this->RemoveFromParent();
+			PlayerCharacter->GetSaveLoadGameMenuWidget()->AddToViewport();
+			PlayerCharacter->GetSaveLoadGameMenuWidget()->ToLoadTransition();
+		}
 }
 
 void UMainMenu::SettingsButtonOnClicked()

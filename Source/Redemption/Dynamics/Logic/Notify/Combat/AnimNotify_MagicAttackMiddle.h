@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\SpellWithSpellObject.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\SpellWithSpellObject.h"
+#include "..\Characters\Player\PlayerCharacter.h"
 #include "AnimNotify_MagicAttackMiddle.generated.h"
 
 /**

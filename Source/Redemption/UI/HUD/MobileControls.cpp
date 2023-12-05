@@ -1,5 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\MobileControls.h"
+#include "..\UI\HUD\MobileControls.h"
 

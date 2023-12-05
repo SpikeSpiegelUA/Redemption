@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
+#include "..\Characters\Player\PlayerCharacter.h"
 #include "Components\VerticalBox.h"
 #include "Components\TextBlock.h"
 #include "Components\Border.h"

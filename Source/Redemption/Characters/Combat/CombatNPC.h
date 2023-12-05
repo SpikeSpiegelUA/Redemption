@@ -3,12 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\CharacterInTheWorld.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\FloatingHealthBarWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\Interfaces\CombatActionsInterface.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
+#include "..\Characters\CharacterInTheWorld.h"
+#include "..\UI\HUD\FloatingHealthBarWidget.h"
+#include "..\Dynamics\Logic\Interfaces\CombatActionsInterface.h"
+#include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Spell.h"
 #include "Components/WidgetComponent.h"
+#include "Redemption/Dynamics/Miscellaneous/PhysicalTypeAndItsPercentage.h"
 #include "CombatNPC.generated.h"
 
 /**
@@ -25,7 +26,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFloatingHealthBarWidget* GetFloatingHealthBarWidget() const;
-	TArray<FElementAndItsPercentageStruct> GetResistances() const;
+	TArray<FElementAndItsPercentageStruct> GetElementalResistances() const;
+	TArray<FPhysicalTypeAndItsPercentageStruct> GetPhysicalResistances() const;
 	TArray<FElementAndItsPercentageStruct> GetMeleeWeaponElements() const;
 	TArray<FElementAndItsPercentageStruct> GetRangeWeaponElements() const;
 	TArray<AEffect*> GetEffects() const;
@@ -105,7 +107,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
 		int Luck = 1;
 	UPROPERTY(EditAnywhere, Category = "Combat")
-		TArray<FElementAndItsPercentageStruct> Resistances {};
+		TArray<FElementAndItsPercentageStruct> ElementalResistances {};
+	UPROPERTY(EditAnywhere, Category = "Combat")
+		TArray<FPhysicalTypeAndItsPercentageStruct> PhysicalResistances{};
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 		TArray<FElementAndItsPercentageStruct> MeleeWeaponElements {};
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
@@ -117,6 +121,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true))
 		TSubclassOf<ASmartObject> AIClass;
 	//Spells and skills classes for the SkillBattleMenu.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Spells")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spells")
 		TArray<TSubclassOf<ASpell>> AvailableSkills{};
 };

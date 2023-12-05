@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\BitmapsActions.h"
+#include "..\Miscellaneous\BitmapsActions.h"
 #include "PlayerCharacterAnimInstance.generated.h"
 
 /**

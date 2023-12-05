@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItemWithItemObject.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
+#include "..\Dynamics\World\Items\GameItemWithItemObject.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "Containers/EnumAsByte.h"
 #include "AssaultItem.generated.h"
 

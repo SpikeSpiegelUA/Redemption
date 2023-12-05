@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItemWithElements.h"
+#include "..\Dynamics\World\Items\GameItemWithElements.h"
 #include "RestorationItem.generated.h"
 
 /**

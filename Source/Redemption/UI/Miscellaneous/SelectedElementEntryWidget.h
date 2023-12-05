@@ -6,7 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/Image.h"
 #include "Components/Button.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "SelectedElementEntryWidget.generated.h"
 
 /**

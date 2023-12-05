@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
+#include "..\SaveSystem\Structs\RedemptionGameInstanceSaveData.h"
 #include "RedemptionSaveGame.generated.h"
 
 /**
@@ -13,13 +14,14 @@ UCLASS()
 class REDEMPTION_API URedemptionSaveGame : public USaveGame
 {
 	GENERATED_BODY()
-private:
-	UPROPERTY()
-	TArray<FString> NonCombatNPCIDs{};
+
 public:
-	void LoadNonCombatNPC();
 
-	void AddStringToNonCombatNPCIDs(const FString& NewID);
-
-	TArray<FString> GetNonCombatNPCIDs() const;
+	UPROPERTY(EditAnywhere)
+	FName MapName{};
+	UPROPERTY(EditAnywhere)
+	uint16 SaveIndex{};
+	//Save data.
+	UPROPERTY(EditAnywhere)
+	FRedemptionGameInstanceSaveData RedemptionGameInstanceSaveData{};
 };

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
+#include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "Spell.generated.h"
 
 UENUM(BlueprintType)

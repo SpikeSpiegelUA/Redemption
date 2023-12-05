@@ -2,11 +2,12 @@
 
 
 #include "SpellObject.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\CreatedDebuffSpell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\PresetDebuffSpell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ElementsActions.h"
-#include <Kismet/GameplayStatics.h>
+#include "..\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\CreatedDebuffSpell.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\PresetDebuffSpell.h"
+#include "..\Miscellaneous\ElementsActions.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\TurnStartDamageEffect.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
@@ -57,6 +58,12 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedCombatNPC,
 					AssaultSpell->GetAttackValue(), ElementsActions::FindContainedElements(AssaultSpell->GetSpellElements()), false);
 				OnOverlapBeginsActions(PlayerCharacter);
+				if (AssaultSpell->GetEffectsAndTheirChances().Num() > 0) {
+					int8 Chance = FMath::RandRange(0, 100);
+					if (AssaultSpell->GetEffectsAndTheirChances()[0].Chance >= Chance)
+						if(auto* TurnStartDamageEffect = NewObject<ATurnStartDamageEffect>(this, AssaultSpell->GetEffectsAndTheirChances()[0].Effect); IsValid(TurnStartDamageEffect))
+							CombatNPC->Effects.Add(TurnStartDamageEffect);
+				}
 			}
 			else if (APresetDebuffSpell* PresetDebuffSpell = Cast<APresetDebuffSpell>(Spell); IsValid(PresetDebuffSpell)) {
 				TArray<AEffect*> EffectsArray;

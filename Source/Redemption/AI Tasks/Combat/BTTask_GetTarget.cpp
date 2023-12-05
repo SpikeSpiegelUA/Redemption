@@ -3,10 +3,10 @@
 
 #include "BTTask_GetTarget.h"
 #include "AIController.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatNPC.h"
+#include "..\Characters\Combat\CombatNPC.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "..\Characters\Player\PlayerCharacter.h"
+#include "..\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
 
 UBTTask_GetTarget::UBTTask_GetTarget(const FObjectInitializer& ObjectInitializer)

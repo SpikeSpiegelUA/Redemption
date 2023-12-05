@@ -2,7 +2,7 @@
 
 
 #include "CombatPlayerCharacterAIController.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\PlayerCharacterAnimInstance.h"
+#include "..\Characters\Animation\PlayerCharacterAnimInstance.h"
 
 ACombatPlayerCharacterAIController::ACombatPlayerCharacterAIController()
 {

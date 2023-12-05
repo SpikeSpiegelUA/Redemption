@@ -1,8 +1,8 @@
 
 #include "SkillBattleMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "Redemption/Miscellaneous/ElementsActions.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\FloatingManaBarWidget.h"
+#include "..\Characters\Player\PlayerCharacter.h"
+#include "..\Miscellaneous\ElementsActions.h"
+#include "..\UI\HUD\FloatingManaBarWidget.h"
 
 bool USkillBattleMenu::Initialize()
 {

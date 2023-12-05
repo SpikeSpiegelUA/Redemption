@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\LearnedSpellsJournalMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ElementsActions.h"
+#include "..\UI\Menus\LearnedSpellsJournalMenu.h"
+#include "..\Miscellaneous\ElementsActions.h"
 #include "Redemption/Characters/Player/PlayerCharacter.h"
 
 bool ULearnedSpellsJournalMenu::Initialize()
@@ -110,7 +110,6 @@ void ULearnedSpellsJournalMenu::AddLearnedSpellEntryToMainScrollBox(const class 
     if(IsValid(LearnedSpellEntryWidgetClass))
         LearnedSpellEntryWidget = CreateWidget<ULearnedSpellEntryWidget>(GetWorld(), LearnedSpellEntryWidgetClass);
     if (IsValid(PlayerCharacter) && IsValid(LearnedSpellEntryWidget) && IsValid(PlayerCharacter->GetEffectsSpellsAndSkillsManager())) {
-        UE_LOG(LogTemp, Warning, TEXT("ADD LEARNED IS CALLED!!!"));
         LearnedSpellEntryWidget->SetSpellTypeImage(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetSpellTypeImageTexture(SpellToAdd->GetTypeOfSpell()));
         LearnedSpellEntryWidget->SetSpellMainElementImage(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetMainSpellElementImageTexture(ElementsActions::FindSpellsMainElement(SpellToAdd->GetSpellElements())));
         LearnedSpellEntryWidget->SetSpellNameText(SpellToAdd->GetSpellName());

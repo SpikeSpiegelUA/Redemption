@@ -1,7 +1,7 @@
 #pragma once
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\World\Items\EquipmentItem.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "CombatActionsInterface.generated.h"
 
 UINTERFACE(MinimalAPI, Blueprintable, BlueprintType)

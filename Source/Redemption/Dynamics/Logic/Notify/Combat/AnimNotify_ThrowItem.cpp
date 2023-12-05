@@ -2,9 +2,9 @@
 
 
 #include "AnimNotify_ThrowItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
-#include <Kismet/KismetMathLibrary.h>
-#include <Kismet/GameplayStatics.h>
+#include "..\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 void UAnimNotify_ThrowItem::SpawnItemObject(const AGameItemWithItemObject* const& GameItemWithItemObject, const USkeletalMeshComponent* const& MeshComp, const ACombatNPC* const& CombatNPC)
 {

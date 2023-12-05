@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\AudioManager.h"
+#include "..\Dynamics\Gameplay\Managers\AudioManager.h"
 #include "Kismet\GameplayStatics.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
+#include "..\Characters\Player\PlayerCharacter.h"
+#include "..\GameInstance\RedemptionGameInstance.h"
 #include "Components/AudioComponent.h"
 
 // Sets default values

@@ -2,8 +2,8 @@
 
 
 #include "CombatAllyNPCAnimInstance.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\BitmapsActions.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatAllyNPC.h"
+#include "..\Miscellaneous\BitmapsActions.h"
+#include "..\Characters\Combat\CombatAllyNPC.h"
 
 UCombatAllyNPCAnimInstance::UCombatAllyNPCAnimInstance()
 {

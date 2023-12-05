@@ -7,7 +7,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\CharacterInTheWorld.h"
+#include "..\Characters\CharacterInTheWorld.h"
 
 ACombatNPCAIController::ACombatNPCAIController()
 {

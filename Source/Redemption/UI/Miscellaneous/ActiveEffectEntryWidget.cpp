@@ -2,8 +2,8 @@
 
 
 #include "ActiveEffectEntryWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Public\UIManagerWorldSubsystem.h"
-#include "Redemption/Characters/Player/PlayerCharacter.h"
+#include "..\Public\UIManagerWorldSubsystem.h"
+#include "..\Characters\Player\PlayerCharacter.h"
 
 bool UActiveEffectEntryWidget::Initialize()
 {

@@ -4,12 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "Engine/DataTable.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Skill.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\SpellObjects\SpellObject.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Skill.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Spell.h"
+#include "..\Dynamics\World\Items\GameItem.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\SpellObjects\SpellObject.h"
 #include "EffectsSpellsAndSkillsManager.generated.h"
 
 USTRUCT(BlueprintType)

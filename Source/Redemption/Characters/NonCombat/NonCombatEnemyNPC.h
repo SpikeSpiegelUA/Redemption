@@ -3,20 +3,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Redemption/Characters/AI Controllers/NonCombat/NonCombatEnemyNPCAIController.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\NonCombat\NonCombatNPC.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatEnemyNPC.h"
+#include "../Characters/AI Controllers/NonCombat/NonCombatEnemyNPCAIController.h"
+#include "..\Characters\NonCombat\NonCombatNPC.h"
+#include "..\Characters\Combat\CombatEnemyNPC.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Float.h"
 #include "Components/BoxComponent.h"
 #include "Components/WidgetComponent.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\NonCombatEnemyDetectionBarWidget.h"
+#include "..\UI\HUD\NonCombatEnemyDetectionBarWidget.h"
+#include "..\SaveSystem\Interfaces\SavableObjectInterface.h"
 #include "NonCombatEnemyNPC.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class ANonCombatEnemyNPC : public ANonCombatNPC
+class ANonCombatEnemyNPC : public ANonCombatNPC, public ISavableObjectInterface
 {
 	GENERATED_BODY()
 private:
@@ -44,8 +45,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	TArray<TSubclassOf<ACombatEnemyNPC>> BattleEnemies;
 
+	void LoadObjectFromGameInstance_Implementation(const URedemptionGameInstance* const GameInstance) override;
+
 public:
-	TArray<TSubclassOf<ACombatEnemyNPC>> GetBattleEnemies() const;
+	TArray<TSubclassOf<ACombatEnemyNPC>> GetBattleEnemies();
+	void SetBattleEnemies(const TArray<TSubclassOf<ACombatEnemyNPC>>& NewBattleEnemies);
 
 	UBoxComponent* GetForwardMarker() const;
 	UNonCombatEnemyDetectionBarWidget* GetNonCombatEnemyDetectionBarWidget() const;

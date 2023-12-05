@@ -2,8 +2,8 @@
 
 
 #include "CombatEnemyNPCAnimInstance.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\BitmapsActions.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatEnemyNPC.h"
+#include "..\Miscellaneous\BitmapsActions.h"
+#include "..\Characters\Combat\CombatEnemyNPC.h"
 
 UCombatEnemyNPCAnimInstance::UCombatEnemyNPCAnimInstance()
 {

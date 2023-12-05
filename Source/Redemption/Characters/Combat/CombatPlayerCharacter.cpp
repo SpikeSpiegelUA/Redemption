@@ -1,7 +1,7 @@
 #include "CombatPlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\Combat\CombatPlayerCharacterAIController.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\Combat\CombatPlayerCharacterAnimInstanc.h"
+#include "..\Characters\AI Controllers\Combat\CombatPlayerCharacterAIController.h"
+#include "..\Characters\Player\PlayerCharacter.h"
+#include "..\Characters\Animation\Combat\CombatPlayerCharacterAnimInstanc.h"
 
 // Sets default values
 ACombatPlayerCharacter::ACombatPlayerCharacter()
@@ -66,29 +66,29 @@ void ACombatPlayerCharacter::Tick(float DeltaTime)
 void ACombatPlayerCharacter::GetResistancesFromEquipedItems()
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter) && IsValid(PlayerCharacter->GetInventoryMenuWidget())) {
-			for (FElementAndItsPercentageStruct ResistancesArrayWhereToAddElementPercentage : Resistances) {
+			for (FElementAndItsPercentageStruct ResistancesArrayWhereToAddElementPercentage : ElementalResistances) {
 
 			}
-			for (int i = 0; i < Resistances.Num(); i++) {
+			for (int i = 0; i < ElementalResistances.Num(); i++) {
 				if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedHead))
 					for(int g = 0; g < PlayerCharacter->GetInventoryMenuWidget()->EquipedHead->GetElementsAndTheirPercentagesStructs().Num(); g++)
-						if (PlayerCharacter->GetInventoryMenuWidget()->EquipedHead->GetElementsAndTheirPercentagesStructs()[g].GetElement() == Resistances[i].GetElement()) {
-							Resistances[i].SetPercent(PlayerCharacter->GetInventoryMenuWidget()->EquipedHead->GetElementsAndTheirPercentagesStructs()[g].GetPercent() + Resistances[i].GetPercent());
+						if (PlayerCharacter->GetInventoryMenuWidget()->EquipedHead->GetElementsAndTheirPercentagesStructs()[g].Element == ElementalResistances[i].Element) {
+							ElementalResistances[i].Percent = PlayerCharacter->GetInventoryMenuWidget()->EquipedHead->GetElementsAndTheirPercentagesStructs()[g].Percent + ElementalResistances[i].Percent;
 						}
 				if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse))
 					for (int g = 0; g < PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse->GetElementsAndTheirPercentagesStructs().Num(); g++)
-						if (PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse->GetElementsAndTheirPercentagesStructs()[g].GetElement() == Resistances[i].GetElement()) {
-							Resistances[i].SetPercent(PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse->GetElementsAndTheirPercentagesStructs()[g].GetPercent() + Resistances[i].GetPercent());
+						if (PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse->GetElementsAndTheirPercentagesStructs()[g].Element == ElementalResistances[i].Element) {
+							ElementalResistances[i].Percent = PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse->GetElementsAndTheirPercentagesStructs()[g].Percent + ElementalResistances[i].Percent;
 						}
 				if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedHand))
 					for (int g = 0; g < PlayerCharacter->GetInventoryMenuWidget()->EquipedHand->GetElementsAndTheirPercentagesStructs().Num(); g++)
-						if (PlayerCharacter->GetInventoryMenuWidget()->EquipedHand->GetElementsAndTheirPercentagesStructs()[g].GetElement() == Resistances[i].GetElement()) {
-							Resistances[i].SetPercent(PlayerCharacter->GetInventoryMenuWidget()->EquipedHand->GetElementsAndTheirPercentagesStructs()[g].GetPercent() + Resistances[i].GetPercent());
+						if (PlayerCharacter->GetInventoryMenuWidget()->EquipedHand->GetElementsAndTheirPercentagesStructs()[g].Element == ElementalResistances[i].Element) {
+							ElementalResistances[i].Percent = PlayerCharacter->GetInventoryMenuWidget()->EquipedHand->GetElementsAndTheirPercentagesStructs()[g].Percent + ElementalResistances[i].Percent;
 						}
 				if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor))
 					for (int g = 0; g < PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetElementsAndTheirPercentagesStructs().Num(); g++)
-						if (PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetElementsAndTheirPercentagesStructs()[g].GetElement() == Resistances[i].GetElement()) {
-							Resistances[i].SetPercent(PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetElementsAndTheirPercentagesStructs()[g].GetPercent() + Resistances[i].GetPercent());
+						if (PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetElementsAndTheirPercentagesStructs()[g].Element == ElementalResistances[i].Element) {
+							ElementalResistances[i].Percent = PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetElementsAndTheirPercentagesStructs()[g].Percent + ElementalResistances[i].Percent;
 						}
 			}
 	}

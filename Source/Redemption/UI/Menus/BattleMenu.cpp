@@ -2,12 +2,12 @@
 
 
 #include "BattleMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\Combat\CombatPlayerCharacterAIController.h"
+#include "..\Characters\Player\PlayerCharacter.h"
+#include "..\Characters\AI Controllers\Combat\CombatPlayerCharacterAIController.h"
 #include "Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\AssaultItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ElementsActions.h"
+#include "..\Dynamics\World\Items\AssaultItem.h"
+#include "..\Dynamics\World\Items\GameItem.h"
+#include "..\Miscellaneous\ElementsActions.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
@@ -16,24 +16,22 @@
 #include "Components/VerticalBox.h"
 #include "Components/ScrollBox.h"
 #include "Components/CanvasPanelSlot.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\FloatingHealthBarWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\FloatingManaBarWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\InventoryMenu.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\SpellBattleMenu.h"
+#include "..\UI\HUD\FloatingHealthBarWidget.h"
+#include "..\UI\HUD\FloatingManaBarWidget.h"
+#include "..\UI\Menus\InventoryMenu.h"
+#include "..\UI\Menus\SpellBattleMenu.h"
 #include "Kismet/GameplayStatics.h"
-
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\InventoryActions.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\BuffItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\RestorationItem.h"
-
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\AssaultItem.h"
-#include "Redemption/Dynamics/World/Items/DebuffItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\CreatedBuffSpell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\PresetBuffSpell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\CreatedDebuffSpell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\PresetDebuffSpell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\SkillsSpellsAndEffectsActions.h"
+#include "..\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
+#include "..\Miscellaneous\InventoryActions.h"
+#include "..\Dynamics\World\Items\BuffItem.h"
+#include "..\Dynamics\World\Items\RestorationItem.h"
+#include "..\Dynamics\World\Items\AssaultItem.h"
+#include "..\Dynamics\World\Items\DebuffItem.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\CreatedBuffSpell.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\PresetBuffSpell.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\CreatedDebuffSpell.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\PresetDebuffSpell.h"
+#include "..\Miscellaneous\SkillsSpellsAndEffectsActions.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 
@@ -366,7 +364,7 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 			if (ARestorationItem* RestorationItem = Cast<ARestorationItem>(Inventory->GetPickedItem()); IsValid(RestorationItem) && IsValid(EntryWidget)) {
 				if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH && SelectedCombatNPC->CurrentHP < SelectedCombatNPC->MaxHP) {
 					int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(SelectedCombatNPC->MaxHP * RestorationItem->GetRestorationValuePercent() / 100,
-						SelectedCombatNPC->Effects, SelectedCombatNPC->GetResistances(), RestorationItem->GetElementsAndTheirPercentagesStructs());
+						SelectedCombatNPC->Effects, SelectedCombatNPC->GetElementalResistances(), RestorationItem->GetElementsAndTheirPercentagesStructs());
 					SelectedCombatNPC->CurrentHP += AmountToHeal;
 					ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), SelectedCombatNPC->GetActorLocation(), SelectedCombatNPC->GetActorRotation());
 					FString TextForCombatFloatingInformationActor = FString();
@@ -379,7 +377,7 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 				}
 				else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA && SelectedCombatNPC->CurrentMana < SelectedCombatNPC->MaxMana) {
 					int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(SelectedCombatNPC->MaxMana * RestorationItem->GetRestorationValuePercent() / 100,
-						SelectedCombatNPC->Effects, SelectedCombatNPC->GetResistances(), RestorationItem->GetElementsAndTheirPercentagesStructs());
+						SelectedCombatNPC->Effects, SelectedCombatNPC->GetElementalResistances(), RestorationItem->GetElementsAndTheirPercentagesStructs());
 					SelectedCombatNPC->CurrentMana += AmountToRestore;
 					ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), SelectedCombatNPC->GetActorLocation(), SelectedCombatNPC->GetActorRotation());
 					FString TextForCombatFloatingInformationActor = FString();
@@ -500,6 +498,7 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 			PlayerCharacter->GetCombatCharacterInfoMenuWidget()->AddToViewport();
 			PlayerCharacter->GetCombatCharacterInfoMenuWidget()->ResetActiveEffectsScrollBox();
 			PlayerCharacter->GetCombatCharacterInfoMenuWidget()->SetCharacterInfo(SelectedCombatNPC);
+			PlayerCharacter->GetCombatCharacterInfoMenuWidget()->SetCharacterResistances(SelectedCombatNPC);
 			if (IsValid(UIManagerWorldSubsystem->PickedButton))
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 			if (PlayerCharacter->GetCombatCharacterInfoMenuWidget()->GetActiveEffectsScrollBox()->GetAllChildren().Num() > 0) {
@@ -510,7 +509,7 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 			}
 			else {
-				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetCombatCharacterInfoMenuWidget()->GetBackButton();
+				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetCombatCharacterInfoMenuWidget()->GetEffectsResistancesToggleButtonWithNeighbors();
 				UIManagerWorldSubsystem->PickedButtonIndex = 0;
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 				PlayerCharacter->GetCombatCharacterInfoMenuWidget()->CanUseKeyboardButtonSelection = false;
@@ -567,7 +566,7 @@ void UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 	bool SpellHasBeenUsed = false;
 	if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::HEALTH && BattleManager->SelectedCombatNPC->CurrentHP < BattleManager->SelectedCombatNPC->MaxHP) {
 		int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(BattleManager->SelectedCombatNPC->MaxHP * SpellToUse->GetRestorationValuePercent() / 100,
-			BattleManager->SelectedCombatNPC->Effects, BattleManager->SelectedCombatNPC->GetResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
+			BattleManager->SelectedCombatNPC->Effects, BattleManager->SelectedCombatNPC->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 		BattleManager->SelectedCombatNPC->CurrentHP += AmountToHeal;
 		ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), BattleManager->SelectedCombatNPC->GetActorLocation(), BattleManager->SelectedCombatNPC->GetActorRotation());
 		FString TextForCombatFloatingInformationActor = FString();
@@ -580,7 +579,7 @@ void UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 	}
 	else if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::MANA && BattleManager->SelectedCombatNPC->CurrentMana < BattleManager->SelectedCombatNPC->MaxMana) {
 		int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(BattleManager->SelectedCombatNPC->MaxMana * SpellToUse->GetRestorationValuePercent() / 100,
-			BattleManager->SelectedCombatNPC->Effects, BattleManager->SelectedCombatNPC->GetResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
+			BattleManager->SelectedCombatNPC->Effects, BattleManager->SelectedCombatNPC->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 		BattleManager->SelectedCombatNPC->CurrentMana += AmountToRestore;
 		ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), BattleManager->SelectedCombatNPC->GetActorLocation(), BattleManager->SelectedCombatNPC->GetActorRotation());
 		FString TextForCombatFloatingInformationActor = FString();

@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatEnemyNPC.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
+#include "..\Characters\Combat\CombatEnemyNPC.h"
+#include "..\GameInstance\RedemptionGameInstance.h"
+#include "..\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
 #include "UIManagerWorldSubsystem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "..\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "BattleMenu.generated.h"
 
 /**

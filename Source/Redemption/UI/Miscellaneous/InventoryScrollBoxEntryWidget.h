@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItem.h"
+#include "..\Dynamics\World\Items\GameItem.h"
 #include "InventoryScrollBoxEntryWidget.generated.h"
 
 /**

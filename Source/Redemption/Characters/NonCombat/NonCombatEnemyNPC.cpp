@@ -3,7 +3,11 @@
 
 #include "NonCombatEnemyNPC.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include <Kismet/KismetMathLibrary.h>
+#include "Kismet/KismetMathLibrary.h"
+#include "..\GameInstance\Structs\ActorGameInstanceData.h"
+#include "Kismet/GameplayStatics.h"
+#include "..\GameInstance\RedemptionGameInstance.h"
+#include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 
 ANonCombatEnemyNPC::ANonCombatEnemyNPC()
 {
@@ -26,12 +30,14 @@ void ANonCombatEnemyNPC::BeginPlay()
 	if (IsValid(NonCombatEnemyDetectionBarWidget)) {
 		NonCombatEnemyDetectionBarWidget->Detection = NonCombatEnemyNPCAIController->GetPlayerDetection();
 	}
+	if (URedemptionGameInstance* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance))
+		Execute_LoadObjectFromGameInstance(this, RedemptionGameInstance);
 }
 
 void ANonCombatEnemyNPC::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (IsValid(NonCombatEnemyNPCAIController)) {
+	if (IsValid(NonCombatEnemyNPCAIController) && IsValid(Player)) {
 		NonCombatEnemyNPCAIController->SetBlackboardDistanceToThePlayer((Player->GetActorLocation() - GetActorLocation()).Length());
 		if (NonCombatEnemyNPCAIController->GetBlackboardComponent()->GetValueAsBool(FName("CanSeePlayer")) && (Player->GetActorLocation()-this->GetActorLocation()).Length() <= 200.f) {
 			FVector FacingVector = Player->GetActorLocation() - this->GetActorLocation();
@@ -46,9 +52,40 @@ void ANonCombatEnemyNPC::Tick(float DeltaTime)
 	}
 }
 
-TArray<TSubclassOf<ACombatEnemyNPC>> ANonCombatEnemyNPC::GetBattleEnemies() const
+void ANonCombatEnemyNPC::LoadObjectFromGameInstance_Implementation(const URedemptionGameInstance* const GameInstance)
+{
+	if (IsValid(GameInstance) && !this->GetFName().IsNone()) {
+		TArray<FActorGameInstanceData> ActorGameInstanceDataArray{};
+		if (UGameplayStatics::GetCurrentLevelName(GetWorld()) == "Town")
+			ActorGameInstanceDataArray = GameInstance->TownActors;
+		else if (UGameplayStatics::GetCurrentLevelName(GetWorld()) == "Dungeon")
+			ActorGameInstanceDataArray = GameInstance->DungeonActors;
+		bool ToBeDestroyed = true;
+		for (FActorGameInstanceData ActorGameInstanceData : ActorGameInstanceDataArray)
+			if (ActorGameInstanceData.ActorName == this->GetFName())
+			{
+				SetActorTransform(ActorGameInstanceData.ActorTransform);
+				FMemoryReader MemReader(ActorGameInstanceData.ByteData);
+				FObjectAndNameAsStringProxyArchive Ar(MemReader, true);
+				Ar.ArIsSaveGame = true;
+				// Convert binary array back into actor's variables
+				Serialize(Ar);
+				ToBeDestroyed = false;
+				break;
+			}
+		if (ToBeDestroyed && ActorGameInstanceDataArray.Num() > 0)
+			Destroy();
+	}
+}
+
+TArray<TSubclassOf<ACombatEnemyNPC>> ANonCombatEnemyNPC::GetBattleEnemies()
 {
 	return BattleEnemies;
+}
+
+void ANonCombatEnemyNPC::SetBattleEnemies(const TArray<TSubclassOf<ACombatEnemyNPC>>& NewBattleEnemies)
+{
+	BattleEnemies = NewBattleEnemies;
 }
 
 UBoxComponent* ANonCombatEnemyNPC::GetForwardMarker() const

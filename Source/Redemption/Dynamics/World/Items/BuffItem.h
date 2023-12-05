@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItemWithElements.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\World\Items\GameItemWithElements.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Spell.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "BuffItem.generated.h"
 
 /**

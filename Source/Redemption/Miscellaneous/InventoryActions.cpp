@@ -1,10 +1,10 @@
 #include "InventoryActions.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ArmorItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
+#include "..\Dynamics\World\Items\ArmorItem.h"
+#include "..\Dynamics\World\Items\WeaponItem.h"
+#include "..\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "Engine/World.h"
-#include "Redemption/Characters/Player/PlayerCharacter.h"
+#include "..\Characters\Player\PlayerCharacter.h"
 
 void InventoryActions::IfItemAlreadyIsInInventory(UWorld* const World, UScrollBox* ItemScrollBox, const AGameItem* const Item)
 {

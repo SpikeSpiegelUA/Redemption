@@ -2,7 +2,7 @@
 
 
 #include "AnimNotify_NCombatAttack.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\GameManager.h"
+#include "..\Dynamics\Gameplay\Managers\GameManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "EngineUtils.h"
 #include "Engine.h"

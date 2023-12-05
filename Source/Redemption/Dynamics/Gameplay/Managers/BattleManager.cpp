@@ -1,17 +1,20 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\Combat\CombatEnemyNPCAIController.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
+#include "..\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\TurnStartDamageEffect.h"
+#include "..\Characters\AI Controllers\Combat\CombatEnemyNPCAIController.h"
+#include "..\UI\Menus\BattleMenu.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
 #include "UIManagerWorldSubsystem.h"
-#include <Kismet/KismetMathLibrary.h>
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ArrayActions.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\FloatingManaBarWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
-#include <Kismet/GameplayStatics.h>
+#include "Kismet/KismetMathLibrary.h"
+#include "..\Miscellaneous\ArrayActions.h"
+#include "..\Miscellaneous\BattleActions.h"
+#include "..\Miscellaneous\ElementsActions.h"
+#include "..\UI\HUD\FloatingManaBarWidget.h"
+#include "..\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ABattleManager::ABattleManager()
@@ -68,7 +71,7 @@ void ABattleManager::TurnChange()
 {
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	//Pass turn to next random enemy
-	if (IsValid(CombatPlayerCharacter) && CombatPlayerCharacter->CurrentHP > 0) {
+	if (IsValid(CombatPlayerCharacter) && CombatPlayerCharacter->CurrentHP > 0 && IsValid(PlayerCharacter)) {
 		if (EnemyTurnQueue.Num() > 0) {
 			if (ActorNumberOfTheCurrentTurn >= 0) {
 				if(ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[ActorNumberOfTheCurrentTurn]->GetController()); IsValid(AIController))
@@ -82,13 +85,46 @@ void ABattleManager::TurnChange()
 				SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
 			if (IsValid(Cast<ACombatAllies>(SelectedCombatNPC)))
 				Cast<ACombatAllies>(SelectedCombatNPC)->GetFloatingManaBarWidget()->GetManaBar()->SetVisibility(ESlateVisibility::Hidden);
-				int NextActor = EnemyTurnQueue[0];
-				SelectedCombatNPC = BattleEnemies[NextActor];
-				ActorNumberOfTheCurrentTurn = NextActor;
-				if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[NextActor]->GetController()); IsValid(AIController))
-					if (IsValid(AIController->GetBlackboardComponent()))
-						AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", true);
-				EnemyTurnQueue.RemoveAt(0);
+			int NextActor = EnemyTurnQueue[0];
+			SelectedCombatNPC = BattleEnemies[NextActor];
+			ActorNumberOfTheCurrentTurn = NextActor;
+			//
+			bool ContinueTurn = true;
+			for (AEffect* Effect : SelectedCombatNPC->Effects)
+				if (Effect->GetEffectType() == EEffectType::TURNSKIP)
+					if (IsValid(SelectedCombatNPC->GetMesh())) {
+						SelectedCombatNPC->GetMesh()->bPauseAnims = true;
+						ContinueTurn = false;
+					}
+			if (ContinueTurn) {
+				//If the next actor has a TurnStartDamage effect, then use get hit and delay AI activation by 2 seconds.
+				bool GotHit = false;
+				for (AEffect* Effect : SelectedCombatNPC->Effects) {
+					if (Effect->GetEffectType() == EEffectType::TURNSTARTDAMAGE) {
+						if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
+							SelectedCombatNPC->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedCombatNPC,
+								BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), SelectedCombatNPC),
+								ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), false);
+							GotHit = true;
+						}
+					}
+				}
+				if (GotHit) {
+					FTimerHandle EnableTurnAIControllerTimerHandle{};
+					GetWorld()->GetTimerManager().SetTimer(EnableTurnAIControllerTimerHandle, this, &ABattleManager::EnableTurnAIController, 2.75f, false);
+				}
+				else {
+					if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(SelectedCombatNPC->GetController()); IsValid(AIController))
+						if (IsValid(AIController->GetBlackboardComponent()))
+							AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", true);
+				}
+			}
+			else {
+				FTimerHandle SkipTurnTimerHandle{};
+				GetWorld()->GetTimerManager().SetTimer(SkipTurnTimerHandle, this, &ABattleManager::SkipTurnActions, 1.f, false);
+				SelectedCombatNPC->GetMesh()->bPauseAnims = true;
+			}
+			EnemyTurnQueue.RemoveAt(0);
 			CanTurnBehindPlayerCameraToTarget = true;
 		}
 		//If EnemyQueue is empty, check if there are alive enemies. If yes, then enable battle UI and continue the battle, if not, show results of the battle.
@@ -170,11 +206,11 @@ void ABattleManager::TurnChange()
 				ActorNumberOfTheCurrentTurn = -1;
 				PlayerCharacter->GetBattleMenuWidget()->RemoveFromParent();
 				PlayerCharacter->GetBattleResultsScreenWidget()->AddToViewport();
-				GetWorld()->GetTimerManager().SetTimer(ShowExperienceTextTimerHandle, this, &ABattleManager::ShowExperienceText, 1, false);
-				GetWorld()->GetTimerManager().SetTimer(ShowGoldTextTimerHandle, this, &ABattleManager::ShowGoldText, 3, false);
+				GetWorld()->GetTimerManager().SetTimer(ShowExperienceTextTimerHandle, this, &ABattleManager::ShowExperienceText, 1.f, false);
+				GetWorld()->GetTimerManager().SetTimer(ShowGoldTextTimerHandle, this, &ABattleManager::ShowGoldText, 3.f, false);
 				FTimerDelegate SetAmountOfGoldTimerDelegate = FTimerDelegate::CreateUObject(this, &ABattleManager::SetAmountOfGoldText, PlayerCharacter->Gold);
-				GetWorldTimerManager().SetTimer(SetAmountOfGoldTextTimerHandle, SetAmountOfGoldTimerDelegate, 4, false);
-				GetWorld()->GetTimerManager().SetTimer(ShowContinueButtonTimerHandle, this, &ABattleManager::ShowContinueButton, 5, false);
+				GetWorldTimerManager().SetTimer(SetAmountOfGoldTextTimerHandle, SetAmountOfGoldTimerDelegate, 4.f, false);
+				GetWorld()->GetTimerManager().SetTimer(ShowContinueButtonTimerHandle, this, &ABattleManager::ShowContinueButton, 5.f, false);
 				//Background Music set
 				PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->Play(0.0f);
 				PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(true);
@@ -308,6 +344,8 @@ void ABattleManager::PlayerTurnController()
 				PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(true);
 				PlayerCharacter->GetAudioManager()->GetDungeonBattleResultsBackgroundMusicAudioComponent()->Play(0.0f);
 				PlayerCharacter->GetAudioManager()->GetDungeonBattleResultsBackgroundMusicAudioComponent()->SetPaused(false);
+				if (IsValid(SelectedCombatNPC))
+					SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
 				for (int i = CombatPlayerCharacter->Effects.Num() - 1; i >= 0; i--) {
 					if (IsValid(CombatPlayerCharacter->Effects[i])) {
 						CombatPlayerCharacter->Effects[i]->ConditionalBeginDestroy();
@@ -352,6 +390,18 @@ void ABattleManager::SetAmountOfGoldText(int Value)
 {
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	PlayerCharacter->GetBattleResultsScreenWidget()->SetAmountOfGoldTextBlock(FText::FromString(FString::FromInt(Value)));
+}
+
+void ABattleManager::EnableTurnAIController()
+{
+	if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(SelectedCombatNPC->GetController()); IsValid(AIController))
+		if (IsValid(AIController->GetBlackboardComponent()))
+			AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", true);
+}
+
+void ABattleManager::SkipTurnActions()
+{
+	TurnChange();
 }
 
 void ABattleManager::ShowContinueButton()

@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\NonCombat\NonCombatEnemyNPC.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\BitmapsActions.h"
+#include "..\Characters\NonCombat\NonCombatEnemyNPC.h"
+#include "..\Miscellaneous\BitmapsActions.h"
 #include "NonCombatEnemyNPCAnimInstance.generated.h"
 
 /**

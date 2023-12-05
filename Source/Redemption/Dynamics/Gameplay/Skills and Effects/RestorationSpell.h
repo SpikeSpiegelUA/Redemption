@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Spell.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Spell.h"
 #include "RestorationSpell.generated.h"
 
 /**

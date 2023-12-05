@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\AI Decorators\Dialogue\BTDecorator_CheckResponse.h"
+#include "..\AI Decorators\Dialogue\BTDecorator_CheckResponse.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 UBTDecorator_CheckResponse::UBTDecorator_CheckResponse(const FObjectInitializer& ObjectInitializer) {

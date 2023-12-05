@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Notification.h"
+#include "..\UI\HUD\Notification.h"
 
 bool UNotification::Initialize()
 {

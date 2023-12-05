@@ -2,7 +2,7 @@
 
 
 #include "SpellWithSpellObject.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\SpellObjects\SpellObject.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\SpellObjects\SpellObject.h"
 
 class TSubclassOf<ASpellObject> ASpellWithSpellObject::GetSpellObjectClass() const
 {

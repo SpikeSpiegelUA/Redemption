@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\AlliesInfoBars.h"
+#include "..\UI\HUD\AlliesInfoBars.h"
 #include "Components/ProgressBar.h"
 #include "Components/CanvasPanel.h"
 

@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Combat\CombatStartLocation.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatPlayerCharacter.h"
+#include "..\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "..\Dynamics\Gameplay\Combat\CombatStartLocation.h"
+#include "..\Characters\Combat\CombatPlayerCharacter.h"
 #include "GameManager.generated.h"
 
 UCLASS()
@@ -51,6 +51,7 @@ public:
 
 	ABattleManager* GetBattleManager() const;
 	TArray<AActor*> GetEnemyBattleSpawns() const;
+	TArray<ACombatStartLocation*> GetAlliesPlayerBattleSpawns() const;
 
 	//Restore widgets to default state
 	void RestartBattleTransitionScreenWidget();

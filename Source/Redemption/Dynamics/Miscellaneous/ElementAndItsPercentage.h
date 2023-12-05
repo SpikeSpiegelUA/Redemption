@@ -2,7 +2,7 @@
 
 #pragma once 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "ElementAndItsPercentage.generated.h"
 
 USTRUCT(BlueprintType) 
@@ -14,24 +14,4 @@ struct FElementAndItsPercentageStruct
 		ESpellElements Element {};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int Percent{};
-
-	int GetPercent() const	
-	{
-		return Percent;
-	}
-
-	ESpellElements GetElement() const
-	{
-		return Element;
-	}
-
-	void SetPercent(int16 NewPercent)
-	{
-		Percent = NewPercent;
-	}
-
-	void SetElement(ESpellElements NewElement)
-	{
-		Element = NewElement;
-	}
 };

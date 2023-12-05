@@ -38,9 +38,9 @@ enum class ESpellElements :uint8
 	BLOOD UMETA(DisplayName = "Blood"),
 
 	//Need this for some logic. Basically spell/weapon has different elements with the same count.
-	MULTIELEMENTAL UMETA(DisplayName = "Multielemental"),
+	MULTIELEMENTAL UMETA(DisplayName = "Multielemental")
 };
-ENUM_RANGE_BY_FIRST_AND_LAST(ESpellElements, ESpellElements::FIRE, ESpellElements::BLOOD);
+ENUM_RANGE_BY_FIRST_AND_LAST(ESpellElements, ESpellElements::FIRE, ESpellElements::MULTIELEMENTAL);
 
 UENUM(BlueprintType)
 enum class EEffectType :uint8
@@ -48,7 +48,9 @@ enum class EEffectType :uint8
 	BUFF UMETA(DisplayName = "Buff"),
 	DEBUFF UMETA(DisplayName = "Debuff"),
 	PLAINBUFF UMETA(DisplayName = "Plain Buff"),
-	PLAINDEBUFF UMETA(DisplayName = "Plain Debuff")
+	PLAINDEBUFF UMETA(DisplayName = "Plain Debuff"),
+	TURNSTARTDAMAGE UMETA(DisplayName = "Turn start damage"),
+	TURNSKIP UMETA(DisplayName = "Turn skip")
 };
 
 UCLASS()

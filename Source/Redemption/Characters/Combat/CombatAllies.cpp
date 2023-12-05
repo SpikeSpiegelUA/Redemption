@@ -2,13 +2,13 @@
 
 
 #include "CombatAllies.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\Combat\CombatAlliesAIController.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
+#include "..\Characters\AI Controllers\Combat\CombatAlliesAIController.h"
+#include "..\Characters\Player\PlayerCharacter.h"
+#include "..\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\SkillsSpellsAndEffectsActions.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ElementsActions.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\FloatingManaBarWidget.h"
+#include "..\Miscellaneous\SkillsSpellsAndEffectsActions.h"
+#include "..\Miscellaneous\ElementsActions.h"
+#include "..\UI\HUD\FloatingManaBarWidget.h"
 
 ACombatAllies::ACombatAllies()
 {

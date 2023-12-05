@@ -2,19 +2,19 @@
 
 
 #include "GameManager.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Menus\BattleMenu.h"
-#include <Kismet/GameplayStatics.h>
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Screens\ToBattleTransitionScreen.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\NonCombat\NonCombatEnemyNPC.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
+#include "..\UI\Menus\BattleMenu.h"
+#include "Kismet/GameplayStatics.h"
+#include "..\UI\Screens\ToBattleTransitionScreen.h"
+#include "..\Characters\NonCombat\NonCombatEnemyNPC.h"
+#include "..\Characters\Player\PlayerCharacter.h"
 #include "UIManagerWorldSubsystem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatAllyNPC.h"
+#include "..\Characters\Combat\CombatAllyNPC.h"
 #include "Components/StackBox.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\RedemptionGameInstance.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ArrayActions.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\Combat\CombatEnemyNPCAIController.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ArrayActions.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\Combat\CombatAllyNPCAIController.h"
+#include "..\GameInstance\RedemptionGameInstance.h"
+#include "..\Miscellaneous\ArrayActions.h"
+#include "..\Characters\AI Controllers\Combat\CombatEnemyNPCAIController.h"
+#include "..\Miscellaneous\ArrayActions.h"
+#include "..\Characters\AI Controllers\Combat\CombatAllyNPCAIController.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
 // Sets default values
@@ -46,7 +46,7 @@ void AGameManager::Tick(float DeltaTime)
 //Set up battle stage
 void AGameManager::StartBattle(AActor* const AttackingNPC)
 {
-	if (IsValid(PlayerCharacter)) {
+	if (IsValid(PlayerCharacter) && IsValid(BattleManager)) {
 		PlayerLastLocation = PlayerCharacter->GetActorLocation();
 		//Set player's last rotation and location, teleport player to battle scene, destroy roaming NPC, disable input and battle UI widgets
 		if (APlayerController* PC = Cast<APlayerController>(PlayerCharacter->GetController()); IsValid(PC)) {
@@ -54,29 +54,28 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 			ToBattleTransitionScreen->SetMainTextBlockText(FText::FromString("Initiative!"));
 			GetWorld()->GetTimerManager().SetTimer(ToBattleTransitionTimerHandle, this, &AGameManager::ToBattleTransition, 2.f, false);
 			//Create enemies and add them to BattleEnemies array in battle manager
-			TArray<AActor*> ShuffledEnemyBattleSpawns = EnemyBattleSpawns;
-			ArrayActions::ShuffleArray(ShuffledEnemyBattleSpawns);
-			if (ANonCombatEnemyNPC* NonCombatEnemyNPC = Cast<ANonCombatEnemyNPC>(AttackingNPC); IsValid(NonCombatEnemyNPC))
-				for (uint8 i = 0; i < NonCombatEnemyNPC->GetBattleEnemies().Num(); i++) {
-					const FVector Location = ShuffledEnemyBattleSpawns[i]->GetActorLocation();
-					ACombatEnemyNPC* SpawnedEnemy = GetWorld()->SpawnActor<ACombatEnemyNPC>(NonCombatEnemyNPC->GetBattleEnemies()[i], Location, ShuffledEnemyBattleSpawns[i]->GetActorRotation());
+			if (ANonCombatEnemyNPC* NonCombatEnemyNPC = Cast<ANonCombatEnemyNPC>(AttackingNPC); IsValid(NonCombatEnemyNPC)) {
+				TArray<TSubclassOf<ACombatEnemyNPC>> ShuffledNPCBattleEnemies = NonCombatEnemyNPC->GetBattleEnemies();
+				ArrayActions::ShuffleArray(ShuffledNPCBattleEnemies);
+				NonCombatEnemyNPC->SetBattleEnemies(ShuffledNPCBattleEnemies);
+				for (uint8 i = 0; i < NonCombatEnemyNPC->GetBattleEnemies().Num() && i < 4; i++) {
+					const FVector Location = EnemyBattleSpawns[i]->GetActorLocation();
+					ACombatEnemyNPC* SpawnedEnemy = GetWorld()->SpawnActor<ACombatEnemyNPC>(NonCombatEnemyNPC->GetBattleEnemies()[i], Location, EnemyBattleSpawns[i]->GetActorRotation());
 					ASmartObject* AISmartObject = GetWorld()->SpawnActor<ASmartObject>(SpawnedEnemy->GetAIClass());
 					if (IsValid(SpawnedEnemy) && IsValid(AISmartObject))
 						SpawnedEnemy->SetSmartObject(AISmartObject);
-					ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(SpawnedEnemy->GetController());
-					SpawnedEnemy->SetStartLocation(ShuffledEnemyBattleSpawns[i]);
-					if (IsValid(AIController))
+					SpawnedEnemy->SetStartLocation(EnemyBattleSpawns[i]);
+					if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(SpawnedEnemy->GetController()); IsValid(AIController))
 						AIController->SetDynamicSubtree();
-					if (IsValid(BattleManager)) {
-					//	SpawnedEnemy->SetStartLocation(ShuffledEnemyBattleSpawns[i]);
-						BattleManager->BattleEnemies.Add(SpawnedEnemy);
-					}
+					BattleManager->BattleEnemies.Add(SpawnedEnemy);
 				}
+			}
 			//Create allies and combat player character
-			TArray<ACombatStartLocation*> ShuffledAlliesBattleSpawns = AlliesPlayerBattleSpawns;
-			ArrayActions::ShuffleArray(ShuffledAlliesBattleSpawns);
-			for (uint8 i = 0; i < PlayerCharacter->GetAllies().Num(); i++) {
-				const FVector Location = ShuffledAlliesBattleSpawns[i]->GetActorLocation();
+			TArray<TSubclassOf<ACombatAllies>> ShuffledCombatAllies = PlayerCharacter->GetAllies();
+			ArrayActions::ShuffleArray(ShuffledCombatAllies);
+			PlayerCharacter->SetAllies(ShuffledCombatAllies);
+			for (uint8 i = 0; i < PlayerCharacter->GetAllies().Num() && i < 4; i++) {
+				const FVector Location = AlliesPlayerBattleSpawns[i]->GetActorLocation();
 				ACombatAllyNPC* SpawnedAlly = GetWorld()->SpawnActor<ACombatAllyNPC>(PlayerCharacter->GetAllies()[i], Location, FRotator(0, 180, 0));
 				ASmartObject* AISmartObject = GetWorld()->SpawnActor<ASmartObject>(SpawnedAlly->GetAIClass());
 				if (IsValid(SpawnedAlly) && IsValid(AISmartObject))
@@ -85,8 +84,8 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 				if (IsValid(AIController))
 					AIController->SetDynamicSubtree();
 				if (IsValid(BattleManager)) {
-					SpawnedAlly->SetStartLocation(ShuffledAlliesBattleSpawns[i]);
-					SpawnedAlly->SetActorLocation(ShuffledAlliesBattleSpawns[i]->GetActorLocation());
+					SpawnedAlly->SetStartLocation(AlliesPlayerBattleSpawns[i]);
+					SpawnedAlly->SetActorLocation(AlliesPlayerBattleSpawns[i]->GetActorLocation());
 					BattleManager->BattleAlliesPlayer.Add(SpawnedAlly);
 					BattleManager->AlliesPlayerTurnQueue.Add(i);
 				}
@@ -98,9 +97,9 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 				PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesNameTextBlockes()[i]->SetText(FText::FromName(SpawnedAlly->GetCharacterName()));
 			}
 			ACombatPlayerCharacter* CombatPlayerCharacter = GetWorld()->SpawnActor<ACombatPlayerCharacter>(CombatPlayerCharacterClass);
-			CombatPlayerCharacter->SetActorLocation(ShuffledAlliesBattleSpawns[3]->GetActorLocation());
+			CombatPlayerCharacter->SetActorLocation(AlliesPlayerBattleSpawns[3]->GetActorLocation());
 			CombatPlayerCharacter->SetActorRotation(FRotator(0, 180, 0));
-			CombatPlayerCharacter->SetStartLocation(ShuffledAlliesBattleSpawns[3]);
+			CombatPlayerCharacter->SetStartLocation(AlliesPlayerBattleSpawns[3]);
 			PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesHealthBars()[BattleManager->BattleAlliesPlayer.Num()]->PercentDelegate.Clear();
 			PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesManaBars()[BattleManager->BattleAlliesPlayer.Num()]->PercentDelegate.Clear();
 			PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesInfoVerticalBoxes()[BattleManager->BattleAlliesPlayer.Num()]->SetVisibility(ESlateVisibility::Visible);
@@ -181,7 +180,6 @@ void AGameManager::EndBattle()
 		PlayerCharacter->CurrentMana = BattleManager->CombatPlayerCharacter->CurrentMana;
 		for (int i = BattleManager->BattleAlliesPlayer.Num() - 1; i >= 0; i--)
 			BattleManager->BattleAlliesPlayer[i]->Destroy();
-		GameInstance->InstanceGold = PlayerCharacter->Gold;
 		BattleManager->BattleEnemies.Empty();
 		PlayerCharacter->RestartBattleMenuWidget();
 		PlayerCharacter->RestartBattleResultsScreenWidget();
@@ -232,6 +230,11 @@ ABattleManager* AGameManager::GetBattleManager() const
 TArray<AActor*> AGameManager::GetEnemyBattleSpawns() const
 {
 	return EnemyBattleSpawns;
+}
+
+TArray<ACombatStartLocation*> AGameManager::GetAlliesPlayerBattleSpawns() const
+{
+	return AlliesPlayerBattleSpawns;
 }
 
 

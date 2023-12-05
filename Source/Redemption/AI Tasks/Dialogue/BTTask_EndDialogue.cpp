@@ -4,10 +4,10 @@
 #include "BTTask_EndDialogue.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\HUD\Dialogue\DialogueBox.h"
+#include "..\UI\HUD\Dialogue\DialogueBox.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
+#include "..\Characters\Player\PlayerCharacter.h"
 
 UBTTask_EndDialogue::UBTTask_EndDialogue(const FObjectInitializer& ObjectInitializer)
 {

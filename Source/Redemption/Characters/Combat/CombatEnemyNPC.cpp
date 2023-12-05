@@ -2,17 +2,17 @@
 
 
 #include "CombatEnemyNPC.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\Combat\CombatEnemyNPCAnimInstance.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\EffectWithPlainModifier.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ElementsActions.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Combat\CombatFloatingInformationActor.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\SkillsSpellsAndEffectsActions.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Miscellaneous\ElementsActions.h"
+#include "..\Characters\Animation\Combat\CombatEnemyNPCAnimInstance.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\EffectWithPlainModifier.h"
+#include "..\Miscellaneous\ElementsActions.h"
+#include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
+#include "..\Characters\Player\PlayerCharacter.h"
+#include "..\Dynamics\Gameplay\Combat\CombatFloatingInformationActor.h"
+#include "..\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "..\Miscellaneous\SkillsSpellsAndEffectsActions.h"
+#include "..\Miscellaneous\ElementsActions.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include <Redemption/Characters/AI Controllers/Combat/CombatEnemyNPCAIController.h>
+#include "..\Characters\AI Controllers\Combat\CombatEnemyNPCAIController.h"
 
 // Sets default values
 ACombatEnemyNPC::ACombatEnemyNPC()

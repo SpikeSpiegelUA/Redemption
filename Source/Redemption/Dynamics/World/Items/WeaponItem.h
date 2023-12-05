@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\EquipmentItem.h"
-#include "Redemption/Dynamics/Gameplay/Skills and Effects/Effect.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
+#include "..\Dynamics\World\Items\EquipmentItem.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "WeaponItem.generated.h"
 
 /**
@@ -17,14 +17,6 @@ enum class EWeaponType :uint8
 {
 	MELEE UMETA(DisplayName = "Melee"),
 	RANGE UMETA(DisplayName = "Range"),
-};
-
-UENUM(BlueprintType)
-enum class EPhysicalType :uint8
-{
-	SLASHING UMETA(DisplayName = "Slashing"),
-	CRUSHING UMETA(DisplayName = "Crushing"),
-	PIERCING UMETA(DisplayName = "PIERCING"),
 };
 
 UCLASS()

@@ -4,12 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatEnemyNPC.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatPlayerCharacter.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatNPC.h"
+#include "..\Characters\Player\PlayerCharacter.h"
+#include "..\Characters\Combat\CombatEnemyNPC.h"
+#include "..\Characters\Combat\CombatPlayerCharacter.h"
+#include "..\Characters\Combat\CombatNPC.h"
 #include "Camera/CameraActor.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Combat\CombatFloatingInformationActor.h"
+#include "..\Dynamics\Gameplay\Combat\CombatFloatingInformationActor.h"
 #include "BattleManager.generated.h"
 
 UCLASS()
@@ -101,4 +101,8 @@ private:
 	void ShowContinueButton();
 	UFUNCTION()
 	void SetAmountOfGoldText(int Value);
+	UFUNCTION()
+	void EnableTurnAIController();
+	UFUNCTION()
+	void SkipTurnActions();
 };

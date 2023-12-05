@@ -2,8 +2,8 @@
 
 
 #include "LearnedSpellEntryWidget.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Public\UIManagerWorldSubsystem.h"
-#include "Redemption/Characters/Player/PlayerCharacter.h"
+#include "..\Public\UIManagerWorldSubsystem.h"
+#include "..\Characters\Player\PlayerCharacter.h"
 
 bool ULearnedSpellEntryWidget::Initialize()
 {
@@ -23,24 +23,25 @@ void ULearnedSpellEntryWidget::NativeConstruct()
 
 void ULearnedSpellEntryWidget::MainButtonOnClicked()
 {
-    if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter())) {
-        PlayerCharacter->GetSpellInfoWidget()->AddToViewport();
-        if (PlayerCharacter->GetLearnedSpellsJournalMenu()->IsInViewport()) {
-            PlayerCharacter->GetSpellInfoWidget()->SetPositionInViewport(FVector2D(300, 60));
-            if (IsValid(PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton))
-                PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
-            PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton = MainButton;
+    if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
+        if (IsValid(PlayerCharacter->GetSpellBattleMenuWidget()) && IsValid(PlayerCharacter->GetSkillBattleMenuWidget()) && PlayerCharacter->GetSpellInfoWidget()) {
+            PlayerCharacter->GetSpellInfoWidget()->AddToViewport();
+            if (PlayerCharacter->GetLearnedSpellsJournalMenu()->IsInViewport()) {
+                PlayerCharacter->GetSpellInfoWidget()->SetPositionInViewport(FVector2D(300, 60));
+                if (IsValid(PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton))
+                    PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
+                PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton = MainButton;
+            }
+            else if (PlayerCharacter->GetSkillBattleMenuWidget()->IsInViewport()) {
+                PlayerCharacter->GetSpellInfoWidget()->SetPositionInViewport(FVector2D(720, 20));
+                if (IsValid(PlayerCharacter->GetSkillBattleMenuWidget()->SelectedSkillButton))
+                    PlayerCharacter->GetSkillBattleMenuWidget()->SelectedSkillButton->SetBackgroundColor(FLinearColor(0.6, 0.6, 0.6, 1));
+                PlayerCharacter->GetSkillBattleMenuWidget()->SelectedSkillButton = MainButton;
+            }
+            PlayerCharacter->GetSpellBattleMenuWidget()->SetCreatedSpell(EntrySpell);
+            PlayerCharacter->GetSpellInfoWidget()->SetSpellInfo(EntrySpell);
+            MainButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
         }
-        else if (PlayerCharacter->GetSkillBattleMenuWidget()->IsInViewport()) {
-            PlayerCharacter->GetSpellInfoWidget()->SetPositionInViewport(FVector2D(720, 20));
-            if (IsValid(PlayerCharacter->GetSkillBattleMenuWidget()->SelectedSkillButton))
-                PlayerCharacter->GetSkillBattleMenuWidget()->SelectedSkillButton->SetBackgroundColor(FLinearColor(0.6, 0.6, 0.6, 1));
-            PlayerCharacter->GetSkillBattleMenuWidget()->SelectedSkillButton = MainButton;
-        }
-        PlayerCharacter->GetSpellBattleMenuWidget()->SetCreatedSpell(EntrySpell);
-        PlayerCharacter->GetSpellInfoWidget()->SetSpellInfo(EntrySpell);
-        MainButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-    }
 }
 
 void ULearnedSpellEntryWidget::MainButtonOnHovered()

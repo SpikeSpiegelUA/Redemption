@@ -8,7 +8,7 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/Border.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\LearnedSpellEntryWidget.h"
+#include "..\UI\Miscellaneous\LearnedSpellEntryWidget.h"
 #include "LearnedSpellsJournalMenu.generated.h"
 
 /**
@@ -42,7 +42,7 @@ private:
 	UFUNCTION()
 	void BackButtonOnHovered();
 	UFUNCTION()
-		void HideNotificationAndClearItsTimer();
+	void HideNotificationAndClearItsTimer();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 		TSubclassOf<ULearnedSpellEntryWidget> LearnedSpellEntryWidgetClass{};

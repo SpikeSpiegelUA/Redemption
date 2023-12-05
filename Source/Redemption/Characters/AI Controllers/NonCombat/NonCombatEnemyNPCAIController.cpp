@@ -1,18 +1,18 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\AI Controllers\NonCombat\NonCombatEnemyNPCAIController.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\CharacterInTheWorld.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\NonCombat\NonCombatEnemyNPC.h"
-#include <C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h>
+#include "..\Characters\AI Controllers\NonCombat\NonCombatEnemyNPCAIController.h"
+#include "..\Characters\CharacterInTheWorld.h"
+#include "..\Characters\NonCombat\NonCombatEnemyNPC.h"
+#include "..\Characters\Player\PlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Float.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include <Kismet/GameplayStatics.h>
-#include <Kismet/KismetMathLibrary.h>
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ANonCombatEnemyNPCAIController::ANonCombatEnemyNPCAIController(const FObjectInitializer& ObjectInitializer)
 {

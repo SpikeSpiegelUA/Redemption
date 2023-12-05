@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\EffectsSpellsAndSkillsManager.h"
+#include "..\Dynamics\Gameplay\Managers\EffectsSpellsAndSkillsManager.h"
 
 // Sets default values
 AEffectsSpellsAndSkillsManager::AEffectsSpellsAndSkillsManager()

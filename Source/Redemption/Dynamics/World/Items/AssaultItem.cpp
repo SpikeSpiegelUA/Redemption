@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\AssaultItem.h"
+#include "..\Dynamics\World\Items\AssaultItem.h"
 
 int AAssaultItem::GetAttackValue() const
 {

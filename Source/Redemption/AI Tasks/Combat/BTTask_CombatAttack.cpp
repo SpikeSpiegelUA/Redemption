@@ -3,7 +3,7 @@
 
 #include "BTTask_CombatAttack.h"
 #include "AIController.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\Combat\CombatEnemyNPCAnimInstance.h"
+#include "..\Characters\Animation\Combat\CombatEnemyNPCAnimInstance.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 UBTTask_CombatAttack::UBTTask_CombatAttack(const FObjectInitializer& ObjectInitializer)

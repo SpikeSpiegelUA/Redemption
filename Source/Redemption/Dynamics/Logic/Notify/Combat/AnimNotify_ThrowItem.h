@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
-#include <Redemption/Dynamics/World/Items/AssaultItem.h>
-#include <Redemption/Dynamics/World/Items/DebuffItem.h>
-#include "Redemption/Dynamics/Gameplay/Managers/BattleManager.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\GameItemWithItemObject.h"
+#include "..\Dynamics\World\Items\AssaultItem.h"
+#include "..\Dynamics\World\Items\DebuffItem.h"
+#include "..\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "..\Dynamics\World\Items\GameItemWithItemObject.h"
 #include "AnimNotify_ThrowItem.generated.h"
 
 

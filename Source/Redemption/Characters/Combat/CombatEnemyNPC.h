@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Skills and Effects\Effect.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Combat\CombatNPC.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Characters\Combat\CombatNPC.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\Interfaces\DialogueActionsInterface.h"
+#include "..\Dynamics\Logic\Interfaces\DialogueActionsInterface.h"
 #include "CombatEnemyNPC.generated.h"
 
 /**

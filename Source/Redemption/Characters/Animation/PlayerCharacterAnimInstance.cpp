@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Animation\PlayerCharacterAnimInstance.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Characters\Player\PlayerCharacter.h"
+#include "..\Characters\Animation\PlayerCharacterAnimInstance.h"
+#include "..\Characters\Player\PlayerCharacter.h"
 
 UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
 {

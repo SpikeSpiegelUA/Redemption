@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\WeaponItem.h"
+#include "..\Dynamics\World\Items\WeaponItem.h"
 #include "PhysicalTypeAndItsPercentage.generated.h"
 /**
  * 
@@ -16,24 +16,4 @@ USTRUCT(BlueprintType) struct FPhysicalTypeAndItsPercentageStruct
 		EPhysicalType PhysicalType {};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int Percent{};
-
-	int GetPercent() const
-	{
-		return Percent;
-	}
-
-	EPhysicalType GetPhysicalType() const
-	{
-		return PhysicalType;
-	}
-
-	void SetPercent(int NewPercent)
-	{
-		Percent = NewPercent;
-	}
-
-	void SetPhysicalType(EPhysicalType NewPhysicalType)
-	{
-		PhysicalType = NewPhysicalType;
-	}
 };

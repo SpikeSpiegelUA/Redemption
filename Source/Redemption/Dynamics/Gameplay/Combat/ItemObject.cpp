@@ -2,10 +2,10 @@
 
 
 #include "ItemObject.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Gameplay\Managers\BattleManager.h"
-#include <Kismet/GameplayStatics.h>
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\AssaultItem.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\DebuffItem.h"
+#include "..\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "..\Dynamics\World\Items\AssaultItem.h"
+#include "..\Dynamics\World\Items\DebuffItem.h"
 #include "Kismet/KismetMathLibrary.h"
 // Sets default values
 AItemObject::AItemObject()
