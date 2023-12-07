@@ -111,19 +111,19 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 			BattleManager->AlliesPlayerTurnQueue.Add(BattleManager->BattleAlliesPlayer.Num() - 1);
 			ArrayActions::ShuffleArray<int>(BattleManager->AlliesPlayerTurnQueue);
 			//Set camera position and set non combat player position to PlayerPlane's position
-			BattleManager->CurrentTurnAllyPlayerIndex = BattleManager->AlliesPlayerTurnQueue[0];
+			BattleManager->CurrentTurnCombatNPCIndex = BattleManager->AlliesPlayerTurnQueue[0];
 			BattleManager->SetBehindPlayerCameraLocation(Cast<ACombatStartLocation>(BattleManager->BattleAlliesPlayer[BattleManager->AlliesPlayerTurnQueue[0]]->GetStartLocation())->CombatCameraLocation);
 			PlayerCharacter->SetCanInput(false);
 			PlayerCharacter->SetActorLocation(FVector(1350, 5610, -960));
 			PlayerCharacter->GetAlliesInfoBarsWidget()->AddToViewport();
 			PlayerCharacter->GetSkillBattleMenuWidget()->ResetSkillsScrollBox();
-			for (TSubclassOf<ASpell> SpellClass : BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnAllyPlayerIndex]->GetAvailableSkills())
+			for (TSubclassOf<ASpell> SpellClass : BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnCombatNPCIndex]->GetAvailableSkills())
 				PlayerCharacter->GetSkillBattleMenuWidget()->AddSkillEntryToSkillsScrollBox(Cast<ASpell>(SpellClass->GetDefaultObject()));
 			if (UAlliesInfoBars* AlliesInfoBarsWidget = PlayerCharacter->GetAlliesInfoBarsWidget(); IsValid(AlliesInfoBarsWidget)) {
 				if(AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder < AlliesInfoBarsWidget->GetAlliesNameBorders().Num())
 					AlliesInfoBarsWidget->GetAlliesNameBorders()[AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder]->SetBrushColor(FLinearColor(0.3f, 0.3f, 0.3f, 1.f));
-				AlliesInfoBarsWidget->GetAlliesNameBorders()[BattleManager->CurrentTurnAllyPlayerIndex]->SetBrushColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
-				AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder = BattleManager->CurrentTurnAllyPlayerIndex;
+				AlliesInfoBarsWidget->GetAlliesNameBorders()[BattleManager->CurrentTurnCombatNPCIndex]->SetBrushColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+				AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder = BattleManager->CurrentTurnCombatNPCIndex;
 			}
 			BattleManager->AlliesPlayerTurnQueue.RemoveAt(0);
 			PC->bShowMouseCursor = true;

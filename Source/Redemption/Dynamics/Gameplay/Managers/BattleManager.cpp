@@ -73,10 +73,10 @@ void ABattleManager::TurnChange()
 	//Pass turn to next random enemy
 	if (IsValid(CombatPlayerCharacter) && CombatPlayerCharacter->CurrentHP > 0 && IsValid(PlayerCharacter)) {
 		if (EnemyTurnQueue.Num() > 0) {
-			if (ActorNumberOfTheCurrentTurn >= 0) {
-				if(ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[ActorNumberOfTheCurrentTurn]->GetController()); IsValid(AIController))
+			if (CurrentTurnCombatNPCIndex >= 0) {
+				if(ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[CurrentTurnCombatNPCIndex]->GetController()); IsValid(AIController))
 					AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
-				BattleEnemies[ActorNumberOfTheCurrentTurn]->SetActorRotation(FRotator(0, 0, 0));
+				BattleEnemies[CurrentTurnCombatNPCIndex]->SetActorRotation(FRotator(0, 0, 0));
 			}
 			/*for (int i = BattleAlliesPlayer.Num() - 1; i >= 0; i--)
 				if (BattleAlliesPlayer[i]->GetCurrentHP() <= 0) 
@@ -87,42 +87,59 @@ void ABattleManager::TurnChange()
 				Cast<ACombatAllies>(SelectedCombatNPC)->GetFloatingManaBarWidget()->GetManaBar()->SetVisibility(ESlateVisibility::Hidden);
 			int NextActor = EnemyTurnQueue[0];
 			SelectedCombatNPC = BattleEnemies[NextActor];
-			ActorNumberOfTheCurrentTurn = NextActor;
+			CurrentTurnCombatNPCIndex = NextActor;
 			//
 			bool ContinueTurn = true;
-			for (AEffect* Effect : SelectedCombatNPC->Effects)
-				if (Effect->GetEffectType() == EEffectType::TURNSKIP)
-					if (IsValid(SelectedCombatNPC->GetMesh())) {
-						SelectedCombatNPC->GetMesh()->bPauseAnims = true;
+			for (int i = BattleEnemies[NextActor]->Effects.Num() - 1; i >= 0; i--)
+				if (BattleEnemies[NextActor]->Effects[i]->GetEffectType() == EEffectType::TURNSKIP)
+					if (IsValid(BattleEnemies[NextActor]->GetMesh())) {
+						BattleEnemies[NextActor]->Effects[i]->CurrentDuration += 1;
+						if (BattleEnemies[NextActor]->Effects[i]->CurrentDuration >= BattleEnemies[NextActor]->Effects[i]->GetDuration() + 1) {
+							BattleEnemies[NextActor]->Effects[i]->ConditionalBeginDestroy();
+							BattleEnemies[NextActor]->Effects.RemoveAt(i);
+							continue;
+						}
+						BattleEnemies[NextActor]->GetMesh()->bPauseAnims = true;
 						ContinueTurn = false;
 					}
 			if (ContinueTurn) {
+				if (IsValid(BattleEnemies[NextActor]->GetMesh()))
+					if(BattleEnemies[NextActor]->GetMesh()->bPauseAnims)
+						BattleEnemies[NextActor]->GetMesh()->bPauseAnims = false;
 				//If the next actor has a TurnStartDamage effect, then use get hit and delay AI activation by 2 seconds.
 				bool GotHit = false;
-				for (AEffect* Effect : SelectedCombatNPC->Effects) {
+				for (AEffect* Effect : BattleEnemies[NextActor]->Effects) {
 					if (Effect->GetEffectType() == EEffectType::TURNSTARTDAMAGE) {
 						if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
-							SelectedCombatNPC->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedCombatNPC,
-								BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), SelectedCombatNPC),
+							BattleEnemies[NextActor]->Execute_GetHit(PlayerCharacter->GetBattleManager()->BattleEnemies[NextActor],
+								BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleEnemies[NextActor]),
 								ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), false);
 							GotHit = true;
 						}
 					}
 				}
+				for (int i = BattleEnemies[NextActor]->Effects.Num() - 1; i >= 0; i--) {
+					if (IsValid(BattleEnemies[NextActor]->Effects[i])) {
+						BattleEnemies[NextActor]->Effects[i]->CurrentDuration += 1;
+						if (BattleEnemies[NextActor]->Effects[i]->CurrentDuration >= BattleEnemies[NextActor]->Effects[i]->GetDuration() + 1) {
+							BattleEnemies[NextActor]->Effects[i]->ConditionalBeginDestroy();
+							BattleEnemies[NextActor]->Effects.RemoveAt(i);
+						}
+					}
+				}
 				if (GotHit) {
 					FTimerHandle EnableTurnAIControllerTimerHandle{};
-					GetWorld()->GetTimerManager().SetTimer(EnableTurnAIControllerTimerHandle, this, &ABattleManager::EnableTurnAIController, 2.75f, false);
+					GetWorld()->GetTimerManager().SetTimer(EnableTurnAIControllerTimerHandle, this, &ABattleManager::EnableTurnAIController, 2.25f, false);
 				}
 				else {
-					if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(SelectedCombatNPC->GetController()); IsValid(AIController))
+					if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[NextActor]->GetController()); IsValid(AIController))
 						if (IsValid(AIController->GetBlackboardComponent()))
 							AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", true);
 				}
 			}
 			else {
 				FTimerHandle SkipTurnTimerHandle{};
-				GetWorld()->GetTimerManager().SetTimer(SkipTurnTimerHandle, this, &ABattleManager::SkipTurnActions, 1.f, false);
-				SelectedCombatNPC->GetMesh()->bPauseAnims = true;
+				GetWorld()->GetTimerManager().SetTimer(SkipTurnTimerHandle, this, &ABattleManager::SkipEnemyTurnActions, 1.f, false);
 			}
 			EnemyTurnQueue.RemoveAt(0);
 			CanTurnBehindPlayerCameraToTarget = true;
@@ -136,15 +153,14 @@ void ABattleManager::TurnChange()
 					break;
 				}
 			if (AreAliveEnemies) {
-				if (ActorNumberOfTheCurrentTurn >= 0) {
-					if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[ActorNumberOfTheCurrentTurn]->GetController()); IsValid(AIController))
+				if (CurrentTurnCombatNPCIndex >= 0) {
+					if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[CurrentTurnCombatNPCIndex]->GetController()); IsValid(AIController))
 						AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
-					BattleEnemies[ActorNumberOfTheCurrentTurn]->SetActorRotation(FRotator(0, 0, 0));
+					BattleEnemies[CurrentTurnCombatNPCIndex]->SetActorRotation(FRotator(0, 0, 0));
 				}
 				UUIManagerWorldSubsystem* UIManagerWorldSubsystem = nullptr;
 				if (IsValid(GetWorld()))
 					UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
-				ActorNumberOfTheCurrentTurn = -1;
 				UBattleMenu* BattleMenu = PlayerCharacter->GetBattleMenuWidget();
 				CanTurnBehindPlayerCameraToTarget = false;
 				CanTurnBehindPlayerCameraToStartPosition = true;
@@ -157,53 +173,72 @@ void ABattleManager::TurnChange()
 				ArrayActions::ShuffleArray<int>(AlliesPlayerTurnQueue);
 				if (BattleAlliesPlayer.Num() > 0)
 					BehindPlayerCamera->SetActorLocation(Cast<ACombatStartLocation>(BattleAlliesPlayer[AlliesPlayerTurnQueue[0]]->GetStartLocation())->CombatCameraLocation);
-				CurrentTurnAllyPlayerIndex = AlliesPlayerTurnQueue[0];
+				CurrentTurnCombatNPCIndex = AlliesPlayerTurnQueue[0];
 				if (UAlliesInfoBars* AlliesInfoBarsWidget = PlayerCharacter->GetAlliesInfoBarsWidget(); IsValid(AlliesInfoBarsWidget)) {
 					AlliesInfoBarsWidget->GetAlliesNameBorders()[AlliesPlayerTurnQueue[0]]->SetBrushColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
 					AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder = AlliesPlayerTurnQueue[0];
 				}
 				AlliesPlayerTurnQueue.RemoveAt(0);
-				if (IsValid(BattleMenu) && IsValid(UIManagerWorldSubsystem)) {
-					BattleMenu->AddToViewport();
-					BattleMenu->IsChoosingAction = true;
-					BattleMenu->GetMenuBorder()->SetVisibility(ESlateVisibility::Visible);
-					UIManagerWorldSubsystem->PickedButton = BattleMenu->GetAttackButton();
-					BattleMenu->GetAttackButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-				}
-				//Toggle blocking animation off
-				UCombatAlliesAnimInstance* CombatAlliesAnimInstance{};
-				if (CurrentTurnAllyPlayerIndex >= 0 ) {
-					if (IsValid(BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]))
-						if (IsValid(BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->GetMesh()))
-							if (IsValid(BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->GetMesh()->GetAnimInstance()))
-								CombatAlliesAnimInstance = Cast<UCombatAlliesAnimInstance>(BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->GetMesh()->GetAnimInstance());
-					//Check Effects array in a next turn's character. If CurrentDuration>=Duration, add index to special array and then delete in separate loop
-					//1 is subtracted from the duration right after the turn, so we need to set the duration to desired number of turns + 1.
-					for (int i = BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->Effects.Num() - 1; i >= 0; i--) {
-						if (IsValid(BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->Effects[i])) {
-							BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->Effects[i]->CurrentDuration += 1;
-							if (BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->Effects[i]->CurrentDuration >= BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->Effects[i]->GetDuration() + 1) {
-								BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->Effects[i]->ConditionalBeginDestroy();
-								BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->Effects.RemoveAt(i);
+				bool ContinueTurn = true;
+				for (int i = BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.Num() - 1; i >= 0; i--)
+					if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetEffectType() == EEffectType::TURNSKIP)
+						if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh())) {
+							BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration += 1;
+							if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration >= BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetDuration() + 1) {
+								BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->ConditionalBeginDestroy();
+								BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.RemoveAt(i);
+								continue;
+							}
+							BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh()->bPauseAnims = true;
+							ContinueTurn = false;
+						}
+				if (ContinueTurn) {
+					if (IsValid(BattleMenu) && IsValid(UIManagerWorldSubsystem)) {
+						BattleMenu->AddToViewport();
+						BattleMenu->IsChoosingAction = true;
+						BattleMenu->GetMenuBorder()->SetVisibility(ESlateVisibility::Visible);
+						UIManagerWorldSubsystem->PickedButton = BattleMenu->GetAttackButton();
+						BattleMenu->GetAttackButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+					}
+					//Toggle blocking animation off
+					UCombatAlliesAnimInstance* CombatAlliesAnimInstance{};
+					if (CurrentTurnCombatNPCIndex >= 0) {
+						if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]))
+							if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh()))
+								if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh()->GetAnimInstance()))
+									CombatAlliesAnimInstance = Cast<UCombatAlliesAnimInstance>(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh()->GetAnimInstance());
+						//Check Effects array in a next turn's character. If CurrentDuration>=Duration, add index to special array and then delete in separate loop
+						//1 is subtracted from the duration right after the turn, so we need to set the duration to desired number of turns + 1.
+						for (int i = BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.Num() - 1; i >= 0; i--) {
+							if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i])) {
+								BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration += 1;
+								if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration >= BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetDuration() + 1) {
+									BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->ConditionalBeginDestroy();
+									BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.RemoveAt(i);
+								}
 							}
 						}
+						PlayerCharacter->GetSkillBattleMenuWidget()->ResetSkillsScrollBox();
+						for (TSubclassOf<ASpell> SpellClass : BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetAvailableSkills())
+							PlayerCharacter->GetSkillBattleMenuWidget()->AddSkillEntryToSkillsScrollBox(Cast<ASpell>(SpellClass->GetDefaultObject()));
 					}
-					PlayerCharacter->GetSkillBattleMenuWidget()->ResetSkillsScrollBox();
-					for (TSubclassOf<ASpell> SpellClass : BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->GetAvailableSkills())
-						PlayerCharacter->GetSkillBattleMenuWidget()->AddSkillEntryToSkillsScrollBox(Cast<ASpell>(SpellClass->GetDefaultObject()));
+					if (IsValid(CombatAlliesAnimInstance))
+						if (CombatAlliesAnimInstance->GetCombatAlliesIsBlocking())
+							CombatAlliesAnimInstance->ToggleCombatAlliesIsBlocking(false);
 				}
-				if (IsValid(CombatAlliesAnimInstance))
-					if (CombatAlliesAnimInstance->GetCombatAlliesIsBlocking())
-						CombatAlliesAnimInstance->ToggleCombatAlliesIsBlocking(false);
+				else {
+					FTimerHandle SkipTurnTimerHandle{};
+					GetWorld()->GetTimerManager().SetTimer(SkipTurnTimerHandle, this, &ABattleManager::SkipAllyTurnActions, 1.f, false);
+				}
 			}
 			else {
-				if (ActorNumberOfTheCurrentTurn >= 0) {
-					if(ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[ActorNumberOfTheCurrentTurn]->GetController()); IsValid(AIController))
+				if (CurrentTurnCombatNPCIndex >= 0) {
+					if(ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[CurrentTurnCombatNPCIndex]->GetController()); IsValid(AIController))
 					AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
-					BattleEnemies[ActorNumberOfTheCurrentTurn]->SetActorRotation(FRotator(0, 0, 0));
+					BattleEnemies[CurrentTurnCombatNPCIndex]->SetActorRotation(FRotator(0, 0, 0));
 				}
 				//Show results screen
-				ActorNumberOfTheCurrentTurn = -1;
+				CurrentTurnCombatNPCIndex = -1;
 				PlayerCharacter->GetBattleMenuWidget()->RemoveFromParent();
 				PlayerCharacter->GetBattleResultsScreenWidget()->AddToViewport();
 				GetWorld()->GetTimerManager().SetTimer(ShowExperienceTextTimerHandle, this, &ABattleManager::ShowExperienceText, 1.f, false);
@@ -228,8 +263,9 @@ void ABattleManager::TurnChange()
 	}
 	//Player's death logic
 	else if (IsValid(CombatPlayerCharacter) && CombatPlayerCharacter->CurrentHP <= 0) {
-		if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[ActorNumberOfTheCurrentTurn]->GetController()); IsValid(AIController))
-			AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
+		if(CurrentTurnCombatNPCIndex >= 0)
+			if (auto* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[CurrentTurnCombatNPCIndex]->GetController()); IsValid(AIController))
+				AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
 		PlayerCharacter->GetBattleMenuWidget()->RemoveFromParent(); 
 		PlayerCharacter->GetDeathMenuWidget()->AddToViewport();
 		PlayerCharacter->GetAudioManager()->GetDeathMenuBackgroundMusicAudioComponent()->Play(0.0f);
@@ -270,68 +306,85 @@ void ABattleManager::PlayerTurnController()
 							AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
 						BattleEnemies[ActorNumberOfTheCurrentTurn]->SetActorRotation(FRotator(0, 0, 0));
 					}*/
-				BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->SetActorRotation(FRotator(0, 180, 0));
+				BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->SetActorRotation(FRotator(0, 180, 0));
 				if (IsValid(SelectedCombatNPC))
 					SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
 				if (IsValid(Cast<ACombatAllies>(SelectedCombatNPC)))
 					Cast<ACombatAllies>(SelectedCombatNPC)->GetFloatingManaBarWidget()->GetManaBar()->SetVisibility(ESlateVisibility::Hidden);
 				int NextActor = AlliesPlayerTurnQueue[0];
 				SelectedCombatNPC = BattleAlliesPlayer[NextActor];
-				CurrentTurnAllyPlayerIndex = NextActor;
-				BehindPlayerCamera->SetActorLocation(Cast<ACombatStartLocation>(BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->GetStartLocation())->CombatCameraLocation);
+				CurrentTurnCombatNPCIndex = NextActor;
+				BehindPlayerCamera->SetActorLocation(Cast<ACombatStartLocation>(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetStartLocation())->CombatCameraLocation);
 				if (UAlliesInfoBars* AlliesInfoBarsWidget = PlayerCharacter->GetAlliesInfoBarsWidget(); IsValid(AlliesInfoBarsWidget)) {
 					if (AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder < AlliesInfoBarsWidget->GetAlliesNameBorders().Num())
 						AlliesInfoBarsWidget->GetAlliesNameBorders()[AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder]->SetBrushColor(FLinearColor(0.3f, 0.3f, 0.3f, 1.f));
-					AlliesInfoBarsWidget->GetAlliesNameBorders()[CurrentTurnAllyPlayerIndex]->SetBrushColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
-					AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder = CurrentTurnAllyPlayerIndex;
+					AlliesInfoBarsWidget->GetAlliesNameBorders()[CurrentTurnCombatNPCIndex]->SetBrushColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+					AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder = CurrentTurnCombatNPCIndex;
 				}
 				//CanTurnBehindPlayerCameraToTarget = true;
 				AlliesPlayerTurnQueue.Remove(NextActor);
-				ActorNumberOfTheCurrentTurn = NextActor;
 				UUIManagerWorldSubsystem* UIManagerWorldSubsystem = nullptr;
 				if (IsValid(GetWorld()))
 					UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
-				ActorNumberOfTheCurrentTurn = -1;
 				UBattleMenu* BattleMenu = PlayerCharacter->GetBattleMenuWidget();
 				CanTurnBehindPlayerCameraToTarget = false;
 				CanTurnBehindPlayerCameraToStartPosition = true;
-				if (IsValid(BattleMenu) && IsValid(UIManagerWorldSubsystem)) {
-					BattleMenu->AddToViewport();
-					BattleMenu->IsChoosingAction = true;
-					BattleMenu->GetMenuBorder()->SetVisibility(ESlateVisibility::Visible);
-					UIManagerWorldSubsystem->PickedButton = BattleMenu->GetAttackButton();
-					BattleMenu->GetAttackButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-				}
-				//Check Effects array in a next character. If CurrentDuration>=Duration, add index to special array and then delete in separate loop
-				//1 is subtracted from the duration right after the turn, so we need to set the duration to desired number of turns + 1.
-				for (int i = BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->Effects.Num() - 1; i >= 0; i--) {
-					if (IsValid(BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->Effects[i])) {
-						BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->Effects[i]->CurrentDuration += 1;
-						if (BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->Effects[i]->CurrentDuration >= BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->Effects[i]->GetDuration() + 1) {
-							BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->Effects[i]->ConditionalBeginDestroy();
-							BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->Effects.RemoveAt(i);
+				bool ContinueTurn = true;
+				for (int i = BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.Num() - 1; i >= 0; i--)
+					if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetEffectType() == EEffectType::TURNSKIP)
+						if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh())) {
+							BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration += 1;
+							if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration >= BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetDuration() + 1) {
+								BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->ConditionalBeginDestroy();
+								BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.RemoveAt(i);
+								continue;
+							}
+							BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh()->bPauseAnims = true;
+							ContinueTurn = false;
+						}
+				if (ContinueTurn) {
+					if (IsValid(BattleMenu) && IsValid(UIManagerWorldSubsystem)) {
+						BattleMenu->AddToViewport();
+						BattleMenu->IsChoosingAction = true;
+						BattleMenu->GetMenuBorder()->SetVisibility(ESlateVisibility::Visible);
+						UIManagerWorldSubsystem->PickedButton = BattleMenu->GetAttackButton();
+						BattleMenu->GetAttackButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+					}
+					//Check Effects array in a next character. If CurrentDuration>=Duration, add index to special array and then delete in separate loop
+					//1 is subtracted from the duration right after the turn, so we need to set the duration to desired number of turns + 1.
+					for (int i = BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.Num() - 1; i >= 0; i--) {
+						if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i])) {
+							BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration += 1;
+							if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration >= BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetDuration() + 1) {
+								BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->ConditionalBeginDestroy();
+								BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.RemoveAt(i);
+							}
 						}
 					}
+					//Set animation variables
+					UCombatAlliesAnimInstance* CombatAlliesAnimInstance{};
+					if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]))
+						if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh()))
+							if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh()->GetAnimInstance()))
+								CombatAlliesAnimInstance = Cast<UCombatAlliesAnimInstance>(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh()->GetAnimInstance());
+					if (IsValid(CombatAlliesAnimInstance))
+						if (CombatAlliesAnimInstance->GetCombatAlliesIsBlocking())
+							CombatAlliesAnimInstance->ToggleCombatAlliesIsBlocking(false);
+					PlayerCharacter->GetSkillBattleMenuWidget()->ResetSkillsScrollBox();
+					for (TSubclassOf<ASpell> SpellClass : BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetAvailableSkills())
+						PlayerCharacter->GetSkillBattleMenuWidget()->AddSkillEntryToSkillsScrollBox(Cast<ASpell>(SpellClass->GetDefaultObject()));
+					/*if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[NextActor]->GetController()); IsValid(AIController))
+						if (IsValid(AIController->GetBlackboardComponent()))
+							AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", true);*/
 				}
-				//Set animation variables
-				UCombatAlliesAnimInstance* CombatAlliesAnimInstance{};
-				if (IsValid(BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]))
-					if (IsValid(BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->GetMesh()))
-						if (IsValid(BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->GetMesh()->GetAnimInstance()))
-							CombatAlliesAnimInstance = Cast<UCombatAlliesAnimInstance>(BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->GetMesh()->GetAnimInstance());
-				if (IsValid(CombatAlliesAnimInstance))
-					if (CombatAlliesAnimInstance->GetCombatAlliesIsBlocking())
-						CombatAlliesAnimInstance->ToggleCombatAlliesIsBlocking(false);
-				PlayerCharacter->GetSkillBattleMenuWidget()->ResetSkillsScrollBox();
-				for (TSubclassOf<ASpell> SpellClass : BattleAlliesPlayer[CurrentTurnAllyPlayerIndex]->GetAvailableSkills())
-					PlayerCharacter->GetSkillBattleMenuWidget()->AddSkillEntryToSkillsScrollBox(Cast<ASpell>(SpellClass->GetDefaultObject()));
-				/*if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[NextActor]->GetController()); IsValid(AIController))
-					if (IsValid(AIController->GetBlackboardComponent()))
-						AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", true);*/
+				else {
+					FTimerHandle SkipTurnTimerHandle{};
+					GetWorld()->GetTimerManager().SetTimer(SkipTurnTimerHandle, this, &ABattleManager::SkipAllyTurnActions, 1.f, false);
+				}
 			}
 			else {
 				//Show results screen
-				ActorNumberOfTheCurrentTurn = -1;
+				CurrentTurnCombatNPCIndex = -1;
 				PlayerCharacter->GetBattleMenuWidget()->RemoveFromParent();
 				PlayerCharacter->GetBattleResultsScreenWidget()->AddToViewport();
 				GetWorld()->GetTimerManager().SetTimer(ShowExperienceTextTimerHandle, this, &ABattleManager::ShowExperienceText, 1, false);
@@ -364,6 +417,9 @@ void ABattleManager::PlayerTurnController()
 			if (UAlliesInfoBars* AlliesInfoBarsWidget = PlayerCharacter->GetAlliesInfoBarsWidget(); IsValid(AlliesInfoBarsWidget)) 
 				if (AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder < AlliesInfoBarsWidget->GetAlliesNameBorders().Num())
 					AlliesInfoBarsWidget->GetAlliesNameBorders()[AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder]->SetBrushColor(FLinearColor(0.3f, 0.3f, 0.3f, 1.f));
+			if(CurrentTurnCombatNPCIndex >= 0)
+				BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->SetActorRotation(FRotator(0, 180, 0));
+			CurrentTurnCombatNPCIndex = -1;
 			for (int i = BattleEnemies.Num() - 1; i >= 0; i--)
 				if(BattleEnemies[i]->GetCurrentHP() > 0)
 					EnemyTurnQueue.Add(i);
@@ -399,9 +455,14 @@ void ABattleManager::EnableTurnAIController()
 			AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", true);
 }
 
-void ABattleManager::SkipTurnActions()
+void ABattleManager::SkipEnemyTurnActions()
 {
 	TurnChange();
+}
+
+void ABattleManager::SkipAllyTurnActions()
+{
+	PlayerTurnController();
 }
 
 void ABattleManager::ShowContinueButton()
@@ -418,11 +479,6 @@ void ABattleManager::SetCanTurnBehindPlayerCameraToTarget(bool Value)
 void ABattleManager::SetCanTurnBehindPlayerCameraToStartPosition(bool Value)
 {
 	CanTurnBehindPlayerCameraToStartPosition = Value;
-}
-
-void ABattleManager::SetActorNumberOfTheCurrentTurn(uint8 Value)
-{
-	ActorNumberOfTheCurrentTurn = Value;
 }
 
 void ABattleManager::SetBehindPlayerCameraLocation(FVector& NewLocation)
@@ -443,10 +499,5 @@ FTimerHandle ABattleManager::GetPlayerTurnControllerTimerHandle() const
 TSubclassOf<ACombatFloatingInformationActor> ABattleManager::GetCombatFloatingInformationActorClass() const
 {
 	return CombatFloatingInformationActorClass;
-}
-
-uint8 ABattleManager::GetActorNumberOfTheCurrentTurn() const
-{
-	return ActorNumberOfTheCurrentTurn;
 }
 

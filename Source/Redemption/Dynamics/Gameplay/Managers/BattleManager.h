@@ -29,24 +29,22 @@ public:
 	//Array that stores spawned allies and the player and is used in a gameplay logic
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 		TArray<ACombatNPC*> BattleAlliesPlayer;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
-		bool PlayerTurn = false;
 	//Target for Action(For example, a heal or an attack. Can be an ally as well as an enemy).
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, transient)
 		class ACombatNPC* SelectedCombatNPC {};
 	//Need this for control of target selection with keyboard
 	int8 SelectedCombatNPCIndex{};
 	//BattleAlliesPlayer index of actor with current turn.
-	int8 CurrentTurnAllyPlayerIndex{};
+	int8 CurrentTurnCombatNPCIndex{};
 
 	ACombatPlayerCharacter* CombatPlayerCharacter{};
 
 	void SetCanTurnBehindPlayerCameraToTarget(bool Value);
 	void SetCanTurnBehindPlayerCameraToStartPosition(bool Value);
-	void SetActorNumberOfTheCurrentTurn(uint8 Value);
+	//void SetActorNumberOfTheCurrentTurn(uint8 Value);
 	void SetBehindPlayerCameraLocation(FVector& NewLocation);
 
-	uint8 GetActorNumberOfTheCurrentTurn() const;
+	//uint8 GetActorNumberOfTheCurrentTurn() const;
 	ACameraActor* GetBehindPlayerCamera() const;
 	FTimerHandle GetPlayerTurnControllerTimerHandle() const;
 	TSubclassOf<ACombatFloatingInformationActor> GetCombatFloatingInformationActorClass() const;
@@ -82,7 +80,7 @@ private:
 	bool CanTurnBehindPlayerCameraToStartPosition = false;
 
 	//Number of an enemy, who has a turn. Assign -1 value when transitioning to player's turn to prevent bugs
-	int ActorNumberOfTheCurrentTurn = -1;
+	//int ActorNumberOfTheCurrentTurn = -1;
 
 	//Timer Handles
 	FTimerHandle ShowExperienceTextTimerHandle{};
@@ -104,5 +102,7 @@ private:
 	UFUNCTION()
 	void EnableTurnAIController();
 	UFUNCTION()
-	void SkipTurnActions();
+	void SkipEnemyTurnActions();
+	UFUNCTION()
+	void SkipAllyTurnActions();
 };

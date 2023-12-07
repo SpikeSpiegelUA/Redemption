@@ -9,18 +9,14 @@ int SkillsSpellsAndEffectsActions::GetValueAfterEffects(int ValueBeforeEffects, 
 	int ValueAfterEffects = ValueBeforeEffects;
 	for (AEffect* Effect : Effects) {
 		if (IsValid(Effect) && Effect->GetEffectArea() == EffectArea) {
-			if (IsValid(Cast<AEffectWithPlainModifier>(Effect))) {
-				if (Effect->GetEffectType() == EEffectType::PLAINBUFF)
-					ValueAfterEffects += ValueBeforeEffects + Effect->GetEffectStat();
-				else if (Effect->GetEffectType() == EEffectType::PLAINDEBUFF)
-					ValueAfterEffects += ValueBeforeEffects - Effect->GetEffectStat();
-			}
-			else if(IsValid(Cast<AEffect>(Effect))) {
-				if (Effect->GetEffectType() == EEffectType::BUFF)
-					ValueAfterEffects += ValueBeforeEffects * (Effect->GetEffectStat() - 1);
-				else if (Effect->GetEffectType() == EEffectType::DEBUFF)
-					ValueAfterEffects -= ValueBeforeEffects / Effect->GetEffectStat();
-			}
+			if (Effect->GetEffectType() == EEffectType::PLAINBUFF)
+				ValueAfterEffects += ValueBeforeEffects + Effect->GetEffectStat();
+			else if (Effect->GetEffectType() == EEffectType::PLAINDEBUFF)
+				ValueAfterEffects += ValueBeforeEffects - Effect->GetEffectStat();
+			else if (Effect->GetEffectType() == EEffectType::BUFF)
+				ValueAfterEffects += ValueBeforeEffects * (Effect->GetEffectStat() - 1);
+			else if (Effect->GetEffectType() == EEffectType::DEBUFF)
+				ValueAfterEffects -= ValueBeforeEffects / Effect->GetEffectStat();
 		}
 	}
 	return ValueAfterEffects;
@@ -35,18 +31,14 @@ int SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(i
 		for (AEffect* Effect : Effects)
 			if (IsValid(Effect) && GetSpellElementCorrespondingToEffectArea(Effect->GetEffectArea()) == ReceiverElementPercent.Element) {
 				NewElementPercent.Element = ReceiverElementPercent.Element;
-				if (IsValid(Cast<AEffectWithPlainModifier>(Effect)) || ReceiverElementPercent.Percent == 0) {
-					if (Effect->GetEffectType() == EEffectType::PLAINBUFF)
-						NewElementPercent.Percent = ElementPercentBeforeEffects + Effect->GetEffectStat();
-					else if (Effect->GetEffectType() == EEffectType::PLAINDEBUFF)
-						NewElementPercent.Percent = ElementPercentBeforeEffects - Effect->GetEffectStat();
-				}
-				else if(IsValid(Cast<AEffect>(Effect))) {
-					if (Effect->GetEffectType() == EEffectType::BUFF)
-						NewElementPercent.Percent = ElementPercentBeforeEffects * (Effect->GetEffectStat() - 1);
-					else if (Effect->GetEffectType() == EEffectType::DEBUFF)
-						NewElementPercent.Percent = ElementPercentBeforeEffects / Effect->GetEffectStat();
-				}
+				if (Effect->GetEffectType() == EEffectType::BUFF && ReceiverElementPercent.Percent != 0)
+					NewElementPercent.Percent = ElementPercentBeforeEffects * (Effect->GetEffectStat() - 1);
+				else if (Effect->GetEffectType() == EEffectType::DEBUFF && ReceiverElementPercent.Percent != 0)
+					NewElementPercent.Percent = ElementPercentBeforeEffects / Effect->GetEffectStat();
+				else if (Effect->GetEffectType() == EEffectType::PLAINBUFF)
+					NewElementPercent.Percent = ElementPercentBeforeEffects + Effect->GetEffectStat();
+				else if (Effect->GetEffectType() == EEffectType::PLAINDEBUFF)
+					NewElementPercent.Percent = ElementPercentBeforeEffects - Effect->GetEffectStat();
 				TemporaryReceiverContainedElements.Add(NewElementPercent);
 			}
 	}

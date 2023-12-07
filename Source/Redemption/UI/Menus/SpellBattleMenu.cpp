@@ -385,7 +385,6 @@ class ACreatedBuffSpell* USpellBattleMenu::CreateBuffSpell(const TArray<ESpellEl
 	//CreatedBuffSpell->SetDescription(FText::FromString(DescriptionOfTheSpell));
 	
 	return CreatedBuffSpell;
-
 }
 
 TArray<AEffect*> USpellBattleMenu::CreateEffectForSpell(EEffectType EffectType, TArray<ESpellElements> SpellElements)
@@ -414,15 +413,36 @@ TArray<AEffect*> USpellBattleMenu::CreateEffectForSpell(EEffectType EffectType, 
 			NameOfTheEffect.Append("Severe ");
 		NameOfTheEffect.Append(*SkillsSpellsAndEffectsActions::GetEnumDisplayName<EEffectArea>(NewEffect->GetEffectArea()).ToString());
 		if (EffectType == EEffectType::PLAINDEBUFF)
-			NameOfTheEffect.Append(" Plain Debuff Spell");
+			NameOfTheEffect.Append(" Plain Debuff Effect");
 		else if (EffectType == EEffectType::PLAINBUFF)
-			NameOfTheEffect.Append(" Plain Buff Spell");
+			NameOfTheEffect.Append(" Plain Buff Effect");
+		else if (EffectType == EEffectType::DEBUFF)
+			NameOfTheEffect.Append(" Debuff Effect");
+		else if (EffectType == EEffectType::BUFF)
+			NameOfTheEffect.Append(" Buff Effect");
 		NewEffect->SetEffectName(FText::FromString(NameOfTheEffect));
 		if (Element == ESpellElements::BLOOD)
 			NewEffect->SetEffectStat(ElementCount * 25);
 		else
 			NewEffect->SetEffectStat(ElementCount * 15);
 		NewEffect->SetDuration(3);
+		FString EffectDescription{};
+		if (EffectType == EEffectType::PLAINDEBUFF)
+			EffectDescription.Append("plain debuff effect that debuffs the ");
+		else if (EffectType == EEffectType::PLAINBUFF)
+			EffectDescription.Append("plain buff effect that debuffs the ");
+		else if (EffectType == EEffectType::DEBUFF)
+			EffectDescription.Append("debuff effect that debuffs the ");
+		else if (EffectType == EEffectType::BUFF)
+			EffectDescription.Append("buff effect that debuffs the ");
+		EffectDescription.Append(*SkillsSpellsAndEffectsActions::GetEnumDisplayName<EEffectArea>(NewEffect->GetEffectArea()).ToString());
+		EffectDescription.Append(" by ");
+		EffectDescription.AppendInt(NewEffect->GetEffectStat());
+		if (EffectType == EEffectType::PLAINDEBUFF || EffectType == EEffectType::PLAINBUFF)
+			EffectDescription.Append(" points");
+		else if(EffectType == EEffectType::DEBUFF || EffectType == EEffectType::BUFF)
+			EffectDescription.Append(" times");
+		NewEffect->SetEffectDescription(FText::FromString(EffectDescription));
 		EffectsToReturn.Add(NewEffect);
 		if (SpellElementsToCount.Num() == 0)
 			break;
@@ -1002,12 +1022,12 @@ void USpellBattleMenu::UseSpell(bool CreateNotificationIfCreatedSpellIsNotValid)
 				if (IsValid(UIManagerWorldSubsystem) && IsValid(CreatedSpell)) {
 					float VariableCorrespondingToSpellCostType{};
 					if (CreatedSpell->GetSpellCostType() == ESpellCostType::MANA)
-						VariableCorrespondingToSpellCostType = BManager->BattleAlliesPlayer[BManager->CurrentTurnAllyPlayerIndex]->CurrentMana;
+						VariableCorrespondingToSpellCostType = BManager->BattleAlliesPlayer[BManager->CurrentTurnCombatNPCIndex]->CurrentMana;
 					else
-						VariableCorrespondingToSpellCostType = BManager->BattleAlliesPlayer[BManager->CurrentTurnAllyPlayerIndex]->CurrentHP;
+						VariableCorrespondingToSpellCostType = BManager->BattleAlliesPlayer[BManager->CurrentTurnCombatNPCIndex]->CurrentHP;
 					if ((CreatedSpell->GetSpellCostType() == ESpellCostType::MANA && VariableCorrespondingToSpellCostType >= CreatedSpell->GetCost()) ||
 						(CreatedSpell->GetSpellCostType() == ESpellCostType::HEALTH && VariableCorrespondingToSpellCostType > CreatedSpell->GetCost())) {
-						BManager->BattleAlliesPlayer[BManager->CurrentTurnAllyPlayerIndex]->SpellToUse = CreatedSpell;
+						BManager->BattleAlliesPlayer[BManager->CurrentTurnCombatNPCIndex]->SpellToUse = CreatedSpell;
 						if (IsValid(Cast<ARestorationSpell>(CreatedSpell)) || IsValid(Cast<ABuffSpell>(CreatedSpell))) {
 							PlayerCharacter->GetBattleManager()->IsSelectingAllyAsTarget = true;
 							for(ACombatNPC* AllyPlayerNPC : BManager->BattleAlliesPlayer)

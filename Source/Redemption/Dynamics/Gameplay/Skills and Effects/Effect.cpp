@@ -33,9 +33,14 @@ EEffectType AEffect::GetEffectType() const
 	return TypeOfEffect;
 }
 
-FText AEffect::GetEffectName() const
+const FText& AEffect::GetEffectName() const
 {
 	return EffectName;
+}
+
+const FText& AEffect::GetEffectDescription() const
+{
+	return EffectDescription;
 }
 
 int AEffect::GetEffectStat() const
@@ -71,5 +76,10 @@ void AEffect::SetEffectStat(int NewEffectStat)
 void AEffect::SetDuration(int NewDuration)
 {
 	Duration = NewDuration;
+}
+
+void AEffect::SetEffectDescription(const FText& NewEffectDescription)
+{
+	EffectDescription = NewEffectDescription;
 }
 

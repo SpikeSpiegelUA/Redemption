@@ -142,6 +142,8 @@ void UCombatCharacterInfoMenu::SetEffectInfo(const AEffect* const EffectToViewIn
 	else
 		StringToSet += " turn left";
 	EffectDurationTextBlock->SetText(FText::FromString(StringToSet));
+	StringToSet = "Description: " + EffectToViewInfoOf->GetEffectDescription().ToString();
+	EffectDescriptionTextBlock->SetText(FText::FromString(StringToSet));
 }
 
 void UCombatCharacterInfoMenu::SetCharacterResistances(const ACombatNPC* const NPCToViewInfoOf)
@@ -261,6 +263,11 @@ UTextBlock* UCombatCharacterInfoMenu::GetEffectValueTextBlock() const
 UTextBlock* UCombatCharacterInfoMenu::GetEffectDurationTextBlock() const
 {
 	return EffectDurationTextBlock;
+}
+
+UTextBlock* UCombatCharacterInfoMenu::GetEffectDescriptionTextBlock() const
+{
+	return EffectDescriptionTextBlock;
 }
 
 UScrollBox* UCombatCharacterInfoMenu::GetActiveEffectsScrollBox() const

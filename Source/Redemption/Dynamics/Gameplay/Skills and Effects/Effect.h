@@ -49,8 +49,8 @@ enum class EEffectType :uint8
 	DEBUFF UMETA(DisplayName = "Debuff"),
 	PLAINBUFF UMETA(DisplayName = "Plain Buff"),
 	PLAINDEBUFF UMETA(DisplayName = "Plain Debuff"),
-	TURNSTARTDAMAGE UMETA(DisplayName = "Turn start damage"),
-	TURNSKIP UMETA(DisplayName = "Turn skip")
+	TURNSKIP UMETA(DisplayName = "Turn skip"),
+	TURNSTARTDAMAGE UMETA(DisplayName = "Turn start damage")
 };
 
 UCLASS()
@@ -73,6 +73,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "General Information")
 		FText EffectName {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "General Information")
+		FText EffectDescription{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "General Information")
 		int EffectStat{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "General Information")
 		int Duration{};
@@ -83,7 +85,8 @@ public:
 
 	EEffectArea GetEffectArea() const;
 	EEffectType GetEffectType() const;
-	FText GetEffectName() const;
+	const FText& GetEffectName() const;
+	const FText& GetEffectDescription() const;
 	int GetEffectStat() const;
 	int GetDuration() const;
 
@@ -92,6 +95,7 @@ public:
 	void SetEffectName(const FText& NewEffectName);
 	void SetEffectStat(int NewEffectStat);
 	void SetDuration(int NewDuration);
+	void SetEffectDescription(const FText& NewEffectDescription);
 
 	int8 CurrentDuration = 0;
 };
