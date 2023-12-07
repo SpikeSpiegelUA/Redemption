@@ -39,9 +39,9 @@ void ULearnedSpellsJournalMenu::UseButtonOnClicked()
             if (ABattleManager* BManager = PlayerCharacter->GetBattleManager(); IsValid(BManager)) {
                 float VariableCorrespondingToSpellCostType{};
                 if (CreatedSpell->GetSpellCostType() == ESpellCostType::MANA)
-                    VariableCorrespondingToSpellCostType = BManager->BattleAlliesPlayer[BManager->CurrentTurnAllyPlayerIndex]->CurrentMana;
+                    VariableCorrespondingToSpellCostType = BManager->BattleAlliesPlayer[BManager->CurrentTurnCombatNPCIndex]->CurrentMana;
                 else
-                    VariableCorrespondingToSpellCostType = BManager->BattleAlliesPlayer[BManager->CurrentTurnAllyPlayerIndex]->CurrentHP;
+                    VariableCorrespondingToSpellCostType = BManager->BattleAlliesPlayer[BManager->CurrentTurnCombatNPCIndex]->CurrentHP;
                 if ((CreatedSpell->GetSpellCostType() == ESpellCostType::MANA && VariableCorrespondingToSpellCostType >= CreatedSpell->GetCost()) ||
                     (CreatedSpell->GetSpellCostType() == ESpellCostType::HEALTH && VariableCorrespondingToSpellCostType > CreatedSpell->GetCost())) {
                     PlayerCharacter->GetSpellBattleMenuWidget()->UseSpell();

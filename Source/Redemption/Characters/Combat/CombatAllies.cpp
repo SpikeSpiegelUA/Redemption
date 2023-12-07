@@ -41,7 +41,7 @@ void ACombatAllies::StartMovingToEnemy()
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
 		if (ABattleManager* BattleManager = Cast<ABattleManager>(PlayerCharacter->GetBattleManager()); IsValid(BattleManager)) 
 			if (IsValid(CombatAlliesAIController) && IsValid(BattleManager)) 
-				CombatAlliesAIController->MoveToActor(BattleManager->SelectedCombatNPC, 100.f);
+				CombatAlliesAIController->MoveToActor(BattleManager->SelectedCombatNPC, 185.f);
 }
 
 void ACombatAllies::StartMovingToStartLocation()

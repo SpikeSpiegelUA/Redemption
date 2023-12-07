@@ -122,7 +122,7 @@ void UBattleMenu::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 			MoveCounter++;
 		}
 		if (UCanvasPanelSlot* CenterMarkCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(CenterMarkCanvasPanel); IsValid(CenterMarkCanvasSlot)) {
-			ACombatNPC* CurrentTurnAlliesNPC = Cast<ACombatNPC>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnAllyPlayerIndex]);
+			ACombatNPC* CurrentTurnAlliesNPC = Cast<ACombatNPC>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnCombatNPCIndex]);
 			CenterMarkCanvasSlot->SetPosition(UKismetMathLibrary::Vector2DInterpTo_Constant(CenterMarkCanvasSlot->GetPosition(), RandomTargetForCenterMark, InDeltaTime, 740.f));
 			if ((RandomTargetForCenterMark - CenterMarkCanvasSlot->GetPosition()).Length() <= 2.f) {
 				CenterMarkIsMovingToTarget = false;
@@ -142,7 +142,7 @@ void UBattleMenu::AttackButtonOnClicked()
 
 void UBattleMenu::RangeButtonOnClicked()
 {
-	if (ACombatNPC* CurrentTurnAlliesNPC = Cast<ACombatNPC>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnAllyPlayerIndex]); IsValid(CurrentTurnAlliesNPC)) {
+	if (ACombatNPC* CurrentTurnAlliesNPC = Cast<ACombatNPC>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnCombatNPCIndex]); IsValid(CurrentTurnAlliesNPC)) {
 		if (CurrentTurnAlliesNPC->GetRangeAmmo() > 0) {
 			IsPreparingToAttack = true;
 			IsAttackingWithRange = true;
@@ -176,7 +176,7 @@ void UBattleMenu::InfoButtonOnClicked()
 void UBattleMenu::OpenActionMenu(const FText& NewAttackTalkInfoActionButtonText)
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(BattleManager) && IsValid(PlayerCharacter)) 
-		if(ACombatNPC* CurrentTurnAlliesNPC = Cast<ACombatNPC>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnAllyPlayerIndex]); IsValid(CurrentTurnAlliesNPC)){
+		if(ACombatNPC* CurrentTurnAlliesNPC = Cast<ACombatNPC>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnCombatNPCIndex]); IsValid(CurrentTurnAlliesNPC)){
 			//Remove menu render and turn on target selection
 			IsChoosingAction = false;
 			if (IsPreparingToViewInfo || BattleManager->IsSelectingAllyAsTarget) {
@@ -222,9 +222,9 @@ void UBattleMenu::DefendButtonOnClicked()
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	ACombatNPC* CurrentTurnAllyPlayer{};
 	if (IsValid(BattleManager))
-		CurrentTurnAllyPlayer = BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnAllyPlayerIndex];
+		CurrentTurnAllyPlayer = BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnCombatNPCIndex];
 	if (IsValid(BattleManager))
-		if (IsValid(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnAllyPlayerIndex]))
+		if (IsValid(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnCombatNPCIndex]))
 			CombatAlliesAnimInstance = Cast<UCombatAlliesAnimInstance>(CurrentTurnAllyPlayer->GetMesh()->GetAnimInstance());
 
 	if (IsValid(CombatAlliesAnimInstance) && IsValid(BattleManager) && IsValid(PlayerCharacter) && IsValid(CurrentTurnAllyPlayer)) {
@@ -336,7 +336,7 @@ void UBattleMenu::AttackMenuBackButtonOnClicked()
 				MenuBorder->SetVisibility(ESlateVisibility::Visible);
 				IsChoosingAction = true;
 				if(IsAttackingWithRange)
-					if (UCombatCharacterAnimInstance* AnimInstance = Cast<UCombatCharacterAnimInstance>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnAllyPlayerIndex]->GetMesh()->GetAnimInstance()); IsValid(AnimInstance))
+					if (UCombatCharacterAnimInstance* AnimInstance = Cast<UCombatCharacterAnimInstance>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnCombatNPCIndex]->GetMesh()->GetAnimInstance()); IsValid(AnimInstance))
 						AnimInstance->ToggleCombatCharacterIsAiming(false);
 				IsAttackingWithMelee = false;
 				IsAttackingWithRange = false;
@@ -354,7 +354,7 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 	ACombatAllies* CurrentTurnAlliesNPC{};
 	ACombatNPC* SelectedCombatNPC{};
 	if (IsValid(BattleManager)) {
-		CurrentTurnAlliesNPC = Cast<ACombatAllies>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnAllyPlayerIndex]);
+		CurrentTurnAlliesNPC = Cast<ACombatAllies>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnCombatNPCIndex]);
 		SelectedCombatNPC = BattleManager->SelectedCombatNPC;
 	}
 	if (IsValid(PlayerCharacter) && IsValid(CurrentTurnAlliesNPC) && IsValid(BattleManager)) {

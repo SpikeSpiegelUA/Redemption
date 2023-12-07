@@ -45,7 +45,7 @@ void ASpellObject::Tick(float DeltaTime)
 		//Interp is slowing down near the target, so we move target further
 		FVector DirectionVector = BattleManager->SelectedCombatNPC->GetActorLocation() - this->GetActorLocation();
 		DirectionVector.Normalize();
-		FVector NewPosition = FMath::VInterpTo(this->GetActorLocation(), BattleManager->SelectedCombatNPC->GetActorLocation() + DirectionVector * 400, DeltaTime, 0.6f);
+		FVector NewPosition = FMath::VInterpTo(this->GetActorLocation(), BattleManager->SelectedCombatNPC->GetActorLocation() + DirectionVector * 400, DeltaTime, 1.5f);
 		this->SetActorLocation(NewPosition);
 	}
 }
@@ -55,25 +55,44 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
 		if (ACombatNPC* CombatNPC = Cast<ACombatNPC>(OtherActor); IsValid(CombatNPC)) {
 			if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(Spell); IsValid(AssaultSpell)) {
-				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHit(PlayerCharacter->GetBattleManager()->SelectedCombatNPC,
-					AssaultSpell->GetAttackValue(), ElementsActions::FindContainedElements(AssaultSpell->GetSpellElements()), false);
-				OnOverlapBeginsActions(PlayerCharacter);
 				if (AssaultSpell->GetEffectsAndTheirChances().Num() > 0) {
-					int8 Chance = FMath::RandRange(0, 100);
-					if (AssaultSpell->GetEffectsAndTheirChances()[0].Chance >= Chance)
-						if(auto* TurnStartDamageEffect = NewObject<ATurnStartDamageEffect>(this, AssaultSpell->GetEffectsAndTheirChances()[0].Effect); IsValid(TurnStartDamageEffect))
-							CombatNPC->Effects.Add(TurnStartDamageEffect);
+					for (uint8 Index = 0; Index < AssaultSpell->GetEffectsAndTheirChances().Num(); Index++) {
+						int8 Chance = FMath::RandRange(0, 100);
+						ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(PlayerCharacter->GetBattleManager()->GetCombatFloatingInformationActorClass(), GetActorLocation(), GetActorRotation());
+						FString TextForCombatFloatingInformationActor = FString();
+						if (AssaultSpell->GetEffectsAndTheirChances()[Index].Chance >= Chance) {
+							if (IsValid(Cast<ATurnStartDamageEffect>(AssaultSpell->GetEffectsAndTheirChances()[0].Effect->GetDefaultObject()))) {
+								if (auto* TurnStartDamageEffect = NewObject<ATurnStartDamageEffect>(this, AssaultSpell->GetEffectsAndTheirChances()[0].Effect); IsValid(TurnStartDamageEffect))
+									CombatNPC->Effects.Add(TurnStartDamageEffect);
+							}
+							else if (IsValid(Cast<AEffect>(AssaultSpell->GetEffectsAndTheirChances()[0].Effect->GetDefaultObject()))) {
+								if (auto* Effect = NewObject<AEffect>(this, AssaultSpell->GetEffectsAndTheirChances()[0].Effect); IsValid(Effect)) {
+									CombatNPC->Effects.Add(Effect);
+									if (Effect->GetEffectType() == EEffectType::TURNSKIP && CombatNPC->CurrentHP > 0)
+										CombatNPC->GetMesh()->bPauseAnims = true;
+								}
+							}
+							TextForCombatFloatingInformationActor.Append("Extra effect applied!!!");
+							CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
+						}
+						else {
+							TextForCombatFloatingInformationActor.Append("Miss!");
+							CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
+						}
+					}
 				}
+				CombatNPC->Execute_GetHit(CombatNPC, AssaultSpell->GetAttackValue(), ElementsActions::FindContainedElements(AssaultSpell->GetSpellElements()), false);
+				OnOverlapBeginsActions(PlayerCharacter);
 			}
 			else if (APresetDebuffSpell* PresetDebuffSpell = Cast<APresetDebuffSpell>(Spell); IsValid(PresetDebuffSpell)) {
 				TArray<AEffect*> EffectsArray;
 				for (TSubclassOf<AEffect> EffectClass : PresetDebuffSpell->GetEffectsClasses())
 					EffectsArray.Add(Cast<AEffect>(EffectClass->GetDefaultObject()));
-				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedCombatNPC, EffectsArray, ElementsActions::FindContainedElements(PresetDebuffSpell->GetSpellElements()));
+				CombatNPC->Execute_GetHitWithBuffOrDebuff(CombatNPC, EffectsArray, ElementsActions::FindContainedElements(PresetDebuffSpell->GetSpellElements()));
 				OnOverlapBeginsActions(PlayerCharacter);
 			}
 			else if (ACreatedDebuffSpell* CreatedDebuffSpell = Cast<ACreatedDebuffSpell>(Spell); IsValid(CreatedDebuffSpell)) {
-				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedCombatNPC, CreatedDebuffSpell->GetEffects(), ElementsActions::FindContainedElements(CreatedDebuffSpell->GetSpellElements()));
+				CombatNPC->Execute_GetHitWithBuffOrDebuff(CombatNPC, CreatedDebuffSpell->GetEffects(), ElementsActions::FindContainedElements(CreatedDebuffSpell->GetSpellElements()));
 				OnOverlapBeginsActions(PlayerCharacter);
 			}
 		}

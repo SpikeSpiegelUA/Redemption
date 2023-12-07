@@ -38,6 +38,8 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UTextBlock* EffectDurationTextBlock;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UTextBlock* EffectDescriptionTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UTextBlock* FireResistanceTextBlock;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UTextBlock* WaterResistanceTextBlock;
@@ -94,6 +96,7 @@ public:
 	UTextBlock* GetEffectTypeTextBlock() const;
 	UTextBlock* GetEffectValueTextBlock() const;
 	UTextBlock* GetEffectDurationTextBlock() const;
+	UTextBlock* GetEffectDescriptionTextBlock() const;
 	UScrollBox* GetActiveEffectsScrollBox() const;
 	UButtonWithNeighbors* GetBackButtonWithNeighbors() const;
 	UButtonWithNeighbors* GetEffectsResistancesToggleButtonWithNeighbors() const;

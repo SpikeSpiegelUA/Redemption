@@ -87,13 +87,15 @@ void ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementA
 			if (IsValid(AnimInstance)) {
 				if (CurrentHP <= 0)
 					AnimInstance->ToggleCombatCharacterIsDead(true);
-				else if (UCombatAlliesAnimInstance* CombatAlliesAnimInstance = Cast<UCombatAlliesAnimInstance>(GetMesh()->GetAnimInstance()); IsValid(CombatAlliesAnimInstance)) {
-					if (CurrentHP > 0 && !CombatAlliesAnimInstance->GetCombatAlliesIsBlocking())
-						AnimInstance->ToggleCombatCharacterGotHit(true);
-				}
-				else {
-					if (CurrentHP > 0)
-						AnimInstance->ToggleCombatCharacterGotHit(true);
+				if (!GetMesh()->bPauseAnims) {
+					if (UCombatAlliesAnimInstance* CombatAlliesAnimInstance = Cast<UCombatAlliesAnimInstance>(GetMesh()->GetAnimInstance()); IsValid(CombatAlliesAnimInstance)) {
+						if (CurrentHP > 0 && !CombatAlliesAnimInstance->GetCombatAlliesIsBlocking())
+							AnimInstance->ToggleCombatCharacterGotHit(true);
+					}
+					else {
+						if (CurrentHP > 0)
+							AnimInstance->ToggleCombatCharacterGotHit(true);
+					}
 				}
 			}
 		}
