@@ -38,7 +38,7 @@ protected:
 		class ANonCombatEnemyNPC* NPCReference;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation Properties")
 		float Speed{};
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Bitmask, BitmaskEnum = "ENonCombatEnemyNPCAnimationState"), Category = "General Information")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Bitmask, BitmaskEnum = "/Script/Redemption.ENonCombatEnemyNPCAnimationState"), Category = "General Information")
 		int32 NonCombatEnemyNPCAnimationStateBitmaskCode {};
 
 	UFUNCTION(BlueprintCallable, Category = "Animations")

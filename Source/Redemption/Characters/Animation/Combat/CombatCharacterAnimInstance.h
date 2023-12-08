@@ -40,7 +40,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Animations")
 		virtual void UpdateAnimProperties();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Bitmask, BitmaskEnum = "ECombatCharacterAnimationState"), Category = "General Information")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Bitmask, BitmaskEnum = "/Script/Redemption.ECombatCharacterAnimationState"), Category = "General Information")
 		int32 CombatCharacterAnimationStateBitmaskCode {};
 public:
 	void ToggleCombatCharacterIsAttacking(bool Value);

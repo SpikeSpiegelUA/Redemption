@@ -770,6 +770,8 @@ void UInventoryMenu::SetItemInfo(const AGameItem* const GameItem)
 	}
 	else if (Cast<ABuffItem>(GameItem))
 		ItemTypeTextBlock->SetText(FText::FromString("Type: Buff Item"));
+	else if (Cast<ADebuffItem>(GameItem))
+		ItemTypeTextBlock->SetText(FText::FromString("Type: Debuff Item"));
 	if (!Cast<AMiscellaneousItem>(GameItem)) {
 		ItemEffectValueTextBlock->SetVisibility(ESlateVisibility::Visible);
 		FString StringToSet = "";
@@ -802,7 +804,7 @@ void UInventoryMenu::SetItemInfo(const AGameItem* const GameItem)
 			StringToSet = FString("Item's effects: ");
 				for (int i = 0; i < BuffItem->GetEffectsClasses().Num(); i++) {
 					StringToSet.Append(*SkillsSpellsAndEffectsActions::GetEnumDisplayName<EEffectArea>(Cast<AEffect>(BuffItem->GetEffectsClasses()[i]->GetDefaultObject())->GetEffectArea()).ToString());
-					StringToSet.Append(" -");
+					StringToSet.Append(" +");
 					StringToSet.AppendInt(Cast<AEffect>(BuffItem->GetEffectsClasses()[i]->GetDefaultObject())->GetEffectStat());
 					if (i != BuffItem->GetEffectsClasses().Num() - 1)
 						StringToSet.Append(", ");
@@ -811,6 +813,20 @@ void UInventoryMenu::SetItemInfo(const AGameItem* const GameItem)
 				}
 			ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));
 		}
+		else if (ADebuffItem* DebuffItem = const_cast<ADebuffItem*>(Cast<ADebuffItem>(GameItem)); IsValid(DebuffItem)) {
+			StringToSet = FString("Item's effects: ");
+			for (int i = 0; i < DebuffItem->GetEffectsClasses().Num(); i++) {
+				StringToSet.Append(*SkillsSpellsAndEffectsActions::GetEnumDisplayName<EEffectArea>(Cast<AEffect>(DebuffItem->GetEffectsClasses()[i]->GetDefaultObject())->GetEffectArea()).ToString());
+				StringToSet.Append(" -");
+				StringToSet.AppendInt(Cast<AEffect>(DebuffItem->GetEffectsClasses()[i]->GetDefaultObject())->GetEffectStat());
+				if (i != DebuffItem->GetEffectsClasses().Num() - 1)
+					StringToSet.Append(", ");
+				else
+					StringToSet.Append(".");
+			}
+			ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));
+		}
+		UE_LOG(LogTemp, Warning, TEXT("OUTER IS OK!!!"));
 	}
 	else
 		ItemEffectValueTextBlock->SetVisibility(ESlateVisibility::Collapsed);

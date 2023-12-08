@@ -237,6 +237,9 @@ void APlayerCharacter::InputSpellReset()
 		SpellBattleMenuWidget->ResetButtonOnClicked();
 		SpellBattleMenuWidget->ResetUIKeyboardControlLogic();
 	}
+	AEffect* Effect = NewObject<AEffect>(BattleManager->BattleAlliesPlayer[0], BattleManager->DizzyClass);
+	if(IsValid(Effect))
+		BattleManager->BattleAlliesPlayer[0]->Effects.Add(Effect);
 }
 
 void APlayerCharacter::InputOpenLearnedSpells()
@@ -434,7 +437,7 @@ void APlayerCharacter::InputScrollRight()
 			}
 		}
 	if ((IsValid(SpellBattleMenuWidget) && SpellBattleMenuWidget->IsInViewport()) || (IsValid(LearnedSpellsJournalMenuWidget) && LearnedSpellsJournalMenuWidget->IsInViewport())
-		|| (IsValid(SkillBattleMenuWidget) && SkillBattleMenuWidget->IsInViewport())){
+		|| (IsValid(SkillBattleMenuWidget) && SkillBattleMenuWidget->IsInViewport())) {
 			if (UButtonWithNeighbors* PickedButtonWithNeighbors = Cast<UButtonWithNeighbors>(UIManagerWorldSubsystem->PickedButton); IsValid(PickedButtonWithNeighbors))
 				for (FSideAndItsButton SideAndItsButton : PickedButtonWithNeighbors->SidesAndTheirButtons)
 					if (SideAndItsButton.Side == ESides::RIGHT) {

@@ -77,9 +77,9 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 			for (uint8 i = 0; i < PlayerCharacter->GetAllies().Num() && i < 4; i++) {
 				const FVector Location = AlliesPlayerBattleSpawns[i]->GetActorLocation();
 				ACombatAllyNPC* SpawnedAlly = GetWorld()->SpawnActor<ACombatAllyNPC>(PlayerCharacter->GetAllies()[i], Location, FRotator(0, 180, 0));
-				ASmartObject* AISmartObject = GetWorld()->SpawnActor<ASmartObject>(SpawnedAlly->GetAIClass());
-				if (IsValid(SpawnedAlly) && IsValid(AISmartObject))
-					SpawnedAlly->SetSmartObject(AISmartObject);
+				if (IsValid(SpawnedAlly->GetAIClass())) 
+					if (ASmartObject* AISmartObject = GetWorld()->SpawnActor<ASmartObject>(SpawnedAlly->GetAIClass()); IsValid(SpawnedAlly) && IsValid(AISmartObject))
+						SpawnedAlly->SetSmartObject(AISmartObject);
 				ACombatAllyNPCAIController* AIController = Cast<ACombatAllyNPCAIController>(SpawnedAlly->GetController());
 				if (IsValid(AIController))
 					AIController->SetDynamicSubtree();

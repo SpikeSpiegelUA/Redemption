@@ -23,6 +23,8 @@ void UAnimNotify_MagicAttackMiddle::SpawnSpellObject(const ASpellWithSpellObject
 	FTransform SpawnTransform = MeshComp->GetSocketTransform(FName(TEXT("RightHandIndex3")), ERelativeTransformSpace::RTS_World);
 	FActorSpawnParameters ActorSpawnParemeters;
 	ASpellObject* SpawnedSpellObject = MeshComp->GetWorld()->SpawnActor<ASpellObject>(SpellWithSpellObject->GetSpellObjectClass(), SpawnTransform, ActorSpawnParemeters);
-	SpawnedSpellObject->SetSpell(CombatNPC->SpellToUse);
-	SpawnedSpellObject->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(SpawnedSpellObject->GetActorLocation(), CombatNPC->Target->GetActorLocation()));
+	if (IsValid(SpawnedSpellObject)) {
+		SpawnedSpellObject->SetSpell(CombatNPC->SpellToUse);
+		SpawnedSpellObject->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(SpawnedSpellObject->GetActorLocation(), CombatNPC->Target->GetActorLocation()));
+	}
 }

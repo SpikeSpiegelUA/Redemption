@@ -65,6 +65,9 @@ public:
 	TArray<int> EnemyTurnQueue;
 	TArray<int> AlliesPlayerTurnQueue;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle", meta = (AllowPrivateAccess = true))
+	TSubclassOf<AEffect> DizzyClass{};
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -105,4 +108,9 @@ private:
 	void SkipEnemyTurnActions();
 	UFUNCTION()
 	void SkipAllyTurnActions();
+	//Need this for the timer for the passing of a turn to a the player's team in the TurnChance function.
+	UFUNCTION()
+	void ToPlayerTurnPassInTurnChangeFunction();
+	UFUNCTION()
+	void PlayerAllyDizzyActions();
 };

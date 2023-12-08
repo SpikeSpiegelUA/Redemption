@@ -54,7 +54,7 @@ protected:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Bitmask, BitmaskEnum = "EPlayerCharacterAnimationState"), Category = "General Information")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Bitmask, BitmaskEnum = "/Script/Redemption.EPlayerCharacterAnimationState"), Category = "General Information")
 		int32 PlayerCharacterAnimationStateBitmaskCode {};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation Properties")

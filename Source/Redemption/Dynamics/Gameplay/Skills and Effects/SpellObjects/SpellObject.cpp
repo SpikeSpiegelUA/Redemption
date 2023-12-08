@@ -68,8 +68,12 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 							else if (IsValid(Cast<AEffect>(AssaultSpell->GetEffectsAndTheirChances()[0].Effect->GetDefaultObject()))) {
 								if (auto* Effect = NewObject<AEffect>(this, AssaultSpell->GetEffectsAndTheirChances()[0].Effect); IsValid(Effect)) {
 									CombatNPC->Effects.Add(Effect);
-									if (Effect->GetEffectType() == EEffectType::TURNSKIP && CombatNPC->CurrentHP > 0)
-										CombatNPC->GetMesh()->bPauseAnims = true;
+									if (CombatNPC->CurrentHP > 0) {
+										if (Effect->GetEffectType() == EEffectType::TURNSKIP)
+											CombatNPC->GetMesh()->bPauseAnims = true;
+										//else if (Effect->GetEffectType() == EEffectType::DIZZINESS)
+										//	CombatNPC->GetMesh()->bPauseAnims = true;
+									}
 								}
 							}
 							TextForCombatFloatingInformationActor.Append("Extra effect applied!!!");

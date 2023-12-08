@@ -50,7 +50,8 @@ enum class EEffectType :uint8
 	PLAINBUFF UMETA(DisplayName = "Plain Buff"),
 	PLAINDEBUFF UMETA(DisplayName = "Plain Debuff"),
 	TURNSKIP UMETA(DisplayName = "Turn skip"),
-	TURNSTARTDAMAGE UMETA(DisplayName = "Turn start damage")
+	TURNSTARTDAMAGE UMETA(DisplayName = "Turn start damage"),
+	DIZZINESS UMETA(DisplayName = "Dizziness")
 };
 
 UCLASS()

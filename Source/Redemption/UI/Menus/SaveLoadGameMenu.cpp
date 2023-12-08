@@ -98,7 +98,7 @@ void USaveLoadGameMenu::DeleteButtonWithNeighborsOnClicked()
 					if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
 						uint16 SaveSlotIndex = RedemptionSaveGame->SaveIndex;
 						for (UWidget* Widget : PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren())
-							if (USaveSlotEntry* SaveSlotEntry = Cast<USaveSlotEntry>(Widget); IsValid(SaveSlotEntry))
+							if (USaveSlotEntry* SaveSlotEntry = Cast<USaveSlotEntry>(Widget); IsValid(SaveSlotEntry) && IsValid(Widget))
 								if (SaveSlotEntry->GetSlotIndex() == SaveSlotIndex) {
 									Widget->RemoveFromParent();
 									Widget->ConditionalBeginDestroy();

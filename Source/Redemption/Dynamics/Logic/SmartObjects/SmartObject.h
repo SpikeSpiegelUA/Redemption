@@ -24,9 +24,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 		class UArrowComponent* FacingDirection;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+		class USceneComponent* DefaultRoot{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
 		class UBehaviorTree* SubTree{};
+
 
 public:	
 	// Called every frame
