@@ -2,13 +2,15 @@
 
 
 #include "SpellObject.h"
-#include "..\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\CreatedDebuffSpell.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\PresetDebuffSpell.h"
 #include "..\Miscellaneous\ElementsActions.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\TurnStartDamageEffect.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "D:/UE_5.1/Engine/Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
+#include "..\Dynamics\Gameplay\Managers\BattleManager.h"
+#include "D:/UE_5.1/Engine/Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h"
 
 // Sets default values
 ASpellObject::ASpellObject()
@@ -53,51 +55,116 @@ void ASpellObject::Tick(float DeltaTime)
 void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
-		if (ACombatNPC* CombatNPC = Cast<ACombatNPC>(OtherActor); IsValid(CombatNPC)) {
-			if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(Spell); IsValid(AssaultSpell)) {
-				if (AssaultSpell->GetEffectsAndTheirChances().Num() > 0) {
-					for (uint8 Index = 0; Index < AssaultSpell->GetEffectsAndTheirChances().Num(); Index++) {
-						int8 Chance = FMath::RandRange(0, 100);
-						ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(PlayerCharacter->GetBattleManager()->GetCombatFloatingInformationActorClass(), GetActorLocation(), GetActorRotation());
-						FString TextForCombatFloatingInformationActor = FString();
-						if (AssaultSpell->GetEffectsAndTheirChances()[Index].Chance >= Chance) {
-							if (IsValid(Cast<ATurnStartDamageEffect>(AssaultSpell->GetEffectsAndTheirChances()[0].Effect->GetDefaultObject()))) {
-								if (auto* TurnStartDamageEffect = NewObject<ATurnStartDamageEffect>(this, AssaultSpell->GetEffectsAndTheirChances()[0].Effect); IsValid(TurnStartDamageEffect))
-									CombatNPC->Effects.Add(TurnStartDamageEffect);
-							}
-							else if (IsValid(Cast<AEffect>(AssaultSpell->GetEffectsAndTheirChances()[0].Effect->GetDefaultObject()))) {
-								if (auto* Effect = NewObject<AEffect>(this, AssaultSpell->GetEffectsAndTheirChances()[0].Effect); IsValid(Effect)) {
-									CombatNPC->Effects.Add(Effect);
-									if (CombatNPC->CurrentHP > 0) {
-										if (Effect->GetEffectType() == EEffectType::TURNSKIP)
-											CombatNPC->GetMesh()->bPauseAnims = true;
-										//else if (Effect->GetEffectType() == EEffectType::DIZZINESS)
-										//	CombatNPC->GetMesh()->bPauseAnims = true;
+		if (ACombatNPC* CombatNPC = Cast<ACombatNPC>(OtherActor); IsValid(CombatNPC) && IsValid(Spell)) {
+			//Cast for each type of spell.
+			//Need to create an Array of actors that were hit.
+			TArray<ACombatNPC*> TargetActors{};
+			switch (Spell->GetSpellRange()) {
+			case ESpellRange::SINGLE:
+				TargetActors.Add(CombatNPC);
+				break;
+			case ESpellRange::NEIGHBORS:
+				if (CasterBattleSide == EBattleSide::ALLIES) {
+					TargetActors.Add(CombatNPC);
+					if (PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex + 1 < PlayerCharacter->GetBattleManager()->BattleEnemies.Num())
+						TargetActors.Add(PlayerCharacter->GetBattleManager()->BattleEnemies[PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex + 1]);
+					if (PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex - 1 >= 0)
+						TargetActors.Add(PlayerCharacter->GetBattleManager()->BattleEnemies[PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex - 1]);
+				}
+				else if (CasterBattleSide == EBattleSide::ENEMIES) {
+					TargetActors.Add(CombatNPC);
+					if (PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex + 1 < PlayerCharacter->GetBattleManager()->BattleAlliesPlayer.Num())
+						TargetActors.Add(PlayerCharacter->GetBattleManager()->BattleAlliesPlayer[PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex + 1]);
+					if (PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex - 1 >= 0)
+						TargetActors.Add(PlayerCharacter->GetBattleManager()->BattleAlliesPlayer[PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex - 1]);
+				}
+				break;
+			case ESpellRange::EVERYONE:
+				if (CasterBattleSide == EBattleSide::ALLIES) {
+					for (ACombatNPC* CombatNPCInArray : PlayerCharacter->GetBattleManager()->BattleEnemies)
+						TargetActors.Add(CombatNPCInArray);
+				}
+				else if (CasterBattleSide == EBattleSide::ENEMIES) {
+					for (ACombatNPC* CombatNPCInArray : PlayerCharacter->GetBattleManager()->BattleAlliesPlayer)
+						TargetActors.Add(CombatNPCInArray);
+				}
+				break;
+			}
+			for (ACombatNPC* CombatTarget : TargetActors) {
+				if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(Spell); IsValid(AssaultSpell)) {
+					//Logic for special effects of the spell(frozen, burn...).
+					if (CombatTarget->Execute_GetHit(CombatTarget, AssaultSpell->GetAttackValue(), ElementsActions::FindContainedElements(AssaultSpell->GetSpellElements()), false)) {
+						if (AssaultSpell->GetEffectsAndTheirChances().Num() > 0) {
+							for (uint8 Index = 0; Index < AssaultSpell->GetEffectsAndTheirChances().Num(); Index++) {
+								int8 Chance = FMath::RandRange(0, 100);
+								ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(PlayerCharacter->GetBattleManager()->GetCombatFloatingInformationActorClass(), GetActorLocation(), GetActorRotation());
+								FString TextForCombatFloatingInformationActor = FString();
+								if (AssaultSpell->GetEffectsAndTheirChances()[Index].Chance >= Chance) {
+									if (IsValid(Cast<ATurnStartDamageEffect>(AssaultSpell->GetEffectsAndTheirChances()[0].Effect->GetDefaultObject()))) {
+										if (auto* TurnStartDamageEffect = NewObject<ATurnStartDamageEffect>(this, AssaultSpell->GetEffectsAndTheirChances()[0].Effect); IsValid(TurnStartDamageEffect)) {
+											CombatTarget->Effects.Add(TurnStartDamageEffect);
+											if (ElementsActions::FindSpellsMainElement(TurnStartDamageEffect->GetSpellElements()) == ESpellElements::FIRE) {
+												if (IsValid(PlayerCharacter->GetParticlesManager()) && IsValid(PlayerCharacter->GetParticlesManager()->GetFlamesEmitter()))
+													CombatTarget->FlamesEmitterComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(PlayerCharacter->GetParticlesManager()->GetFlamesEmitter(),
+														CombatTarget->GetRootComponent(), NAME_None, FVector(0, 0, 45), FRotator(0, 0, 0), EAttachLocation::SnapToTarget, false, true, ENCPoolMethod::None, true);
+												//If Fire elements, then remove frozen effect.
+												for (AEffect* Effect : CombatTarget->Effects)
+													if (Effect->GetEffectType() == EEffectType::TURNSKIP) {
+														CombatTarget->Effects.Remove(Effect);
+														CombatTarget->GetMesh()->bPauseAnims = false;
+														break;
+													}
+											}
+										}
 									}
+									else if (IsValid(Cast<AEffect>(AssaultSpell->GetEffectsAndTheirChances()[0].Effect->GetDefaultObject()))) {
+										if (auto* Effect = NewObject<AEffect>(this, AssaultSpell->GetEffectsAndTheirChances()[0].Effect); IsValid(Effect)) {
+											CombatTarget->Effects.Add(Effect);
+											if (CombatTarget->CurrentHP > 0) {
+												if (Effect->GetEffectType() == EEffectType::TURNSKIP) {
+													CombatTarget->GetMesh()->bPauseAnims = true;
+													//Remove burn effect
+													for (AEffect* ExtraEffect : CombatTarget->Effects)
+														if (ExtraEffect->GetEffectType() == EEffectType::TURNSTARTDAMAGE)
+															if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(ExtraEffect); IsValid(TurnStartDamageEffect))
+																if (ElementsActions::FindSpellsMainElement(TurnStartDamageEffect->GetSpellElements()) == ESpellElements::FIRE) {
+																	CombatTarget->Effects.Remove(ExtraEffect);
+																	if(IsValid(CombatTarget->FlamesEmitterComponent))
+																		CombatTarget->FlamesEmitterComponent->DestroyComponent();
+																	break;
+																}
+												}
+												else if (Effect->GetEffectType() == EEffectType::DIZZINESS) {
+													if (IsValid(PlayerCharacter->GetParticlesManager()) && IsValid(PlayerCharacter->GetParticlesManager()->GetDizzyEmitter()))
+														CombatTarget->DizzyEmitterComponent = UGameplayStatics::SpawnEmitterAttached(PlayerCharacter->GetParticlesManager()->GetDizzyEmitter(), CombatTarget->GetRootComponent(), NAME_None,
+															FVector(0, 0, 110), FRotator(0, 0, 0), FVector(1, 1, 1), EAttachLocation::SnapToTarget, false, EPSCPoolMethod::AutoRelease);
+												}
+											}
+										}
+									}
+									TextForCombatFloatingInformationActor.Append("Extra effect applied!!!");
+									CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
+								}
+								else {
+									TextForCombatFloatingInformationActor.Append("Miss!");
+									CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 								}
 							}
-							TextForCombatFloatingInformationActor.Append("Extra effect applied!!!");
-							CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
-						}
-						else {
-							TextForCombatFloatingInformationActor.Append("Miss!");
-							CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 						}
 					}
+					OnOverlapBeginsActions(PlayerCharacter);
 				}
-				CombatNPC->Execute_GetHit(CombatNPC, AssaultSpell->GetAttackValue(), ElementsActions::FindContainedElements(AssaultSpell->GetSpellElements()), false);
-				OnOverlapBeginsActions(PlayerCharacter);
-			}
-			else if (APresetDebuffSpell* PresetDebuffSpell = Cast<APresetDebuffSpell>(Spell); IsValid(PresetDebuffSpell)) {
-				TArray<AEffect*> EffectsArray;
-				for (TSubclassOf<AEffect> EffectClass : PresetDebuffSpell->GetEffectsClasses())
-					EffectsArray.Add(Cast<AEffect>(EffectClass->GetDefaultObject()));
-				CombatNPC->Execute_GetHitWithBuffOrDebuff(CombatNPC, EffectsArray, ElementsActions::FindContainedElements(PresetDebuffSpell->GetSpellElements()));
-				OnOverlapBeginsActions(PlayerCharacter);
-			}
-			else if (ACreatedDebuffSpell* CreatedDebuffSpell = Cast<ACreatedDebuffSpell>(Spell); IsValid(CreatedDebuffSpell)) {
-				CombatNPC->Execute_GetHitWithBuffOrDebuff(CombatNPC, CreatedDebuffSpell->GetEffects(), ElementsActions::FindContainedElements(CreatedDebuffSpell->GetSpellElements()));
-				OnOverlapBeginsActions(PlayerCharacter);
+				else if (APresetDebuffSpell* PresetDebuffSpell = Cast<APresetDebuffSpell>(Spell); IsValid(PresetDebuffSpell)) {
+					TArray<AEffect*> EffectsArray;
+					for (TSubclassOf<AEffect> EffectClass : PresetDebuffSpell->GetEffectsClasses())
+						EffectsArray.Add(Cast<AEffect>(EffectClass->GetDefaultObject()));
+					CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, ElementsActions::FindContainedElements(PresetDebuffSpell->GetSpellElements()));
+					OnOverlapBeginsActions(PlayerCharacter);
+				}
+				else if (ACreatedDebuffSpell* CreatedDebuffSpell = Cast<ACreatedDebuffSpell>(Spell); IsValid(CreatedDebuffSpell)) {
+					CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, CreatedDebuffSpell->GetEffects(), ElementsActions::FindContainedElements(CreatedDebuffSpell->GetSpellElements()));
+					OnOverlapBeginsActions(PlayerCharacter);
+				}
 			}
 		}
 	}
@@ -114,4 +181,9 @@ void ASpellObject::OnOverlapBeginsActions(const class APlayerCharacter* const Pl
 void ASpellObject::SetSpell(const class ASpell* const NewSpell)
 {
 	Spell = const_cast<ASpell*>(NewSpell);
+}
+
+void ASpellObject::SetCasterBattleSide(const EBattleSide NewCasterBattleSide)
+{
+	CasterBattleSide = NewCasterBattleSide;
 }

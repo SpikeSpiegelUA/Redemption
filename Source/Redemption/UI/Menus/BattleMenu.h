@@ -8,6 +8,7 @@
 #include "..\GameInstance\RedemptionGameInstance.h"
 #include "..\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
 #include "UIManagerWorldSubsystem.h"
+#include "..\UI\HUD\Crosshair.h"
 #include "..\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "BattleMenu.generated.h"
 
@@ -75,6 +76,8 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* InfoButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UCrosshair* RangeCrosshair;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* MenuBorder;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* EnemyNameBorder;
@@ -84,8 +87,6 @@ protected:
 		class UBorder* LeftRightMenuBorder;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* NotificationBorder;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		class UCanvasPanel* CenterMarkCanvasPanel;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UVerticalBox* MenuVerticalBox;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -103,7 +104,7 @@ protected:
 public:
 	void SetTargetName(const FText& Name);
 
-	UCanvasPanel* GetCenterMark() const;
+	UCrosshair* GetRangeCrosshair() const;
 	UVerticalBox* GetMenuVerticalBox() const;
 	UVerticalBox* GetAttackMenuVerticalBox() const;
 	UBorder* GetMenuBorder() const;
@@ -181,4 +182,6 @@ public:
 		void InfoButtonOnHovered();
 
 	void ButtonOnHoveredActions(UButton* const HoveredButton, int8 Index);
+	void HideAllCrosshairWidgetComponents() const;
+	void HideAllFloatingHealthWidgetComponents() const;
 };

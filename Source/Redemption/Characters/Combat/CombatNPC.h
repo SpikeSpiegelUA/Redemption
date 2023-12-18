@@ -10,11 +10,21 @@
 #include "..\Dynamics\Gameplay\Skills and Effects\Spell.h"
 #include "Components/WidgetComponent.h"
 #include "Redemption/Dynamics/Miscellaneous/PhysicalTypeAndItsPercentage.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Niagara/Public/NiagaraComponent.h"
 #include "CombatNPC.generated.h"
 
 /**
  * 
  */
+UENUM(BlueprintType)
+enum class EBattleSide :uint8
+{
+	NONE UMETA(Hidden),
+	ALLIES UMETA(DisplayName = "Allies"),
+	ENEMIES UMETA(DisplayName = "Enemies")
+};
+
 UCLASS()
 class REDEMPTION_API ACombatNPC : public ACharacterInTheWorld, public ICombatActionsInterface
 {
@@ -26,6 +36,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFloatingHealthBarWidget* GetFloatingHealthBarWidget() const;
+	UWidgetComponent* GetCrosshairWidgetComponent() const;
 	TArray<FElementAndItsPercentageStruct> GetElementalResistances() const;
 	TArray<FPhysicalTypeAndItsPercentageStruct> GetPhysicalResistances() const;
 	TArray<FElementAndItsPercentageStruct> GetMeleeWeaponElements() const;
@@ -63,6 +74,10 @@ public:
 	//Chance, that this actor will be targeted by enemy
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 		int TargetingChance = 25;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VFX")
+		class UParticleSystemComponent* DizzyEmitterComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VFX")
+		class UNiagaraComponent* FlamesEmitterComponent;
 
 	UFUNCTION()
 		float GetHealthPercentage();
@@ -70,9 +85,9 @@ public:
 		float GetManaPercentage();
 
 	//Function to call, when a NPC got hit. Parameters for a standard attack.
-	void GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, bool ForcedMiss = false) override;
+	bool GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, bool ForcedMiss = false) override;
 	//Function to call, when a NPC got hit. Parameters for a buff/debuff attack.
-	void GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements) override;
+	bool GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements) override;
 protected:
 
 	virtual void BeginPlay() override;
@@ -117,7 +132,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 		UFloatingHealthBarWidget* FloatingHealthBarWidget {};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
-		UWidgetComponent* FloatingHealthBarComponentWidget;
+		UWidgetComponent* FloatingHealthBarWidgetComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+		UWidgetComponent* CrosshairWidgetComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true))
 		TSubclassOf<ASmartObject> AIClass;
 	//Spells and skills classes for the SkillBattleMenu.

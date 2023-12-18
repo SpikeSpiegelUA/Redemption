@@ -121,10 +121,9 @@ void UBattleMenu::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 			CenterMarkIsMovingToTarget = true;
 			MoveCounter++;
 		}
-		if (UCanvasPanelSlot* CenterMarkCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(CenterMarkCanvasPanel); IsValid(CenterMarkCanvasSlot)) {
-			ACombatNPC* CurrentTurnAlliesNPC = Cast<ACombatNPC>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnCombatNPCIndex]);
-			CenterMarkCanvasSlot->SetPosition(UKismetMathLibrary::Vector2DInterpTo_Constant(CenterMarkCanvasSlot->GetPosition(), RandomTargetForCenterMark, InDeltaTime, 740.f));
-			if ((RandomTargetForCenterMark - CenterMarkCanvasSlot->GetPosition()).Length() <= 2.f) {
+		if (UCanvasPanelSlot* RangeCrosshairCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(RangeCrosshair); IsValid(RangeCrosshairCanvasSlot)) {
+			RangeCrosshairCanvasSlot->SetPosition(UKismetMathLibrary::Vector2DInterpTo_Constant(RangeCrosshairCanvasSlot->GetPosition(), RandomTargetForCenterMark, InDeltaTime, 740.f));
+			if ((RandomTargetForCenterMark - RangeCrosshairCanvasSlot->GetPosition()).Length() <= 2.f) {
 				CenterMarkIsMovingToTarget = false;
 				if (MoveCounter >= 3)
 					MoveCounter = 0;
@@ -147,11 +146,12 @@ void UBattleMenu::RangeButtonOnClicked()
 			IsPreparingToAttack = true;
 			IsAttackingWithRange = true;
 			OpenActionMenu(FText::FromString("Attack"));
+			RangeCrosshair->SetVisibility(ESlateVisibility::Visible);
 			if (UCombatCharacterAnimInstance* AnimInstance = Cast<UCombatCharacterAnimInstance>(CurrentTurnAlliesNPC->GetMesh()->GetAnimInstance()); IsValid(AnimInstance))
 				AnimInstance->ToggleCombatCharacterIsAiming(true);
 			const FVector2D ViewportSize = FVector2D(GEngine->GameViewport->Viewport->GetSizeXY());
-			if (UCanvasPanelSlot* CenterMarkCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(CenterMarkCanvasPanel); IsValid(CenterMarkCanvasSlot))
-				CenterMarkCanvasSlot->SetPosition(FVector2D(FMath::RandRange(-ViewportSize.X / 2 + 250, ViewportSize.X / 2 - 250), FMath::RandRange(-ViewportSize.Y / 2 + 250, ViewportSize.Y / 2 - 250)));
+			if (UCanvasPanelSlot* RangeCrosshairCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(RangeCrosshair); IsValid(RangeCrosshairCanvasSlot))
+				RangeCrosshairCanvasSlot->SetPosition(FVector2D(FMath::RandRange(-ViewportSize.X / 2 + 250, ViewportSize.X / 2 - 250), FMath::RandRange(-ViewportSize.Y / 2 + 250, ViewportSize.Y / 2 - 250)));
 		}
 		else if (CurrentTurnAlliesNPC->GetRangeAmmo() <= 0)
 			CreateNotification(FText::FromString("You don't have any ammo"));
@@ -197,15 +197,18 @@ void UBattleMenu::OpenActionMenu(const FText& NewAttackTalkInfoActionButtonText)
 			}
 			CurrentTurnAlliesNPC->Target = BattleManager->SelectedCombatNPC;
 			BattleManager->SelectedCombatNPCIndex = 0;
+			if (IsValid(BattleManager->SelectedCombatNPC)) {
+				if(!IsAttackingWithRange)
+					BattleManager->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
+				BattleManager->SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
+			}
 			MenuBorder->SetVisibility(ESlateVisibility::Hidden);
-			CenterMarkCanvasPanel->SetVisibility(ESlateVisibility::Visible);
 			EnemyNameBorder->SetVisibility(ESlateVisibility::Visible);
 			LeftRightMenuBorder->SetVisibility(ESlateVisibility::Visible);
 			AttackMenuBorder->SetVisibility(ESlateVisibility::Visible);
 			AttackButton->SetBackgroundColor(FColor(1, 1, 1, 1));
 			if (IsValid(UIManagerWorldSubsystem->PickedButton))
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-			BattleManager->SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
 			UIManagerWorldSubsystem->PickedButton = AttackTalkInfoActionButton;
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 			UIManagerWorldSubsystem->PickedButtonIndex = 0;
@@ -253,7 +256,8 @@ void UBattleMenu::AttackMenuBackButtonOnClicked()
 	if (IsPreparingToAttack || IsPreparingToTalk || IsPreparingToViewInfo) {
 		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 		if (IsValid(PlayerCharacter) && IsValid(BattleManager) && IsValid(UIManagerWorldSubsystem)) {
-			CenterMarkCanvasPanel->SetVisibility(ESlateVisibility::Hidden);
+			HideAllCrosshairWidgetComponents();
+			HideAllFloatingHealthWidgetComponents();
 			EnemyNameBorder->SetVisibility(ESlateVisibility::Hidden);
 			AttackMenuBorder->SetVisibility(ESlateVisibility::Hidden);
 			LeftRightMenuBorder->SetVisibility(ESlateVisibility::Hidden);
@@ -271,8 +275,8 @@ void UBattleMenu::AttackMenuBackButtonOnClicked()
 			if(IsValid(UIManagerWorldSubsystem->PickedButton))
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 			if(IsAttackingWithRange)
-				if (UCanvasPanelSlot* CenterMarkCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(CenterMarkCanvasPanel); IsValid(CenterMarkCanvasSlot))
-					CenterMarkCanvasSlot->SetPosition(FVector2D(-164.960938, -88.540527));
+				if (UCanvasPanelSlot* CenterMarkCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(RangeCrosshair); IsValid(CenterMarkCanvasSlot))
+					CenterMarkCanvasSlot->SetPosition(FVector2D(-52.0, -12.0));
 			//If attacking with item, back to item menu, otherwise back to main menu
 			UInventoryMenu* Inventory = PlayerCharacter->GetInventoryMenuWidget();
 			USpellBattleMenu* SpellBattleMenu = PlayerCharacter->GetSpellBattleMenuWidget();
@@ -465,10 +469,10 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 			CurrentTurnAlliesNPC->StartMovingToEnemy();
 		}
 		if (IsAttackingWithRange) {
-			if (UCanvasPanelSlot* CenterMarkCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(CenterMarkCanvasPanel); IsValid(CenterMarkCanvasSlot)) {
-				FVector2D TargetForCenterMark = FVector2D(-220,0);
+			if (UCanvasPanelSlot* RangeCrosshairCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(RangeCrosshair); IsValid(RangeCrosshairCanvasSlot)) {
+				FVector2D TargetForCenterMark = FVector2D(-52,-12);
 				CurrentTurnAlliesNPC->Target = SelectedCombatNPC;
-				if ((CenterMarkCanvasSlot->GetPosition() - TargetForCenterMark).Length() <= 90.0) 
+				if ((RangeCrosshairCanvasSlot->GetPosition() - TargetForCenterMark).Length() <= 90.0)
 					SelectedCombatNPC->Execute_GetHit(SelectedCombatNPC, CurrentTurnAlliesNPC->GetRangeAttackValue(), CurrentTurnAlliesNPC->GetRangeWeaponElements(), false);
 				else
 					SelectedCombatNPC->Execute_GetHit(SelectedCombatNPC, CurrentTurnAlliesNPC->GetRangeAttackValue(), CurrentTurnAlliesNPC->GetRangeWeaponElements(), true);
@@ -480,7 +484,7 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 				}
 				CurrentTurnAlliesNPC->SetRangeAmmo(CurrentTurnAlliesNPC->GetRangeAmmo() - 1);
 				IsAttackingWithRange = false;
-				CenterMarkCanvasSlot->SetPosition(FVector2D(-164.960938, -88.540527));
+				RangeCrosshairCanvasSlot->SetPosition(FVector2D(-52.0, -12.0));
 			}
 		}
 		if (IsPreparingToTalk && IsValid(CurrentTurnAlliesNPC->Target))
@@ -490,6 +494,7 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 					PlayerCharacter->GetAudioManager()->GetDungeonTalkBackgroundMusicAudioComponent_Daat()->Play();
 					PlayerCharacter->GetAudioManager()->GetDungeonTalkBackgroundMusicAudioComponent_Daat()->SetPaused(false);
 					Enemy->Execute_StartADialogue(Enemy);
+					PlayerCharacter->GetAlliesInfoBarsWidget()->RemoveFromParent();
 				}
 				//if (APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()); IsValid(PlayerController))
 				//	PlayerController->ActivateTouchInterface(PlayerCharacter->GetEmptyTouchInterface());
@@ -518,7 +523,7 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 		if ((!IsAttackingWithItem) || (IsAttackingWithItem && ItemHasBeenUsed)) {
 			AttackMenuBorder->SetVisibility(ESlateVisibility::Hidden);
 			LeftRightMenuBorder->SetVisibility(ESlateVisibility::Hidden);
-			CenterMarkCanvasPanel->SetVisibility(ESlateVisibility::Hidden);
+			HideAllCrosshairWidgetComponents();
 			EnemyNameBorder->SetVisibility(ESlateVisibility::Hidden);
 			if (!IsPreparingToViewInfo) {
 				IsPreparingToAttack = false;
@@ -849,6 +854,30 @@ void UBattleMenu::ButtonOnHoveredActions(UButton* const HoveredButton, int8 Inde
 	UIManagerWorldSubsystem->PickedButtonIndex = Index;
 }
 
+void UBattleMenu::HideAllCrosshairWidgetComponents() const
+{
+	if (IsValid(BattleManager)) {
+		TArray<ACombatNPC*> AllCombatNPCs = BattleManager->BattleAlliesPlayer;
+		for (ACombatNPC* CombatNPC : BattleManager->BattleEnemies)
+			AllCombatNPCs.Add(CombatNPC);
+		for (ACombatNPC* CombatNPC : AllCombatNPCs)
+			if (IsValid(CombatNPC->GetCrosshairWidgetComponent()))
+				CombatNPC->GetCrosshairWidgetComponent()->SetVisibility(false);
+	}
+}
+
+void UBattleMenu::HideAllFloatingHealthWidgetComponents() const
+{
+	if (IsValid(BattleManager)) {
+		TArray<ACombatNPC*> AllCombatNPCs = BattleManager->BattleAlliesPlayer;
+		for (ACombatNPC* CombatNPC : BattleManager->BattleEnemies)
+			AllCombatNPCs.Add(CombatNPC);
+		for (ACombatNPC* CombatNPC : AllCombatNPCs)
+			if (IsValid(CombatNPC->GetFloatingHealthBarWidget()))
+				CombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
 void UBattleMenu::HideNotificationAndClearItsTimer()
 {
 	NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
@@ -868,9 +897,9 @@ void UBattleMenu::SetTargetName(const FText& Name)
 	EnemyNameTextBlock->SetText(Name);
 }
 
-UCanvasPanel* UBattleMenu::GetCenterMark() const
+UCrosshair* UBattleMenu::GetRangeCrosshair() const
 {
-	return CenterMarkCanvasPanel;
+	return RangeCrosshair;
 }
 
 UVerticalBox* UBattleMenu::GetMenuVerticalBox() const

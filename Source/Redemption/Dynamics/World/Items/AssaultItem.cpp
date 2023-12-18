@@ -7,3 +7,8 @@ int AAssaultItem::GetAttackValue() const
 {
 	return AttackValue;
 }
+
+TArray<FEffectAndItsChanceStruct> AAssaultItem::GetEffectsAndTheirChances() const
+{
+	return EffectsAndTheirChances;
+}

@@ -49,8 +49,11 @@ public:
 	FTimerHandle GetPlayerTurnControllerTimerHandle() const;
 	TSubclassOf<ACombatFloatingInformationActor> GetCombatFloatingInformationActorClass() const;
 
-	void SelectNewTarget(const class ACombatNPC* const Target, int Index);
-	
+	void SelectNewTarget(const class ACombatNPC* const Target, int8 Index);
+	//Depending on the range sometimes we need to set visible several crosshairs.
+	//Direction - either "Left" or "Right".
+	void SelectNewTargetCrosshairLogic(const TArray<ACombatNPC*>& TargetsForSelection, int8 NewIndex, int8 CurrentIndex, const std::string_view Direction);
+
 	//Function, that controls whether player's turn continues or passes to enemies
 	UFUNCTION()
 	void PlayerTurnController();

@@ -8,7 +8,8 @@
 #include "GameItem.generated.h"
 
 UENUM(BlueprintType)
-enum class EItemType : uint8 {
+enum class EItemType : uint8 
+{
 	NONE UMETA(Hidden),
 	ASSAULT UMETA(DisplayName = "Assault"),
 	RESTORATION UMETA(DisplayName = "Restoration"),
@@ -16,7 +17,16 @@ enum class EItemType : uint8 {
 	DEBUFF UMETA(DisplayName = "Debuff"),
 	MISCELLANEOUS UMETA(DisplayName = "Miscellaneous"),
 	WEAPON UMETA(DisplayName = "Weapon"),
-	ARMOR UMETA(DisplayName = "Armor"),
+	ARMOR UMETA(DisplayName = "Armor")
+};
+
+UENUM(BlueprintType)
+enum class EItemRange : uint8
+{
+	NONE UMETA(Hidden),
+	SINGLE UMETA(DisplayName = "Single"),
+	NEIGHBORS UMETA(DisplayName = "Neighbors"),
+	EVERYONE UMETA(DisplayName = "Everyone")
 };
 
 UCLASS()
@@ -33,6 +43,8 @@ private:
 		FText Description{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information", meta = (AllowPrivateAccess = true))
 		EItemType ItemType{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information", meta = (AllowPrivateAccess = true))
+		EItemRange ItemRange{};
 
 protected:
 	// Called when the game starts or when spawned
@@ -48,4 +60,5 @@ public:
 	int GetCost() const;
 	FText GetDescription() const;
 	EItemType GetItemType() const;
+	EItemRange GetItemRange() const;
 };

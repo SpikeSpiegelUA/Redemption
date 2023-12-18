@@ -8,7 +8,7 @@ public class Redemption : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayTasks", "AIModule", "NavigationSystem", "GameplayTags", "Slate", "SlateCore" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayTasks", "AIModule", "NavigationSystem", "GameplayTags", "Slate", "SlateCore", "Niagara" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

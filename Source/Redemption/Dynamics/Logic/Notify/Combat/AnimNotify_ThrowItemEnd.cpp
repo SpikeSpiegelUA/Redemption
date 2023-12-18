@@ -6,6 +6,6 @@
 
 void UAnimNotify_ThrowItemEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	if (UCombatAlliesAnimInstance* AnimInstance = Cast<UCombatAlliesAnimInstance>(MeshComp->GetAnimInstance()); IsValid(AnimInstance))
+	if (UCombatAlliesAnimInstance* AnimInstance = Cast<UCombatAlliesAnimInstance>(MeshComp->GetAnimInstance()); IsValid(AnimInstance)) 
 		AnimInstance->ToggleCombatAlliesThrowingItem(false);
 }

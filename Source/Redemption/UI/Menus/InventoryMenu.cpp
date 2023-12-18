@@ -681,8 +681,40 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 				BattleMenu->IsAttackingWithItem = true;
 				BattleManager->SelectedCombatNPCIndex = 0;
 				this->RemoveFromParent();
-				BattleMenu->GetCenterMark()->SetVisibility(ESlateVisibility::Visible);
-				BattleMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
+				//Depending on the item's range, we need to turn on additional target selection
+				//Create targets array.
+				TArray<ACombatNPC*> TargetsForSelection{};
+				//Add BattleEnemies in a loop, cause we need to convert them to the ACombatNPC.
+				if (BattleManager->IsSelectingAllyAsTarget)
+					TargetsForSelection = BattleManager->BattleAlliesPlayer;
+				else if (!BattleManager->IsSelectingAllyAsTarget)
+					for (ACombatNPC* CombatNPC : BattleManager->BattleEnemies)
+						TargetsForSelection.Add(CombatNPC);
+				switch (PickedItem->GetItemRange()) {
+					case EItemRange::SINGLE:
+						BattleMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
+						if(IsValid(BattleManager->SelectedCombatNPC))
+							BattleManager->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
+						break;
+					case EItemRange::NEIGHBORS:
+						if (TargetsForSelection.Num() > 1) {
+							if (IsValid(BattleManager->SelectedCombatNPC))
+								BattleManager->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
+							if (BattleManager->SelectedCombatNPCIndex - 1 >= 0)
+								TargetsForSelection[BattleManager->SelectedCombatNPCIndex - 1]->GetCrosshairWidgetComponent()->SetVisibility(true);
+							if (BattleManager->SelectedCombatNPCIndex + 1 < TargetsForSelection.Num())
+								TargetsForSelection[BattleManager->SelectedCombatNPCIndex + 1]->GetCrosshairWidgetComponent()->SetVisibility(true);
+						}
+						else {
+							BattleMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
+							if (IsValid(BattleManager->SelectedCombatNPC))
+								BattleManager->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
+						}
+						break;
+					case EItemRange::EVERYONE:
+						for (ACombatNPC* Target : TargetsForSelection)
+							Target->GetCrosshairWidgetComponent()->SetVisibility(true);
+				}
 				BattleMenu->GetAttackMenuBorder()->SetVisibility(ESlateVisibility::Visible);
 				BattleMenu->GetLeftRightMenuBorder()->SetVisibility(ESlateVisibility::Visible);
 				BattleMenu->GetAttackButton()->SetBackgroundColor(FColor(1, 1, 1, 1));
@@ -826,7 +858,6 @@ void UInventoryMenu::SetItemInfo(const AGameItem* const GameItem)
 			}
 			ItemEffectValueTextBlock->SetText(FText::FromString(StringToSet));
 		}
-		UE_LOG(LogTemp, Warning, TEXT("OUTER IS OK!!!"));
 	}
 	else
 		ItemEffectValueTextBlock->SetVisibility(ESlateVisibility::Collapsed);

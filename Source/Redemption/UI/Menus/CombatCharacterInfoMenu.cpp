@@ -42,7 +42,8 @@ void UCombatCharacterInfoMenu::BackButtonOnClicked()
 				PlayerCharacter->GetUIManagerWorldSubsystem()->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 			}
 			BattleMenu->AddToViewport();
-			BattleMenu->GetCenterMark()->SetVisibility(ESlateVisibility::Visible);
+			if (IsValid(PlayerCharacter->GetBattleManager()) && IsValid(PlayerCharacter->GetBattleManager()->SelectedCombatNPC))
+				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(false);
 			BattleMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
 			BattleMenu->GetLeftRightMenuBorder()->SetVisibility(ESlateVisibility::Visible);
 			BattleMenu->GetAttackMenuBorder()->SetVisibility(ESlateVisibility::Visible);

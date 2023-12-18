@@ -82,6 +82,11 @@ ESpellType ASpell::GetTypeOfSpell() const
 	return TypeOfSpell;
 }
 
+ESpellRange ASpell::GetSpellRange() const
+{
+	return SpellRange;
+}
+
 FText ASpell::GetDescription() const
 {
 	return Description;

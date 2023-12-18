@@ -28,13 +28,17 @@ EBTNodeResult::Type UBTTask_AskQuestion::ExecuteTask(UBehaviorTreeComponent& Own
 EBTNodeResult::Type UBTTask_AskQuestion::PrepareResponses(APlayerController*& PlayerController)
 {
 	APlayerCharacter* PlayerCharacter = nullptr;
-	if (GetWorld()) 
+	if (IsValid(GetWorld()))
 		PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 
-	if(!PlayerCharacter)
+	if(!IsValid(PlayerCharacter))
+		return EBTNodeResult::Failed;
+
+	if(!IsValid(PlayerCharacter->GetDialogueBoxWidget()))
 		return EBTNodeResult::Failed;
 
 	PlayerCharacter->GetDialogueBoxWidget()->GetResponseOverlay()->AddChildToOverlay(PlayerCharacter->GetResponsesBox());
+	PlayerCharacter->GetDialogueBoxWidget()->GetContinueButton()->SetVisibility(ESlateVisibility::Hidden);
 	PlayerCharacter->GetDialogueBoxWidget()->SetDialogueText(NPCQuestion);
 
 	for (auto Response : PlayerResponses) {
@@ -51,9 +55,9 @@ void UBTTask_AskQuestion::ResponseReceived_Implementation(const FText& ResponseR
 {
 	BehaviorTreeComponent->GetBlackboardComponent()->SetValueAsString(PlayerResponseKeySelector.SelectedKeyName, *ResponseReceived.ToString());
 	APlayerCharacter* PlayerCharacter = nullptr;
-	if(GetWorld())
+	if(IsValid(GetWorld()))
 	PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	if(PlayerCharacter)
+	if(IsValid(PlayerCharacter))
 	PlayerCharacter->GetResponsesBox()->RemoveFromParent();
 	FinishLatentTask(*BehaviorTreeComponent, EBTNodeResult::Succeeded);
 }

@@ -18,14 +18,14 @@ EBTNodeResult::Type UBTTask_StartADialogue::ExecuteTask(UBehaviorTreeComponent& 
 	const UBlackboardComponent* MyBlackboard = OwnerComp.GetBlackboardComponent();
 	AAIController* MyController = OwnerComp.GetAIOwner();
 	APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-	if (!MyController || !MyBlackboard || !PlayerController)
+	if (!IsValid(MyController) || !IsValid(MyBlackboard) || !IsValid(PlayerController))
 		return EBTNodeResult::Failed;
 
 	APlayerCharacter* PlayerCharacter = nullptr;
 
-	if (GetWorld())
+	if (IsValid(GetWorld()))
 		PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	if (!PlayerCharacter)
+	if (!IsValid(PlayerCharacter))
 		return EBTNodeResult::Failed;
 
 	if (!PlayerCharacter->GetDialogueBoxWidget()->IsInViewport()) {

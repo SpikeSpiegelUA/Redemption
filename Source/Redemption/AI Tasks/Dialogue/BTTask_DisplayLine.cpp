@@ -22,15 +22,15 @@ UBTTask_DisplayLine::UBTTask_DisplayLine(const FObjectInitializer& ObjectInitial
 EBTNodeResult::Type UBTTask_DisplayLine::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	const UBlackboardComponent* MyBlackboard = OwnerComp.GetBlackboardComponent();
-	AAIController* MyController = OwnerComp.GetAIOwner();
-	if (!MyController || !MyBlackboard || !PlayerController)
+	if (!IsValid(MyBlackboard) || !IsValid(PlayerController))
 		return EBTNodeResult::Failed;
 
 	UDialogueBox* DialogueBoxWidget = Cast<UDialogueBox>(MyBlackboard->GetValueAsObject(DialogueBoxWidgetKeySelector.SelectedKeyName));
 
-	if (!DialogueBoxWidget)
+	if (!IsValid(DialogueBoxWidget))
 		return EBTNodeResult::Failed;
 
+	DialogueBoxWidget->GetContinueButton()->SetVisibility(ESlateVisibility::Visible);
 	DialogueBoxWidget->SetDialogueText(TextToDisplay);
 
 	return EBTNodeResult::InProgress;

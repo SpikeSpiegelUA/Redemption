@@ -68,6 +68,11 @@ UOverlay* UDialogueBox::GetResponseOverlay() const
 	return ResponseOverlay;
 }
 
+UButton* UDialogueBox::GetContinueButton() const
+{
+	return ContinueButton;
+}
+
 FText UDialogueBox::GetDialogueText() const
 {
 	return DialogueText;
