@@ -27,8 +27,8 @@ void UAnimNotify_MagicAttackMiddle::SpawnSpellObject(const ASpellWithSpellObject
 		SpawnedSpellObject->SetSpell(CombatNPC->SpellToUse);
 		SpawnedSpellObject->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(SpawnedSpellObject->GetActorLocation(), CombatNPC->Target->GetActorLocation()));
 		if (IsValid(Cast<ACombatAllies>(MeshComp->GetOwner())))
-			SpawnedSpellObject->SetCasterBattleSide(EBattleSide::ALLIES);
+			SpawnedSpellObject->SetTargetBattleSide(EBattleSide::ENEMIES);
 		else if(IsValid(Cast<ACombatEnemyNPC>(MeshComp->GetOwner())))
-			SpawnedSpellObject->SetCasterBattleSide(EBattleSide::ENEMIES);
+			SpawnedSpellObject->SetTargetBattleSide(EBattleSide::ALLIES);
 	}
 }

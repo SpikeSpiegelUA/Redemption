@@ -277,7 +277,7 @@ void ABattleManager::TurnChange()
 		//If EnemyQueue is empty, check if there are alive enemies. If yes, then enable battle UI and continue the battle, if not, show results of the battle.
 		else {
 			bool AreAliveEnemies = false;
-			for (int8 i = 0; i < BattleEnemies.Num(); i++)
+			for (int i = 0; i < BattleEnemies.Num(); i++)
 				if (BattleEnemies[i]->GetCurrentHP() > 0) {
 					AreAliveEnemies = true;
 					break;
@@ -297,7 +297,7 @@ void ABattleManager::TurnChange()
 				/*for (int8 i = BattleAlliesPlayer.Num() - 1; i >= 0; i--)
 					if (BattleAlliesPlayer[i]->GetCurrentHP() <= 0)
 						BattleAlliesPlayer.RemoveAt(i);*/
-				for (int8 i = BattleAlliesPlayer.Num() - 1; i >= 0; i--) 
+				for (int i = BattleAlliesPlayer.Num() - 1; i >= 0; i--) 
 					if(BattleAlliesPlayer[i]->GetCurrentHP() > 0)
 						AlliesPlayerTurnQueue.Add(i);
 				ArrayActions::ShuffleArray<int>(AlliesPlayerTurnQueue);
@@ -311,7 +311,7 @@ void ABattleManager::TurnChange()
 				AlliesPlayerTurnQueue.RemoveAt(0);
 				//Check, if skip the turn.
 				bool ContinueTurn = true;
-				for (int16 i = BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.Num() - 1; i >= 0; i--)
+				for (int i = BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.Num() - 1; i >= 0; i--)
 					if(IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]))
 						if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetEffectType() == EEffectType::TURNSKIP)
 							if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh())) {
@@ -356,7 +356,7 @@ void ABattleManager::TurnChange()
 						}
 					}
 					//Destroy effects, which CurrentDuration is >= Duration.
-					for (int16 i = BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.Num() - 1; i >= 0; i--) {
+					for (int i = BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.Num() - 1; i >= 0; i--) {
 						if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i])) {
 							BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration += 1;
 							if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration >= BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetDuration() + 1) {
@@ -496,11 +496,12 @@ void ABattleManager::PlayerTurnController()
 				CanTurnBehindPlayerCameraToStartPosition = true;
 				//Check if skip the turn.
 				bool ContinueTurn = true;
-				for (int16 i = BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.Num() - 1; i >= 0; i--)
+				for (int i = BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.Num() - 1; i >= 0; i--)
 					if(IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]))
 						if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetEffectType() == EEffectType::TURNSKIP)
 							if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh())) {
 								BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration += 1;
+								UE_LOG(LogTemp, Warning, TEXT("Error!!!"));
 								if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration >= BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetDuration() + 1) {
 									BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->ConditionalBeginDestroy();
 									BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.RemoveAt(i);
@@ -536,9 +537,11 @@ void ABattleManager::PlayerTurnController()
 						}
 					}
 					//Destroy effects, which CurrentDuration is >= Duration.
-					for (int16 i = BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.Num() - 1; i >= 0; i--) {
+					for (int i = BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.Num() - 1; i >= 0; i--) {
 						if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i])) {
 							BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration += 1;
+							UE_LOG(LogTemp, Warning, TEXT("The current duration is: %d"), BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration);
+							UE_LOG(LogTemp, Warning, TEXT("The overall duration is: %d"), BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetDuration() + 1);
 							if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration >= BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetDuration() + 1) {
 								if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetEffectType() == EEffectType::DIZZINESS) {
 									if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetController()); IsValid(AIController))

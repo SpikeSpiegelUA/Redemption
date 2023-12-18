@@ -9,6 +9,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Redemption/Dynamics/Gameplay/Skills and Effects/TurnStartDamageEffect.h"
 #include "Redemption/Miscellaneous/ElementsActions.h"
+#include "..\Miscellaneous\InventoryActions.h"
 #include <NiagaraFunctionLibrary.h>
 // Sets default values
 AItemObject::AItemObject()
@@ -55,39 +56,7 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 		if (ACombatEnemyNPC* CombatEnemyNPC = Cast<ACombatEnemyNPC>(OtherActor); IsValid(CombatEnemyNPC) && IsValid(Item)) {
 			//Cast for each type of spell.
 			//Need to create an Array of actors that were hit.
-			TArray<ACombatNPC*> TargetActors{};
-			switch (Item->GetItemRange()) {
-			case EItemRange::SINGLE:
-				TargetActors.Add(CombatEnemyNPC);
-				break;
-			case EItemRange::NEIGHBORS:
-				if (UserBattleSide == EBattleSide::ALLIES) {
-					TargetActors.Add(CombatEnemyNPC);
-					if (PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex + 1 < PlayerCharacter->GetBattleManager()->BattleEnemies.Num())
-						TargetActors.Add(PlayerCharacter->GetBattleManager()->BattleEnemies[PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex + 1]);
-					if (PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex - 1 >= 0)
-						TargetActors.Add(PlayerCharacter->GetBattleManager()->BattleEnemies[PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex - 1]);
-				}
-				else if (UserBattleSide == EBattleSide::ENEMIES) {
-					TargetActors.Add(CombatEnemyNPC);
-					if (PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex + 1 < PlayerCharacter->GetBattleManager()->BattleAlliesPlayer.Num())
-						TargetActors.Add(PlayerCharacter->GetBattleManager()->BattleAlliesPlayer[PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex + 1]);
-					if (PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex - 1 >= 0)
-						TargetActors.Add(PlayerCharacter->GetBattleManager()->BattleAlliesPlayer[PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex - 1]);
-				}
-				break;
-			case EItemRange::EVERYONE:
-				if (UserBattleSide == EBattleSide::ALLIES) {
-					for (ACombatNPC* CombatNPCInArray : PlayerCharacter->GetBattleManager()->BattleEnemies)
-						TargetActors.Add(CombatNPCInArray);
-				}
-				else if (UserBattleSide == EBattleSide::ENEMIES) {
-					for (ACombatNPC* CombatNPCInArray : PlayerCharacter->GetBattleManager()->BattleAlliesPlayer)
-						TargetActors.Add(CombatNPCInArray);
-				}
-				break;
-			}
-			for (ACombatNPC* CombatTarget : TargetActors) {
+			for (ACombatNPC* CombatTarget : InventoryActions::GetTargets(PlayerCharacter->GetBattleManager(), TargetBattleSide, Item->GetItemRange())) {
 				if (AAssaultItem* AssaultItem = Cast<AAssaultItem>(Item); IsValid(AssaultItem)) {
 					//Logic for special effects of the spell(frozen, burn...).
 					if (CombatTarget->Execute_GetHit(CombatTarget, AssaultItem->GetAttackValue(), AssaultItem->GetElementsAndTheirPercentagesStructs(), false)) {
@@ -157,7 +126,7 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 					TArray<AEffect*> EffectsArray;
 					for (TSubclassOf<AEffect> EffectClass : DebuffItem->GetEffectsClasses())
 						EffectsArray.Add(Cast<AEffect>(EffectClass->GetDefaultObject()));
-					PlayerCharacter->GetBattleManager()->SelectedCombatNPC->Execute_GetHitWithBuffOrDebuff(PlayerCharacter->GetBattleManager()->SelectedCombatNPC, EffectsArray, DebuffItem->GetElementsAndTheirPercentagesStructs());
+					CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, DebuffItem->GetElementsAndTheirPercentagesStructs());
 					OnOverlapBeginsActions(PlayerCharacter);
 				}
 			}
@@ -178,8 +147,8 @@ void AItemObject::SetItem(AGameItem* NewItem)
 	Item = NewItem;
 }
 
-void AItemObject::SetUserBattleSide(const EBattleSide NewUserBattleSide)
+void AItemObject::SetTargetBattleSide(const EBattleSide NewUserBattleSide)
 {
-	UserBattleSide = NewUserBattleSide;
+	TargetBattleSide = NewUserBattleSide;
 }
 

@@ -152,3 +152,49 @@ void SkillsSpellsAndEffectsActions::InitializePhysicalResistances(TArray<FPhysic
 	for (FPhysicalTypeAndItsPercentageStruct PhysicalTypePercent : NewPhysicalResistances)
 		PhysicalResistances.Add(PhysicalTypePercent);
 }
+
+TArray<ACombatNPC*> SkillsSpellsAndEffectsActions::GetTargets(const ABattleManager* const BattleManager, const EBattleSide TargetsBattleSide, const ESpellRange SpellRange)
+{
+	TArray<ACombatNPC*> TargetActors{};
+	switch (SpellRange) {
+		case ESpellRange::SINGLE:
+			if (TargetsBattleSide == EBattleSide::ENEMIES) {
+				if (BattleManager->SelectedCombatNPCIndex < BattleManager->BattleEnemies.Num() && BattleManager->SelectedCombatNPCIndex >= 0)
+					TargetActors.Add(BattleManager->BattleEnemies[BattleManager->SelectedCombatNPCIndex]);
+			}
+			else if (TargetsBattleSide == EBattleSide::ALLIES) {
+				if (BattleManager->SelectedCombatNPCIndex < BattleManager->BattleAlliesPlayer.Num() && BattleManager->SelectedCombatNPCIndex >= 0)
+					TargetActors.Add(BattleManager->BattleAlliesPlayer[BattleManager->SelectedCombatNPCIndex]);
+			}
+			break;
+		case ESpellRange::NEIGHBORS:
+			if (TargetsBattleSide == EBattleSide::ENEMIES) {
+				if (BattleManager->SelectedCombatNPCIndex < BattleManager->BattleEnemies.Num() && BattleManager->SelectedCombatNPCIndex >= 0)
+					TargetActors.Add(BattleManager->BattleEnemies[BattleManager->SelectedCombatNPCIndex]);
+				if (BattleManager->SelectedCombatNPCIndex + 1 < BattleManager->BattleEnemies.Num())
+					TargetActors.Add(BattleManager->BattleEnemies[BattleManager->SelectedCombatNPCIndex + 1]);
+				if (BattleManager->SelectedCombatNPCIndex - 1 >= 0)
+					TargetActors.Add(BattleManager->BattleEnemies[BattleManager->SelectedCombatNPCIndex - 1]);
+			}
+			else if (TargetsBattleSide == EBattleSide::ALLIES) {
+				if (BattleManager->SelectedCombatNPCIndex < BattleManager->BattleAlliesPlayer.Num() && BattleManager->SelectedCombatNPCIndex >= 0)
+					TargetActors.Add(BattleManager->BattleAlliesPlayer[BattleManager->SelectedCombatNPCIndex]);
+				if (BattleManager->SelectedCombatNPCIndex + 1 < BattleManager->BattleAlliesPlayer.Num())
+					TargetActors.Add(BattleManager->BattleAlliesPlayer[BattleManager->SelectedCombatNPCIndex + 1]);
+				if (BattleManager->SelectedCombatNPCIndex - 1 >= 0)
+					TargetActors.Add(BattleManager->BattleAlliesPlayer[BattleManager->SelectedCombatNPCIndex - 1]);
+			}
+			break;
+		case ESpellRange::EVERYONE:
+			if (TargetsBattleSide == EBattleSide::ENEMIES) {
+				for (ACombatNPC* CombatNPCInArray : BattleManager->BattleEnemies)
+					TargetActors.Add(CombatNPCInArray);
+			}
+			else if (TargetsBattleSide == EBattleSide::ALLIES) {
+				for (ACombatNPC* CombatNPCInArray : BattleManager->BattleAlliesPlayer)
+					TargetActors.Add(CombatNPCInArray);
+			}
+			break;
+	}
+	return TargetActors;
+}

@@ -225,9 +225,6 @@ void APlayerCharacter::InputSpellReset()
 		SpellBattleMenuWidget->ResetButtonOnClicked();
 		SpellBattleMenuWidget->ResetUIKeyboardControlLogic();
 	}
-	AEffect* Effect = NewObject<AEffect>(BattleManager->BattleAlliesPlayer[0], BattleManager->DizzyClass);
-	if(IsValid(Effect))
-		BattleManager->BattleAlliesPlayer[0]->Effects.Add(Effect);
 }
 
 void APlayerCharacter::InputOpenLearnedSpells()
@@ -588,15 +585,21 @@ void APlayerCharacter::InputScrollUp()
 		}
 		else if (IsValid(SpellBattleMenuWidget) && SpellBattleMenuWidget->IsInViewport() && SpellBattleMenuWidget->CanUseKeyboardButtonSelection && !LearnedSpellsJournalMenuWidget->IsInViewport()) {
 			TArray<UWidget*> SpellBattleMenuElementsButtons{};
-			if(SpellBattleMenuWidget->SelectedSpellRange)
-			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetWaterElementButton());
-			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetEarthElementButton());
-			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetDarkElementButton());
-			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetLightningElementButton());
-			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetHolyElementButton());
-			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetWindElementButton());
-			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetFireElementButton());
-			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetBloodElementButton());
+			if (SpellBattleMenuWidget->GetSelectedSpellRange() == ESpellRange::NONE) {
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetNeighborsSpellRangeButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetEveryoneSpellRangeButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetSingleSpellRangeButton());
+			}
+			else if (SpellBattleMenuWidget->GetSelectedSpellElements().Num() >= 0) {
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetWaterElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetEarthElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetDarkElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetLightningElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetHolyElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetWindElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetFireElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetBloodElementButton());
+			}
 			if (UIManagerWorldSubsystem->PickedButtonIndex == 0) {
 				if (IsValid(UIManagerWorldSubsystem->PickedButton))
 					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
@@ -867,14 +870,21 @@ void APlayerCharacter::InputScrollDown()
 		}
 		else if (IsValid(SpellBattleMenuWidget) && SpellBattleMenuWidget->IsInViewport() && SpellBattleMenuWidget->CanUseKeyboardButtonSelection) {
 			TArray<UWidget*> SpellBattleMenuElementsButtons{};
-			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetWaterElementButton());
-			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetEarthElementButton());
-			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetDarkElementButton());
-			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetLightningElementButton());
-			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetHolyElementButton());
-			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetWindElementButton());
-			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetFireElementButton());
-			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetBloodElementButton());
+			if (SpellBattleMenuWidget->GetSelectedSpellRange() == ESpellRange::NONE) {
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetNeighborsSpellRangeButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetEveryoneSpellRangeButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetSingleSpellRangeButton());
+			}
+			else if (SpellBattleMenuWidget->GetSelectedSpellElements().Num() >= 0) {
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetWaterElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetEarthElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetDarkElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetLightningElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetHolyElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetWindElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetFireElementButton());
+				SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetBloodElementButton());
+			}
 			if (UIManagerWorldSubsystem->PickedButtonIndex == SpellBattleMenuElementsButtons.Num() - 1) {
 				if (IsValid(UIManagerWorldSubsystem->PickedButton))
 					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));

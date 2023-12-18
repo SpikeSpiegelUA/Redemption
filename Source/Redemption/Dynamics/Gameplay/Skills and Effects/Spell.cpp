@@ -22,37 +22,27 @@ void ASpell::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ASpell::SetSpellName(FText& NewSpellName)
+void ASpell::SetSpellName(const FText& NewSpellName)
 {
 	SpellName = NewSpellName;
 }
 
-void ASpell::SetSpellName(FText NewSpellName)
-{
-	SpellName = NewSpellName;
-}
-
-void ASpell::SetCost(int NewManaCost)
+void ASpell::SetCost(const int NewManaCost)
 {
 	Cost = NewManaCost;
 }
 
-void ASpell::SetSpellCostType(ESpellCostType NewSpellCostType)
+void ASpell::SetSpellCostType(const ESpellCostType NewSpellCostType)
 {
 	SpellCostType = NewSpellCostType;
 }
 
-void ASpell::SetTypeOfSpell(ESpellType NewTypeOfSpell)
+void ASpell::SetTypeOfSpell(const ESpellType NewTypeOfSpell)
 {
 	TypeOfSpell = NewTypeOfSpell;
 }
 
-void ASpell::SetDescription(FText& NewDescription)
-{
-	Description = NewDescription;
-}
-
-void ASpell::SetDescription(FText NewDescription)
+void ASpell::SetDescription(const FText& NewDescription)
 {
 	Description = NewDescription;
 }
@@ -60,6 +50,11 @@ void ASpell::SetDescription(FText NewDescription)
 void ASpell::SetSpellElements(const TArray<ESpellElements>& NewSpellElemnts)
 {
 	SpellElements = NewSpellElemnts;
+}
+
+void ASpell::SetSpellRange(const ESpellRange NewSpellRange)
+{
+	SpellRange = NewSpellRange;
 }
 
 FText ASpell::GetSpellName() const

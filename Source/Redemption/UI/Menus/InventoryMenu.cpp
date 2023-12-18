@@ -770,6 +770,7 @@ void UInventoryMenu::DebuffOrAssaultItemHasBeenUsedActions(UBattleMenu* const& B
 void UInventoryMenu::SetItemInfo(const AGameItem* const GameItem)
 {
 	FString ItemName = FString("Name: ").Append(GameItem->GetItemName().ToString());
+	FString SpellRangeString = FString("Range: ").Append(*SkillsSpellsAndEffectsActions::GetEnumDisplayName<EItemRange>(GameItem->GetItemRange()).ToString());
 	ItemNameTextBlock->SetText(FText::FromString(ItemName));
 	if (AEquipmentItem* EquipmentItem = const_cast<AEquipmentItem*>(Cast<AEquipmentItem>(GameItem)); IsValid(EquipmentItem)) {
 		if (Cast<AWeaponItem>(EquipmentItem))
@@ -1052,5 +1053,10 @@ void UInventoryMenu::SetTextOfItemCostTextBlock(const FText& NewText)
 void UInventoryMenu::SetTextOfItemDescriptionTextBlock(const FText& NewText)
 {
 	ItemDescriptionTextBlock->SetText(NewText);
+}
+
+void UInventoryMenu::SetTextOfItemRangeTextBlock(const FText& NewText)
+{
+	ItemRangeTextBlock->SetText(NewText);
 }
 

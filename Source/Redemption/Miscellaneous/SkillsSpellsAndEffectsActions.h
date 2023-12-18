@@ -3,10 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "../Dynamics/Gameplay/Skills and Effects/Effect.h"
 #include "Containers/EnumAsByte.h"
 #include "..\Dynamics/Miscellaneous/ElementAndItsPercentage.h"
 #include "..\Dynamics\Miscellaneous\PhysicalTypeAndItsPercentage.h"
+#include "..\Characters\Combat\CombatNPC.h"
+#include "Redemption/Dynamics/Gameplay/Managers/BattleManager.h"
 
 
 /**
@@ -25,6 +26,8 @@ namespace SkillsSpellsAndEffectsActions {
 	void InitializeElementalResistances(TArray<FElementAndItsPercentageStruct>& ElementalResistances);
 	//Same as the function above, just for physical resistances;
 	void InitializePhysicalResistances(TArray<FPhysicalTypeAndItsPercentageStruct>& PhysicalResistances);
+	//Get Targets for attack, depending on a spell range and a caster's battle side.
+	TArray<ACombatNPC*> GetTargets(const ABattleManager* const BattleManager, const EBattleSide TargetsBattleSide, const ESpellRange SpellRange);
 	template<typename T>
 	FText GetEnumDisplayName(T EnumValue)
 	{

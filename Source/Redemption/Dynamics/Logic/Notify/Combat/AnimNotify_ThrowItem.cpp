@@ -14,9 +14,9 @@ void UAnimNotify_ThrowItem::SpawnItemObject(const AGameItemWithItemObject* const
 	SpawnedItemObject->SetItem(const_cast<AGameItemWithItemObject*>(GameItemWithItemObject));
 	SpawnedItemObject->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(SpawnedItemObject->GetActorLocation(), CombatNPC->Target->GetActorLocation()));
 	if (IsValid(Cast<ACombatAllies>(MeshComp->GetOwner())))
-		SpawnedItemObject->SetUserBattleSide(EBattleSide::ALLIES);
+		SpawnedItemObject->SetTargetBattleSide(EBattleSide::ENEMIES);
 	else if (IsValid(Cast<ACombatEnemyNPC>(MeshComp->GetOwner())))
-		SpawnedItemObject->SetUserBattleSide(EBattleSide::ENEMIES);
+		SpawnedItemObject->SetTargetBattleSide(EBattleSide::ALLIES);
 }
 
 void UAnimNotify_ThrowItem::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)

@@ -28,7 +28,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void SetSpell(const class ASpell* const NewSpell);
-	void SetCasterBattleSide(const EBattleSide NewCasterBattleSide);
+	void SetTargetBattleSide(const EBattleSide NewTargetBattleSide);
 private:
 	UFUNCTION()
 		void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -37,7 +37,7 @@ private:
 		UBoxComponent* BoxComponent{};
 
 	class ASpell* Spell{};
-	EBattleSide CasterBattleSide{};
+	EBattleSide TargetBattleSide{};
 
 	//On overlap with the player or an enemy we need to destroy this object and set timer for turn change
 	void OnOverlapBeginsActions(const class APlayerCharacter* const PlayerCharacter);

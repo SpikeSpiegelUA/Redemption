@@ -138,6 +138,9 @@ bool USpellBattleMenu::Initialize()
 		DebuffSpellTypeButtonWithNeighbors->ToolTipWidgetDelegate.BindUFunction(this, "TooltipBinding");
 		RestorationSpellTypeButtonWithNeighbors->ToolTipWidgetDelegate.BindUFunction(this, "TooltipBinding");
 		BuffSpellTypeButtonWithNeighbors->ToolTipWidgetDelegate.BindUFunction(this, "TooltipBinding");
+		SingleSpellRangeButton->ToolTipWidgetDelegate.BindUFunction(this, "TooltipBinding");
+		NeighborsSpellRangeButton->ToolTipWidgetDelegate.BindUFunction(this, "TooltipBinding");
+		EveryoneSpellRangeButton->ToolTipWidgetDelegate.BindUFunction(this, "TooltipBinding");
 	}
 	if (!bSuccess) return false;
 	return bSuccess;
@@ -192,47 +195,80 @@ void USpellBattleMenu::DarkElementButtonOnClicked()
 
 void USpellBattleMenu::SingleSpellRangeButtonOnClicked()
 {
+	CreateSelectedSpellRangeWidgetAndAddToHorizontalBox(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetSingleSpellRangeIcon(), ESpellRange::SINGLE);
+	ShowElementsButtonsHideSpellTypesAndRangeButtons();
+	ShowElementsButtonsUIManagerLogic();
 }
 
 void USpellBattleMenu::NeighborsSpellRangeButtonOnClicked()
 {
+	CreateSelectedSpellRangeWidgetAndAddToHorizontalBox(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetNeighborsSpellRangeIcon(), ESpellRange::NEIGHBORS);
+	ShowElementsButtonsHideSpellTypesAndRangeButtons();
+	ShowElementsButtonsUIManagerLogic();
 }
 
 void USpellBattleMenu::EveryoneSpellRangeButtonOnClicked()
 {
+	CreateSelectedSpellRangeWidgetAndAddToHorizontalBox(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetEveryoneSpellRangeIcon(), ESpellRange::EVERYONE);
+	ShowElementsButtonsHideSpellTypesAndRangeButtons();
+	ShowElementsButtonsUIManagerLogic();
 }
 
 void USpellBattleMenu::AssaultSpellTypeButtonOnClicked()
 {
 	CreateSelectedSpellTypeWidgetAndAddToHorizontalBox(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetAssaultSpellTypeIcon(), ESpellType::ASSAULT);
-	ShowElementsButtonsHideSpellTypesAndRangeButtons();
-	ShowElementsButtonsUIManagerLogic();
+	if (SelectedSpellRange == ESpellRange::NONE) {
+		ShowRangeButtonsHideSpellTypesAndElementsButtons();
+		ShowSpellRangeButtonsUIManagerLogic();
+	}
+	else if(SelectedSpellRange != ESpellRange::NONE){
+		ShowElementsButtonsHideSpellTypesAndRangeButtons();
+		ShowElementsButtonsUIManagerLogic();
+	}
 }
 
 void USpellBattleMenu::DebuffSpellTypeButtonOnClicked()
 {
 	CreateSelectedSpellTypeWidgetAndAddToHorizontalBox(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetDebuffSpellTypeIcon(), ESpellType::DEBUFF);
-	ShowElementsButtonsHideSpellTypesAndRangeButtons();
-	ShowElementsButtonsUIManagerLogic();
+	if (SelectedSpellRange == ESpellRange::NONE) {
+		ShowRangeButtonsHideSpellTypesAndElementsButtons();
+		ShowSpellRangeButtonsUIManagerLogic();
+	}
+	else if (SelectedSpellRange != ESpellRange::NONE) {
+		ShowElementsButtonsHideSpellTypesAndRangeButtons();
+		ShowElementsButtonsUIManagerLogic();
+	}
 }
 
 void USpellBattleMenu::RestorationSpellTypeButtonOnClicked()
 {
 	CreateSelectedSpellTypeWidgetAndAddToHorizontalBox(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetRestorationSpellTypeIcon(), ESpellType::RESTORATION);
-	ShowElementsButtonsHideSpellTypesAndRangeButtons();
-	ShowElementsButtonsUIManagerLogic();
+	if (SelectedSpellRange == ESpellRange::NONE) {
+		ShowRangeButtonsHideSpellTypesAndElementsButtons();
+		ShowSpellRangeButtonsUIManagerLogic();
+	}
+	else if (SelectedSpellRange != ESpellRange::NONE) {
+		ShowElementsButtonsHideSpellTypesAndRangeButtons();
+		ShowElementsButtonsUIManagerLogic();
+	}
 }
 
 void USpellBattleMenu::BuffSpellTypeButtonOnClicked()
 {
 	CreateSelectedSpellTypeWidgetAndAddToHorizontalBox(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetBuffSpellTypeIcon(), ESpellType::BUFF);
-	ShowElementsButtonsHideSpellTypesAndRangeButtons();
-	ShowElementsButtonsUIManagerLogic();
+	if (SelectedSpellRange == ESpellRange::NONE) {
+		ShowRangeButtonsHideSpellTypesAndElementsButtons();
+		ShowSpellRangeButtonsUIManagerLogic();
+	}
+	else if (SelectedSpellRange != ESpellRange::NONE) {
+		ShowElementsButtonsHideSpellTypesAndRangeButtons();
+		ShowElementsButtonsUIManagerLogic();
+	}
 }
 
 void USpellBattleMenu::ShowResultSpellButtonOnClicked()
 {
-	if (SelectedSpellType != ESpellType::NONE && SelectedElementsHorizontalBox->GetAllChildren().Num() > 0) {
+	if (SelectedSpellType != ESpellType::NONE && SelectedSpellRange != ESpellRange::NONE && SelectedElementsHorizontalBox->GetAllChildren().Num() > 0) {
 		SetUniqueCreatedSpell(SelectedSpellElements, SelectedSpellType);
 		if (!IsValid(CreatedSpell)) {
 			CreateSpellAndSetCreatedSpell(SelectedSpellElements, SelectedSpellType);
@@ -245,7 +281,7 @@ void USpellBattleMenu::ShowResultSpellButtonOnClicked()
 	}
 }
 
-class ASpell* USpellBattleMenu::CreateBasicSpell(ESpellType SpellType, const TArray<ESpellElements>& SpellElements)
+class ASpell* USpellBattleMenu::CreateBasicSpell(const ESpellType SpellType, const ESpellRange SpellRange, const TArray<ESpellElements>& SpellElements)
 {
 	ASpell* CreatedBasicSpell = NewObject<ASpell>();
 	FString NameOfTheSpell{};
@@ -274,7 +310,8 @@ class ASpell* USpellBattleMenu::CreateBasicSpell(ESpellType SpellType, const TAr
 	}
 	CreatedBasicSpell->SetSpellCostType(ESpellCostType::MANA);
 	CreatedBasicSpell->SetSpellName(FText::FromString(NameOfTheSpell));
-	CreatedBasicSpell->SetSpellElements(SelectedSpellElements);
+	CreatedBasicSpell->SetSpellElements(SpellElements);
+	CreatedBasicSpell->SetSpellRange(SpellRange);
 	//Calculate mana cost;
 	int16 BasicManaCost = 0;
 	float CostModifier{};
@@ -297,6 +334,17 @@ class ASpell* USpellBattleMenu::CreateBasicSpell(ESpellType SpellType, const TAr
 			BasicManaCost += 10 * CostModifier;
 		else
 			BasicManaCost += 5 * CostModifier;
+	switch (SpellRange) {
+	case ESpellRange::SINGLE:
+		BasicManaCost *= 1;
+		break;
+	case ESpellRange::NEIGHBORS:
+		BasicManaCost *= 1.5;
+		break;
+	case ESpellRange::EVERYONE:
+		BasicManaCost *= 2;
+		break;
+	}
 	CreatedBasicSpell->SetCost(BasicManaCost);
 	CreatedBasicSpell->SetTypeOfSpell(SpellType);
 	/*FString DescriptionOfTheSpell{};
@@ -329,7 +377,7 @@ class ASpell* USpellBattleMenu::CreateBasicSpell(ESpellType SpellType, const TAr
 class AAssaultSpell* USpellBattleMenu::CreateAssaultSpell(const TArray<ESpellElements>& SpellElements)
 {
 	AAssaultSpell* CreatedAssaultSpell = NewObject<AAssaultSpell>();
-	*CreatedAssaultSpell = *CreateBasicSpell(ESpellType::ASSAULT, SelectedSpellElements);
+	*CreatedAssaultSpell = *CreateBasicSpell(ESpellType::ASSAULT, SelectedSpellRange, SelectedSpellElements);
 	//Calculate damage
 	int16 CreatedAssaultSpellDamage = 0;
 	for (int8 i = 0; i < SpellElements.Num(); i++)
@@ -350,7 +398,7 @@ class AAssaultSpell* USpellBattleMenu::CreateAssaultSpell(const TArray<ESpellEle
 class ACreatedDebuffSpell* USpellBattleMenu::CreateDebuffSpell(const TArray<ESpellElements>& SpellElements)
 {
 	ACreatedDebuffSpell* CreatedDebuffSpell = NewObject<ACreatedDebuffSpell>(this);
-	*CreatedDebuffSpell = *CreateBasicSpell(ESpellType::DEBUFF, SelectedSpellElements);
+	*CreatedDebuffSpell = *CreateBasicSpell(ESpellType::DEBUFF, SelectedSpellRange, SelectedSpellElements);
 	CreatedDebuffSpell->SetTypeOfDebuff(EBuffDebuffType::ELEMENTALRESISTANCE);
 	CreatedDebuffSpell->AddObjectsToEffects(CreateEffectForSpell(EEffectType::PLAINDEBUFF, SpellElements));
 	CreatedDebuffSpell->SetSpellObjectClass(FindSpellObject(ElementsActions::FindSpellsMainElement(SpellElements)));
@@ -372,7 +420,7 @@ class ACreatedDebuffSpell* USpellBattleMenu::CreateDebuffSpell(const TArray<ESpe
 class ARestorationSpell* USpellBattleMenu::CreateRestorationSpell(const TArray<ESpellElements>& SpellElements)
 {
 	ARestorationSpell* CreatedRestorationSpell = NewObject<ARestorationSpell>();
-	*CreatedRestorationSpell = *CreateBasicSpell(ESpellType::RESTORATION, SelectedSpellElements);
+	*CreatedRestorationSpell = *CreateBasicSpell(ESpellType::RESTORATION, SelectedSpellRange, SelectedSpellElements);
 	//Calculate damage
 	int16 CreatedRestorationSpellValuePercent = 0;
 	for (int8 i = 0; i < SpellElements.Num(); i++)
@@ -392,7 +440,7 @@ class ARestorationSpell* USpellBattleMenu::CreateRestorationSpell(const TArray<E
 class ACreatedBuffSpell* USpellBattleMenu::CreateBuffSpell(const TArray<ESpellElements>& SpellElements)
 {
 	ACreatedBuffSpell* CreatedBuffSpell = NewObject<ACreatedBuffSpell>(this);
-	*CreatedBuffSpell = *CreateBasicSpell(ESpellType::BUFF, SelectedSpellElements);
+	*CreatedBuffSpell = *CreateBasicSpell(ESpellType::BUFF, SelectedSpellRange, SelectedSpellElements);
 	CreatedBuffSpell->SetTypeOfBuff(EBuffDebuffType::ELEMENTALRESISTANCE);
 	CreatedBuffSpell->AddObjectsToEffects(CreateEffectForSpell(EEffectType::PLAINBUFF, SpellElements));
 	CreatedBuffSpell->SetSpellObjectClass(FindSpellObject(ElementsActions::FindSpellsMainElement(SpellElements)));
@@ -717,17 +765,17 @@ void USpellBattleMenu::DarkElementButtonOnHovered()
 
 void USpellBattleMenu::SingleSpellRangeButtonOnHovered()
 {
-	ButtonOnHoveredActions(HolyElementButton, (int8)2);
+	ButtonOnHoveredActions(SingleSpellRangeButton, (int8)2);
 }
 
 void USpellBattleMenu::NeighborsSpellRangeButtonOnHovered()
 {
-	ButtonOnHoveredActions(HolyElementButton, (int8)0);
+	ButtonOnHoveredActions(NeighborsSpellRangeButton, (int8)0);
 }
 
 void USpellBattleMenu::EveryoneSpellRangeButtonOnHovered()
 {
-	ButtonOnHoveredActions(HolyElementButton, (int8)1);
+	ButtonOnHoveredActions(EveryoneSpellRangeButton, (int8)1);
 }
 
 void USpellBattleMenu::ShowResultSpellButtonOnHovered()
@@ -803,6 +851,12 @@ void USpellBattleMenu::TooltipLogic()
 			SimpleTooltipWidget->SetMainTextBlockText(FText::FromString("Restoration type"));
 		if (UIManagerWorldSubsystem->PickedButton == BuffSpellTypeButtonWithNeighbors)
 			SimpleTooltipWidget->SetMainTextBlockText(FText::FromString("Buff type"));
+		if (UIManagerWorldSubsystem->PickedButton == SingleSpellRangeButton)
+			SimpleTooltipWidget->SetMainTextBlockText(FText::FromString("Single"));
+		if (UIManagerWorldSubsystem->PickedButton == NeighborsSpellRangeButton)
+			SimpleTooltipWidget->SetMainTextBlockText(FText::FromString("Neighbors"));
+		if (UIManagerWorldSubsystem->PickedButton == EveryoneSpellRangeButton)
+			SimpleTooltipWidget->SetMainTextBlockText(FText::FromString("Everyone"));
 	}
 }
 
@@ -880,8 +934,12 @@ void USpellBattleMenu::Reset(const bool SetCreatedSpellToNullPtr)
 	SelectedSpellElements.Empty();
 	for (UWidget* Child : SelectedSpellTypeHorizontalBox->GetAllChildren())
 		Child->ConditionalBeginDestroy();
+	for (UWidget* Child : SelectedSpellRangeHorizontalBox->GetAllChildren())
+		Child->ConditionalBeginDestroy();
 	SelectedSpellTypeHorizontalBox->ClearChildren();
+	SelectedSpellRangeHorizontalBox->ClearChildren();
 	SelectedSpellType = ESpellType::NONE;
+	SelectedSpellRange = ESpellRange::NONE;
 	ShowSpellTypesButtonsHideElementsAndRangeButtons();
 	if (SetCreatedSpellToNullPtr)
 		CreatedSpell = nullptr;
@@ -941,12 +999,12 @@ void USpellBattleMenu::CreateSelectedSpellRangeWidgetAndAddToHorizontalBox(const
 	if (!SelectedSpellRangeHorizontalBox->HasAnyChildren() && IsValid(Icon)) {
 		if (IsValid(SelectedSpellRangeEntryWidgetClass))
 			SelectedSpellRangeEntryWidget = CreateWidget<USelectedSpellRangeEntryWidget>(GetWorld(), SelectedSpellRangeEntryWidgetClass);
-		if (IsValid(SelectedSpellTypeEntryWidget)) {
+		if (IsValid(SelectedSpellRangeEntryWidget)) {
 			SelectedSpellRangeEntryWidget->SetSpellRange(SpellRange);
 			SelectedSpellRangeEntryWidget->GetMainImage()->Brush.SetResourceObject(const_cast<UTexture*>(Icon));
 			SelectedSpellRangeEntryWidget->GetMainImage()->Brush.SetImageSize(FVector2D(120, 100));
 			SelectedSpellRangeEntryWidget->AddToViewport();
-			SelectedSpellTypeHorizontalBox->AddChildToHorizontalBox(SelectedSpellRangeEntryWidget);
+			SelectedSpellRangeHorizontalBox->AddChildToHorizontalBox(SelectedSpellRangeEntryWidget);
 			SelectedSpellRangeEntryWidget->SetPadding(FMargin(0.f, 0.f, 0.f, 0.f));
 			UWidgetLayoutLibrary::SlotAsHorizontalBoxSlot(SelectedSpellRangeEntryWidget)->SetSize(ESlateSizeRule::Fill);
 			SelectedSpellRange = SpellRange;
@@ -1063,6 +1121,8 @@ void USpellBattleMenu::OnMenuOpenUIManagerLogic()
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
 		if (SelectedSpellType == ESpellType::NONE)
 			UIManagerWorldSubsystem->PickedButton = AssaultSpellTypeButtonWithNeighbors;
+		else if(SelectedSpellType == ESpellType::NONE)
+			UIManagerWorldSubsystem->PickedButton = NeighborsSpellRangeButton;
 		else
 			UIManagerWorldSubsystem->PickedButton = WaterElementButton;
 		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
@@ -1090,7 +1150,7 @@ void USpellBattleMenu::ShowSpellRangeButtonsUIManagerLogic()
 
 void USpellBattleMenu::UseButtonOnClicked()
 {
-	if (SelectedSpellType != ESpellType::NONE && SelectedElementsHorizontalBox->GetAllChildren().Num() > 0) {
+	if (SelectedSpellType != ESpellType::NONE && SelectedSpellRange != ESpellRange::NONE && SelectedElementsHorizontalBox->GetAllChildren().Num() > 0) {
 		if(!IsValid(CreatedSpell))
 			CreateSpellAndSetCreatedSpell(SelectedSpellElements, SelectedSpellType);
 		UseSpell();
@@ -1099,7 +1159,7 @@ void USpellBattleMenu::UseButtonOnClicked()
 
 void USpellBattleMenu::UseUniqueSpellButtonOnClicked()
 {
-	if (SelectedSpellType != ESpellType::NONE && SelectedElementsHorizontalBox->GetAllChildren().Num() > 0) {
+	if (SelectedSpellType != ESpellType::NONE && SelectedSpellRange != ESpellRange::NONE && SelectedElementsHorizontalBox->GetAllChildren().Num() > 0) {
 		if (!IsValid(CreatedSpell))
 			SetUniqueCreatedSpell(SelectedSpellElements, SelectedSpellType);
 		UseSpell(true);
@@ -1300,6 +1360,11 @@ ASpell* USpellBattleMenu::GetCreatedSpell() const
 ESpellType USpellBattleMenu::GetSelectedSpellType() const
 {
 	return SelectedSpellType;
+}
+
+ESpellRange USpellBattleMenu::GetSelectedSpellRange() const
+{
+	return SelectedSpellRange;
 }
 
 UButtonWithNeighbors* USpellBattleMenu::GetAssaultSpellTypeButtonWithNeighbors() const

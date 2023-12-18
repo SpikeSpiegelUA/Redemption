@@ -222,7 +222,7 @@ private:
 	void CreateSelectedSpellRangeWidgetAndAddToHorizontalBox(const UTexture* const Icon, ESpellRange SpellRange);
 	//All spells are children of ASpell, so we create basic ASpell and then assign parameters specific to spell kind separately. 
 	class ACreatedBuffSpell* CreateBuffSpell(const TArray<ESpellElements>& SpellElements);
-	ASpell* CreateBasicSpell(ESpellType SpellType, const TArray<ESpellElements>& SpellElements);
+	ASpell* CreateBasicSpell(const ESpellType SpellType, const ESpellRange SpellRange, const TArray<ESpellElements>& SpellElements);
 	class AAssaultSpell* CreateAssaultSpell(const TArray<ESpellElements>& SpellElements);
 	class ACreatedDebuffSpell* CreateDebuffSpell(const TArray<ESpellElements>& SpellElements);
 	ARestorationSpell* CreateRestorationSpell(const TArray<ESpellElements>& SpellElements);
@@ -249,6 +249,7 @@ public:
 	TArray<ESpellElements> GetSelectedSpellElements() const;
 	ASpell* GetCreatedSpell() const;
 	ESpellType GetSelectedSpellType() const;
+	ESpellRange GetSelectedSpellRange() const;
 	UButtonWithNeighbors* GetAssaultSpellTypeButtonWithNeighbors() const;
 	UButton* GetWaterElementButton() const;
 	UButton* GetEarthElementButton() const;
