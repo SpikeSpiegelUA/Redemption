@@ -49,8 +49,11 @@ public:
 	FTimerHandle GetPlayerTurnControllerTimerHandle() const;
 	TSubclassOf<ACombatFloatingInformationActor> GetCombatFloatingInformationActorClass() const;
 
-	void SelectNewTarget(const class ACombatNPC* const Target, int Index);
-	
+	void SelectNewTarget(const class ACombatNPC* const Target, int8 Index);
+	//Depending on the range sometimes we need to set visible several crosshairs.
+	//Direction - either "Left" or "Right".
+	void SelectNewTargetCrosshairLogic(const TArray<ACombatNPC*>& TargetsForSelection, int8 NewIndex, int8 CurrentIndex, const std::string_view Direction);
+
 	//Function, that controls whether player's turn continues or passes to enemies
 	UFUNCTION()
 	void PlayerTurnController();
@@ -64,6 +67,9 @@ public:
 	//Queue for enemies' and allies' turns. Randomized by dedicated function
 	TArray<int> EnemyTurnQueue;
 	TArray<int> AlliesPlayerTurnQueue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle", meta = (AllowPrivateAccess = true))
+	TSubclassOf<AEffect> DizzyClass{};
 
 protected:
 	// Called when the game starts or when spawned
@@ -105,4 +111,9 @@ private:
 	void SkipEnemyTurnActions();
 	UFUNCTION()
 	void SkipAllyTurnActions();
+	//Need this for the timer for the passing of a turn to a the player's team in the TurnChance function.
+	UFUNCTION()
+	void ToPlayerTurnPassInTurnChangeFunction();
+	UFUNCTION()
+	void PlayerAllyDizzyActions();
 };

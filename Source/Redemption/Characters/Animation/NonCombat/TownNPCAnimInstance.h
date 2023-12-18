@@ -34,7 +34,7 @@ protected:
 		class ATownNPC* NPCReference;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation Properties")
 		float Speed{};
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Bitmask, BitmaskEnum = "ETownNPCAnimationState"), Category = "General Information")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Bitmask, BitmaskEnum = "/Script/Redemption.ETownNPCAnimationState"), Category = "General Information")
 		int32 TownNPCAnimationStateBitmaskCode {};
 
 	UFUNCTION(BlueprintCallable, Category = "Animations")

@@ -8,6 +8,7 @@
 #include "..\Characters\Player\PlayerCharacter.h"
 #include "..\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
+#include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
 
 UBTTask_GetTarget::UBTTask_GetTarget(const FObjectInitializer& ObjectInitializer)
 {
@@ -38,21 +39,39 @@ EBTNodeResult::Type UBTTask_GetTarget::ExecuteTask(UBehaviorTreeComponent& Owner
 	if(!IsValid(BattleManager))
 		return EBTNodeResult::Failed;
 
+	TArray<ACombatNPC*> ActorsToTarget{};
+	if (OwnerComp.GetBlackboardComponent()->GetValue<UBlackboardKeyType_Bool>("CanTargetEveryone")) {
+		for (ACombatNPC* Actor : BattleManager->BattleAlliesPlayer)
+			if(Actor != MyController->GetPawn())
+				ActorsToTarget.Add(Actor);
+		for (ACombatNPC* Actor : BattleManager->BattleEnemies)
+			if (Actor != MyController->GetPawn())
+				ActorsToTarget.Add(Actor);
+	}
+	else {
+		if (IsValid(Cast<ACombatAllies>(MyController->GetPawn())))
+			for (ACombatNPC* Actor : BattleManager->BattleEnemies)
+				ActorsToTarget.Add(Actor);
+		if (IsValid(Cast<ACombatEnemyNPC>(MyController->GetPawn())))
+			for (ACombatNPC* Actor : BattleManager->BattleAlliesPlayer)
+				ActorsToTarget.Add(Actor);
+	}
+
 	//Get Targets total targeting chance.
 	int16 SumOfTargetingChances{};
-	for (int8 i = 0; i < BattleManager->BattleAlliesPlayer.Num(); i++) 
-		SumOfTargetingChances += BattleManager->BattleAlliesPlayer[i]->TargetingChance;
+	for (int8 i = 0; i < ActorsToTarget.Num(); i++)
+		SumOfTargetingChances += ActorsToTarget[i]->TargetingChance;
 
 	//Get random number from zero to total chance. Then set sum to 0 and gradually add chances to sum again, but check if random number is less or equal than sum. If yes, than
 	//set TargetActor and quit from the loop.
 	int16 RandomTargetingChance = FMath::RandRange(0, SumOfTargetingChances);
 	SumOfTargetingChances = 0;
 
-	for (int8 i = 0; i < BattleManager->BattleAlliesPlayer.Num(); i++) {
-		SumOfTargetingChances += BattleManager->BattleAlliesPlayer[i]->TargetingChance;
+	for (int8 i = 0; i < ActorsToTarget.Num(); i++) {
+		SumOfTargetingChances += ActorsToTarget[i]->TargetingChance;
 		if (RandomTargetingChance <= SumOfTargetingChances) {
-			Chr->Target = BattleManager->BattleAlliesPlayer[i];
-			OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Object>("TargetActor", BattleManager->BattleAlliesPlayer[i]);
+			Chr->Target = ActorsToTarget[i];
+			OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Object>("TargetActor", ActorsToTarget[i]);
 			break;
 		}
 	}

@@ -32,6 +32,6 @@ protected:
 
 	virtual void UpdateAnimProperties();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Bitmask, BitmaskEnum = "ECombatPlayerCharacterAnimationState"), Category = "General Information")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Bitmask, BitmaskEnum = "/Script/Redemption.ECombatPlayerCharacterAnimationState"), Category = "General Information")
 		int32 CombatPlayerCharacterAnimationStateBitmaskCode {};
 };

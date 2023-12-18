@@ -10,10 +10,10 @@ void UAnimNotify_CEnemyMAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 {
 	if (IsValid(MeshComp) && IsValid(MeshComp->GetOwner())) {
 		ACombatEnemyNPC* Owner = Cast<ACombatEnemyNPC>(MeshComp->GetOwner());
-		ACombatAllies* CombatAllies{};
+		ACombatNPC* Enemy{};
 		if(IsValid(Owner))
-			CombatAllies = Cast<ACombatAllies>(Owner->Target);
-		if (IsValid(CombatAllies) && IsValid(Owner)) 
-			CombatAllies->Execute_GetHit(CombatAllies, BattleActions::CalculateAttackValueAfterEffects(Owner->GetMeleeAttackValue(), Owner), Owner->GetMeleeWeaponElements(), false);
+			Enemy = Cast<ACombatNPC>(Owner->Target);
+		if (IsValid(Enemy) && IsValid(Owner))
+			Enemy->Execute_GetHit(Enemy, BattleActions::CalculateAttackValueAfterEffects(Owner->GetMeleeAttackValue(), Owner), Owner->GetMeleeWeaponElements(), false);
 	}
 }

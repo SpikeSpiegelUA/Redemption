@@ -55,6 +55,7 @@ public:
 	UTextBlock* GetDialogueTextBlock() const;
 	UTextBlock* GetSpeakerNameTextBlock() const;
 	UOverlay* GetResponseOverlay() const;
+	UButton* GetContinueButton() const;
 
 	UFUNCTION()
 	FText GetDialogueText() const;

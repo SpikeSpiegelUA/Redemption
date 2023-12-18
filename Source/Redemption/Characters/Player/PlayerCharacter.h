@@ -17,6 +17,7 @@
 #include "..\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "..\Dynamics\Gameplay\Managers\GameManager.h"
 #include "..\Dynamics\Gameplay\Managers\AudioManager.h"
+#include "..\Dynamics\Gameplay\Managers\ParticlesManager.h"
 #include "..\GameInstance\RedemptionGameInstance.h"
 #include "..\UI\Menus\CombatCharacterInfoMenu.h"
 #include "..\Public\UIManagerWorldSubsystem.h"
@@ -87,6 +88,8 @@ private:
 		class AGameManager* GameManager {};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		class AEffectsSpellsAndSkillsManager* EffectsManager {};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
+		class AParticlesManager* ParticlesManager{};
 	UPROPERTY(BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		URedemptionGameInstance* RedemptionGameInstance {};
 
@@ -141,6 +144,7 @@ public:
 	UUIManagerWorldSubsystem* GetUIManagerWorldSubsystem() const;
 	class AGameManager* GetGameManager() const;
 	AAudioManager* GetAudioManager() const;
+	AParticlesManager* GetParticlesManager() const;
 	UDeathMenu* GetDeathMenuWidget() const;
 	USettingsMenu* GetSettingsMenuWidget() const;
 	USkillBattleMenu* GetSkillBattleMenuWidget() const;

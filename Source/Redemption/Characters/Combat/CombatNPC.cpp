@@ -11,9 +11,14 @@ ACombatNPC::ACombatNPC()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	//Create ComponentWidget for FloatingHealthBar
-	FloatingHealthBarComponentWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Health Bar"));
-	FloatingHealthBarComponentWidget->SetWidgetSpace(EWidgetSpace::Screen);
-	FloatingHealthBarComponentWidget->SetupAttachment(RootComponent);
+	FloatingHealthBarWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Health Bar"));
+	FloatingHealthBarWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	FloatingHealthBarWidgetComponent->SetupAttachment(RootComponent);
+
+	//Create ComponentWidget for Crosshair
+	CrosshairWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Crosshair"));
+	CrosshairWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	CrosshairWidgetComponent->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -21,7 +26,7 @@ void ACombatNPC::BeginPlay()
 {
 	Super::BeginPlay();
 	//Set up properties for FloatingHealthBar
-	FloatingHealthBarWidget = Cast<UFloatingHealthBarWidget>(FloatingHealthBarComponentWidget->GetWidget());
+	FloatingHealthBarWidget = Cast<UFloatingHealthBarWidget>(FloatingHealthBarWidgetComponent->GetWidget());
 	if (IsValid(FloatingHealthBarWidget)) {
 		FloatingHealthBarWidget->HP = CurrentHP;
 		FloatingHealthBarWidget->MaxHP = CurrentHP;
@@ -36,7 +41,7 @@ void ACombatNPC::Tick(float DeltaTime)
 
 }
 
-void ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements)
+bool ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements)
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
 		if (ABattleManager* BattleManager = PlayerCharacter->GetBattleManager(); IsValid(BattleManager)) {
@@ -49,17 +54,20 @@ void ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffec
 			if (EvasionRandomNumber <= ChanceOfEvasion) {
 				TextForCombatFloatingInformationActor.Append("Miss!");
 				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
+				return false;
 			}
 			else {
 				TextForCombatFloatingInformationActor.Append("Hit!");
 				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 				for (AEffect* Effect : HitEffects)
 					Effects.Add(Effect);
+				return true;
 			}
 		}
+	return false;
 }
 
-void ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, bool ForcedMiss)
+bool ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, bool ForcedMiss)
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
 		if (ABattleManager* BattleManager = PlayerCharacter->GetBattleManager(); IsValid(BattleManager)) {
@@ -70,6 +78,7 @@ void ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementA
 			if (EvasionRandomNumber <= ChanceOfEvasion || ForcedMiss) {
 				TextForCombatFloatingInformationActor.Append("Miss!");
 				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
+				return false;
 			}
 			else {
 				int ValueOfArmor = SkillsSpellsAndEffectsActions::GetValueAfterEffects(ArmorValue, Effects, EEffectArea::ARMOR);
@@ -82,28 +91,40 @@ void ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementA
 					FloatingHealthBarWidget->HP = CurrentHP;
 				TextForCombatFloatingInformationActor.AppendInt(ValueOfAttackWithResistances - ValueOfArmor / 10);
 				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
-			}
-			UCombatCharacterAnimInstance* AnimInstance = Cast<UCombatCharacterAnimInstance>(GetMesh()->GetAnimInstance());
-			if (IsValid(AnimInstance)) {
-				if (CurrentHP <= 0)
-					AnimInstance->ToggleCombatCharacterIsDead(true);
-				if (!GetMesh()->bPauseAnims) {
-					if (UCombatAlliesAnimInstance* CombatAlliesAnimInstance = Cast<UCombatAlliesAnimInstance>(GetMesh()->GetAnimInstance()); IsValid(CombatAlliesAnimInstance)) {
-						if (CurrentHP > 0 && !CombatAlliesAnimInstance->GetCombatAlliesIsBlocking())
-							AnimInstance->ToggleCombatCharacterGotHit(true);
+				UCombatCharacterAnimInstance* AnimInstance = Cast<UCombatCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+				if (IsValid(AnimInstance)) {
+					if (CurrentHP <= 0) {
+						if (IsValid(DizzyEmitterComponent))
+							DizzyEmitterComponent->DestroyComponent();
+						if (IsValid(FlamesEmitterComponent))
+							FlamesEmitterComponent->DestroyComponent();
+						AnimInstance->ToggleCombatCharacterIsDead(true);
 					}
-					else {
-						if (CurrentHP > 0)
-							AnimInstance->ToggleCombatCharacterGotHit(true);
+					if (!GetMesh()->bPauseAnims) {
+						if (UCombatAlliesAnimInstance* CombatAlliesAnimInstance = Cast<UCombatAlliesAnimInstance>(GetMesh()->GetAnimInstance()); IsValid(CombatAlliesAnimInstance)) {
+							if (CurrentHP > 0 && !CombatAlliesAnimInstance->GetCombatAlliesIsBlocking())
+								AnimInstance->ToggleCombatCharacterGotHit(true);
+						}
+						else {
+							if (CurrentHP > 0)
+								AnimInstance->ToggleCombatCharacterGotHit(true);
+						}
 					}
 				}
+				return true;
 			}
 		}
+	return false;
 }
 
 UFloatingHealthBarWidget* ACombatNPC::GetFloatingHealthBarWidget() const
 {
 	return FloatingHealthBarWidget;
+}
+
+UWidgetComponent* ACombatNPC::GetCrosshairWidgetComponent() const
+{
+	return CrosshairWidgetComponent;
 }
 
 TArray<FElementAndItsPercentageStruct> ACombatNPC::GetElementalResistances() const

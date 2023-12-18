@@ -77,23 +77,11 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	//Find managers in the world and set corresponding variables
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	TArray<AActor*> BattleManagerActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABattleManager::StaticClass(), BattleManagerActors);
-	TArray<AActor*> GameManagerActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGameManager::StaticClass(), GameManagerActors);
-	TArray<AActor*> AudioManagerActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAudioManager::StaticClass(), AudioManagerActors);
-	TArray<AActor*> EffectsManagerActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEffectsSpellsAndSkillsManager::StaticClass(), EffectsManagerActors);
-	if (AudioManagerActors.Num() > 0)
-		AudioManager = Cast<AAudioManager>(AudioManagerActors[0]);
-	if (BattleManagerActors.Num() > 0)
-		BattleManager = Cast<ABattleManager>(BattleManagerActors[0]);
-	if (GameManagerActors.Num() > 0)
-		GameManager = Cast<AGameManager>(GameManagerActors[0]);
-	if (EffectsManagerActors.Num() > 0)
-		EffectsManager = Cast<AEffectsSpellsAndSkillsManager>(EffectsManagerActors[0]);
+	ParticlesManager = Cast<AParticlesManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AParticlesManager::StaticClass()));
+	AudioManager = Cast<AAudioManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AAudioManager::StaticClass()));
+	BattleManager = Cast<ABattleManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ABattleManager::StaticClass()));
+	GameManager = Cast<AGameManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass()));
+	EffectsManager = Cast<AEffectsSpellsAndSkillsManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AEffectsSpellsAndSkillsManager::StaticClass()));
 	PlayerController = GetWorld()->GetFirstPlayerController();
 	if(IsValid(PlayerController))
 		PlayerSkeletalMesh = PlayerController->GetPawn()->FindComponentByClass<USkeletalMeshComponent>();
@@ -237,6 +225,9 @@ void APlayerCharacter::InputSpellReset()
 		SpellBattleMenuWidget->ResetButtonOnClicked();
 		SpellBattleMenuWidget->ResetUIKeyboardControlLogic();
 	}
+	AEffect* Effect = NewObject<AEffect>(BattleManager->BattleAlliesPlayer[0], BattleManager->DizzyClass);
+	if(IsValid(Effect))
+		BattleManager->BattleAlliesPlayer[0]->Effects.Add(Effect);
 }
 
 void APlayerCharacter::InputOpenLearnedSpells()
@@ -351,6 +342,7 @@ void APlayerCharacter::InputScrollLeft()
 				while (true) {
 					if (CurrentIndex + 1 < TargetsForSelection.Num()) {
 						if (TargetsForSelection[CurrentIndex + 1]->GetCurrentHP() > 0) {
+							BattleManager->SelectNewTargetCrosshairLogic(TargetsForSelection, CurrentIndex + 1, CurrentIndex, "Left");
 							BattleManager->SelectNewTarget(TargetsForSelection[CurrentIndex + 1], CurrentIndex + 1);
 							break;
 						}
@@ -362,6 +354,7 @@ void APlayerCharacter::InputScrollLeft()
 					}
 					else {
 						if (TargetsForSelection[0]->GetCurrentHP() > 0) {
+							BattleManager->SelectNewTargetCrosshairLogic(TargetsForSelection, 0, CurrentIndex, "Left");
 							BattleManager->SelectNewTarget(TargetsForSelection[0], 0);
 							break;
 						}
@@ -407,9 +400,11 @@ void APlayerCharacter::InputScrollRight()
 				//Choose target with scroll
 				int8 CurrentIndex = BattleManager->SelectedCombatNPCIndex;
 				int8 StartIndex = BattleManager->SelectedCombatNPCIndex;
+				//Need this for a sv suffix.
 				while (true) {
 					if (CurrentIndex - 1 >= 0) {
 						if (TargetsForSelection[CurrentIndex - 1]->GetCurrentHP() > 0) {
+							BattleManager->SelectNewTargetCrosshairLogic(TargetsForSelection, CurrentIndex - 1, CurrentIndex, "Right");
 							BattleManager->SelectNewTarget(TargetsForSelection[CurrentIndex - 1], CurrentIndex - 1);
 							break;
 						}
@@ -421,6 +416,7 @@ void APlayerCharacter::InputScrollRight()
 					}
 					else {
 						if (TargetsForSelection[TargetsForSelection.Num() - 1]->GetCurrentHP() > 0) {
+							BattleManager->SelectNewTargetCrosshairLogic(TargetsForSelection, TargetsForSelection.Num() - 1, CurrentIndex, "Right");
 							BattleManager->SelectNewTarget(TargetsForSelection[TargetsForSelection.Num() - 1], TargetsForSelection.Num() - 1);
 							break;
 						}
@@ -434,7 +430,7 @@ void APlayerCharacter::InputScrollRight()
 			}
 		}
 	if ((IsValid(SpellBattleMenuWidget) && SpellBattleMenuWidget->IsInViewport()) || (IsValid(LearnedSpellsJournalMenuWidget) && LearnedSpellsJournalMenuWidget->IsInViewport())
-		|| (IsValid(SkillBattleMenuWidget) && SkillBattleMenuWidget->IsInViewport())){
+		|| (IsValid(SkillBattleMenuWidget) && SkillBattleMenuWidget->IsInViewport())) {
 			if (UButtonWithNeighbors* PickedButtonWithNeighbors = Cast<UButtonWithNeighbors>(UIManagerWorldSubsystem->PickedButton); IsValid(PickedButtonWithNeighbors))
 				for (FSideAndItsButton SideAndItsButton : PickedButtonWithNeighbors->SidesAndTheirButtons)
 					if (SideAndItsButton.Side == ESides::RIGHT) {
@@ -592,6 +588,7 @@ void APlayerCharacter::InputScrollUp()
 		}
 		else if (IsValid(SpellBattleMenuWidget) && SpellBattleMenuWidget->IsInViewport() && SpellBattleMenuWidget->CanUseKeyboardButtonSelection && !LearnedSpellsJournalMenuWidget->IsInViewport()) {
 			TArray<UWidget*> SpellBattleMenuElementsButtons{};
+			if(SpellBattleMenuWidget->SelectedSpellRange)
 			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetWaterElementButton());
 			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetEarthElementButton());
 			SpellBattleMenuElementsButtons.Add(SpellBattleMenuWidget->GetDarkElementButton());
@@ -1468,6 +1465,11 @@ AGameManager* APlayerCharacter::GetGameManager() const
 AAudioManager* APlayerCharacter::GetAudioManager() const
 {
 	return AudioManager;
+}
+
+AParticlesManager* APlayerCharacter::GetParticlesManager() const
+{
+	return ParticlesManager;
 }
 
 UDeathMenu* APlayerCharacter::GetDeathMenuWidget() const

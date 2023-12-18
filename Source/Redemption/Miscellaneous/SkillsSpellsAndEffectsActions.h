@@ -28,9 +28,8 @@ namespace SkillsSpellsAndEffectsActions {
 	template<typename T>
 	FText GetEnumDisplayName(T EnumValue)
 	{
-		TEnumAsByte<T> EnumVar = EnumValue;
 		FText MyEnumValueText;
-		UEnum::GetDisplayValueAsText(EnumVar, MyEnumValueText);
+		UEnum::GetDisplayValueAsText(EnumValue, MyEnumValueText);
 		return MyEnumValueText;
 	}
 }

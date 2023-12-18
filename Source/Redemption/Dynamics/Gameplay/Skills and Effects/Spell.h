@@ -14,24 +14,35 @@ enum class ESpellType :uint8
 	ASSAULT UMETA(DisplayName = "Assault"),
 	BUFF UMETA(DisplayName = "Buff"),
 	RESTORATION UMETA(DisplayName = "Restoration"),
-	DEBUFF UMETA(DisplayName = "Debuff"),
+	DEBUFF UMETA(DisplayName = "Debuff")
 };
 
 UENUM(BlueprintType)
 enum class ESpellCostType :uint8
 {
+	NONE UMETA(Hidden),
 	HEALTH UMETA(DisplayName = "Health"),
-	MANA UMETA(DisplayName = "Mana"),
+	MANA UMETA(DisplayName = "Mana")
+};
+
+UENUM(BlueprintType)
+enum class ESpellRange :uint8
+{
+	NONE UMETA(Hidden),
+	SINGLE UMETA(DisplayName = "Single"),
+	NEIGHBORS UMETA(DisplayName = "Neighbors"),
+	EVERYONE UMETA(DisplayName = "Everyone")
 };
 
 UENUM(BlueprintType)
 enum class EBuffDebuffType :uint8
 {
+	NONE UMETA(Hidden),
 	DAMAGE UMETA(DisplayName = "Attack"),
 	ARMOR UMETA(DisplayName = "Armor"),
 	EVASION UMETA(DisplayName = "Agility"),
 	ELEMENTALRESISTANCE UMETA(DisplayName = "Elemental Resistance"),
-	PHYSICALRESISTANCE UMETA(DisplayName = "Physical Resistance"),
+	PHYSICALRESISTANCE UMETA(DisplayName = "Physical Resistance")
 };
 
 UCLASS()
@@ -49,6 +60,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
 		ESpellType TypeOfSpell {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
+		ESpellRange SpellRange{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
 		FText Description {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		TArray<ESpellElements> SpellElements {};
@@ -61,6 +74,7 @@ public:
 	ESpellCostType GetSpellCostType() const;
 	int GetCost() const;
 	ESpellType GetTypeOfSpell() const;
+	ESpellRange GetSpellRange() const;
 	FText GetDescription() const;
 	TArray<ESpellElements> GetSpellElements() const;
 

@@ -44,3 +44,8 @@ EItemType AGameItem::GetItemType() const
 {
 	return ItemType;
 }
+
+EItemRange AGameItem::GetItemRange() const
+{
+	return ItemRange;
+}

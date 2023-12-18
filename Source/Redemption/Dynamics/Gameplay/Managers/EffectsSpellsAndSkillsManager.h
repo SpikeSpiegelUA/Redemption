@@ -6,7 +6,6 @@
 #include "GameFramework/Actor.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "Engine/DataTable.h"
-#include "..\Dynamics\Gameplay\Skills and Effects\Skill.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\Spell.h"
 #include "..\Dynamics\World\Items\GameItem.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\SpellObjects\SpellObject.h"

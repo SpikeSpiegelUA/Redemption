@@ -29,9 +29,8 @@ void USelectedSpellTypeEntryWidget::MainButtonOnClicked()
 		{
 			SpellBattleMenu->SetSelectedSpellType(ESpellType::NONE);
 			SpellBattleMenu->GetSelectedSpellTypeHorizontalBox()->RemoveChild(this);
-			this->ConditionalBeginDestroy();
 			SpellBattleMenu->SetCreatedSpell(nullptr);
-			SpellBattleMenu->ShowSpellTypesButtonsHideElementsButtons();
+			SpellBattleMenu->ShowSpellTypesButtonsHideElementsAndRangeButtons();
 			SpellBattleMenu->CanUseKeyboardButtonSelection = true;
 			if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = PlayerCharacter->GetUIManagerWorldSubsystem(); IsValid(UIManagerWorldSubsystem)) {
 				if (IsValid(UIManagerWorldSubsystem->PickedButton))
@@ -40,6 +39,7 @@ void USelectedSpellTypeEntryWidget::MainButtonOnClicked()
 				UIManagerWorldSubsystem->PickedButtonIndex = 0;
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
 			}
+			this->ConditionalBeginDestroy();
 		}
 }
 

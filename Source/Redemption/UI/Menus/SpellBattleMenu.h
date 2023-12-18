@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "..\UI\Miscellaneous\SelectedElementEntryWidget.h"
 #include "..\UI\Miscellaneous\SelectedSpellTypeEntryWidget.h"
+#include "..\UI\Miscellaneous\SelectedSpellRangeEntryWidget.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\Spell.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\BuffSpell.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\DebuffSpell.h"
@@ -47,6 +48,12 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UButton* DarkElementButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UButton* SingleSpellRangeButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UButton* NeighborsSpellRangeButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UButton* EveryoneSpellRangeButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UButtonWithNeighbors* RestorationSpellTypeButtonWithNeighbors;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UButtonWithNeighbors* AssaultSpellTypeButtonWithNeighbors;
@@ -75,6 +82,8 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UHorizontalBox* SelectedSpellTypeHorizontalBox;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+		class UHorizontalBox* SelectedSpellRangeHorizontalBox;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UTextBlock* NotificationTextBlock;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UTextBlock* ToggleSpellInfoTextBlock;
@@ -92,11 +101,15 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 		TSubclassOf<USelectedSpellTypeEntryWidget> SelectedSpellTypeEntryWidgetClass{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+		TSubclassOf<USelectedSpellRangeEntryWidget> SelectedSpellRangeEntryWidgetClass{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 		TSubclassOf<USimpleTooltip> SimpleTooltipClass{};
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 		USelectedElementEntryWidget* SelectedElementEntryWidget {};
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 		USelectedSpellTypeEntryWidget* SelectedSpellTypeEntryWidget {};
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+		USelectedSpellRangeEntryWidget* SelectedSpellRangeEntryWidget{};
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 		USimpleTooltip* SimpleTooltipWidget{};
 	UPROPERTY()
@@ -106,6 +119,7 @@ private:
 
 	TArray<ESpellElements> SelectedSpellElements;
 	ESpellType SelectedSpellType{};
+	ESpellRange SelectedSpellRange{};
 
 	FTimerHandle HideNotificationTimerHandle{};
 	FTimerHandle ShowTooltipTimerHandle{};
@@ -126,6 +140,12 @@ private:
 		void HolyElementButtonOnClicked();
 	UFUNCTION()
 		void DarkElementButtonOnClicked();
+	UFUNCTION()
+		void SingleSpellRangeButtonOnClicked();
+	UFUNCTION()
+		void NeighborsSpellRangeButtonOnClicked();
+	UFUNCTION()
+		void EveryoneSpellRangeButtonOnClicked();
 	UFUNCTION()
 		void AssaultSpellTypeButtonOnClicked();
 	UFUNCTION()
@@ -158,6 +178,12 @@ private:
 		void HolyElementButtonOnHovered();
 	UFUNCTION()
 		void DarkElementButtonOnHovered();
+	UFUNCTION()
+		void SingleSpellRangeButtonOnHovered();
+	UFUNCTION()
+		void NeighborsSpellRangeButtonOnHovered();
+	UFUNCTION()
+		void EveryoneSpellRangeButtonOnHovered();
 	UFUNCTION()
 		void ShowResultSpellButtonOnHovered();
 	UFUNCTION()
@@ -192,6 +218,8 @@ private:
 	void CreateSelectedElementWidgetAndAddToHorizontalBox(const UTexture* const Icon, ESpellElements Element);
 	//Spell type selection logic. Create widget and add it to a dedicated border.
 	void CreateSelectedSpellTypeWidgetAndAddToHorizontalBox(const UTexture* const Icon, ESpellType SpellType);
+	//Spell range selection logic. Create widget and add it to a dedicated border.
+	void CreateSelectedSpellRangeWidgetAndAddToHorizontalBox(const UTexture* const Icon, ESpellRange SpellRange);
 	//All spells are children of ASpell, so we create basic ASpell and then assign parameters specific to spell kind separately. 
 	class ACreatedBuffSpell* CreateBuffSpell(const TArray<ESpellElements>& SpellElements);
 	ASpell* CreateBasicSpell(ESpellType SpellType, const TArray<ESpellElements>& SpellElements);
@@ -216,6 +244,7 @@ protected:
 public:
 	UHorizontalBox* GetSelectedElementsHorizontalBox() const;
 	UHorizontalBox* GetSelectedSpellTypeHorizontalBox() const;
+	UHorizontalBox* GetSelectedSpellRangeHorizontalBox() const;
 	UBorder* GetSelectedSpellTypeBorder() const;
 	TArray<ESpellElements> GetSelectedSpellElements() const;
 	ASpell* GetCreatedSpell() const;
@@ -229,11 +258,15 @@ public:
 	UButton* GetWindElementButton() const;
 	UButton* GetFireElementButton() const;
 	UButton* GetBloodElementButton() const;
+	UButton* GetNeighborsSpellRangeButton() const;
+	UButton* GetSingleSpellRangeButton() const;
+	UButton* GetEveryoneSpellRangeButton() const;
 	UButton* GetToggleSpellInfoButton() const;
 	UScaleBox* GetHintScaleBox() const;
 
 	void SelectedSpellElementsRemoveSingleItem(ESpellElements ElementToRemove);
 	void SetSelectedSpellType(ESpellType NewSpellType);
+	void SetSelectedSpellRange(ESpellRange NewSpellRange);
 	void SetCreatedSpell(const ASpell* const NewSpell);
 	//Create spell from elements and set CreatedSpell to it
 	void CreateSpellAndSetCreatedSpell(const TArray<ESpellElements>& SpellElements, ESpellType TypeOfTheSpell);
@@ -241,13 +274,16 @@ public:
 	//Set CreatedSpell to found unique spell or nullptr.
 	void SetUniqueCreatedSpell(const TArray<ESpellElements>& SpellElements, ESpellType TypeOfTheSpell);
 	void CreateNotification(const FText& NotificationText);
-	void ShowSpellTypesButtonsHideElementsButtons();
-	void ShowElementsButtonsHideSpellTypesButtons();
+	void ShowSpellTypesButtonsHideElementsAndRangeButtons();
+	void ShowElementsButtonsHideSpellTypesAndRangeButtons();
+	void ShowRangeButtonsHideSpellTypesAndElementsButtons();
 	//For example, we go back from LearnedSpellJournal to this. We need to set correct PickedButtonIndex and whether picked button is AssaultType or WaterElement
 	//(depends, whether SelectedSpellType is NONE).
 	void OnMenuOpenUIManagerLogic();
-	//Set PickedButton to water element button, PickedButtonIndex to 0 and button's background color after we selected a spell type.
+	//Set PickedButton to water element button, PickedButtonIndex to 0 and button's background color to red after we selected a spell range.
 	void ShowElementsButtonsUIManagerLogic();
+	//Set PickedButton to NeighborsSpellRangeButton, PickedButtonIndex to 0 and button's background color to red after we selected a spell type.
+	void ShowSpellRangeButtonsUIManagerLogic();
 
 	void Reset(const bool SetCreatedSpellToNullPtr = true);
 	//Set PickedButton to AssaultSpellType, Index to 0, and PickedButton's color to red. Set previous PickedButton to standard color.

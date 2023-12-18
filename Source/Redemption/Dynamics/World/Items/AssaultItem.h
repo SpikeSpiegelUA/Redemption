@@ -7,6 +7,7 @@
 #include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
 #include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "Containers/EnumAsByte.h"
+#include "Redemption/Dynamics/Miscellaneous/EffectAndItsChance.h"
 #include "AssaultItem.generated.h"
 
 /**
@@ -19,7 +20,10 @@ class REDEMPTION_API AAssaultItem : public AGameItemWithItemObject
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		int AttackValue = 0;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "General Information")
+		TArray<FEffectAndItsChanceStruct> EffectsAndTheirChances{};
 
 public:
 	int GetAttackValue() const;
+	TArray<FEffectAndItsChanceStruct> GetEffectsAndTheirChances() const;
 };

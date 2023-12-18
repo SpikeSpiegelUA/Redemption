@@ -6,6 +6,7 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/BorderSlot.h"
+#include "Components\CanvasPanelSlot.h"
 #include "..\Dynamics\Gameplay\Managers\EffectsSpellsAndSkillsManager.h"
 #include "..\Miscellaneous\SkillsSpellsAndEffectsActions.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\CreatedBuffSpell.h"
@@ -107,6 +108,18 @@ bool USpellBattleMenu::Initialize()
 		ToggleSpellInfoButton->OnClicked.AddDynamic(this, &USpellBattleMenu::ToggleSpellInfoButtonOnClicked);
 		ToggleSpellInfoButton->OnHovered.AddDynamic(this, &USpellBattleMenu::ToggleSpellInfoButtonOnHovered);
 	}
+	if (IsValid(SingleSpellRangeButton)) {
+		SingleSpellRangeButton->OnClicked.AddDynamic(this, &USpellBattleMenu::SingleSpellRangeButtonOnClicked);
+		SingleSpellRangeButton->OnHovered.AddDynamic(this, &USpellBattleMenu::SingleSpellRangeButtonOnHovered);
+	}
+	if (IsValid(NeighborsSpellRangeButton)) {
+		NeighborsSpellRangeButton->OnClicked.AddDynamic(this, &USpellBattleMenu::NeighborsSpellRangeButtonOnClicked);
+		NeighborsSpellRangeButton->OnHovered.AddDynamic(this, &USpellBattleMenu::NeighborsSpellRangeButtonOnHovered);
+	}
+	if (IsValid(EveryoneSpellRangeButton)) {
+		EveryoneSpellRangeButton->OnClicked.AddDynamic(this, &USpellBattleMenu::EveryoneSpellRangeButtonOnClicked);
+		EveryoneSpellRangeButton->OnHovered.AddDynamic(this, &USpellBattleMenu::EveryoneSpellRangeButtonOnHovered);
+	}
 	if (IsValid(GetWorld()) && IsValid(GetWorld()->GetFirstPlayerController()))
 		PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	if (IsValid(GetWorld()))
@@ -177,31 +190,43 @@ void USpellBattleMenu::DarkElementButtonOnClicked()
 	CreateSelectedElementWidgetAndAddToHorizontalBox(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetDarkElementIcon(), ESpellElements::DARK);
 }
 
+void USpellBattleMenu::SingleSpellRangeButtonOnClicked()
+{
+}
+
+void USpellBattleMenu::NeighborsSpellRangeButtonOnClicked()
+{
+}
+
+void USpellBattleMenu::EveryoneSpellRangeButtonOnClicked()
+{
+}
+
 void USpellBattleMenu::AssaultSpellTypeButtonOnClicked()
 {
 	CreateSelectedSpellTypeWidgetAndAddToHorizontalBox(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetAssaultSpellTypeIcon(), ESpellType::ASSAULT);
-	ShowElementsButtonsHideSpellTypesButtons();
+	ShowElementsButtonsHideSpellTypesAndRangeButtons();
 	ShowElementsButtonsUIManagerLogic();
 }
 
 void USpellBattleMenu::DebuffSpellTypeButtonOnClicked()
 {
 	CreateSelectedSpellTypeWidgetAndAddToHorizontalBox(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetDebuffSpellTypeIcon(), ESpellType::DEBUFF);
-	ShowElementsButtonsHideSpellTypesButtons();
+	ShowElementsButtonsHideSpellTypesAndRangeButtons();
 	ShowElementsButtonsUIManagerLogic();
 }
 
 void USpellBattleMenu::RestorationSpellTypeButtonOnClicked()
 {
 	CreateSelectedSpellTypeWidgetAndAddToHorizontalBox(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetRestorationSpellTypeIcon(), ESpellType::RESTORATION);
-	ShowElementsButtonsHideSpellTypesButtons();
+	ShowElementsButtonsHideSpellTypesAndRangeButtons();
 	ShowElementsButtonsUIManagerLogic();
 }
 
 void USpellBattleMenu::BuffSpellTypeButtonOnClicked()
 {
 	CreateSelectedSpellTypeWidgetAndAddToHorizontalBox(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetBuffSpellTypeIcon(), ESpellType::BUFF);
-	ShowElementsButtonsHideSpellTypesButtons();
+	ShowElementsButtonsHideSpellTypesAndRangeButtons();
 	ShowElementsButtonsUIManagerLogic();
 }
 
@@ -690,6 +715,21 @@ void USpellBattleMenu::DarkElementButtonOnHovered()
 	ButtonOnHoveredActions(DarkElementButton, (int8) 2);
 }
 
+void USpellBattleMenu::SingleSpellRangeButtonOnHovered()
+{
+	ButtonOnHoveredActions(HolyElementButton, (int8)2);
+}
+
+void USpellBattleMenu::NeighborsSpellRangeButtonOnHovered()
+{
+	ButtonOnHoveredActions(HolyElementButton, (int8)0);
+}
+
+void USpellBattleMenu::EveryoneSpellRangeButtonOnHovered()
+{
+	ButtonOnHoveredActions(HolyElementButton, (int8)1);
+}
+
 void USpellBattleMenu::ShowResultSpellButtonOnHovered()
 {
 	ButtonOnHoveredActions(ShowResultSpellButton, false);
@@ -842,7 +882,7 @@ void USpellBattleMenu::Reset(const bool SetCreatedSpellToNullPtr)
 		Child->ConditionalBeginDestroy();
 	SelectedSpellTypeHorizontalBox->ClearChildren();
 	SelectedSpellType = ESpellType::NONE;
-	ShowSpellTypesButtonsHideElementsButtons();
+	ShowSpellTypesButtonsHideElementsAndRangeButtons();
 	if (SetCreatedSpellToNullPtr)
 		CreatedSpell = nullptr;
 	HideNotificationAndClearItsTimer();
@@ -896,6 +936,24 @@ void USpellBattleMenu::CreateSelectedSpellTypeWidgetAndAddToHorizontalBox(const 
 	}
 }
 
+void USpellBattleMenu::CreateSelectedSpellRangeWidgetAndAddToHorizontalBox(const UTexture* const Icon, ESpellRange SpellRange)
+{
+	if (!SelectedSpellRangeHorizontalBox->HasAnyChildren() && IsValid(Icon)) {
+		if (IsValid(SelectedSpellRangeEntryWidgetClass))
+			SelectedSpellRangeEntryWidget = CreateWidget<USelectedSpellRangeEntryWidget>(GetWorld(), SelectedSpellRangeEntryWidgetClass);
+		if (IsValid(SelectedSpellTypeEntryWidget)) {
+			SelectedSpellRangeEntryWidget->SetSpellRange(SpellRange);
+			SelectedSpellRangeEntryWidget->GetMainImage()->Brush.SetResourceObject(const_cast<UTexture*>(Icon));
+			SelectedSpellRangeEntryWidget->GetMainImage()->Brush.SetImageSize(FVector2D(120, 100));
+			SelectedSpellRangeEntryWidget->AddToViewport();
+			SelectedSpellTypeHorizontalBox->AddChildToHorizontalBox(SelectedSpellRangeEntryWidget);
+			SelectedSpellRangeEntryWidget->SetPadding(FMargin(0.f, 0.f, 0.f, 0.f));
+			UWidgetLayoutLibrary::SlotAsHorizontalBoxSlot(SelectedSpellRangeEntryWidget)->SetSize(ESlateSizeRule::Fill);
+			SelectedSpellRange = SpellRange;
+		}
+	}
+}
+
 void USpellBattleMenu::CreateSpellAndSetCreatedSpell(const TArray<ESpellElements>& SpellElements, ESpellType TypeOfTheSpell)
 {
 	if (TypeOfTheSpell == ESpellType::ASSAULT)
@@ -941,7 +999,7 @@ void USpellBattleMenu::SetUniqueCreatedSpell(const TArray<ESpellElements>& Spell
 		}
 }
 
-void USpellBattleMenu::ShowSpellTypesButtonsHideElementsButtons()
+void USpellBattleMenu::ShowSpellTypesButtonsHideElementsAndRangeButtons()
 {
 	AssaultSpellTypeButtonWithNeighbors->SetVisibility(ESlateVisibility::Visible);
 	DebuffSpellTypeButtonWithNeighbors->SetVisibility(ESlateVisibility::Visible);
@@ -955,9 +1013,12 @@ void USpellBattleMenu::ShowSpellTypesButtonsHideElementsButtons()
 	BloodElementButton->SetVisibility(ESlateVisibility::Hidden);
 	HolyElementButton->SetVisibility(ESlateVisibility::Hidden);
 	DarkElementButton->SetVisibility(ESlateVisibility::Hidden);
+	SingleSpellRangeButton->SetVisibility(ESlateVisibility::Hidden);
+	NeighborsSpellRangeButton->SetVisibility(ESlateVisibility::Hidden);
+	EveryoneSpellRangeButton->SetVisibility(ESlateVisibility::Hidden);
 }
 
-void USpellBattleMenu::ShowElementsButtonsHideSpellTypesButtons()
+void USpellBattleMenu::ShowElementsButtonsHideSpellTypesAndRangeButtons()
 {
 	FireElementButton->SetVisibility(ESlateVisibility::Visible);
 	WaterElementButton->SetVisibility(ESlateVisibility::Visible);
@@ -971,6 +1032,28 @@ void USpellBattleMenu::ShowElementsButtonsHideSpellTypesButtons()
 	DebuffSpellTypeButtonWithNeighbors->SetVisibility(ESlateVisibility::Hidden);
 	RestorationSpellTypeButtonWithNeighbors->SetVisibility(ESlateVisibility::Hidden);
 	BuffSpellTypeButtonWithNeighbors->SetVisibility(ESlateVisibility::Hidden);
+	SingleSpellRangeButton->SetVisibility(ESlateVisibility::Hidden);
+	NeighborsSpellRangeButton->SetVisibility(ESlateVisibility::Hidden);
+	EveryoneSpellRangeButton->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void USpellBattleMenu::ShowRangeButtonsHideSpellTypesAndElementsButtons()
+{
+	SingleSpellRangeButton->SetVisibility(ESlateVisibility::Visible);
+	NeighborsSpellRangeButton->SetVisibility(ESlateVisibility::Visible);
+	EveryoneSpellRangeButton->SetVisibility(ESlateVisibility::Visible);
+	AssaultSpellTypeButtonWithNeighbors->SetVisibility(ESlateVisibility::Hidden);
+	DebuffSpellTypeButtonWithNeighbors->SetVisibility(ESlateVisibility::Hidden);
+	RestorationSpellTypeButtonWithNeighbors->SetVisibility(ESlateVisibility::Hidden);
+	BuffSpellTypeButtonWithNeighbors->SetVisibility(ESlateVisibility::Hidden);
+	FireElementButton->SetVisibility(ESlateVisibility::Hidden);
+	WaterElementButton->SetVisibility(ESlateVisibility::Hidden);
+	WindElementButton->SetVisibility(ESlateVisibility::Hidden);
+	EarthElementButton->SetVisibility(ESlateVisibility::Hidden);
+	LightningElementButton->SetVisibility(ESlateVisibility::Hidden);
+	BloodElementButton->SetVisibility(ESlateVisibility::Hidden);
+	HolyElementButton->SetVisibility(ESlateVisibility::Hidden);
+	DarkElementButton->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void USpellBattleMenu::OnMenuOpenUIManagerLogic()
@@ -992,6 +1075,15 @@ void USpellBattleMenu::ShowElementsButtonsUIManagerLogic()
 	if (IsValid(UIManagerWorldSubsystem->PickedButton))
 		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
 	UIManagerWorldSubsystem->PickedButton = WaterElementButton;
+	UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
+	UIManagerWorldSubsystem->PickedButtonIndex = 0;
+}
+
+void USpellBattleMenu::ShowSpellRangeButtonsUIManagerLogic()
+{
+	if (IsValid(UIManagerWorldSubsystem->PickedButton))
+		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+	UIManagerWorldSubsystem->PickedButton = NeighborsSpellRangeButton;
 	UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
 	UIManagerWorldSubsystem->PickedButtonIndex = 0;
 }
@@ -1034,6 +1126,8 @@ void USpellBattleMenu::UseSpell(bool CreateNotificationIfCreatedSpellIsNotValid)
 								if (AllyPlayerNPC->CurrentHP > 0) {
 									BManager->SelectedCombatNPC = AllyPlayerNPC;
 									BMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(AllyPlayerNPC->GetCharacterName()));
+									BManager->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
+
 									break;
 								}
 							if (IsValid(Cast<ARestorationSpell>(CreatedSpell))) {
@@ -1076,16 +1170,47 @@ void USpellBattleMenu::UseSpell(bool CreateNotificationIfCreatedSpellIsNotValid)
 						BMenu->IsPreparingToAttack = true;
 						BMenu->IsAttackingWithSpell = true;
 						BMenu->AddToViewport();
-
 						UIManagerWorldSubsystem->PickedButton = BMenu->GetAttackTalkInfoActionButton();
 						UIManagerWorldSubsystem->PickedButtonIndex = 0;
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 						//Remove menu and turn on target selection
 						BManager->SelectedCombatNPCIndex = 0;
-						BMenu->GetCenterMark()->SetVisibility(ESlateVisibility::Visible);
-						BMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
 						BMenu->GetAttackMenuBorder()->SetVisibility(ESlateVisibility::Visible);
 						BMenu->GetLeftRightMenuBorder()->SetVisibility(ESlateVisibility::Visible);
+						//Depending on the spell's range, we need to turn on additional target selection
+						//Create targets array.
+						TArray<ACombatNPC*> TargetsForSelection{};
+						//Add BattleEnemies in a loop, cause we need to convert them to the ACombatNPC.
+						if (BManager->IsSelectingAllyAsTarget)
+							TargetsForSelection = BManager->BattleAlliesPlayer;
+						else if (!BManager->IsSelectingAllyAsTarget)
+							for (ACombatNPC* CombatNPC : BManager->BattleEnemies)
+								TargetsForSelection.Add(CombatNPC);
+						switch (CreatedSpell->GetSpellRange()) {
+							case ESpellRange::SINGLE:
+								BMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
+								if (IsValid(BManager->SelectedCombatNPC))
+									BManager->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
+								break;
+							case ESpellRange::NEIGHBORS:
+								if (TargetsForSelection.Num() > 1) {
+									if (IsValid(BManager->SelectedCombatNPC))
+										BManager->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
+									if (BManager->SelectedCombatNPCIndex - 1 >= 0)
+										TargetsForSelection[BManager->SelectedCombatNPCIndex - 1]->GetCrosshairWidgetComponent()->SetVisibility(true);
+									if (BManager->SelectedCombatNPCIndex + 1 < TargetsForSelection.Num())
+										TargetsForSelection[BManager->SelectedCombatNPCIndex + 1]->GetCrosshairWidgetComponent()->SetVisibility(true);
+								}
+								else {
+									BMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
+									if (IsValid(BManager->SelectedCombatNPC))
+										BManager->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
+								}
+								break;
+							case ESpellRange::EVERYONE:
+								for (ACombatNPC* Target : TargetsForSelection)
+									Target->GetCrosshairWidgetComponent()->SetVisibility(true);
+						}
 						if (UTextBlock* AttackTalkInfoTextBlock = Cast<UTextBlock>(BMenu->GetAttackTalkInfoActionButton()->GetChildAt(0)); IsValid(AttackTalkInfoTextBlock))
 							AttackTalkInfoTextBlock->SetText(FText::FromString("Attack"));
 						BManager->SetCanTurnBehindPlayerCameraToTarget(true);
@@ -1132,6 +1257,11 @@ void USpellBattleMenu::SetSelectedSpellType(ESpellType NewSpellType)
 	SelectedSpellType = NewSpellType;
 }
 
+void USpellBattleMenu::SetSelectedSpellRange(ESpellRange NewSpellRange)
+{
+	SelectedSpellRange = NewSpellRange;
+}
+
 void USpellBattleMenu::SetCreatedSpell(const ASpell* const NewSpell)
 {
 	CreatedSpell = const_cast<ASpell*>(NewSpell);
@@ -1150,6 +1280,11 @@ UBorder* USpellBattleMenu::GetSelectedSpellTypeBorder() const
 UHorizontalBox* USpellBattleMenu::GetSelectedSpellTypeHorizontalBox() const
 {
 	return SelectedSpellTypeHorizontalBox;
+}
+
+UHorizontalBox* USpellBattleMenu::GetSelectedSpellRangeHorizontalBox() const
+{
+	return SelectedSpellRangeHorizontalBox;
 }
 
 TArray<ESpellElements> USpellBattleMenu::GetSelectedSpellElements() const
@@ -1210,6 +1345,21 @@ UButton* USpellBattleMenu::GetFireElementButton() const
 UButton* USpellBattleMenu::GetBloodElementButton() const
 {
 	return BloodElementButton;
+}
+
+UButton* USpellBattleMenu::GetNeighborsSpellRangeButton() const
+{
+	return NeighborsSpellRangeButton;
+}
+
+UButton* USpellBattleMenu::GetSingleSpellRangeButton() const
+{
+	return SingleSpellRangeButton;
+}
+
+UButton* USpellBattleMenu::GetEveryoneSpellRangeButton() const
+{
+	return EveryoneSpellRangeButton;
 }
 
 UButton* USpellBattleMenu::GetToggleSpellInfoButton() const

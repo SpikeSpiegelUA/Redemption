@@ -34,9 +34,10 @@ void ACombatAlliesAIController::OnMoveCompleted(FAIRequestID RequestID, const FP
 					}
 					//Activate when a CombatAlliesNPC completed a move to a start position
 					else if (CombatAlliesNPC->IsMovingToStartPosition) {
+						if (IsValid(BattleManager->SelectedCombatNPC))
+							BattleManager->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(false);
 						BattleManager->PlayerTurnController();
 						CombatAlliesNPC->SetActorRotation(FRotator(0, 180, 0));
-						PlayerCharacter->GetBattleMenuWidget()->GetCenterMark()->SetVisibility(ESlateVisibility::Hidden);
 						CombatAlliesNPC->IsMovingToStartPosition = false;
 					}
 				}
