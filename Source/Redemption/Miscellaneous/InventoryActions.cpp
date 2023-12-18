@@ -107,3 +107,49 @@ UScrollBox* InventoryActions::FindCorrespondingScrollBox(const UInventoryMenu* c
 		return InventoryMenu->GetInventoryScrollBox();
 	return nullptr;
 }
+
+TArray<ACombatNPC*> InventoryActions::GetTargets(const ABattleManager* const BattleManager, const EBattleSide TargetsBattleSide, const EItemRange ItemRange)
+{
+	TArray<ACombatNPC*> TargetActors{};
+	switch (ItemRange) {
+	case EItemRange::SINGLE:
+		if (TargetsBattleSide == EBattleSide::ENEMIES) {
+			if (BattleManager->SelectedCombatNPCIndex < BattleManager->BattleEnemies.Num() && BattleManager->SelectedCombatNPCIndex >= 0)
+				TargetActors.Add(BattleManager->BattleEnemies[BattleManager->SelectedCombatNPCIndex]);
+		}
+		else if (TargetsBattleSide == EBattleSide::ALLIES) {
+			if (BattleManager->SelectedCombatNPCIndex < BattleManager->BattleAlliesPlayer.Num() && BattleManager->SelectedCombatNPCIndex >= 0)
+				TargetActors.Add(BattleManager->BattleAlliesPlayer[BattleManager->SelectedCombatNPCIndex]);
+		}
+		break;
+	case EItemRange::NEIGHBORS:
+		if (TargetsBattleSide == EBattleSide::ENEMIES) {
+			if (BattleManager->SelectedCombatNPCIndex < BattleManager->BattleEnemies.Num() && BattleManager->SelectedCombatNPCIndex >= 0)
+				TargetActors.Add(BattleManager->BattleEnemies[BattleManager->SelectedCombatNPCIndex]);
+			if (BattleManager->SelectedCombatNPCIndex + 1 < BattleManager->BattleEnemies.Num())
+				TargetActors.Add(BattleManager->BattleEnemies[BattleManager->SelectedCombatNPCIndex + 1]);
+			if (BattleManager->SelectedCombatNPCIndex - 1 >= 0)
+				TargetActors.Add(BattleManager->BattleEnemies[BattleManager->SelectedCombatNPCIndex - 1]);
+		}
+		else if (TargetsBattleSide == EBattleSide::ALLIES) {
+			if (BattleManager->SelectedCombatNPCIndex < BattleManager->BattleAlliesPlayer.Num() && BattleManager->SelectedCombatNPCIndex >= 0)
+				TargetActors.Add(BattleManager->BattleAlliesPlayer[BattleManager->SelectedCombatNPCIndex]);
+			if (BattleManager->SelectedCombatNPCIndex + 1 < BattleManager->BattleAlliesPlayer.Num())
+				TargetActors.Add(BattleManager->BattleAlliesPlayer[BattleManager->SelectedCombatNPCIndex + 1]);
+			if (BattleManager->SelectedCombatNPCIndex - 1 >= 0)
+				TargetActors.Add(BattleManager->BattleAlliesPlayer[BattleManager->SelectedCombatNPCIndex - 1]);
+		}
+		break;
+	case EItemRange::EVERYONE:
+		if (TargetsBattleSide == EBattleSide::ENEMIES) {
+			for (ACombatNPC* CombatNPCInArray : BattleManager->BattleEnemies)
+				TargetActors.Add(CombatNPCInArray);
+		}
+		else if (TargetsBattleSide == EBattleSide::ALLIES) {
+			for (ACombatNPC* CombatNPCInArray : BattleManager->BattleAlliesPlayer)
+				TargetActors.Add(CombatNPCInArray);
+		}
+		break;
+	}
+	return TargetActors;
+}

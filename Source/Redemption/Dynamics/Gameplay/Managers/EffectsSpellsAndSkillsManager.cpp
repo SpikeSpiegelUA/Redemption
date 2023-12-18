@@ -149,7 +149,22 @@ UTexture* AEffectsSpellsAndSkillsManager::GetEvasionEffectAreaIcon() const
 	return EvasionEffectAreaIcon;
 }
 
-UTexture* AEffectsSpellsAndSkillsManager::GetSpellTypeImageTexture(ESpellType SpellType)
+UTexture* AEffectsSpellsAndSkillsManager::GetSingleSpellRangeIcon() const
+{
+	return SingleSpellRangeIcon;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetNeighborsSpellRangeIcon() const
+{
+	return NeighborsSpellRangeIcon;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetEveryoneSpellRangeIcon() const
+{
+	return EveryoneSpellRange;
+}
+
+UTexture* AEffectsSpellsAndSkillsManager::GetSpellTypeImageTexture(ESpellType SpellType) const
 {
 	switch (SpellType) {
 	case ESpellType::ASSAULT:
@@ -165,7 +180,7 @@ UTexture* AEffectsSpellsAndSkillsManager::GetSpellTypeImageTexture(ESpellType Sp
 	}
 }
 
-UTexture* AEffectsSpellsAndSkillsManager::GetMainSpellElementImageTexture(ESpellElements MainSpellElement)
+UTexture* AEffectsSpellsAndSkillsManager::GetMainSpellElementImageTexture(ESpellElements MainSpellElement) const
 {
 	switch (MainSpellElement) {
 	case ESpellElements::WATER:
@@ -191,7 +206,7 @@ UTexture* AEffectsSpellsAndSkillsManager::GetMainSpellElementImageTexture(ESpell
 	}
 }
 
-UTexture* AEffectsSpellsAndSkillsManager::GetEffectAreaImageTexture(EEffectArea EffectArea)
+UTexture* AEffectsSpellsAndSkillsManager::GetEffectAreaImageTexture(EEffectArea EffectArea) const
 {
 	switch (EffectArea) {
 		case EEffectArea::DAMAGE:
@@ -223,7 +238,7 @@ UTexture* AEffectsSpellsAndSkillsManager::GetEffectAreaImageTexture(EEffectArea 
 	}
 }
 
-UTexture* AEffectsSpellsAndSkillsManager::GetEffectTypeImageTexture(EEffectType EffectType)
+UTexture* AEffectsSpellsAndSkillsManager::GetEffectTypeImageTexture(EEffectType EffectType) const
 {
 	switch (EffectType) {
 	case EEffectType::BUFF:

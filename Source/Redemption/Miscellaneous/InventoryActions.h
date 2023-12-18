@@ -4,6 +4,7 @@
 #include "Components/ScrollBox.h"
 #include "..\Dynamics\World\Items\GameItem.h"
 #include "..\UI\Menus\InventoryMenu.h"
+#include "..\Characters\Combat\CombatNPC.h"
 #include "..\GameInstance\RedemptionGameInstance.h"
 
 namespace InventoryActions{
@@ -17,4 +18,6 @@ namespace InventoryActions{
 	UInventoryScrollBoxEntryWidget* FindItemInventoryEntryWidget(const AGameItem* const ItemToSearchFor, const UScrollBox* const ItemScrollBox);
 	//Return scroll box corresponding to the item's type.
 	UScrollBox* FindCorrespondingScrollBox(const UInventoryMenu* const InventoryMenu, const AGameItem* const ItemScrollBoxIsFor);
+	//Get Targets for attack, depending on an item's range and an user's battle side.
+	TArray<ACombatNPC*> GetTargets(const ABattleManager* const BattleManager, const EBattleSide TargetsBattleSide, const EItemRange ItemRange);
 }

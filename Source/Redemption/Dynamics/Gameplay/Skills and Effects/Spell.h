@@ -78,14 +78,13 @@ public:
 	FText GetDescription() const;
 	TArray<ESpellElements> GetSpellElements() const;
 
-	void SetSpellName(FText& NewSpellName);
-	void SetSpellName(FText NewSpellName);
-	void SetCost(int NewCost);
-	void SetSpellCostType(ESpellCostType NewSpellCostType);
-	void SetTypeOfSpell(ESpellType NewTypeOfSpell);
-	void SetDescription(FText& NewDescription);
-	void SetDescription(FText NewDescription);
+	void SetSpellName(const FText& NewSpellName);
+	void SetCost(const int NewCost);
+	void SetSpellCostType(const ESpellCostType NewSpellCostType);
+	void SetTypeOfSpell(const ESpellType NewTypeOfSpell);
+	void SetDescription(const FText& NewDescription);
 	void SetSpellElements(const TArray<ESpellElements>& NewSpellElements);
+	void SetSpellRange(const ESpellRange NewSpellRange);
 
 protected:
 	// Called when the game starts or when spawned

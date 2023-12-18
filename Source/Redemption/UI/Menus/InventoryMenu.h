@@ -150,6 +150,8 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* ItemEffectValueTextBlock;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UTextBlock* ItemRangeTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* ItemCostTextBlock;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* ItemDescriptionTextBlock;
@@ -229,6 +231,7 @@ public:
 	void SetTextOfItemEffectValueTextBlock(const FText& NewText);
 	void SetTextOfItemCostTextBlock(const FText& NewText);
 	void SetTextOfItemDescriptionTextBlock(const FText& NewText);
+	void SetTextOfItemRangeTextBlock(const FText& NewText);
 
 	//Set ItemInfo for ItemInfoBorder
 	void SetItemInfo(const AGameItem* const GameItem);

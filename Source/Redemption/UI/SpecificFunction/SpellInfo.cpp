@@ -26,6 +26,8 @@ void USpellInfo::SetSpellInfo(const ASpell* const SpellToShow)
 		FString SpellNameString = FString("Name: ");
 		SpellNameString.Append(SpellToShow->GetSpellName().ToString());
 		SpellNameTextBlock->SetText(FText::FromString(SpellNameString));
+		FString SpellRangeString = FString("Range: ");
+		SpellRangeString.Append(*SkillsSpellsAndEffectsActions::GetEnumDisplayName<ESpellRange>(SpellToShow->GetSpellRange()).ToString());
 		FString SpellTypeString = FString("Type: ");
 		FString SpellEffectValueString = FString("");
 		switch (SpellToShow->GetTypeOfSpell()) {

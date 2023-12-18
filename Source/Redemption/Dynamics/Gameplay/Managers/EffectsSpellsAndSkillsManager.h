@@ -76,6 +76,12 @@ private:
 		UTexture* ArmorEffectAreaIcon{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
 		UTexture* EvasionEffectAreaIcon{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* SingleSpellRangeIcon{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* NeighborsSpellRangeIcon{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
+		UTexture* EveryoneSpellRange{};
 public:	
 	// Sets default values for this actor's properties
 	AEffectsSpellsAndSkillsManager();
@@ -113,6 +119,9 @@ public:
 	UTexture* GetBuffSpellTypeIcon() const;
 	UTexture* GetArmorEffectAreaIcon() const;
 	UTexture* GetEvasionEffectAreaIcon() const;
+	UTexture* GetSingleSpellRangeIcon() const;
+	UTexture* GetNeighborsSpellRangeIcon() const;
+	UTexture* GetEveryoneSpellRangeIcon() const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells")
 		TArray<TSubclassOf<ASpell>> ThreeElementsUniqueSpellsClasses{};
@@ -121,8 +130,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells")
 		TArray<TSubclassOf<ASpell>> FiveElementsUniqueSpellsClasses{};
 
-	UTexture* GetSpellTypeImageTexture(ESpellType SpellType);
-	UTexture* GetMainSpellElementImageTexture(ESpellElements MainSpellElement);
-	UTexture* GetEffectAreaImageTexture(EEffectArea EffectArea);
-	UTexture* GetEffectTypeImageTexture(EEffectType EffectType);
+	UTexture* GetSpellTypeImageTexture(ESpellType SpellType) const;
+	UTexture* GetMainSpellElementImageTexture(ESpellElements MainSpellElement) const;
+	UTexture* GetEffectAreaImageTexture(EEffectArea EffectArea) const;
+	UTexture* GetEffectTypeImageTexture(EEffectType EffectType) const;
 };

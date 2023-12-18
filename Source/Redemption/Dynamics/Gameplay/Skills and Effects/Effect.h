@@ -98,5 +98,5 @@ public:
 	void SetDuration(int NewDuration);
 	void SetEffectDescription(const FText& NewEffectDescription);
 
-	int8 CurrentDuration = 0;
+	int CurrentDuration = 0;
 };

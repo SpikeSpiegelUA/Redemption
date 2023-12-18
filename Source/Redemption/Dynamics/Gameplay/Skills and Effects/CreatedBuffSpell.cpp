@@ -16,6 +16,7 @@ ACreatedBuffSpell& ACreatedBuffSpell::operator=(const ASpell& Spell)
 	SetTypeOfSpell(Spell.GetTypeOfSpell());
 	SetDescription(Spell.GetDescription());
 	SetSpellCostType(Spell.GetSpellCostType());
+	SetSpellRange(Spell.GetSpellRange());
 	return *this;
 }
 

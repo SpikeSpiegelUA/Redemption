@@ -26,7 +26,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void SetItem(class AGameItem* NewItem);
-	void SetUserBattleSide(const EBattleSide NewUserBattleSide);
+	void SetTargetBattleSide(const EBattleSide NewTargetBattleSide);
 private:
 	UFUNCTION()
 		void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -35,7 +35,7 @@ private:
 		UBoxComponent* BoxComponent {};
 
 	class AGameItem* Item{};
-	EBattleSide UserBattleSide{};
+	EBattleSide TargetBattleSide{};
 	//On overlap with the player or an enemy we need to destroy this object and set timer for turn change
 	void OnOverlapBeginsActions(const class APlayerCharacter* const PlayerCharacter);
 };

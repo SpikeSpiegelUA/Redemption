@@ -11,6 +11,7 @@
 #include "D:/UE_5.1/Engine/Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
 #include "..\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "D:/UE_5.1/Engine/Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h"
+#include "..\Miscellaneous\SkillsSpellsAndEffectsActions.h"
 
 // Sets default values
 ASpellObject::ASpellObject()
@@ -58,38 +59,7 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 		if (ACombatNPC* CombatNPC = Cast<ACombatNPC>(OtherActor); IsValid(CombatNPC) && IsValid(Spell)) {
 			//Cast for each type of spell.
 			//Need to create an Array of actors that were hit.
-			TArray<ACombatNPC*> TargetActors{};
-			switch (Spell->GetSpellRange()) {
-			case ESpellRange::SINGLE:
-				TargetActors.Add(CombatNPC);
-				break;
-			case ESpellRange::NEIGHBORS:
-				if (CasterBattleSide == EBattleSide::ALLIES) {
-					TargetActors.Add(CombatNPC);
-					if (PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex + 1 < PlayerCharacter->GetBattleManager()->BattleEnemies.Num())
-						TargetActors.Add(PlayerCharacter->GetBattleManager()->BattleEnemies[PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex + 1]);
-					if (PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex - 1 >= 0)
-						TargetActors.Add(PlayerCharacter->GetBattleManager()->BattleEnemies[PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex - 1]);
-				}
-				else if (CasterBattleSide == EBattleSide::ENEMIES) {
-					TargetActors.Add(CombatNPC);
-					if (PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex + 1 < PlayerCharacter->GetBattleManager()->BattleAlliesPlayer.Num())
-						TargetActors.Add(PlayerCharacter->GetBattleManager()->BattleAlliesPlayer[PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex + 1]);
-					if (PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex - 1 >= 0)
-						TargetActors.Add(PlayerCharacter->GetBattleManager()->BattleAlliesPlayer[PlayerCharacter->GetBattleManager()->SelectedCombatNPCIndex - 1]);
-				}
-				break;
-			case ESpellRange::EVERYONE:
-				if (CasterBattleSide == EBattleSide::ALLIES) {
-					for (ACombatNPC* CombatNPCInArray : PlayerCharacter->GetBattleManager()->BattleEnemies)
-						TargetActors.Add(CombatNPCInArray);
-				}
-				else if (CasterBattleSide == EBattleSide::ENEMIES) {
-					for (ACombatNPC* CombatNPCInArray : PlayerCharacter->GetBattleManager()->BattleAlliesPlayer)
-						TargetActors.Add(CombatNPCInArray);
-				}
-				break;
-			}
+			TArray<ACombatNPC*> TargetActors = SkillsSpellsAndEffectsActions::GetTargets(PlayerCharacter->GetBattleManager(), TargetBattleSide, Spell->GetSpellRange());
 			for (ACombatNPC* CombatTarget : TargetActors) {
 				if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(Spell); IsValid(AssaultSpell)) {
 					//Logic for special effects of the spell(frozen, burn...).
@@ -183,7 +153,7 @@ void ASpellObject::SetSpell(const class ASpell* const NewSpell)
 	Spell = const_cast<ASpell*>(NewSpell);
 }
 
-void ASpellObject::SetCasterBattleSide(const EBattleSide NewCasterBattleSide)
+void ASpellObject::SetTargetBattleSide(const EBattleSide NewTargetBattleSide)
 {
-	CasterBattleSide = NewCasterBattleSide;
+	TargetBattleSide = NewTargetBattleSide;
 }
