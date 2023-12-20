@@ -66,8 +66,8 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 								ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(PlayerCharacter->GetBattleManager()->GetCombatFloatingInformationActorClass(), GetActorLocation(), GetActorRotation());
 								FString TextForCombatFloatingInformationActor = FString();
 								if (AssaultItem->GetEffectsAndTheirChances()[Index].Chance >= Chance) {
-									if (IsValid(Cast<ATurnStartDamageEffect>(AssaultItem->GetEffectsAndTheirChances()[0].Effect->GetDefaultObject()))) {
-										if (auto* TurnStartDamageEffect = NewObject<ATurnStartDamageEffect>(this, AssaultItem->GetEffectsAndTheirChances()[0].Effect); IsValid(TurnStartDamageEffect)) {
+									if (IsValid(Cast<ATurnStartDamageEffect>(AssaultItem->GetEffectsAndTheirChances()[Index].Effect->GetDefaultObject()))) {
+										if (auto* TurnStartDamageEffect = NewObject<ATurnStartDamageEffect>(this, AssaultItem->GetEffectsAndTheirChances()[Index].Effect); IsValid(TurnStartDamageEffect)) {
 											CombatTarget->Effects.Add(TurnStartDamageEffect);
 											if (ElementsActions::FindSpellsMainElement(TurnStartDamageEffect->GetSpellElements()) == ESpellElements::FIRE) {
 												if (IsValid(PlayerCharacter->GetParticlesManager()) && IsValid(PlayerCharacter->GetParticlesManager()->GetFlamesEmitter()))
@@ -84,8 +84,8 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 											}
 										}
 									}
-									else if (IsValid(Cast<AEffect>(AssaultItem->GetEffectsAndTheirChances()[0].Effect->GetDefaultObject()))) {
-										if (auto* Effect = NewObject<AEffect>(this, AssaultItem->GetEffectsAndTheirChances()[0].Effect); IsValid(Effect)) {
+									else if (IsValid(Cast<AEffect>(AssaultItem->GetEffectsAndTheirChances()[Index].Effect->GetDefaultObject()))) {
+										if (auto* Effect = NewObject<AEffect>(this, AssaultItem->GetEffectsAndTheirChances()[Index].Effect); IsValid(Effect)) {
 											CombatTarget->Effects.Add(Effect);
 											if (CombatTarget->CurrentHP > 0) {
 												if (Effect->GetEffectType() == EEffectType::TURNSKIP) {
@@ -124,8 +124,10 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 				}
 				else if (ADebuffItem* DebuffItem = Cast<ADebuffItem>(Item); IsValid(DebuffItem)) {
 					TArray<AEffect*> EffectsArray;
-					for (TSubclassOf<AEffect> EffectClass : DebuffItem->GetEffectsClasses())
-						EffectsArray.Add(Cast<AEffect>(EffectClass->GetDefaultObject()));
+					for (TSubclassOf<AEffect> EffectClass : DebuffItem->GetEffectsClasses()) {
+						AEffect* NewEffect = NewObject<AEffect>(this, EffectClass);
+						EffectsArray.Add(NewEffect);
+					}
 					CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, DebuffItem->GetElementsAndTheirPercentagesStructs());
 					OnOverlapBeginsActions(PlayerCharacter);
 				}

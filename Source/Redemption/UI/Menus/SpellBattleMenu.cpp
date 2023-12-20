@@ -1237,6 +1237,7 @@ void USpellBattleMenu::UseSpell(bool CreateNotificationIfCreatedSpellIsNotValid)
 						BManager->SelectedCombatNPCIndex = 0;
 						BMenu->GetAttackMenuBorder()->SetVisibility(ESlateVisibility::Visible);
 						BMenu->GetLeftRightMenuBorder()->SetVisibility(ESlateVisibility::Visible);
+						BMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
 						//Depending on the spell's range, we need to turn on additional target selection
 						//Create targets array.
 						TArray<ACombatNPC*> TargetsForSelection{};
@@ -1248,7 +1249,6 @@ void USpellBattleMenu::UseSpell(bool CreateNotificationIfCreatedSpellIsNotValid)
 								TargetsForSelection.Add(CombatNPC);
 						switch (CreatedSpell->GetSpellRange()) {
 							case ESpellRange::SINGLE:
-								BMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
 								if (IsValid(BManager->SelectedCombatNPC))
 									BManager->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
 								break;

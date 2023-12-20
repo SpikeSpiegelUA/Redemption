@@ -681,6 +681,7 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 				BattleMenu->IsAttackingWithItem = true;
 				BattleManager->SelectedCombatNPCIndex = 0;
 				this->RemoveFromParent();
+				BattleMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
 				//Depending on the item's range, we need to turn on additional target selection
 				//Create targets array.
 				TArray<ACombatNPC*> TargetsForSelection{};
@@ -692,7 +693,6 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 						TargetsForSelection.Add(CombatNPC);
 				switch (PickedItem->GetItemRange()) {
 					case EItemRange::SINGLE:
-						BattleMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
 						if(IsValid(BattleManager->SelectedCombatNPC))
 							BattleManager->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
 						break;

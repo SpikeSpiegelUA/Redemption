@@ -70,8 +70,8 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 								ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(PlayerCharacter->GetBattleManager()->GetCombatFloatingInformationActorClass(), GetActorLocation(), GetActorRotation());
 								FString TextForCombatFloatingInformationActor = FString();
 								if (AssaultSpell->GetEffectsAndTheirChances()[Index].Chance >= Chance) {
-									if (IsValid(Cast<ATurnStartDamageEffect>(AssaultSpell->GetEffectsAndTheirChances()[0].Effect->GetDefaultObject()))) {
-										if (auto* TurnStartDamageEffect = NewObject<ATurnStartDamageEffect>(this, AssaultSpell->GetEffectsAndTheirChances()[0].Effect); IsValid(TurnStartDamageEffect)) {
+									if (IsValid(Cast<ATurnStartDamageEffect>(AssaultSpell->GetEffectsAndTheirChances()[Index].Effect->GetDefaultObject()))) {
+										if (auto* TurnStartDamageEffect = NewObject<ATurnStartDamageEffect>(this, AssaultSpell->GetEffectsAndTheirChances()[Index].Effect); IsValid(TurnStartDamageEffect)) {
 											CombatTarget->Effects.Add(TurnStartDamageEffect);
 											if (ElementsActions::FindSpellsMainElement(TurnStartDamageEffect->GetSpellElements()) == ESpellElements::FIRE) {
 												if (IsValid(PlayerCharacter->GetParticlesManager()) && IsValid(PlayerCharacter->GetParticlesManager()->GetFlamesEmitter()))
@@ -87,8 +87,8 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 											}
 										}
 									}
-									else if (IsValid(Cast<AEffect>(AssaultSpell->GetEffectsAndTheirChances()[0].Effect->GetDefaultObject()))) {
-										if (auto* Effect = NewObject<AEffect>(this, AssaultSpell->GetEffectsAndTheirChances()[0].Effect); IsValid(Effect)) {
+									else if (IsValid(Cast<AEffect>(AssaultSpell->GetEffectsAndTheirChances()[Index].Effect->GetDefaultObject()))) {
+										if (auto* Effect = NewObject<AEffect>(this, AssaultSpell->GetEffectsAndTheirChances()[Index].Effect); IsValid(Effect)) {
 											CombatTarget->Effects.Add(Effect);
 											if (CombatTarget->CurrentHP > 0) {
 												if (Effect->GetEffectType() == EEffectType::TURNSKIP) {
@@ -126,13 +126,21 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 				}
 				else if (APresetDebuffSpell* PresetDebuffSpell = Cast<APresetDebuffSpell>(Spell); IsValid(PresetDebuffSpell)) {
 					TArray<AEffect*> EffectsArray;
-					for (TSubclassOf<AEffect> EffectClass : PresetDebuffSpell->GetEffectsClasses())
-						EffectsArray.Add(Cast<AEffect>(EffectClass->GetDefaultObject()));
+					for (TSubclassOf<AEffect> EffectClass : PresetDebuffSpell->GetEffectsClasses()) {
+						AEffect* NewEffect = NewObject<AEffect>(this, EffectClass);
+						EffectsArray.Add(NewEffect);
+					}
 					CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, ElementsActions::FindContainedElements(PresetDebuffSpell->GetSpellElements()));
 					OnOverlapBeginsActions(PlayerCharacter);
 				}
 				else if (ACreatedDebuffSpell* CreatedDebuffSpell = Cast<ACreatedDebuffSpell>(Spell); IsValid(CreatedDebuffSpell)) {
-					CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, CreatedDebuffSpell->GetEffects(), ElementsActions::FindContainedElements(CreatedDebuffSpell->GetSpellElements()));
+					TArray<AEffect*> EffectsArray;
+					for (AEffect* Effect : CreatedDebuffSpell->GetEffects()) {
+						AEffect* NewEffect = NewObject<AEffect>(this);
+						NewEffect->CopyEffect(Effect);
+						EffectsArray.Add(NewEffect);
+					}
+					CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, ElementsActions::FindContainedElements(CreatedDebuffSpell->GetSpellElements()));
 					OnOverlapBeginsActions(PlayerCharacter);
 				}
 			}
