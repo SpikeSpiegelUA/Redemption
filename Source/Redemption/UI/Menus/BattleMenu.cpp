@@ -263,9 +263,17 @@ void UBattleMenu::AttackMenuBackButtonOnClicked()
 			LeftRightMenuBorder->SetVisibility(ESlateVisibility::Hidden);
 			AttackTalkInfoActionButton->SetVisibility(ESlateVisibility::Visible);
 			//TalkActionButton->SetVisibility(ESlateVisibility::Collapsed);
-			BattleManager->SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
-			if (IsValid(Cast<ACombatAllies>(BattleManager->SelectedCombatNPC)))
-				Cast<ACombatAllies>(BattleManager->SelectedCombatNPC)->GetFloatingManaBarWidget()->GetManaBar()->SetVisibility(ESlateVisibility::Hidden);
+			for (ACombatNPC* CombatNPC : BattleManager->BattleAlliesPlayer) {
+				if (CombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->GetVisibility() == ESlateVisibility::Visible)
+					CombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
+				if (ACombatAllies* CombatAllies = Cast<ACombatAllies>(CombatNPC); IsValid(CombatAllies))
+					if (CombatAllies->GetFloatingManaBarWidget()->GetManaBar()->GetVisibility() == ESlateVisibility::Visible)
+						CombatAllies->GetFloatingManaBarWidget()->GetManaBar()->SetVisibility(ESlateVisibility::Hidden);
+			}
+			for (ACombatNPC* CombatNPC : BattleManager->BattleEnemies) {
+				if (CombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->GetVisibility() == ESlateVisibility::Visible)
+					CombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
+			}
 			IsPreparingToAttack = false;
 			IsPreparingToTalk = false;
 			IsPreparingToViewInfo = false;
@@ -407,11 +415,11 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 				}
 			}
 			else if (ABuffItem* BuffItem = Cast<ABuffItem>(Inventory->GetPickedItem()); IsValid(BuffItem) && IsValid(EntryWidget)) {
-				for (TSubclassOf<AEffect> EffectClass : BuffItem->GetEffectsClasses()) {
-					AEffect* NewEffect = NewObject<AEffect>(this, EffectClass);
-					for (ACombatNPC* UseTarget : InventoryActions::GetTargets(BattleManager, EBattleSide::ALLIES, RestorationItem->GetItemRange()))
+				for (ACombatNPC* UseTarget : InventoryActions::GetTargets(BattleManager, EBattleSide::ALLIES, RestorationItem->GetItemRange()))
+					for (TSubclassOf<AEffect> EffectClass : BuffItem->GetEffectsClasses()) {
+						AEffect* NewEffect = NewObject<AEffect>(this, EffectClass);
 						UseTarget->Effects.Add(NewEffect);
-				}
+					}
 				CurrentTurnAlliesNPC->Target = SelectedCombatNPC;
 				InventoryActions::RemoveItemFromGameInstance(GameInstance, Inventory->GetPickedItem());
 				InventoryActions::ItemAmountInInventoryLogic(EntryWidget, Inventory->GetInventoryScrollBox(), Inventory->GetPickedItem());
@@ -629,8 +637,15 @@ void UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 void UBattleMenu::BuffSpellUse(const class ACreatedBuffSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC)
 {
 	if (APlayerCharacter* PC = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PC)) {
-		for (ACombatNPC* TargetActor : SkillsSpellsAndEffectsActions::GetTargets(BattleManager, EBattleSide::ALLIES, SpellToUse->GetSpellRange()))
-			TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, SpellToUse->GetEffects(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
+		for (ACombatNPC* TargetActor : SkillsSpellsAndEffectsActions::GetTargets(BattleManager, EBattleSide::ALLIES, SpellToUse->GetSpellRange())) {
+			TArray<AEffect*> CreatedEffectsFromEffects{};
+			for (AEffect* Effect : SpellToUse->GetEffects()) {
+				AEffect* NewEffect = NewObject<AEffect>(this);
+				NewEffect->CopyEffect(Effect);
+				CreatedEffectsFromEffects.Add(NewEffect);
+			}
+			TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, CreatedEffectsFromEffects, ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
+		}
 		UGameplayStatics::PlaySound2D(GetWorld(), PC->GetAudioManager()->GetUseHealOrBuffSoundCue());
 		GetWorld()->GetTimerManager().SetTimer(PlayerTurnControllerTimerHandle, BattleManager, &ABattleManager::PlayerTurnController, 1.5f, false);
 		BattleMenu->IsChoosingSpell = false;
@@ -651,13 +666,14 @@ void UBattleMenu::BuffSpellUse(const class ACreatedBuffSpell* const SpellToUse, 
 void UBattleMenu::BuffSpellUse(const class APresetBuffSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC)
 {
 	if (APlayerCharacter* PC = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PC)) {
-		TArray<AEffect*> CreatedEffectsFromClasses{};
-		for (TSubclassOf<AEffect> EffectClass : SpellToUse->GetEffectsClasses()) {
-			AEffect* NewEffect = NewObject<AEffect>(this, EffectClass);
-			CreatedEffectsFromClasses.Add(NewEffect);
+		for (ACombatNPC* TargetActor : SkillsSpellsAndEffectsActions::GetTargets(BattleManager, EBattleSide::ALLIES, SpellToUse->GetSpellRange())) {
+			TArray<AEffect*> CreatedEffectsFromClasses{};
+			for (TSubclassOf<AEffect> EffectClass : SpellToUse->GetEffectsClasses()) {
+				AEffect* NewEffect = NewObject<AEffect>(this, EffectClass);
+				CreatedEffectsFromClasses.Add(NewEffect);
+			}
+			TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, CreatedEffectsFromClasses, ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 		}
-		for(ACombatNPC* TargetActor : SkillsSpellsAndEffectsActions::GetTargets(BattleManager, EBattleSide::ALLIES, SpellToUse->GetSpellRange()))
-			TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, CreatedEffectsFromClasses,ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 		UGameplayStatics::PlaySound2D(GetWorld(), PC->GetAudioManager()->GetUseHealOrBuffSoundCue());
 		GetWorld()->GetTimerManager().SetTimer(PlayerTurnControllerTimerHandle, BattleManager, &ABattleManager::PlayerTurnController, 1.5f, false);
 		BattleMenu->IsChoosingSpell = false;

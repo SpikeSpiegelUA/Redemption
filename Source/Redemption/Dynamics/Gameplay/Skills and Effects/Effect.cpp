@@ -83,3 +83,14 @@ void AEffect::SetEffectDescription(const FText& NewEffectDescription)
 	EffectDescription = NewEffectDescription;
 }
 
+
+void AEffect::CopyEffect(const AEffect* const EffectToCopy)
+{
+	AreaOfEffect = EffectToCopy->AreaOfEffect;
+	TypeOfEffect = EffectToCopy->TypeOfEffect;
+	EffectName = EffectToCopy->EffectName;
+	EffectDescription = EffectToCopy->EffectDescription;
+	EffectStat = EffectToCopy->EffectStat;
+	Duration = EffectToCopy->Duration;
+}
+

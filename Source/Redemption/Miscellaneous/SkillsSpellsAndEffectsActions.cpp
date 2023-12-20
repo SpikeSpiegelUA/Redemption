@@ -10,9 +10,9 @@ int SkillsSpellsAndEffectsActions::GetValueAfterEffects(int ValueBeforeEffects, 
 	for (AEffect* Effect : Effects) {
 		if (IsValid(Effect) && Effect->GetEffectArea() == EffectArea) {
 			if (Effect->GetEffectType() == EEffectType::PLAINBUFF)
-				ValueAfterEffects += ValueBeforeEffects + Effect->GetEffectStat();
+				ValueAfterEffects += Effect->GetEffectStat();
 			else if (Effect->GetEffectType() == EEffectType::PLAINDEBUFF)
-				ValueAfterEffects += ValueBeforeEffects - Effect->GetEffectStat();
+				ValueAfterEffects -= Effect->GetEffectStat();
 			else if (Effect->GetEffectType() == EEffectType::BUFF)
 				ValueAfterEffects += ValueBeforeEffects * (Effect->GetEffectStat() - 1);
 			else if (Effect->GetEffectType() == EEffectType::DEBUFF)
@@ -56,7 +56,7 @@ int SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(i
 
 int SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements, const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements)
 {
-	TArray<FElementAndItsPercentageStruct> TemporaryReceiverContainedElements;
+	TArray<FElementAndItsPercentageStruct> TemporaryReceiverContainedElements{};
 	for (FElementAndItsPercentageStruct ReceiverElementPercent : ReceiverContainedElements) {
 		int ElementPercentBeforeEffects = ReceiverElementPercent.Percent;
 		FElementAndItsPercentageStruct NewElementPercent;
@@ -85,7 +85,7 @@ int SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(
 		for (FElementAndItsPercentageStruct ReceiverElementPercent : TemporaryReceiverContainedElements) 
 			if (ReceiverElementPercent.Element == AttackerElementPercent.Element) {
 				int ElementPercentOfEvasionChance = ValueBeforeResistances * AttackerElementPercent.Percent / 100;
-				EvasionChanceWithResistances -= ElementPercentOfEvasionChance * ReceiverElementPercent.Percent / 25;
+				EvasionChanceWithResistances += ElementPercentOfEvasionChance * ReceiverElementPercent.Percent / 25;
 			}
 	return EvasionChanceWithResistances;
 }
