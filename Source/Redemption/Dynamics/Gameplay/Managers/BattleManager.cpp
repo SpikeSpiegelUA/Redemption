@@ -240,22 +240,24 @@ void ABattleManager::TurnChange()
 				//Destroy effects, which CurrentDuration is >= Duration.
 				for (int16 i = BattleEnemies[NextActor]->Effects.Num() - 1; i >= 0; i--) {
 					if (IsValid(BattleEnemies[NextActor]->Effects[i])) {
-						BattleEnemies[NextActor]->Effects[i]->CurrentDuration += 1;
-						if (BattleEnemies[NextActor]->Effects[i]->CurrentDuration >= BattleEnemies[NextActor]->Effects[i]->GetDuration() + 1) {
-							if (BattleEnemies[NextActor]->Effects[i]->GetEffectType() == EEffectType::DIZZINESS) {
-								if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[NextActor]->GetController()); IsValid(AIController))
-									if (IsValid(AIController->GetBlackboardComponent())) {
-										AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("CanTargetEveryone", false);
-										if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->DizzyEmitterComponent))
-											BattleEnemies[NextActor]->DizzyEmitterComponent->DestroyComponent();
-									}
+						if (BattleEnemies[NextActor]->Effects[i]->GetEffectType() != EEffectType::TURNSKIP) {
+							BattleEnemies[NextActor]->Effects[i]->CurrentDuration += 1;
+							if (BattleEnemies[NextActor]->Effects[i]->CurrentDuration >= BattleEnemies[NextActor]->Effects[i]->GetDuration() + 1) {
+								if (BattleEnemies[NextActor]->Effects[i]->GetEffectType() == EEffectType::DIZZINESS) {
+									if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[NextActor]->GetController()); IsValid(AIController))
+										if (IsValid(AIController->GetBlackboardComponent())) {
+											AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("CanTargetEveryone", false);
+											if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->DizzyEmitterComponent))
+												BattleEnemies[NextActor]->DizzyEmitterComponent->DestroyComponent();
+										}
+								}
+								else if (BattleEnemies[NextActor]->Effects[i]->GetEffectType() == EEffectType::TURNSTARTDAMAGE) {
+									if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->FlamesEmitterComponent))
+										BattleEnemies[NextActor]->FlamesEmitterComponent->DestroyComponent();
+								}
+								BattleEnemies[NextActor]->Effects[i]->ConditionalBeginDestroy();
+								BattleEnemies[NextActor]->Effects.RemoveAt(i);
 							}
-							else if (BattleEnemies[NextActor]->Effects[i]->GetEffectType() == EEffectType::TURNSTARTDAMAGE) {
-								if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->FlamesEmitterComponent))
-									BattleEnemies[NextActor]->FlamesEmitterComponent->DestroyComponent();
-							}
-							BattleEnemies[NextActor]->Effects[i]->ConditionalBeginDestroy();
-							BattleEnemies[NextActor]->Effects.RemoveAt(i);
 						}
 					}
 				}
@@ -302,7 +304,7 @@ void ABattleManager::TurnChange()
 				for (int8 i = BattleAlliesPlayer.Num() - 1; i >= 0; i--) 
 					if(BattleAlliesPlayer[i]->GetCurrentHP() > 0)
 						AlliesPlayerTurnQueue.Add(i);
-				ArrayActions::ShuffleArray<int>(AlliesPlayerTurnQueue);
+				ArrayActions::ShuffleArray<uint8>(AlliesPlayerTurnQueue);
 				if (BattleAlliesPlayer.Num() > 0)
 					BehindPlayerCamera->SetActorLocation(Cast<ACombatStartLocation>(BattleAlliesPlayer[AlliesPlayerTurnQueue[0]]->GetStartLocation())->CombatCameraLocation);
 				CurrentTurnCombatNPCIndex = AlliesPlayerTurnQueue[0];
@@ -493,9 +495,12 @@ void ABattleManager::PlayerTurnController()
 					//Set animation variables
 					UCombatAlliesAnimInstance* CombatAlliesAnimInstance{};
 					if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]))
-						if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh()))
+						if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh())) {
 							if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh()->GetAnimInstance()))
 								CombatAlliesAnimInstance = Cast<UCombatAlliesAnimInstance>(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh()->GetAnimInstance());
+							if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh()->bPauseAnims)
+								BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetMesh()->bPauseAnims = false;
+						}
 					if (IsValid(CombatAlliesAnimInstance))
 						if (CombatAlliesAnimInstance->GetCombatAlliesIsBlocking())
 							CombatAlliesAnimInstance->ToggleCombatAlliesIsBlocking(false);
@@ -578,11 +583,76 @@ void ABattleManager::PlayerTurnController()
 			for (int8 i = BattleEnemies.Num() - 1; i >= 0; i--)
 				if(BattleEnemies[i]->GetCurrentHP() > 0)
 					EnemyTurnQueue.Add(i);
-			ArrayActions::ShuffleArray<int>(EnemyTurnQueue);
+			ArrayActions::ShuffleArray<uint8>(EnemyTurnQueue);
 			TurnChange();
 		}
 	}
+}
 
+void ABattleManager::PlayerAlliesEffectsDurationLogic(const TArray<uint8>& PassedAlliesPlayerTurnQueue)
+{
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+		for (int8 Index : PassedAlliesPlayerTurnQueue) {
+			//Check if skip the turn.
+			bool ContinueTurn = true;
+			for (int16 i = BattleAlliesPlayer[Index]->Effects.Num() - 1; i >= 0; i--)
+				if (IsValid(BattleAlliesPlayer[Index]->Effects[i]))
+					if (BattleAlliesPlayer[Index]->Effects[i]->GetEffectType() == EEffectType::TURNSKIP)
+						if (IsValid(BattleAlliesPlayer[Index]->GetMesh())) {
+							BattleAlliesPlayer[Index]->Effects[i]->CurrentDuration += 1;
+							if (BattleAlliesPlayer[Index]->Effects[i]->CurrentDuration >= BattleAlliesPlayer[Index]->Effects[i]->GetDuration() + 1) {
+								BattleAlliesPlayer[Index]->Effects[i]->ConditionalBeginDestroy();
+								BattleAlliesPlayer[Index]->Effects.RemoveAt(i);
+								continue;
+							}
+							BattleAlliesPlayer[Index]->GetMesh()->bPauseAnims = true;
+							ContinueTurn = false;
+						}
+			if (ContinueTurn) {
+				//Set animation variables
+				UCombatAlliesAnimInstance* CombatAlliesAnimInstance{};
+				if (IsValid(BattleAlliesPlayer[Index]))
+					if (IsValid(BattleAlliesPlayer[Index]->GetMesh())) {
+						if (IsValid(BattleAlliesPlayer[Index]->GetMesh()->GetAnimInstance()))
+							CombatAlliesAnimInstance = Cast<UCombatAlliesAnimInstance>(BattleAlliesPlayer[Index]->GetMesh()->GetAnimInstance());
+						if (BattleAlliesPlayer[Index]->GetMesh()->bPauseAnims)
+							BattleAlliesPlayer[Index]->GetMesh()->bPauseAnims = false;
+					}
+				if (IsValid(CombatAlliesAnimInstance))
+					if (CombatAlliesAnimInstance->GetCombatAlliesIsBlocking())
+						CombatAlliesAnimInstance->ToggleCombatAlliesIsBlocking(false);
+				for (AEffect* Effect : BattleAlliesPlayer[Index]->Effects) {
+					if (Effect->GetEffectType() == EEffectType::TURNSTARTDAMAGE) {
+						if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
+							BattleAlliesPlayer[Index]->Execute_GetHit(PlayerCharacter->GetBattleManager()->BattleAlliesPlayer[Index],
+								BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleAlliesPlayer[Index]),
+								ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), false);
+						}
+					}
+				}
+				//Destroy effects, which CurrentDuration is >= Duration.
+				for (int i = BattleAlliesPlayer[Index]->Effects.Num() - 1; i >= 0; i--) {
+					if (IsValid(BattleAlliesPlayer[Index]->Effects[i])) {
+						if (BattleAlliesPlayer[Index]->Effects[i]->GetEffectType() != EEffectType::TURNSKIP) {
+							BattleAlliesPlayer[Index]->Effects[i]->CurrentDuration += 1;
+							if (BattleAlliesPlayer[Index]->Effects[i]->CurrentDuration >= BattleAlliesPlayer[Index]->Effects[i]->GetDuration() + 1) {
+								if (BattleAlliesPlayer[Index]->Effects[i]->GetEffectType() == EEffectType::DIZZINESS) {
+									if (IsValid(BattleAlliesPlayer[Index]->DizzyEmitterComponent))
+										BattleAlliesPlayer[Index]->DizzyEmitterComponent->DestroyComponent();
+								}
+								else if (BattleAlliesPlayer[Index]->Effects[i]->GetEffectType() == EEffectType::TURNSTARTDAMAGE) {
+									if (IsValid(BattleAlliesPlayer[Index]->FlamesEmitterComponent))
+										BattleAlliesPlayer[Index]->FlamesEmitterComponent->DestroyComponent();
+								}
+								BattleAlliesPlayer[Index]->Effects[i]->ConditionalBeginDestroy();
+								BattleAlliesPlayer[Index]->Effects.RemoveAt(i);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void ABattleManager::ShowExperienceText()
@@ -637,22 +707,23 @@ void ABattleManager::ToPlayerTurnPassInTurnChangeFunction()
 				//Destroy effects, which CurrentDuration is >= Duration.
 				for (int i = BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.Num() - 1; i >= 0; i--) {
 					if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i])) {
-						BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration += 1;
-						if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration >= BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetDuration() + 1) {
-							if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetEffectType() == EEffectType::DIZZINESS) {
-								if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetController()); IsValid(AIController))
-									if (IsValid(AIController->GetBlackboardComponent())) {
-										AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("CanTargetEveryone", false);
-										if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->DizzyEmitterComponent))
-											BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->DizzyEmitterComponent->DestroyComponent();
-									}
+						if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetEffectType() != EEffectType::TURNSKIP) {
+							BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration += 1;
+							if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->CurrentDuration >= BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetDuration() + 1) {
+								if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetEffectType() == EEffectType::DIZZINESS) {
+									if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetController()); IsValid(AIController))
+										if (IsValid(AIController->GetBlackboardComponent()))
+											AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("CanTargetEveryone", false);
+									if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->DizzyEmitterComponent))
+										BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->DizzyEmitterComponent->DestroyComponent();
+								}
+								else if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetEffectType() == EEffectType::TURNSTARTDAMAGE) {
+									if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->FlamesEmitterComponent))
+										BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->FlamesEmitterComponent->DestroyComponent();
+								}
+								BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->ConditionalBeginDestroy();
+								BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.RemoveAt(i);
 							}
-							else if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->GetEffectType() == EEffectType::TURNSTARTDAMAGE) {
-								if (IsValid(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->FlamesEmitterComponent))
-									BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->FlamesEmitterComponent->DestroyComponent();
-							}
-							BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects[i]->ConditionalBeginDestroy();
-							BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects.RemoveAt(i);
 						}
 					}
 				}

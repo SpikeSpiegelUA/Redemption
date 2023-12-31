@@ -48,6 +48,7 @@ public:
 	int GetRangeAttackValue() const;
 	int GetEvasionChance() const;
 	int GetRangeAmmo() const;
+	int GetLuck() const;
 	AActor* GetStartLocation() const;
 	TSubclassOf<ASmartObject> GetAIClass() const;
 	const TArray<TSubclassOf<ASpell>>& GetAvailableSkills() const;
@@ -121,6 +122,8 @@ protected:
 		int Agility = 1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
 		int Luck = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
+		int Level = 1;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 		TArray<FElementAndItsPercentageStruct> ElementalResistances {};
 	UPROPERTY(EditAnywhere, Category = "Combat")

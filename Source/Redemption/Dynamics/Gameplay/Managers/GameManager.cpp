@@ -109,7 +109,7 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 			BattleManager->BattleAlliesPlayer.Add(CombatPlayerCharacter);
 			BattleManager->CombatPlayerCharacter = CombatPlayerCharacter;
 			BattleManager->AlliesPlayerTurnQueue.Add(BattleManager->BattleAlliesPlayer.Num() - 1);
-			ArrayActions::ShuffleArray<int>(BattleManager->AlliesPlayerTurnQueue);
+			ArrayActions::ShuffleArray<uint8>(BattleManager->AlliesPlayerTurnQueue);
 			//Set camera position and set non combat player position to PlayerPlane's position
 			BattleManager->CurrentTurnCombatNPCIndex = BattleManager->AlliesPlayerTurnQueue[0];
 			BattleManager->SetBehindPlayerCameraLocation(Cast<ACombatStartLocation>(BattleManager->BattleAlliesPlayer[BattleManager->AlliesPlayerTurnQueue[0]]->GetStartLocation())->CombatCameraLocation);

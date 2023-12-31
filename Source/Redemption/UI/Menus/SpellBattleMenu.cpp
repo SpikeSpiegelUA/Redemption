@@ -1242,11 +1242,15 @@ void USpellBattleMenu::UseSpell(bool CreateNotificationIfCreatedSpellIsNotValid)
 						//Create targets array.
 						TArray<ACombatNPC*> TargetsForSelection{};
 						//Add BattleEnemies in a loop, cause we need to convert them to the ACombatNPC.
-						if (BManager->IsSelectingAllyAsTarget)
-							TargetsForSelection = BManager->BattleAlliesPlayer;
+						if (BManager->IsSelectingAllyAsTarget) {
+							for (ACombatNPC* CombatNPC : BManager->BattleAlliesPlayer)
+								if (CombatNPC->CurrentHP > 0)
+									TargetsForSelection.Add(CombatNPC);
+						}
 						else if (!BManager->IsSelectingAllyAsTarget)
 							for (ACombatNPC* CombatNPC : BManager->BattleEnemies)
-								TargetsForSelection.Add(CombatNPC);
+								if(CombatNPC->CurrentHP > 0)
+									TargetsForSelection.Add(CombatNPC);
 						switch (CreatedSpell->GetSpellRange()) {
 							case ESpellRange::SINGLE:
 								if (IsValid(BManager->SelectedCombatNPC))

@@ -172,6 +172,11 @@ int ACombatNPC::GetRangeAmmo() const
 	return RangeAmmo;
 }
 
+int ACombatNPC::GetLuck() const
+{
+	return Luck;
+}
+
 AActor* ACombatNPC::GetStartLocation() const
 {
 	return StartLocation;

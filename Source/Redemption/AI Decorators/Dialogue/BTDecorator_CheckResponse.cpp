@@ -15,7 +15,7 @@ bool UBTDecorator_CheckResponse::CalculateRawConditionValue(UBehaviorTreeCompone
 	if (!IsValid(BlackboardComponent))
 		return false;
 
-	if (BlackboardComponent->GetValueAsString(PlayerResponseKeySelector.SelectedKeyName) == ResponseToCheck)
+	if (BlackboardComponent->GetValueAsString(PlayerResponseKeySelector.SelectedKeyName).Equals(ResponseToCheck))
 		return true;
 
 	return false;

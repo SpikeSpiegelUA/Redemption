@@ -21,6 +21,11 @@ ACombatEnemyNPC::ACombatEnemyNPC()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
+const TArray<TSubclassOf<AGameItem>>& ACombatEnemyNPC::GetPossibleAskItems() const
+{
+	return PossibleAskItems;
+}
+
 // Called when the game starts or when spawned
 void ACombatEnemyNPC::BeginPlay()
 {

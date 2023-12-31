@@ -241,6 +241,7 @@ void UBattleMenu::DefendButtonOnClicked()
 				AEffect* NewEffect = NewObject<AEffect>(this, EffectsList->EffectClass);
 				CurrentTurnAllyPlayer->Effects.Add(NewEffect);
 			}
+			FTimerHandle PlayerTurnControllerTimerHandle{};
 			GetWorld()->GetTimerManager().SetTimer(PlayerTurnControllerTimerHandle, BattleManager, &ABattleManager::PlayerTurnController, 1.0f, false);
 			MenuBorder->SetVisibility(ESlateVisibility::Hidden);
 			if (IsValid(UIManagerWorldSubsystem->PickedButton))
@@ -491,6 +492,7 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 				UGameplayStatics::PlaySound2D(GetWorld(), PlayerCharacter->GetAudioManager()->GetShotSoundCue(), 2.5f, 1.f, 0.3f);
 				if (UCombatAlliesAnimInstance* AnimInstance = Cast<UCombatAlliesAnimInstance>(CurrentTurnAlliesNPC->GetMesh()->GetAnimInstance()); IsValid(AnimInstance)) {
 					FTimerDelegate RangeAttackUseDelegate = FTimerDelegate::CreateUObject(this, &UBattleMenu::RangeAttackUse, AnimInstance);
+					FTimerHandle PlayerTurnControllerTimerHandle{};
 					GetWorld()->GetTimerManager().SetTimer(PlayerTurnControllerTimerHandle, RangeAttackUseDelegate, 2.4f, false);
 				}
 				CurrentTurnAlliesNPC->SetRangeAmmo(CurrentTurnAlliesNPC->GetRangeAmmo() - 1);
@@ -619,6 +621,7 @@ void UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 	if (SpellHasBeenUsed) {
 		APlayerCharacter* PC = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 		UGameplayStatics::PlaySound2D(GetWorld(), PC->GetAudioManager()->GetUseHealOrBuffSoundCue());
+		FTimerHandle PlayerTurnControllerTimerHandle{};
 		GetWorld()->GetTimerManager().SetTimer(PlayerTurnControllerTimerHandle, BattleManager, &ABattleManager::PlayerTurnController, 1.5f, false);
 		BattleMenu->IsChoosingSpell = false;
 		if (SpellToUse->GetSpellCostType() == ESpellCostType::MANA) {
@@ -647,6 +650,7 @@ void UBattleMenu::BuffSpellUse(const class ACreatedBuffSpell* const SpellToUse, 
 			TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, CreatedEffectsFromEffects, ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 		}
 		UGameplayStatics::PlaySound2D(GetWorld(), PC->GetAudioManager()->GetUseHealOrBuffSoundCue());
+		FTimerHandle PlayerTurnControllerTimerHandle{};
 		GetWorld()->GetTimerManager().SetTimer(PlayerTurnControllerTimerHandle, BattleManager, &ABattleManager::PlayerTurnController, 1.5f, false);
 		BattleMenu->IsChoosingSpell = false;
 		if (SpellToUse->GetSpellCostType() == ESpellCostType::MANA) {
@@ -675,6 +679,7 @@ void UBattleMenu::BuffSpellUse(const class APresetBuffSpell* const SpellToUse, c
 			TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, CreatedEffectsFromClasses, ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 		}
 		UGameplayStatics::PlaySound2D(GetWorld(), PC->GetAudioManager()->GetUseHealOrBuffSoundCue());
+		FTimerHandle PlayerTurnControllerTimerHandle{};
 		GetWorld()->GetTimerManager().SetTimer(PlayerTurnControllerTimerHandle, BattleManager, &ABattleManager::PlayerTurnController, 1.5f, false);
 		BattleMenu->IsChoosingSpell = false;
 		if (SpellToUse->GetSpellCostType() == ESpellCostType::MANA) {
@@ -907,6 +912,7 @@ void UBattleMenu::HideNotificationAndClearItsTimer()
 {
 	NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
 	NotificationTextBlock->SetText(FText::FromString(""));
+	FTimerHandle HideNotificationTimerHandle{};
 	GetWorld()->GetTimerManager().ClearTimer(HideNotificationTimerHandle);
 }
 
@@ -914,6 +920,7 @@ void UBattleMenu::CreateNotification(const FText& NotificationText)
 {
 	NotificationBorder->SetVisibility(ESlateVisibility::Visible);
 	NotificationTextBlock->SetText(NotificationText);
+	FTimerHandle HideNotificationTimerHandle{};
 	GetWorld()->GetTimerManager().SetTimer(HideNotificationTimerHandle, this, &UBattleMenu::HideNotificationAndClearItsTimer, 3.f, false);
 }
 

@@ -13,11 +13,11 @@ UCLASS()
 class UBTTask_AskQuestion : public UBTTask_BlackboardBase
 {
 	GENERATED_BODY()
-private:
+protected:
 	EBTNodeResult::Type PrepareResponses(APlayerController*& PlayerController);
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true))
-	FBlackboardKeySelector PlayerResponseKeySelector;
+		FBlackboardKeySelector PlayerResponseKeySelector;
 
 	UBehaviorTreeComponent* BehaviorTreeComponent;
 public:
@@ -25,6 +25,7 @@ public:
 		void ResponseReceived(const FText& ResponseReceived);
 
 	UBTTask_AskQuestion(const FObjectInitializer& ObjectInitializer);
+	UBTTask_AskQuestion();
 
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
