@@ -323,15 +323,22 @@ void APlayerCharacter::InputScrollLeft()
 			TArray<ACombatNPC*> TargetsForSelection{};
 			//Add BattleEnemies in a loop, cause we need to convert them to the ACombatNPC.
 			if (BattleMenuWidget->IsPreparingToViewInfo) {
-				TargetsForSelection = BattleManager->BattleAlliesPlayer;
+				for (ACombatNPC* CombatNPC : BattleManager->BattleAlliesPlayer)
+					if (CombatNPC->CurrentHP > 0)
+						TargetsForSelection.Add(CombatNPC);
 				for (ACombatNPC* CombatNPC : BattleManager->BattleEnemies)
-					TargetsForSelection.Add(CombatNPC);
+					if(CombatNPC->CurrentHP > 0)
+						TargetsForSelection.Add(CombatNPC);
 			}
-			else if (BattleManager->IsSelectingAllyAsTarget)
-				TargetsForSelection = BattleManager->BattleAlliesPlayer;
+			else if (BattleManager->IsSelectingAllyAsTarget) {
+				for (ACombatNPC* CombatNPC : BattleManager->BattleAlliesPlayer)
+					if (CombatNPC->CurrentHP > 0)
+						TargetsForSelection.Add(CombatNPC);
+			}
 			else if (!BattleManager->IsSelectingAllyAsTarget)
 				for (ACombatNPC* CombatNPC : BattleManager->BattleEnemies)
-					TargetsForSelection.Add(CombatNPC);
+					if (CombatNPC->CurrentHP > 0)
+						TargetsForSelection.Add(CombatNPC);
 			//Choose Target with scroll
 			if (TargetsForSelection.Num() > 1) {
 				int8 CurrentIndex = BattleManager->SelectedCombatNPCIndex;
@@ -384,15 +391,22 @@ void APlayerCharacter::InputScrollRight()
 			TArray<ACombatNPC*> TargetsForSelection{};
 			//Add BattleEnemies in a loop, cause we need to convert them to the ACombatNPC.
 			if (BattleMenuWidget->IsPreparingToViewInfo) {
-				TargetsForSelection = BattleManager->BattleAlliesPlayer;
-				for(ACombatNPC* CombatNPC : BattleManager->BattleEnemies)
-					TargetsForSelection.Add(CombatNPC);
-			}
-			else if(BattleManager->IsSelectingAllyAsTarget)
-				TargetsForSelection = BattleManager->BattleAlliesPlayer;
-			else if (!BattleManager->IsSelectingAllyAsTarget) 
+				for (ACombatNPC* CombatNPC : BattleManager->BattleAlliesPlayer)
+					if (CombatNPC->CurrentHP > 0)
+						TargetsForSelection.Add(CombatNPC);
 				for (ACombatNPC* CombatNPC : BattleManager->BattleEnemies)
-					TargetsForSelection.Add(CombatNPC);
+					if (CombatNPC->CurrentHP > 0)
+						TargetsForSelection.Add(CombatNPC);
+			}
+			else if (BattleManager->IsSelectingAllyAsTarget) {
+				for (ACombatNPC* CombatNPC : BattleManager->BattleAlliesPlayer)
+					if (CombatNPC->CurrentHP > 0)
+						TargetsForSelection.Add(CombatNPC);
+			}
+			else if (!BattleManager->IsSelectingAllyAsTarget)
+				for (ACombatNPC* CombatNPC : BattleManager->BattleEnemies)
+					if (CombatNPC->CurrentHP > 0)
+						TargetsForSelection.Add(CombatNPC);
 			if (TargetsForSelection.Num() > 1) {
 				//Choose target with scroll
 				int8 CurrentIndex = BattleManager->SelectedCombatNPCIndex;

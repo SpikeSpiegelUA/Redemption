@@ -341,7 +341,8 @@ public:
 		int Agility = 1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
 		int Luck = 1;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
+		int Level = 1;
 
 	//This is used by right button in the battle menu.
 	void InputScrollRight();

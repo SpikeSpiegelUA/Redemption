@@ -26,9 +26,6 @@ private:
 	UPROPERTY()
 		class ABattleManager * BattleManager{};
 
-	FTimerHandle HideNotificationTimerHandle;
-	FTimerHandle PlayerTurnControllerTimerHandle{};
-
 	bool CenterMarkIsMovingToTarget = false;
 	FVector2D RandomTargetForCenterMark{};
 	//Every n moves CenterMark has to go towards the Target.
@@ -47,8 +44,6 @@ private:
 	void BuffSpellUse(const class APresetBuffSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
 	void DebuffSpellUse(class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
 	void RangeAttackUse(UCombatAlliesAnimInstance* CurrentTurnAlliesNPCAnimInstance);
-	//Turn on target selection and AttackMenuBorder.
-	void OpenActionMenu(const FText& NewAttackTalkInfoActionButtonText);
 
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -184,4 +179,6 @@ public:
 	void ButtonOnHoveredActions(UButton* const HoveredButton, int8 Index);
 	void HideAllCrosshairWidgetComponents() const;
 	void HideAllFloatingHealthWidgetComponents() const;
+	//Turn on target selection and AttackMenuBorder.
+	void OpenActionMenu(const FText& NewAttackTalkInfoActionButtonText);
 };

@@ -59,14 +59,15 @@ public:
 	void PlayerTurnController();
 	//Turn change controller function
 	void TurnChange();
-	
+	//For example, when the player faila a combat dialogue check, the turn immediately is passed to enemies. But we still need our effects' duration logic, so here we are.
+	void PlayerAlliesEffectsDurationLogic(const TArray<uint8>& PassedAlliesPlayerTurnQueue);
 	void SetTimerForPlayerTurnController();
 
 	bool IsSelectingAllyAsTarget = false;
 
 	//Queue for enemies' and allies' turns. Randomized by dedicated function
-	TArray<int> EnemyTurnQueue;
-	TArray<int> AlliesPlayerTurnQueue;
+	TArray<uint8> EnemyTurnQueue;
+	TArray<uint8> AlliesPlayerTurnQueue;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle", meta = (AllowPrivateAccess = true))
 	TSubclassOf<AEffect> DizzyClass{};

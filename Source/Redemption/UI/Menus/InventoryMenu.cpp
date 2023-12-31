@@ -686,11 +686,15 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 				//Create targets array.
 				TArray<ACombatNPC*> TargetsForSelection{};
 				//Add BattleEnemies in a loop, cause we need to convert them to the ACombatNPC.
-				if (BattleManager->IsSelectingAllyAsTarget)
-					TargetsForSelection = BattleManager->BattleAlliesPlayer;
+				if (BattleManager->IsSelectingAllyAsTarget) {
+					for (ACombatNPC* CombatNPC : BattleManager->BattleAlliesPlayer)
+						if (CombatNPC->CurrentHP > 0)
+							TargetsForSelection.Add(CombatNPC);
+				}
 				else if (!BattleManager->IsSelectingAllyAsTarget)
 					for (ACombatNPC* CombatNPC : BattleManager->BattleEnemies)
-						TargetsForSelection.Add(CombatNPC);
+						if(CombatNPC->CurrentHP > 0)
+							TargetsForSelection.Add(CombatNPC);
 				switch (PickedItem->GetItemRange()) {
 					case EItemRange::SINGLE:
 						if(IsValid(BattleManager->SelectedCombatNPC))

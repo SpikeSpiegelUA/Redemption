@@ -41,11 +41,15 @@ EBTNodeResult::Type UBTTask_EndDialogue::ExecuteTask(UBehaviorTreeComponent& Own
 	UWidgetBlueprintLibrary::SetInputMode_GameOnly(PlayerController);
 
 	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("IsInDialogue", false);
+	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("FirstDialoguePassed", false);
 
 	PlayerController->bShowMouseCursor = false;
 	PlayerCharacter->EnableInput(PlayerController);
 	//PlayerController->ActivateTouchInterface(PlayerCharacter->GetStandardTouchInterface());
-	PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->ClearChildren();
+	for (UWidget* Response : PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetAllChildren()) {
+		Response->RemoveFromParent();
+		Response->ConditionalBeginDestroy();
+	}
 
 	return EBTNodeResult::Succeeded;
 }

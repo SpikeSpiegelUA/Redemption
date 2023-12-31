@@ -26,19 +26,28 @@ public:
 	ACombatEnemyNPC();
 
 	int GetGoldReward() const;
-
 	void StartADialogue_Implementation() override;
 
 	UBehaviorTree* GetDialogueTree();
+
+	//Combat dialogue variables.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat Dialogue")
+		int AskMoneyItemSuccessChance{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat Dialogue")
+		int AskToLeaveSuccessChance{};
+
+	const TArray<TSubclassOf<AGameItem>>& GetPossibleAskItems() const;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, Category = "Dialogue")
 		UBehaviorTree* DialogueTree {};
-
-private:
 	//Battle mode regarding variables
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle")
 		int GoldReward{};
+	private:
+	//Combat dialogue possible item ask variables.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = true))
+		TArray<TSubclassOf<AGameItem>> PossibleAskItems{};
 };
