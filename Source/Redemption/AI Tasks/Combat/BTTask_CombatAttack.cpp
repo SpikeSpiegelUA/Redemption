@@ -14,9 +14,8 @@ UBTTask_CombatAttack::UBTTask_CombatAttack(const FObjectInitializer& ObjectIniti
 
 EBTNodeResult::Type UBTTask_CombatAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	const UBlackboardComponent* MyBlackboard = OwnerComp.GetBlackboardComponent();
 	AAIController* MyController = OwnerComp.GetAIOwner();
-	if (!IsValid(MyController) || !IsValid(MyBlackboard))
+	if (!IsValid(MyController))
 		return EBTNodeResult::Failed;
 
 	USkeletalMeshComponent* SkeletalMesh = MyController->GetPawn()->FindComponentByClass<USkeletalMeshComponent>();

@@ -50,6 +50,12 @@ void ABattleManager::Tick(float DeltaTime)
 		if (BehindPlayerCamera->GetActorRotation().Equals(Rotation))
 			CanTurnBehindPlayerCameraToStartPosition = false;
 	}
+	else if (CanTurnBehindPlayerCameraToSpellObject && IsValid(BehindPlayerCamera) && IsValid(CurrentlyUsedSpellObject)) {
+		FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(BehindPlayerCamera->GetActorLocation(), CurrentlyUsedSpellObject->GetActorLocation());
+		BehindPlayerCamera->SetActorRotation(FMath::RInterpTo(BehindPlayerCamera->GetActorRotation(), Rotation, DeltaTime, 8.f));
+		if (BehindPlayerCamera->GetActorRotation().Equals(Rotation))
+			CanTurnBehindPlayerCameraToSpellObject = false;
+	}
 
 }
 
@@ -262,8 +268,14 @@ void ABattleManager::TurnChange()
 					}
 				}
 				if (GotHit) {
-					FTimerHandle EnableTurnAIControllerTimerHandle{};
-					GetWorld()->GetTimerManager().SetTimer(EnableTurnAIControllerTimerHandle, this, &ABattleManager::EnableTurnAIController, 2.25f, false);
+					if (IsValid(CombatPlayerCharacter) && CombatPlayerCharacter->CurrentHP <= 0) {
+						FTimerHandle PlayerDeathLogicTimerHandle{};
+						GetWorld()->GetTimerManager().SetTimer(PlayerDeathLogicTimerHandle, this, &ABattleManager::PlayerDeathLogic, 1.f, false);
+					}
+					else {
+						FTimerHandle EnableTurnAIControllerTimerHandle{};
+						GetWorld()->GetTimerManager().SetTimer(EnableTurnAIControllerTimerHandle, this, &ABattleManager::EnableTurnAIController, 2.25f, false);
+					}
 				}
 				else {
 					if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[NextActor]->GetController()); IsValid(AIController))
@@ -360,11 +372,17 @@ void ABattleManager::TurnChange()
 						}
 					}
 					if (GotHit) {
-						FTimerHandle GotHitTimerHandle{};
-						if (IsDizzy)
-							GetWorld()->GetTimerManager().SetTimer(GotHitTimerHandle, this, &ABattleManager::PlayerAllyDizzyActions, 2.25f, false);
-						else
-							GetWorld()->GetTimerManager().SetTimer(GotHitTimerHandle, this, &ABattleManager::ToPlayerTurnPassInTurnChangeFunction, 2.25f, false);
+						if (IsValid(CombatPlayerCharacter) && CombatPlayerCharacter->CurrentHP <= 0) {
+							FTimerHandle PlayerDeathLogicTimerHandle{};
+							GetWorld()->GetTimerManager().SetTimer(PlayerDeathLogicTimerHandle, this, &ABattleManager::PlayerDeathLogic, 1.f, false);
+						}
+						else {
+							FTimerHandle GotHitTimerHandle{};
+							if (IsDizzy)
+								GetWorld()->GetTimerManager().SetTimer(GotHitTimerHandle, this, &ABattleManager::PlayerAllyDizzyActions, 2.25f, false);
+							else
+								GetWorld()->GetTimerManager().SetTimer(GotHitTimerHandle, this, &ABattleManager::ToPlayerTurnPassInTurnChangeFunction, 2.25f, false);
+						}
 					}
 					else {
 						if(IsDizzy)
@@ -410,23 +428,8 @@ void ABattleManager::TurnChange()
 	}
 	//Player's death logic
 	else if (IsValid(CombatPlayerCharacter) && CombatPlayerCharacter->CurrentHP <= 0) {
-		if(CurrentTurnCombatNPCIndex >= 0)
-			if (auto* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[CurrentTurnCombatNPCIndex]->GetController()); IsValid(AIController))
-				AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
-		PlayerCharacter->GetBattleMenuWidget()->RemoveFromParent(); 
-		PlayerCharacter->GetDeathMenuWidget()->AddToViewport();
-		PlayerCharacter->GetAudioManager()->GetDeathMenuBackgroundMusicAudioComponent()->Play(0.0f);
-		PlayerCharacter->GetAudioManager()->GetDeathMenuBackgroundMusicAudioComponent()->SetPaused(false);
-		PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(true);
-		APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-		for (int8 i = CombatPlayerCharacter->Effects.Num() - 1; i >= 0; i--) {
-			if (IsValid(CombatPlayerCharacter->Effects[i])) {
-				CombatPlayerCharacter->Effects[i]->ConditionalBeginDestroy();
-				CombatPlayerCharacter->Effects.RemoveAt(i);
-			}
-		}
-		if (IsValid(PlayerController))
-			PlayerController->SetPause(true);
+		FTimerHandle PlayerDeathLogicTimerHandle{};
+		GetWorld()->GetTimerManager().SetTimer(PlayerDeathLogicTimerHandle, this, &ABattleManager::PlayerDeathLogic, 1.f, false);
 	}
 }
 
@@ -439,6 +442,17 @@ void ABattleManager::PlayerTurnController()
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
 		PlayerCharacter->GetBattleMenuWidget()->IsChoosingAction = true;
+		PlayerCharacter->GetBattleMenuWidget()->IsChoosingSpell = false;
+		PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell = false;
+		PlayerCharacter->GetBattleMenuWidget()->IsPreparingToAttack = false;
+		PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithRange = false;
+		PlayerCharacter->GetBattleMenuWidget()->IsPreparingToTalk = false;
+		PlayerCharacter->GetBattleMenuWidget()->IsPreparingToViewInfo = false;
+		PlayerCharacter->GetBattleMenuWidget()->IsChoosingItem = false;
+		PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem = false;
+		PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithMelee = false;
+		PlayerCharacter->GetBattleMenuWidget()->IsChoosingSkill = false;
+		PlayerCharacter->GetBattleMenuWidget()->IsChoosingLearnedSpell = false;
 		IsSelectingAllyAsTarget = false;
 		if (AlliesPlayerTurnQueue.Num() > 0) {
 			bool AreAliveEnemies = false;
@@ -521,11 +535,17 @@ void ABattleManager::PlayerTurnController()
 						}
 					}
 					if (GotHit) {
-						FTimerHandle GotHitTimerHandle{};
-						if (IsDizzy)
-							GetWorld()->GetTimerManager().SetTimer(GotHitTimerHandle, this, &ABattleManager::PlayerAllyDizzyActions, 2.25f, false);
-						else
-							GetWorld()->GetTimerManager().SetTimer(GotHitTimerHandle, this, &ABattleManager::ToPlayerTurnPassInTurnChangeFunction, 2.25f, false);
+						if (IsValid(CombatPlayerCharacter) && CombatPlayerCharacter->CurrentHP <= 0) {
+							FTimerHandle PlayerDeathLogicTimerHandle{};
+							GetWorld()->GetTimerManager().SetTimer(PlayerDeathLogicTimerHandle, this, &ABattleManager::PlayerDeathLogic, 1.f, false);
+						}
+						else {
+							FTimerHandle GotHitTimerHandle{};
+							if (IsDizzy)
+								GetWorld()->GetTimerManager().SetTimer(GotHitTimerHandle, this, &ABattleManager::PlayerAllyDizzyActions, 2.25f, false);
+							else
+								GetWorld()->GetTimerManager().SetTimer(GotHitTimerHandle, this, &ABattleManager::ToPlayerTurnPassInTurnChangeFunction, 2.25f, false);
+						}
 					}
 					else {
 						if (IsDizzy)
@@ -698,6 +718,17 @@ void ABattleManager::ToPlayerTurnPassInTurnChangeFunction()
 				if (!BattleMenu->IsInViewport())
 					BattleMenu->AddToViewport();
 				BattleMenu->IsChoosingAction = true;
+				BattleMenu->IsChoosingSpell = false;
+				BattleMenu->IsAttackingWithSpell = false;
+				BattleMenu->IsPreparingToAttack = false;
+				BattleMenu->IsAttackingWithRange = false;
+				BattleMenu->IsPreparingToTalk = false;
+				BattleMenu->IsPreparingToViewInfo = false;
+				BattleMenu->IsChoosingItem = false;
+				BattleMenu->IsAttackingWithItem = false;
+				BattleMenu->IsAttackingWithMelee = false;
+				BattleMenu->IsChoosingSkill = false;
+				BattleMenu->IsChoosingLearnedSpell = false;
 				BattleMenu->GetMenuBorder()->SetVisibility(ESlateVisibility::Visible);
 				if(IsValid(GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>()))
 					GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>()->PickedButton = BattleMenu->GetAttackButton();
@@ -728,7 +759,7 @@ void ABattleManager::ToPlayerTurnPassInTurnChangeFunction()
 					}
 				}
 				PlayerCharacter->GetSkillBattleMenuWidget()->ResetSkillsScrollBox();
-				for (TSubclassOf<ASpell> SpellClass : BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetAvailableSkills())
+				for (TSubclassOf<ASpell> SpellClass : BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetAvailableSpells())
 					PlayerCharacter->GetSkillBattleMenuWidget()->AddSkillEntryToSkillsScrollBox(Cast<ASpell>(SpellClass->GetDefaultObject()));
 			}
 	}
@@ -769,20 +800,47 @@ void ABattleManager::PlayerAllyDizzyActions()
 	}
 }
 
+void ABattleManager::PlayerDeathLogic()
+{
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+		if (CurrentTurnCombatNPCIndex >= 0)
+			if (auto* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[CurrentTurnCombatNPCIndex]->GetController()); IsValid(AIController))
+				AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
+		PlayerCharacter->GetBattleMenuWidget()->RemoveFromParent();
+		PlayerCharacter->GetDeathMenuWidget()->AddToViewport();
+		PlayerCharacter->GetAudioManager()->GetDeathMenuBackgroundMusicAudioComponent()->Play(0.0f);
+		PlayerCharacter->GetAudioManager()->GetDeathMenuBackgroundMusicAudioComponent()->SetPaused(false);
+		PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(true);
+		for (int8 i = CombatPlayerCharacter->Effects.Num() - 1; i >= 0; i--) {
+			if (IsValid(CombatPlayerCharacter->Effects[i])) {
+				CombatPlayerCharacter->Effects[i]->ConditionalBeginDestroy();
+				CombatPlayerCharacter->Effects.RemoveAt(i);
+			}
+		}
+		if (APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()); IsValid(PlayerController))
+			PlayerController->SetPause(true);
+	}
+}
+
 void ABattleManager::ShowContinueButton()
 {
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	PlayerCharacter->GetBattleResultsScreenWidget()->GetContinueButton()->SetVisibility(ESlateVisibility::Visible);
 }
 
-void ABattleManager::SetCanTurnBehindPlayerCameraToTarget(bool Value)
+void ABattleManager::SetCanTurnBehindPlayerCameraToTarget(const bool Value)
 {
 	CanTurnBehindPlayerCameraToTarget = Value;
 }
 
-void ABattleManager::SetCanTurnBehindPlayerCameraToStartPosition(bool Value)
+void ABattleManager::SetCanTurnBehindPlayerCameraToStartPosition(const bool Value)
 {
 	CanTurnBehindPlayerCameraToStartPosition = Value;
+}
+
+void ABattleManager::SetCanTurnBehindPlayerCameraToSpellObject(const bool Value)
+{
+	CanTurnBehindPlayerCameraToSpellObject = Value;
 }
 
 void ABattleManager::SetBehindPlayerCameraLocation(FVector& NewLocation)

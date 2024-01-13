@@ -49,7 +49,7 @@ void ACombatPlayerCharacter::BeginPlay()
 				ArmorValue += PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetArmorValue();
 		}
 		GetResistancesFromEquipedItems();
-		AvailableSkills = PlayerCharacter->GetAvailableSkills();
+		AvailableSpells = PlayerCharacter->GetAvailableSkills();
 		CurrentHP = PlayerCharacter->CurrentHP;
 		MaxHP = PlayerCharacter->MaxHP;
 		CurrentMana = PlayerCharacter->CurrentMana;

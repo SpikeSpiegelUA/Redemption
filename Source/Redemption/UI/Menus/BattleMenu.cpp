@@ -371,23 +371,27 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 		SelectedCombatNPC = BattleManager->SelectedCombatNPC;
 	}
 	if (IsValid(PlayerCharacter) && IsValid(CurrentTurnAlliesNPC) && IsValid(BattleManager)) {
-		bool ItemHasBeenUsed = false;
+		bool ItemOrSpellHaveBeenUsed = false;
 		if (UInventoryMenu* Inventory = PlayerCharacter->GetInventoryMenuWidget(); IsAttackingWithItem && IsValid(Inventory)) {
 			UInventoryScrollBoxEntryWidget* EntryWidget = InventoryActions::FindItemInventoryEntryWidget(Inventory->GetPickedItem(), Inventory->GetInventoryScrollBox());
 			if (ARestorationItem* RestorationItem = Cast<ARestorationItem>(Inventory->GetPickedItem()); IsValid(RestorationItem) && IsValid(EntryWidget)) {
-				for (ACombatNPC* UseTarget : InventoryActions::GetTargets(BattleManager, EBattleSide::ALLIES, RestorationItem->GetItemRange())) {
+				TArray<ACombatNPC*> UseTargets = InventoryActions::GetTargets(BattleManager, EBattleSide::ALLIES, RestorationItem->GetItemRange());
+				uint8 UsageCount = 0;
+				for (ACombatNPC* UseTarget : UseTargets) {
 					if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH && UseTarget->CurrentHP < UseTarget->MaxHP) {
 						int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(UseTarget->MaxHP * RestorationItem->GetRestorationValuePercent() / 100,
 							UseTarget->Effects, UseTarget->GetElementalResistances(), RestorationItem->GetElementsAndTheirPercentagesStructs());
 						UseTarget->CurrentHP += AmountToHeal;
 						ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
 						FString TextForCombatFloatingInformationActor = FString();
+						TextForCombatFloatingInformationActor.Append("+");
 						TextForCombatFloatingInformationActor.AppendInt(AmountToHeal);
 						CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
-						ItemHasBeenUsed = true;
+						ItemOrSpellHaveBeenUsed = true;
 						UseTarget->GetFloatingHealthBarWidget()->HP = UseTarget->CurrentHP;
 						if (UseTarget->CurrentHP > UseTarget->MaxHP)
 							UseTarget->CurrentHP = UseTarget->MaxHP;
+						UsageCount++;
 					}
 					else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA && UseTarget->CurrentMana < UseTarget->MaxMana) {
 						int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(UseTarget->MaxMana * RestorationItem->GetRestorationValuePercent() / 100,
@@ -395,24 +399,36 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 						UseTarget->CurrentMana += AmountToRestore;
 						ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
 						FString TextForCombatFloatingInformationActor = FString();
+						TextForCombatFloatingInformationActor.Append("+");
 						TextForCombatFloatingInformationActor.AppendInt(AmountToRestore);
-						ItemHasBeenUsed = true;
+						ItemOrSpellHaveBeenUsed = true;
 						if (Cast<ACombatAllies>(UseTarget))
 							Cast<ACombatAllies>(UseTarget)->GetFloatingManaBarWidget()->Mana = UseTarget->CurrentMana;
 						if (UseTarget->CurrentMana > UseTarget->MaxMana)
 							UseTarget->CurrentMana = UseTarget->MaxMana;
+						UsageCount++;
 					}
-					else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA && UseTarget->CurrentMana >= UseTarget->MaxMana)
-						CreateNotification(FText::FromString("Target's mana is already full!!!"));
-					else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH && UseTarget->CurrentHP >= UseTarget->MaxHP)
-						CreateNotification(FText::FromString("Target's health is already full!!!"));
-					if (ItemHasBeenUsed) {
-						CurrentTurnAlliesNPC->Target = SelectedCombatNPC;
-						InventoryActions::RemoveItemFromGameInstance(GameInstance, Inventory->GetPickedItem());
-						InventoryActions::ItemAmountInInventoryLogic(EntryWidget, Inventory->GetInventoryScrollBox(), Inventory->GetPickedItem());
-						Inventory->BuffOrRestorationItemHasBeenUsedActions(PlayerCharacter->GetBattleMenuWidget(), PlayerCharacter->GetBattleManager());
-						UGameplayStatics::PlaySound2D(GetWorld(), PlayerCharacter->GetAudioManager()->GetUseHealOrBuffSoundCue());
+					else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA && UseTarget->CurrentMana >= UseTarget->MaxMana) {
+						if (UseTargets.Num() == 1)
+							CreateNotification(FText::FromString("Target's mana is already full!!!"));
 					}
+					else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH && UseTarget->CurrentHP >= UseTarget->MaxHP) {
+						if (UseTargets.Num() == 1)
+							CreateNotification(FText::FromString("Target's health is already full!!!"));
+					}
+				}
+				if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA && UseTargets.Num() > 1 && UsageCount == 0) {
+					CreateNotification(FText::FromString("Targets' mana is already full!!!"));
+				}
+				else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH && UseTargets.Num() > 1 && UsageCount == 0) {
+					CreateNotification(FText::FromString("Targets' health is already full!!!"));
+				}
+				if (ItemOrSpellHaveBeenUsed) {
+					CurrentTurnAlliesNPC->Target = SelectedCombatNPC;
+					InventoryActions::RemoveItemFromGameInstance(GameInstance, Inventory->GetPickedItem());
+					InventoryActions::ItemAmountInInventoryLogic(EntryWidget, Inventory->GetInventoryScrollBox(), Inventory->GetPickedItem());
+					Inventory->BuffOrRestorationItemHasBeenUsedActions(PlayerCharacter->GetBattleMenuWidget(), PlayerCharacter->GetBattleManager());
+					UGameplayStatics::PlaySound2D(GetWorld(), PlayerCharacter->GetAudioManager()->GetUseHealOrBuffSoundCue());
 				}
 			}
 			else if (ABuffItem* BuffItem = Cast<ABuffItem>(Inventory->GetPickedItem()); IsValid(BuffItem) && IsValid(EntryWidget)) {
@@ -426,7 +442,7 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 				InventoryActions::ItemAmountInInventoryLogic(EntryWidget, Inventory->GetInventoryScrollBox(), Inventory->GetPickedItem());
 				Inventory->BuffOrRestorationItemHasBeenUsedActions(PlayerCharacter->GetBattleMenuWidget(), PlayerCharacter->GetBattleManager());
 				UGameplayStatics::PlaySound2D(GetWorld(), PlayerCharacter->GetAudioManager()->GetUseHealOrBuffSoundCue());
-				ItemHasBeenUsed = true;
+				ItemOrSpellHaveBeenUsed = true;
 			}
 			else if (ADebuffItem* DebuffItem = Cast<ADebuffItem>(Inventory->GetPickedItem()); IsValid(DebuffItem) && IsValid(EntryWidget)) {
 				if (UCombatAlliesAnimInstance* AnimInstance = Cast<UCombatAlliesAnimInstance>(CurrentTurnAlliesNPC->GetMesh()->GetAnimInstance()); IsValid(AnimInstance)) {
@@ -437,7 +453,7 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 				InventoryActions::RemoveItemFromGameInstance(GameInstance, Inventory->GetPickedItem());
 				InventoryActions::ItemAmountInInventoryLogic(EntryWidget, Inventory->GetInventoryScrollBox(), Inventory->GetPickedItem());
 				Inventory->DebuffOrAssaultItemHasBeenUsedActions(PlayerCharacter->GetBattleMenuWidget());
-				ItemHasBeenUsed = true;
+				ItemOrSpellHaveBeenUsed = true;
 			}
 			else if (AAssaultItem* AssaultItem = Cast<AAssaultItem>(Inventory->GetPickedItem()); IsValid(AssaultItem) && IsValid(EntryWidget)) {
 				if (UCombatAlliesAnimInstance* AnimInstance = Cast<UCombatAlliesAnimInstance>(CurrentTurnAlliesNPC->GetMesh()->GetAnimInstance()); IsValid(AnimInstance)) {
@@ -448,32 +464,31 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 				InventoryActions::RemoveItemFromGameInstance(GameInstance, Inventory->GetPickedItem());
 				InventoryActions::ItemAmountInInventoryLogic(EntryWidget, Inventory->GetInventoryScrollBox(), Inventory->GetPickedItem());
 				Inventory->DebuffOrAssaultItemHasBeenUsedActions(PlayerCharacter->GetBattleMenuWidget());
-				ItemHasBeenUsed = true;
+				ItemOrSpellHaveBeenUsed = true;
 			}
 		}
-		if(IsAttackingWithSpell){
+		if(IsAttackingWithSpell) {
 			if (IsValid(CurrentTurnAlliesNPC->SpellToUse) && IsValid(BattleManager) && IsValid(UIManagerWorldSubsystem) && IsValid(PlayerCharacter)) {
 				switch (CurrentTurnAlliesNPC->SpellToUse->GetTypeOfSpell()) {
 					case ESpellType::ASSAULT:
 						if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(CurrentTurnAlliesNPC->SpellToUse); IsValid(AssaultSpell))
-							AssaultSpellUse(this, CurrentTurnAlliesNPC);
+							ItemOrSpellHaveBeenUsed = AssaultSpellUse(this, CurrentTurnAlliesNPC);
 						break;
 					case ESpellType::RESTORATION:
 						if (ARestorationSpell* RestorationSpell = Cast<ARestorationSpell>(CurrentTurnAlliesNPC->SpellToUse); IsValid(RestorationSpell))
-							RestorationSpellUse(RestorationSpell, this, CurrentTurnAlliesNPC);
+							ItemOrSpellHaveBeenUsed = RestorationSpellUse(RestorationSpell, this, CurrentTurnAlliesNPC);
 						break;
 					case ESpellType::BUFF:
 						if (ACreatedBuffSpell* CreatedBuffSpell = Cast<ACreatedBuffSpell>(CurrentTurnAlliesNPC->SpellToUse); IsValid(CreatedBuffSpell))
-							BuffSpellUse(CreatedBuffSpell, this, CurrentTurnAlliesNPC);
+							ItemOrSpellHaveBeenUsed = BuffSpellUse(CreatedBuffSpell, this, CurrentTurnAlliesNPC);
 						else if (APresetBuffSpell* PresetBuffSpell = Cast<APresetBuffSpell>(CurrentTurnAlliesNPC->SpellToUse); IsValid(PresetBuffSpell))
-							BuffSpellUse(PresetBuffSpell, this, CurrentTurnAlliesNPC);
+							ItemOrSpellHaveBeenUsed = BuffSpellUse(PresetBuffSpell, this, CurrentTurnAlliesNPC);
 						break;
 					case ESpellType::DEBUFF:
 						if (ACreatedDebuffSpell* CreatedDebuffSpell = Cast<ACreatedDebuffSpell>(CurrentTurnAlliesNPC->SpellToUse); IsValid(CreatedDebuffSpell))
-							DebuffSpellUse(this, CurrentTurnAlliesNPC);
+							ItemOrSpellHaveBeenUsed = DebuffSpellUse(this, CurrentTurnAlliesNPC);
 						break;
 				}
-				IsAttackingWithSpell = false;
 			}
 		}
 		if (IsAttackingWithMelee) {
@@ -533,7 +548,7 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 				PlayerCharacter->GetCombatCharacterInfoMenuWidget()->CanUseKeyboardButtonSelection = false;
 			}
 		}
-		if ((!IsAttackingWithItem) || (IsAttackingWithItem && ItemHasBeenUsed)) {
+		if ((!IsAttackingWithItem && !IsAttackingWithSpell) || (IsAttackingWithItem && ItemOrSpellHaveBeenUsed) || (IsAttackingWithSpell && ItemOrSpellHaveBeenUsed)) {
 			AttackMenuBorder->SetVisibility(ESlateVisibility::Hidden);
 			LeftRightMenuBorder->SetVisibility(ESlateVisibility::Hidden);
 			HideAllCrosshairWidgetComponents();
@@ -556,7 +571,7 @@ void UBattleMenu::RangeAttackUse(UCombatAlliesAnimInstance* CurrentTurnAlliesNPC
 	BattleManager->PlayerTurnController();
 }
 
-void UBattleMenu::AssaultSpellUse(class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC)
+bool UBattleMenu::AssaultSpellUse(class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC)
 {
 	if (CurrentTurnNPC->SpellToUse->GetSpellCostType() == ESpellCostType::MANA) {
 		CurrentTurnNPC->CurrentMana -= CurrentTurnNPC->SpellToUse->GetCost();
@@ -575,36 +590,42 @@ void UBattleMenu::AssaultSpellUse(class UBattleMenu* const BattleMenu, class ACo
 		CurrentTurnNPC->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(CurrentTurnNPC->GetActorLocation(), BattleManager->SelectedCombatNPC->GetActorLocation()));
 		BattleMenu->IsChoosingSpell = false;
 		if (IsValid(PC))
-			PC->GetSpellBattleMenuWidget()->Reset(false);
+			PC->GetSpellBattleMenuWidget()->Reset(true);
 	}
+	return true;
 }
 
-void UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC)
+bool UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC)
 {
 	bool SpellHasBeenUsed = false;
 	//Get Target actors, depending on a caster battle side and a spell's range, and run the logic on each target.
-	for (ACombatNPC* UseTarget : SkillsSpellsAndEffectsActions::GetTargets(BattleManager, EBattleSide::ALLIES, SpellToUse->GetSpellRange())) {
-		if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::HEALTH && UseTarget->CurrentHP < UseTarget->MaxHP) {
+	TArray<ACombatNPC*> UseTargets = SkillsSpellsAndEffectsActions::GetTargetsForAllies(BattleManager, SpellToUse->GetSpellRange(), SpellToUse->GetTypeOfSpell());
+	uint8 UsageCount = 0;
+	for (ACombatNPC* UseTarget : UseTargets) {
+		if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::HEALTH && UseTarget->CurrentHP < UseTarget->MaxHP && UseTarget->CurrentHP > 0) {
 			int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(UseTarget->MaxHP * SpellToUse->GetRestorationValuePercent() / 100,
 				UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 			UseTarget->CurrentHP += AmountToHeal;
 			ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->
 				SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
 			FString TextForCombatFloatingInformationActor = FString();
+			TextForCombatFloatingInformationActor.Append("+");
 			TextForCombatFloatingInformationActor.AppendInt(AmountToHeal);
 			CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
-			BattleManager->SelectedCombatNPC->GetFloatingHealthBarWidget()->HP = UseTarget->CurrentHP;
+			UseTarget->GetFloatingHealthBarWidget()->HP = UseTarget->CurrentHP;
 			SpellHasBeenUsed = true;
 			if (UseTarget->CurrentHP > UseTarget->MaxHP)
 				UseTarget->CurrentHP = UseTarget->MaxHP;
+			UsageCount++;
 		}
-		else if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::MANA && UseTarget->CurrentMana < UseTarget->MaxMana) {
+		else if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::MANA && UseTarget->CurrentMana < UseTarget->MaxMana && UseTarget->CurrentHP > 0) {
 			int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(UseTarget->MaxMana * SpellToUse->GetRestorationValuePercent() / 100,
 				UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 			UseTarget->CurrentMana += AmountToRestore;
 			ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->
 				SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
 			FString TextForCombatFloatingInformationActor = FString();
+			TextForCombatFloatingInformationActor.Append("+");
 			TextForCombatFloatingInformationActor.AppendInt(AmountToRestore);
 			CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 			if (ACombatAllies* AllyTarget = Cast<ACombatAllies>(UseTarget); IsValid(AllyTarget))
@@ -612,11 +633,22 @@ void UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 			SpellHasBeenUsed = true;
 			if (UseTarget->CurrentMana > UseTarget->MaxMana)
 				UseTarget->CurrentMana = UseTarget->MaxMana;
+			UsageCount++;
 		}
-		else if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::MANA && UseTarget->CurrentMana >= UseTarget->MaxMana)
-			CreateNotification(FText::FromString("Target's mana is already full!!!"));
-		else if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::HEALTH && UseTarget->CurrentHP >= UseTarget->MaxHP)
-			CreateNotification(FText::FromString("Target's health is already full!!!"));
+		else if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::MANA && UseTarget->CurrentMana >= UseTarget->MaxMana && UseTarget->CurrentHP > 0) {
+			if(UseTargets.Num() == 1)
+				CreateNotification(FText::FromString("Target's mana is already full!!!"));
+		}
+		else if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::HEALTH && UseTarget->CurrentHP >= UseTarget->MaxHP && UseTarget->CurrentHP > 0) {
+			if (UseTargets.Num() == 1)
+				CreateNotification(FText::FromString("Target's health is already full!!!"));
+		}
+	}
+	if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::MANA && UseTargets.Num() > 1 && UsageCount == 0) {
+		CreateNotification(FText::FromString("Targets' mana is already full!!!"));
+	}
+	else if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::HEALTH && UseTargets.Num() > 1 && UsageCount == 0) {
+		CreateNotification(FText::FromString("Targets' health is already full!!!"));
 	}
 	if (SpellHasBeenUsed) {
 		APlayerCharacter* PC = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
@@ -634,20 +666,25 @@ void UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 			if (CurrentTurnNPC->CurrentHP < 0)
 				CurrentTurnNPC->CurrentHP = 0;
 		}
-		PC->GetSpellBattleMenuWidget()->Reset(false);
+		PC->GetSpellBattleMenuWidget()->Reset(true);
+		return true;
 	}
+	else
+		return false;
 }
-void UBattleMenu::BuffSpellUse(const class ACreatedBuffSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC)
+bool UBattleMenu::BuffSpellUse(const class ACreatedBuffSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC)
 {
 	if (APlayerCharacter* PC = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PC)) {
-		for (ACombatNPC* TargetActor : SkillsSpellsAndEffectsActions::GetTargets(BattleManager, EBattleSide::ALLIES, SpellToUse->GetSpellRange())) {
-			TArray<AEffect*> CreatedEffectsFromEffects{};
-			for (AEffect* Effect : SpellToUse->GetEffects()) {
-				AEffect* NewEffect = NewObject<AEffect>(this);
-				NewEffect->CopyEffect(Effect);
-				CreatedEffectsFromEffects.Add(NewEffect);
+		for (ACombatNPC* TargetActor : SkillsSpellsAndEffectsActions::GetTargetsForAllies(BattleManager, SpellToUse->GetSpellRange(), SpellToUse->GetTypeOfSpell())) {
+			if (TargetActor->CurrentHP > 0) {
+				TArray<AEffect*> CreatedEffectsFromEffects{};
+				for (AEffect* Effect : SpellToUse->GetEffects()) {
+					AEffect* NewEffect = NewObject<AEffect>(this);
+					NewEffect->CopyEffect(Effect);
+					CreatedEffectsFromEffects.Add(NewEffect);
+				}
+				TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, CreatedEffectsFromEffects, ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()), SpellToUse->GetTypeOfSpell());
 			}
-			TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, CreatedEffectsFromEffects, ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 		}
 		UGameplayStatics::PlaySound2D(GetWorld(), PC->GetAudioManager()->GetUseHealOrBuffSoundCue());
 		FTimerHandle PlayerTurnControllerTimerHandle{};
@@ -663,20 +700,23 @@ void UBattleMenu::BuffSpellUse(const class ACreatedBuffSpell* const SpellToUse, 
 			if (CurrentTurnNPC->CurrentHP < 0)
 				CurrentTurnNPC->CurrentHP = 0;
 		}
-		PC->GetSpellBattleMenuWidget()->Reset(false);
+		PC->GetSpellBattleMenuWidget()->Reset(true);
 	}
+	return true;
 }
 
-void UBattleMenu::BuffSpellUse(const class APresetBuffSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC)
+bool UBattleMenu::BuffSpellUse(const class APresetBuffSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC)
 {
 	if (APlayerCharacter* PC = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PC)) {
-		for (ACombatNPC* TargetActor : SkillsSpellsAndEffectsActions::GetTargets(BattleManager, EBattleSide::ALLIES, SpellToUse->GetSpellRange())) {
-			TArray<AEffect*> CreatedEffectsFromClasses{};
-			for (TSubclassOf<AEffect> EffectClass : SpellToUse->GetEffectsClasses()) {
-				AEffect* NewEffect = NewObject<AEffect>(this, EffectClass);
-				CreatedEffectsFromClasses.Add(NewEffect);
+		for (ACombatNPC* TargetActor : SkillsSpellsAndEffectsActions::GetTargetsForAllies(BattleManager, SpellToUse->GetSpellRange(), SpellToUse->GetTypeOfSpell())) {
+			if (TargetActor->CurrentHP > 0) {
+				TArray<AEffect*> CreatedEffectsFromClasses{};
+				for (TSubclassOf<AEffect> EffectClass : SpellToUse->GetEffectsClasses()) {
+					AEffect* NewEffect = NewObject<AEffect>(this, EffectClass);
+					CreatedEffectsFromClasses.Add(NewEffect);
+				}
+				TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, CreatedEffectsFromClasses, ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()), SpellToUse->GetTypeOfSpell());
 			}
-			TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, CreatedEffectsFromClasses, ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 		}
 		UGameplayStatics::PlaySound2D(GetWorld(), PC->GetAudioManager()->GetUseHealOrBuffSoundCue());
 		FTimerHandle PlayerTurnControllerTimerHandle{};
@@ -692,11 +732,12 @@ void UBattleMenu::BuffSpellUse(const class APresetBuffSpell* const SpellToUse, c
 			if (CurrentTurnNPC->CurrentHP < 0)
 				CurrentTurnNPC->CurrentHP = 0;
 		}
-		PC->GetSpellBattleMenuWidget()->Reset(false);
+		PC->GetSpellBattleMenuWidget()->Reset(true);
 	}
+	return true;
 }
 
-void UBattleMenu::DebuffSpellUse(class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC)
+bool UBattleMenu::DebuffSpellUse(class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC)
 {
 	if (CurrentTurnNPC->SpellToUse->GetSpellCostType() == ESpellCostType::MANA) {
 		CurrentTurnNPC->CurrentMana -= CurrentTurnNPC->SpellToUse->GetCost();
@@ -715,8 +756,9 @@ void UBattleMenu::DebuffSpellUse(class UBattleMenu* const BattleMenu, class ACom
 		CurrentTurnNPC->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(CurrentTurnNPC->GetActorLocation(), BattleManager->SelectedCombatNPC->GetActorLocation()));
 		BattleMenu->IsChoosingSpell = false;
 		if (IsValid(PC))
-			PC->GetSpellBattleMenuWidget()->Reset(false);
+			PC->GetSpellBattleMenuWidget()->Reset(true);
 	}
+	return true;
 }
 
 void UBattleMenu::LeftButtonOnClicked()
@@ -737,6 +779,13 @@ void UBattleMenu::SpellButtonOnClicked()
 	IsChoosingAction = false;
 	IsAttackingWithSpell = false;
 	IsPreparingToAttack = false;
+	IsAttackingWithRange = false;
+	IsPreparingToTalk = false;
+	IsPreparingToViewInfo = false;
+	IsAttackingWithMelee = false;
+	IsAttackingWithSpell = false;
+	IsChoosingSkill = false;
+	IsChoosingLearnedSpell = false;
 	if (IsValid(UIManagerWorldSubsystem->PickedButton))
 		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
@@ -753,8 +802,16 @@ void UBattleMenu::SkillButtonOnClicked()
 {
 	IsChoosingSkill = true;
 	IsChoosingAction = false;
+	IsChoosingSpell = false;
 	IsAttackingWithSpell = false;
 	IsPreparingToAttack = false;
+	IsAttackingWithRange = false;
+	IsPreparingToTalk = false;
+	IsPreparingToViewInfo = false;
+	IsChoosingSpell = false;
+	IsAttackingWithMelee = false;
+	IsAttackingWithSpell = false;
+	IsChoosingLearnedSpell = false;
 	SkillButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
 		if (USkillBattleMenu* SkillBattleMenu = PlayerCharacter->GetSkillBattleMenuWidget(); IsValid(SkillBattleMenu)) {
@@ -782,6 +839,14 @@ void UBattleMenu::ItemButtonOnClicked()
 	IsChoosingAction = false;
 	IsAttackingWithItem = false;
 	IsPreparingToAttack = false;
+	IsAttackingWithRange = false;
+	IsPreparingToTalk = false;
+	IsPreparingToViewInfo = false;
+	IsChoosingSpell = false;
+	IsAttackingWithMelee = false;
+	IsAttackingWithSpell = false;
+	IsChoosingSkill = false;
+	IsChoosingLearnedSpell = false;
 	MenuBorder->SetVisibility(ESlateVisibility::Hidden);
 	ItemButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {

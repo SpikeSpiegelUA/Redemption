@@ -9,6 +9,13 @@
 /**
  * 
  */
+UENUM(BlueprintType)
+enum class ECombatAction :uint8
+{
+	MELEEATTACK UMETA(DisplayName = "Melee attack"),
+	USESPELL UMETA(DisplayName = "Use spell")
+};
+
 UCLASS()
 class REDEMPTION_API ACombatNPCAIController : public ANPCAIController
 {

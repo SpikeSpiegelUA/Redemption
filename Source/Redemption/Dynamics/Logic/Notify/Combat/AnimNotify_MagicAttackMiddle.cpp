@@ -14,21 +14,28 @@ void UAnimNotify_MagicAttackMiddle::Notify(USkeletalMeshComponent* MeshComp, UAn
 		if (ACombatNPC* CombatNPC = Cast<ACombatNPC>(MeshComp->GetOwner()); IsValid(CombatNPC))
 			if(APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(MeshComp->GetWorld()->GetFirstPlayerController()->GetCharacter()))
 				if(ABattleManager* BattleManager = PlayerCharacter->GetBattleManager(); IsValid(BattleManager))
-					if (ASpellWithSpellObject* SpellWithSpellObject = Cast<ASpellWithSpellObject>(CombatNPC->SpellToUse); IsValid(SpellWithSpellObject))
-						SpawnSpellObject(SpellWithSpellObject, MeshComp, CombatNPC);
+					if (ASpellWithSpellObject* SpellWithSpellObject = Cast<ASpellWithSpellObject>(CombatNPC->SpellToUse); IsValid(SpellWithSpellObject)) {
+						BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
+						BattleManager->SetCanTurnBehindPlayerCameraToTarget(false);
+						BattleManager->SetCanTurnBehindPlayerCameraToSpellObject(true);
+						BattleManager->CurrentlyUsedSpellObject = SpawnSpellObject(SpellWithSpellObject, MeshComp, CombatNPC);
+					}
 }
 
-void UAnimNotify_MagicAttackMiddle::SpawnSpellObject(const ASpellWithSpellObject* const SpellWithSpellObject, const USkeletalMeshComponent* const MeshComp, const ACombatNPC* const CombatNPC)
+AActor* UAnimNotify_MagicAttackMiddle::SpawnSpellObject(const ASpellWithSpellObject* const SpellWithSpellObject, const USkeletalMeshComponent* const MeshComp, const ACombatNPC* const CombatNPC)
 {
 	FTransform SpawnTransform = MeshComp->GetSocketTransform(FName(TEXT("RightHandIndex3")), ERelativeTransformSpace::RTS_World);
 	FActorSpawnParameters ActorSpawnParemeters;
 	ASpellObject* SpawnedSpellObject = MeshComp->GetWorld()->SpawnActor<ASpellObject>(SpellWithSpellObject->GetSpellObjectClass(), SpawnTransform, ActorSpawnParemeters);
 	if (IsValid(SpawnedSpellObject)) {
 		SpawnedSpellObject->SetSpell(CombatNPC->SpellToUse);
+		SpawnedSpellObject->SetTarget(Cast<ACombatNPC>(CombatNPC->Target));
 		SpawnedSpellObject->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(SpawnedSpellObject->GetActorLocation(), CombatNPC->Target->GetActorLocation()));
+
 		if (IsValid(Cast<ACombatAllies>(MeshComp->GetOwner())))
 			SpawnedSpellObject->SetTargetBattleSide(EBattleSide::ENEMIES);
 		else if(IsValid(Cast<ACombatEnemyNPC>(MeshComp->GetOwner())))
 			SpawnedSpellObject->SetTargetBattleSide(EBattleSide::ALLIES);
 	}
+	return SpawnedSpellObject;
 }

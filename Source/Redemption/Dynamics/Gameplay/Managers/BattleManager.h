@@ -25,22 +25,26 @@ public:
 
 	//Array that stores spawned enemies and is used in a gameplay logic
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
-		TArray<class ACombatEnemyNPC*> BattleEnemies;
+		TArray<class ACombatNPC*> BattleEnemies;
 	//Array that stores spawned allies and the player and is used in a gameplay logic
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 		TArray<ACombatNPC*> BattleAlliesPlayer;
 	//Target for Action(For example, a heal or an attack. Can be an ally as well as an enemy).
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, transient)
 		class ACombatNPC* SelectedCombatNPC {};
-	//Need this for control of target selection with keyboard
+	//Currently used spell object class. Is used for focusing the camera on a spell object.
+	UPROPERTY()
+		AActor* CurrentlyUsedSpellObject{};
+	//Need this for control of target selection with keyboard. Also is used, when enemies select a target for an attack(Save an index of the target here).
 	int8 SelectedCombatNPCIndex{};
 	//BattleAlliesPlayer index of actor with current turn.
 	int8 CurrentTurnCombatNPCIndex{};
 
 	ACombatPlayerCharacter* CombatPlayerCharacter{};
 
-	void SetCanTurnBehindPlayerCameraToTarget(bool Value);
-	void SetCanTurnBehindPlayerCameraToStartPosition(bool Value);
+	void SetCanTurnBehindPlayerCameraToTarget(const bool Value);
+	void SetCanTurnBehindPlayerCameraToStartPosition(const bool Value);
+	void SetCanTurnBehindPlayerCameraToSpellObject(const bool Value);
 	//void SetActorNumberOfTheCurrentTurn(uint8 Value);
 	void SetBehindPlayerCameraLocation(FVector& NewLocation);
 
@@ -71,6 +75,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle", meta = (AllowPrivateAccess = true))
 	TSubclassOf<AEffect> DizzyClass{};
+	
 
 protected:
 	// Called when the game starts or when spawned
@@ -85,6 +90,7 @@ private:
 
 	bool CanTurnBehindPlayerCameraToTarget = false;
 	bool CanTurnBehindPlayerCameraToStartPosition = false;
+	bool CanTurnBehindPlayerCameraToSpellObject = false;
 
 	//Number of an enemy, who has a turn. Assign -1 value when transitioning to player's turn to prevent bugs
 	//int ActorNumberOfTheCurrentTurn = -1;
@@ -117,4 +123,6 @@ private:
 	void ToPlayerTurnPassInTurnChangeFunction();
 	UFUNCTION()
 	void PlayerAllyDizzyActions();
+	UFUNCTION()
+	void PlayerDeathLogic();
 };

@@ -22,7 +22,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Sets default values for this character's properties
+	// Sets default values for this character's properties.
 	ACombatEnemyNPC();
 
 	int GetGoldReward() const;
@@ -38,12 +38,12 @@ public:
 
 	const TArray<TSubclassOf<AGameItem>>& GetPossibleAskItems() const;
 protected:
-	// Called when the game starts or when spawned
+	// Called when the game starts or when spawned.
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, Category = "Dialogue")
 		UBehaviorTree* DialogueTree {};
-	//Battle mode regarding variables
+	//Battle mode regarding variables.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle")
 		int GoldReward{};
 	private:

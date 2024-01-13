@@ -94,6 +94,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UDataTable* GetEffectsDataTable() const;
+
 	TSubclassOf<ASpellObject> GetFireMainElementSpellObjectClass() const;
 	TSubclassOf<ASpellObject> GetBloodMainElementSpellObjectClass() const;
 	TSubclassOf<ASpellObject> GetDarkMainElementSpellObjectClass() const;

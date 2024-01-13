@@ -128,7 +128,7 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 						AEffect* NewEffect = NewObject<AEffect>(this, EffectClass);
 						EffectsArray.Add(NewEffect);
 					}
-					CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, DebuffItem->GetElementsAndTheirPercentagesStructs());
+					CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, DebuffItem->GetElementsAndTheirPercentagesStructs(), ESpellType::DEBUFF);
 					OnOverlapBeginsActions(PlayerCharacter);
 				}
 			}

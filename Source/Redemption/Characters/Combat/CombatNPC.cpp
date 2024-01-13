@@ -41,7 +41,7 @@ void ACombatNPC::Tick(float DeltaTime)
 
 }
 
-bool ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements)
+bool ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements, const ESpellType BuffOrDebuff)
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
 		if (ABattleManager* BattleManager = PlayerCharacter->GetBattleManager(); IsValid(BattleManager)) {
@@ -52,12 +52,22 @@ bool ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffec
 			int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance + Agility * 2,
 				Effects, EEffectArea::EVASION), Effects, ElementalResistances, ContainedElements);
 			if (EvasionRandomNumber <= ChanceOfEvasion) {
-				TextForCombatFloatingInformationActor.Append("Miss!");
+				if(BuffOrDebuff == ESpellType::BUFF)
+					TextForCombatFloatingInformationActor.Append("Buff missed!");
+				else if(BuffOrDebuff == ESpellType::DEBUFF)
+					TextForCombatFloatingInformationActor.Append("Debuff missed!");
+				else
+					TextForCombatFloatingInformationActor.Append("Miss!");
 				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 				return false;
 			}
 			else {
-				TextForCombatFloatingInformationActor.Append("Hit!");
+				if (BuffOrDebuff == ESpellType::BUFF)
+					TextForCombatFloatingInformationActor.Append("Buff hit!");
+				else if (BuffOrDebuff == ESpellType::DEBUFF)
+					TextForCombatFloatingInformationActor.Append("Debuff hit!");
+				else
+					TextForCombatFloatingInformationActor.Append("Hit!");
 				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 				for (AEffect* Effect : HitEffects)
 					Effects.Add(Effect);
@@ -83,21 +93,28 @@ bool ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementA
 			else {
 				int ValueOfArmor = SkillsSpellsAndEffectsActions::GetValueAfterEffects(ArmorValue, Effects, EEffectArea::ARMOR);
 				int ValueOfAttackWithResistances = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(ValueOfAttack, Effects, ElementalResistances, ContainedElements);
-				if (CurrentHP - (ValueOfAttackWithResistances - ValueOfArmor / 10) < 0)
+				if (CurrentHP - (ValueOfAttackWithResistances - ValueOfArmor / 10) < 0) {
 					CurrentHP = 0;
-				else
+					if (IsValid(DizzyEmitterComponent)) {
+						DizzyEmitterComponent->DeactivateSystem();
+						DizzyEmitterComponent->DestroyComponent();
+					}
+					if (IsValid(FlamesEmitterComponent)) {
+						FlamesEmitterComponent->Deactivate();
+						FlamesEmitterComponent->DestroyComponent();
+					}
+				}
+				else {
 					CurrentHP -= (ValueOfAttackWithResistances - ValueOfArmor / 10);
+				}
 				if (IsValid(FloatingHealthBarWidget))
 					FloatingHealthBarWidget->HP = CurrentHP;
+				TextForCombatFloatingInformationActor.Append("-");
 				TextForCombatFloatingInformationActor.AppendInt(ValueOfAttackWithResistances - ValueOfArmor / 10);
 				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 				UCombatCharacterAnimInstance* AnimInstance = Cast<UCombatCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 				if (IsValid(AnimInstance)) {
 					if (CurrentHP <= 0) {
-						if (IsValid(DizzyEmitterComponent))
-							DizzyEmitterComponent->DestroyComponent();
-						if (IsValid(FlamesEmitterComponent))
-							FlamesEmitterComponent->DestroyComponent();
 						AnimInstance->ToggleCombatCharacterIsDead(true);
 					}
 					if (!GetMesh()->bPauseAnims) {
@@ -182,9 +199,19 @@ AActor* ACombatNPC::GetStartLocation() const
 	return StartLocation;
 }
 
+const FRotator& ACombatNPC::GetStartRotation() const
+{
+	return StartRotation;
+}
+
 TSubclassOf<ASmartObject> ACombatNPC::GetAIClass() const
 {
 	return AIClass;
+}
+
+const TArray<TSubclassOf<ASpell>>& ACombatNPC::GetAvailableSpells() const
+{
+	return AvailableSpells;
 }
 
 float ACombatNPC::GetHealthPercentage()
@@ -197,11 +224,6 @@ float ACombatNPC::GetManaPercentage()
 	return CurrentMana/MaxMana;
 }
 
-const TArray<TSubclassOf<ASpell>>& ACombatNPC::GetAvailableSkills() const
-{
-	return AvailableSkills;
-}
-
 void ACombatNPC::SetRangeAmmo(int8 NewRangeAmmo)
 {
 	RangeAmmo = NewRangeAmmo;
@@ -210,6 +232,11 @@ void ACombatNPC::SetRangeAmmo(int8 NewRangeAmmo)
 void ACombatNPC::SetStartLocation(const AActor* const NewLocation)
 {
 	StartLocation = const_cast<AActor*>(NewLocation);
+}
+
+void ACombatNPC::SetStartRotation(const FRotator& NewStartRotation)
+{
+	StartRotation = NewStartRotation;
 }
 
 
