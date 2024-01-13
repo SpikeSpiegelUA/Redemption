@@ -153,47 +153,62 @@ void SkillsSpellsAndEffectsActions::InitializePhysicalResistances(TArray<FPhysic
 		PhysicalResistances.Add(PhysicalTypePercent);
 }
 
-TArray<ACombatNPC*> SkillsSpellsAndEffectsActions::GetTargets(const ABattleManager* const BattleManager, const EBattleSide TargetsBattleSide, const ESpellRange SpellRange)
+TArray<ACombatNPC*> SkillsSpellsAndEffectsActions::GetTargetsForEnemies(const ABattleManager* const BattleManager, const AActor* const Target, const ESpellRange SpellRange, const ESpellType SpellType)
 {
+	//First of all, get target index in BattleAlliesPlayer array;
+	uint8 TargetIndex = 0;
+	TArray<ACombatNPC*> ArrayToSelectTargetsFrom{};
+	if (SpellType == ESpellType::RESTORATION || SpellType == ESpellType::BUFF)
+		ArrayToSelectTargetsFrom = BattleManager->BattleEnemies;
+	else if(SpellType == ESpellType::ASSAULT || SpellType == ESpellType::DEBUFF)
+		ArrayToSelectTargetsFrom = BattleManager->BattleAlliesPlayer;
+	for (uint8 Index = 0; Index < ArrayToSelectTargetsFrom.Num(); Index++)
+		if (ArrayToSelectTargetsFrom[Index] == Target) {
+			TargetIndex = Index;
+			break;
+		}
 	TArray<ACombatNPC*> TargetActors{};
 	switch (SpellRange) {
+	case ESpellRange::SINGLE:
+			TargetActors.Add(ArrayToSelectTargetsFrom[TargetIndex]);
+		break;
+	case ESpellRange::NEIGHBORS:
+			TargetActors.Add(ArrayToSelectTargetsFrom[TargetIndex]);
+		if (TargetIndex + 1 < ArrayToSelectTargetsFrom.Num())
+			TargetActors.Add(ArrayToSelectTargetsFrom[TargetIndex + 1]);
+		if (TargetIndex - 1 >= 0)
+			TargetActors.Add(ArrayToSelectTargetsFrom[TargetIndex - 1]);
+		break;
+	case ESpellRange::EVERYONE:
+		TargetActors = ArrayToSelectTargetsFrom;
+		break;
+	}
+	return TargetActors;
+}
+
+TArray<ACombatNPC*> SkillsSpellsAndEffectsActions::GetTargetsForAllies(const ABattleManager* const BattleManager, const ESpellRange SpellRange, const ESpellType SpellType)
+{
+	TArray<ACombatNPC*> TargetActors{};
+	TArray<ACombatNPC*> ArrayToSelectTargetsFrom{};
+	if (SpellType == ESpellType::RESTORATION || SpellType == ESpellType::BUFF)
+		ArrayToSelectTargetsFrom = BattleManager->BattleAlliesPlayer;
+	else if (SpellType == ESpellType::ASSAULT || SpellType == ESpellType::DEBUFF)
+		ArrayToSelectTargetsFrom = BattleManager->BattleEnemies;
+	switch (SpellRange) {
 		case ESpellRange::SINGLE:
-			if (TargetsBattleSide == EBattleSide::ENEMIES) {
-				if (BattleManager->SelectedCombatNPCIndex < BattleManager->BattleEnemies.Num() && BattleManager->SelectedCombatNPCIndex >= 0)
-					TargetActors.Add(BattleManager->BattleEnemies[BattleManager->SelectedCombatNPCIndex]);
-			}
-			else if (TargetsBattleSide == EBattleSide::ALLIES) {
-				if (BattleManager->SelectedCombatNPCIndex < BattleManager->BattleAlliesPlayer.Num() && BattleManager->SelectedCombatNPCIndex >= 0)
-					TargetActors.Add(BattleManager->BattleAlliesPlayer[BattleManager->SelectedCombatNPCIndex]);
-			}
+			if (BattleManager->SelectedCombatNPCIndex < ArrayToSelectTargetsFrom.Num() && BattleManager->SelectedCombatNPCIndex >= 0)
+				TargetActors.Add(ArrayToSelectTargetsFrom[BattleManager->SelectedCombatNPCIndex]);
 			break;
 		case ESpellRange::NEIGHBORS:
-			if (TargetsBattleSide == EBattleSide::ENEMIES) {
-				if (BattleManager->SelectedCombatNPCIndex < BattleManager->BattleEnemies.Num() && BattleManager->SelectedCombatNPCIndex >= 0)
-					TargetActors.Add(BattleManager->BattleEnemies[BattleManager->SelectedCombatNPCIndex]);
-				if (BattleManager->SelectedCombatNPCIndex + 1 < BattleManager->BattleEnemies.Num())
-					TargetActors.Add(BattleManager->BattleEnemies[BattleManager->SelectedCombatNPCIndex + 1]);
-				if (BattleManager->SelectedCombatNPCIndex - 1 >= 0)
-					TargetActors.Add(BattleManager->BattleEnemies[BattleManager->SelectedCombatNPCIndex - 1]);
-			}
-			else if (TargetsBattleSide == EBattleSide::ALLIES) {
-				if (BattleManager->SelectedCombatNPCIndex < BattleManager->BattleAlliesPlayer.Num() && BattleManager->SelectedCombatNPCIndex >= 0)
-					TargetActors.Add(BattleManager->BattleAlliesPlayer[BattleManager->SelectedCombatNPCIndex]);
-				if (BattleManager->SelectedCombatNPCIndex + 1 < BattleManager->BattleAlliesPlayer.Num())
-					TargetActors.Add(BattleManager->BattleAlliesPlayer[BattleManager->SelectedCombatNPCIndex + 1]);
-				if (BattleManager->SelectedCombatNPCIndex - 1 >= 0)
-					TargetActors.Add(BattleManager->BattleAlliesPlayer[BattleManager->SelectedCombatNPCIndex - 1]);
-			}
+			if (BattleManager->SelectedCombatNPCIndex < ArrayToSelectTargetsFrom.Num() && BattleManager->SelectedCombatNPCIndex >= 0)
+				TargetActors.Add(ArrayToSelectTargetsFrom[BattleManager->SelectedCombatNPCIndex]);
+			if (BattleManager->SelectedCombatNPCIndex + 1 < ArrayToSelectTargetsFrom.Num())
+				TargetActors.Add(ArrayToSelectTargetsFrom[BattleManager->SelectedCombatNPCIndex + 1]);
+			if (BattleManager->SelectedCombatNPCIndex - 1 >= 0)
+				TargetActors.Add(ArrayToSelectTargetsFrom[BattleManager->SelectedCombatNPCIndex - 1]);
 			break;
 		case ESpellRange::EVERYONE:
-			if (TargetsBattleSide == EBattleSide::ENEMIES) {
-				for (ACombatNPC* CombatNPCInArray : BattleManager->BattleEnemies)
-					TargetActors.Add(CombatNPCInArray);
-			}
-			else if (TargetsBattleSide == EBattleSide::ALLIES) {
-				for (ACombatNPC* CombatNPCInArray : BattleManager->BattleAlliesPlayer)
-					TargetActors.Add(CombatNPCInArray);
-			}
+			TargetActors = ArrayToSelectTargetsFrom;
 			break;
 	}
 	return TargetActors;

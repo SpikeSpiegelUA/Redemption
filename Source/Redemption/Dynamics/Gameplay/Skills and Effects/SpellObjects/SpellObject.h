@@ -29,6 +29,7 @@ public:
 
 	void SetSpell(const class ASpell* const NewSpell);
 	void SetTargetBattleSide(const EBattleSide NewTargetBattleSide);
+	void SetTarget(ACombatNPC* const NewTarget);
 private:
 	UFUNCTION()
 		void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -38,6 +39,7 @@ private:
 
 	class ASpell* Spell{};
 	EBattleSide TargetBattleSide{};
+	ACombatNPC* Target{};
 
 	//On overlap with the player or an enemy we need to destroy this object and set timer for turn change
 	void OnOverlapBeginsActions(const class APlayerCharacter* const PlayerCharacter);

@@ -16,7 +16,7 @@ class REDEMPTION_API UAnimNotify_MagicAttackMiddle : public UAnimNotify
 {
 	GENERATED_BODY()
 private:
-	void SpawnSpellObject(const ASpellWithSpellObject* const SpellWithSpellObject, const USkeletalMeshComponent* const MeshComp, const ACombatNPC* const CombatNPC);
+	AActor* SpawnSpellObject(const ASpellWithSpellObject* const SpellWithSpellObject, const USkeletalMeshComponent* const MeshComp, const ACombatNPC* const CombatNPC);
 public:
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 };

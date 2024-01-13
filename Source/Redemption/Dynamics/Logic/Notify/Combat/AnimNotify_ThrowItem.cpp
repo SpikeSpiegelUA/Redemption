@@ -22,7 +22,6 @@ void UAnimNotify_ThrowItem::SpawnItemObject(const AGameItemWithItemObject* const
 void UAnimNotify_ThrowItem::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
 	//Spawn Spell Object and rotate it towards the selected enemy
-	if(IsValid(MeshComp->GetWorld()))
 	if (IsValid(MeshComp->GetWorld()) && IsValid(MeshComp->GetWorld()->GetFirstPlayerController()))
 		if (ACombatNPC* CombatNPC = Cast<ACombatNPC>(MeshComp->GetOwner()); IsValid(CombatNPC))
 			if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(MeshComp->GetWorld()->GetFirstPlayerController()->GetCharacter()))

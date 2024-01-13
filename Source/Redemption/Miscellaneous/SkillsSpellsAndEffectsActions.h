@@ -26,8 +26,10 @@ namespace SkillsSpellsAndEffectsActions {
 	void InitializeElementalResistances(TArray<FElementAndItsPercentageStruct>& ElementalResistances);
 	//Same as the function above, just for physical resistances;
 	void InitializePhysicalResistances(TArray<FPhysicalTypeAndItsPercentageStruct>& PhysicalResistances);
-	//Get Targets for attack, depending on a spell range and a caster's battle side.
-	TArray<ACombatNPC*> GetTargets(const ABattleManager* const BattleManager, const EBattleSide TargetsBattleSide, const ESpellRange SpellRange);
+	//Get Targets for attack for player and allies, depending on a spell range.
+	TArray<ACombatNPC*> GetTargetsForAllies(const ABattleManager* const BattleManager, const ESpellRange SpellRange, const ESpellType SpellType);
+	//Get Targets for attack for enemies, depending on a spell range.
+	TArray<ACombatNPC*> GetTargetsForEnemies(const ABattleManager* const BattleManager, const AActor* const Target, const ESpellRange SpellRange, const ESpellType SpellType);
 	template<typename T>
 	FText GetEnumDisplayName(T EnumValue)
 	{

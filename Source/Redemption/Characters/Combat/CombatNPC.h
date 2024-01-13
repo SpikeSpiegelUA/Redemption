@@ -50,12 +50,14 @@ public:
 	int GetRangeAmmo() const;
 	int GetLuck() const;
 	AActor* GetStartLocation() const;
+	const FRotator& GetStartRotation() const;
 	TSubclassOf<ASmartObject> GetAIClass() const;
-	const TArray<TSubclassOf<ASpell>>& GetAvailableSkills() const;
+	const TArray<TSubclassOf<ASpell>>& GetAvailableSpells() const;
 
 
 	void SetRangeAmmo(int8 NewRangeAmmo);
 	void SetStartLocation(const AActor* const NewLocation);
+	void SetStartRotation(const FRotator& NewStartRotation);
 
 	//Combat mode regarding variables
 	UPROPERTY(VisibleAnywhere, Category = "Combat")
@@ -88,7 +90,7 @@ public:
 	//Function to call, when a NPC got hit. Parameters for a standard attack.
 	bool GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, bool ForcedMiss = false) override;
 	//Function to call, when a NPC got hit. Parameters for a buff/debuff attack.
-	bool GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements) override;
+	bool GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements, const ESpellType BuffOrDebuff) override;
 protected:
 
 	virtual void BeginPlay() override;
@@ -106,6 +108,8 @@ protected:
 		int EvasionChance{};
 	UPROPERTY(EditAnywhere, Category = "Combat")
 		AActor* StartLocation {};
+	UPROPERTY(VisibleAnywhere, Category = "Combat")
+		FRotator StartRotation{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
 		int Strength = 1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
@@ -140,7 +144,7 @@ protected:
 		UWidgetComponent* CrosshairWidgetComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true))
 		TSubclassOf<ASmartObject> AIClass;
-	//Spells and skills classes for the SkillBattleMenu.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spells")
-		TArray<TSubclassOf<ASpell>> AvailableSkills{};
+	//Spells and skills classes for the SkillBattleMenu and AI behavior.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = true))
+		TArray<TSubclassOf<ASpell>> AvailableSpells{};
 };

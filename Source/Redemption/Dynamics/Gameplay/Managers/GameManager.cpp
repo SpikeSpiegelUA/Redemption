@@ -65,6 +65,7 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 					if (IsValid(SpawnedEnemy) && IsValid(AISmartObject))
 						SpawnedEnemy->SetSmartObject(AISmartObject);
 					SpawnedEnemy->SetStartLocation(EnemyBattleSpawns[i]);
+					SpawnedEnemy->SetStartRotation(SpawnedEnemy->GetActorRotation());
 					if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(SpawnedEnemy->GetController()); IsValid(AIController))
 						AIController->SetDynamicSubtree();
 					BattleManager->BattleEnemies.Add(SpawnedEnemy);
@@ -86,6 +87,7 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 				if (IsValid(BattleManager)) {
 					SpawnedAlly->SetStartLocation(AlliesPlayerBattleSpawns[i]);
 					SpawnedAlly->SetActorLocation(AlliesPlayerBattleSpawns[i]->GetActorLocation());
+					SpawnedAlly->SetStartRotation(SpawnedAlly->GetActorRotation());
 					BattleManager->BattleAlliesPlayer.Add(SpawnedAlly);
 					BattleManager->AlliesPlayerTurnQueue.Add(i);
 				}
@@ -100,6 +102,7 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 			CombatPlayerCharacter->SetActorLocation(AlliesPlayerBattleSpawns[3]->GetActorLocation());
 			CombatPlayerCharacter->SetActorRotation(FRotator(0, 180, 0));
 			CombatPlayerCharacter->SetStartLocation(AlliesPlayerBattleSpawns[3]);
+			CombatPlayerCharacter->SetStartRotation(CombatPlayerCharacter->GetActorRotation());
 			PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesHealthBars()[BattleManager->BattleAlliesPlayer.Num()]->PercentDelegate.Clear();
 			PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesManaBars()[BattleManager->BattleAlliesPlayer.Num()]->PercentDelegate.Clear();
 			PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesInfoVerticalBoxes()[BattleManager->BattleAlliesPlayer.Num()]->SetVisibility(ESlateVisibility::Visible);
@@ -117,7 +120,7 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 			PlayerCharacter->SetActorLocation(FVector(1350, 5610, -960));
 			PlayerCharacter->GetAlliesInfoBarsWidget()->AddToViewport();
 			PlayerCharacter->GetSkillBattleMenuWidget()->ResetSkillsScrollBox();
-			for (TSubclassOf<ASpell> SpellClass : BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnCombatNPCIndex]->GetAvailableSkills())
+			for (TSubclassOf<ASpell> SpellClass : BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnCombatNPCIndex]->GetAvailableSpells())
 				PlayerCharacter->GetSkillBattleMenuWidget()->AddSkillEntryToSkillsScrollBox(Cast<ASpell>(SpellClass->GetDefaultObject()));
 			if (UAlliesInfoBars* AlliesInfoBarsWidget = PlayerCharacter->GetAlliesInfoBarsWidget(); IsValid(AlliesInfoBarsWidget)) {
 				if(AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder < AlliesInfoBarsWidget->GetAlliesNameBorders().Num())
@@ -173,7 +176,8 @@ void AGameManager::EndBattle()
 		BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
 		BattleManager->SetCanTurnBehindPlayerCameraToTarget(false);
 		for (int i = BattleManager->BattleEnemies.Num() - 1; i >= 0; i--) {
-			PlayerCharacter->Gold += BattleManager->BattleEnemies[i]->GetGoldReward();
+			if(ACombatEnemyNPC* CombatEnemyNPC = Cast<ACombatEnemyNPC>(BattleManager->BattleEnemies[i]); IsValid(CombatEnemyNPC))
+				PlayerCharacter->Gold += CombatEnemyNPC->GetGoldReward();
 			BattleManager->BattleEnemies[i]->Destroy();
 		}
 		PlayerCharacter->CurrentHP = BattleManager->CombatPlayerCharacter->CurrentHP;

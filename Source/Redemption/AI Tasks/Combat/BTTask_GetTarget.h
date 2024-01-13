@@ -13,7 +13,6 @@ UCLASS()
 class REDEMPTION_API UBTTask_GetTarget : public UBTTask_BlackboardBase
 {
 	GENERATED_BODY()
-
 public:
 	UBTTask_GetTarget(const FObjectInitializer& ObjectInitializer);
 

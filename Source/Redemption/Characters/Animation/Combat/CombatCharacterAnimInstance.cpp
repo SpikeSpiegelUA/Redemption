@@ -70,6 +70,14 @@ void UCombatCharacterAnimInstance::ToggleCombatCharacterIsAiming(bool Value)
 		BitmapsActions::ClearBit(CombatCharacterAnimationStateBitmaskCode, static_cast<int32>(ECombatCharacterAnimationState::CombatCharacterIsAiming));
 }
 
+void UCombatCharacterAnimInstance::ToggleCombatCharacterIsAttackingWithMagicWithoutSpellObject(bool Value)
+{
+	if (Value)
+		BitmapsActions::SetBit(CombatCharacterAnimationStateBitmaskCode, static_cast<int32>(ECombatCharacterAnimationState::CombatCharacterIsAttackingWithMagicWithoutSpellObject));
+	else
+		BitmapsActions::ClearBit(CombatCharacterAnimationStateBitmaskCode, static_cast<int32>(ECombatCharacterAnimationState::CombatCharacterIsAttackingWithMagicWithoutSpellObject));
+}
+
 bool UCombatCharacterAnimInstance::GetCombatCharacterIsDead() const
 {
 	return BitmapsActions::TestBit(CombatCharacterAnimationStateBitmaskCode, static_cast<int32>(ECombatCharacterAnimationState::CombatCharacterIsDead));

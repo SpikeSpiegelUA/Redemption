@@ -21,5 +21,5 @@ public:
        bool GetHit(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, bool ForcedMiss = false);
     //Function to call, when an enemy got hit. Parameters for a buff/debuff attack.
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
-       bool GetHitWithBuffOrDebuff(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements);
+       bool GetHitWithBuffOrDebuff(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements, const ESpellType BuffOrDebuff);
 };
