@@ -13,6 +13,7 @@
 #include "..\GameInstance\Structs\ActorGameInstanceData.h"
 #include "..\GameInstance\Structs\PlayerCharacterInstanceData.h"
 #include "..\UI\Miscellaneous\SaveSlotEntry.h"
+#include "Structs/CombatAllyNPCGameInstanceData.h"
 #include "RedemptionGameInstance.generated.h"
 
 /**
@@ -56,6 +57,10 @@ public:
 		TArray<FActorGameInstanceData> TownActors{};
 	UPROPERTY(VisibleAnywhere, SaveGame)
 		TArray<FActorGameInstanceData> DungeonActors{};
+	//Combat Allies variables
+	UPROPERTY(VisibleAnywhere, SaveGame)
+		TArray<FCombatAllyNPCGameInstanceData> CombatAllyNPCs{};
+
 
 	//Settings variables.
 	UPROPERTY(VisibleAnywhere, Category = "Settings", SaveGame)

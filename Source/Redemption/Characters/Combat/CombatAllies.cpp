@@ -50,6 +50,12 @@ void ACombatAllies::StartMovingToStartLocation()
 	ACombatAlliesAIController* CombatAlliesAIController = Cast<ACombatAlliesAIController>(GetController());
 	if (IsValid(CombatAlliesAIController))
 		CombatAlliesAIController->MoveToActor(StartLocation);
+	
+}
+
+const UTexture* ACombatAllies::GetCharacterPortrait() const
+{
+	return CharacterPortrait;
 }
 
 UFloatingManaBarWidget* ACombatAllies::GetFloatingManaBarWidget() const

@@ -28,11 +28,28 @@ void URedemptionGameInstance::SaveGame(const uint16 SlotIndex, bool IsOverwritin
 	URedemptionSaveGame* LoadedRedemptionSaveGame = Cast<URedemptionSaveGame>(UGameplayStatics::CreateSaveGameObject(URedemptionSaveGame::StaticClass()));
 	if (IsValid(LoadedRedemptionSaveGame)) {
 		if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
-			PlayerCharacterInstanceDataStruct.PlayerTransform = PlayerCharacter->GetActorTransform();
-			FMemoryWriter MemWriter(PlayerCharacterInstanceDataStruct.ByteData);
-			FObjectAndNameAsStringProxyArchive Ar(MemWriter, true);
-			Ar.ArIsSaveGame = true;
-			PlayerCharacter->Serialize(Ar);
+			//Save PlayerCharacter.
+			{
+				PlayerCharacterInstanceDataStruct.PlayerTransform = PlayerCharacter->GetActorTransform();
+				FMemoryWriter MemWriter(PlayerCharacterInstanceDataStruct.ByteData);
+				FObjectAndNameAsStringProxyArchive Ar(MemWriter, true);
+				Ar.ArIsSaveGame = true;
+				PlayerCharacter->Serialize(Ar);
+			}
+			//Save Allies.
+			if (URedemptionGameInstance* RedemptionGameInstance = GetWorld()->GetGameInstance<URedemptionGameInstance>(); IsValid(RedemptionGameInstance)){
+				RedemptionGameInstance->CombatAllyNPCs.Empty();
+				for (ACombatAllyNPC* CombatAllyNPC : PlayerCharacter->GetAllies()) {
+					FCombatAllyNPCGameInstanceData CombatAllyNPCGameInstanceData{};
+					CombatAllyNPCGameInstanceData.ActorClass = CombatAllyNPC->GetClass();
+					CombatAllyNPCGameInstanceData.ActorName = CombatAllyNPC->GetFName();
+					FMemoryWriter MemWriter(CombatAllyNPCGameInstanceData.ByteData);
+					FObjectAndNameAsStringProxyArchive Ar(MemWriter, true);
+					Ar.ArIsSaveGame = true;
+					CombatAllyNPC->Serialize(Ar);
+					RedemptionGameInstance->CombatAllyNPCs.Add(CombatAllyNPCGameInstanceData);
+				}
+			}
 		}
 		if (UGameplayStatics::GetCurrentLevelName(GetWorld()) == "Town")
 			TownActors.Empty();
@@ -41,7 +58,7 @@ void URedemptionGameInstance::SaveGame(const uint16 SlotIndex, bool IsOverwritin
 		for (FActorIterator It(GetWorld()); It; ++It)
 		{
 			AActor* Actor = *It;
-			if (!IsValid(Actor) || !Actor->Implements<USavableObjectInterface>() || IsValid(Cast<APlayerCharacter>(Actor)))
+			if (!IsValid(Actor) || !Actor->Implements<USavableObjectInterface>() || IsValid(Cast<APlayerCharacter>(Actor)) || IsValid(Cast<ACombatAllyNPC>(Actor)))
 			{
 				continue;
 			}

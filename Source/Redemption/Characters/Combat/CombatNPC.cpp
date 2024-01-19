@@ -19,6 +19,9 @@ ACombatNPC::ACombatNPC()
 	CrosshairWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Crosshair"));
 	CrosshairWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
 	CrosshairWidgetComponent->SetupAttachment(RootComponent);
+
+	InitializeSkills();
+	InitializeStats();
 }
 
 // Called when the game starts or when spawned
@@ -34,6 +37,31 @@ void ACombatNPC::BeginPlay()
 	SkillsSpellsAndEffectsActions::InitializeElementalResistances(ElementalResistances);
 	SkillsSpellsAndEffectsActions::InitializePhysicalResistances(PhysicalResistances);
 }
+
+void ACombatNPC::InitializeStats()
+{
+	StatsMap.Add(ECharacterStats::STRENGTH, 1);
+	StatsMap.Add(ECharacterStats::PERCEPTION, 1);
+	StatsMap.Add(ECharacterStats::ENDURANCE, 1);
+	StatsMap.Add(ECharacterStats::CHARISMA, 1);
+	StatsMap.Add(ECharacterStats::INTELLIGENCE, 1);
+	StatsMap.Add(ECharacterStats::WILL, 1);
+	StatsMap.Add(ECharacterStats::AGILITY, 1);
+	StatsMap.Add(ECharacterStats::LUCK, 1);
+}
+
+void ACombatNPC::InitializeSkills()
+{
+	SkillsMap.Add(ECharacterSkills::MELEE, 1);
+	SkillsMap.Add(ECharacterSkills::RANGE, 1);
+	SkillsMap.Add(ECharacterSkills::ASSAULTSPELLS, 1);
+	SkillsMap.Add(ECharacterSkills::DEBUFFSPELLS, 1);
+	SkillsMap.Add(ECharacterSkills::RESTORATIONSPELLS, 1);
+	SkillsMap.Add(ECharacterSkills::BUFFSPELLS, 1);
+	SkillsMap.Add(ECharacterSkills::DEFEND, 1);
+	SkillsMap.Add(ECharacterSkills::PERSUASION, 1);
+}
+
 // Called every frame
 void ACombatNPC::Tick(float DeltaTime)
 {
@@ -49,7 +77,7 @@ bool ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffec
 				GetActorLocation(), GetActorRotation());
 			FString TextForCombatFloatingInformationActor = FString();
 			uint8 EvasionRandomNumber = FMath::RandRange(0, 100);
-			int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance + Agility * 2,
+			int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance + GetStat(ECharacterStats::AGILITY) * 2,
 				Effects, EEffectArea::EVASION), Effects, ElementalResistances, ContainedElements);
 			if (EvasionRandomNumber <= ChanceOfEvasion) {
 				if(BuffOrDebuff == ESpellType::BUFF)
@@ -84,7 +112,7 @@ bool ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementA
 			ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), GetActorLocation(), GetActorRotation());
 			FString TextForCombatFloatingInformationActor = FString();
 			uint8 EvasionRandomNumber = FMath::RandRange(0, 100);
-			int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance + Agility * 2, Effects, EEffectArea::EVASION);
+			int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance + GetStat(ECharacterStats::AGILITY) * 2, Effects, EEffectArea::EVASION);
 			if (EvasionRandomNumber <= ChanceOfEvasion || ForcedMiss) {
 				TextForCombatFloatingInformationActor.Append("Miss!");
 				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
@@ -174,6 +202,11 @@ int ACombatNPC::GetCurrentHP() const
 	return CurrentHP;
 }
 
+int ACombatNPC::GetArmorValue() const
+{
+	return ArmorValue;
+}
+
 int ACombatNPC::GetMeleeAttackValue() const
 {
 	return MeleeAttackValue;
@@ -184,14 +217,14 @@ int ACombatNPC::GetRangeAttackValue() const
 	return RangeAttackValue;
 }
 
+int ACombatNPC::GetEvasionChance() const
+{
+	return EvasionChance;
+}
+
 int ACombatNPC::GetRangeAmmo() const
 {
 	return RangeAmmo;
-}
-
-int ACombatNPC::GetLuck() const
-{
-	return Luck;
 }
 
 AActor* ACombatNPC::GetStartLocation() const
@@ -212,6 +245,26 @@ TSubclassOf<ASmartObject> ACombatNPC::GetAIClass() const
 const TArray<TSubclassOf<ASpell>>& ACombatNPC::GetAvailableSpells() const
 {
 	return AvailableSpells;
+}
+
+const int8 ACombatNPC::GetStat(const ECharacterStats StatToGet) const
+{
+	return *StatsMap.Find(StatToGet);
+}
+
+const int8 ACombatNPC::GetSkill(const ECharacterSkills SkillToGet) const
+{
+	return *SkillsMap.Find(SkillToGet);
+}
+
+void ACombatNPC::SetStat(const ECharacterStats StatToSet, const int8 NewValue)
+{
+	StatsMap.Emplace(StatToSet, NewValue);
+}
+
+void ACombatNPC::SetSkill(const ECharacterSkills SkillToSet, const int8 NewValue)
+{
+	SkillsMap.Emplace(SkillToSet, NewValue);
 }
 
 float ACombatNPC::GetHealthPercentage()

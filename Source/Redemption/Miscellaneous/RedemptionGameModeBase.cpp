@@ -76,12 +76,14 @@ void ARedemptionGameModeBase::SpawnSavedObjectsAndSaveSlots()
 				}
 			}
 		}
+		//Load Allies.
+		for (FCombatAllyNPCGameInstanceData CombatAllyNPCGameInstanceData : RedemptionGameInstance->CombatAllyNPCs) {
+			if (ACombatAllyNPC* SpawnedActor = GetWorld()->SpawnActor<ACombatAllyNPC>(CombatAllyNPCGameInstanceData.ActorClass,
+				FVector(-500.0, -500.0, -500.0), FRotator(0.0, 0.0, 0.0)); IsValid(SpawnedActor))
+				if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
+					PlayerCharacter->AddNewAllyToAllies(SpawnedActor);
+		}
 	}
-}
-
-void ARedemptionGameModeBase::PostLoad()
-{
-	Super::PostLoad();
 }
 
 void ARedemptionGameModeBase::Tick(float DeltaTime)

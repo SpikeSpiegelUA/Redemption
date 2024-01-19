@@ -25,8 +25,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 		class UFloatingManaBarWidget* FloatingManaBarWidget {};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
-		UWidgetComponent* FloatingManaBarComponentWidget;
-
+		UWidgetComponent* FloatingManaBarComponentWidget{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information")
+		UTexture* CharacterPortrait{};
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -44,5 +45,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
 		float CenterMarkMovingSpeed{};
 
+	const UTexture* GetCharacterPortrait() const;
 	UFloatingManaBarWidget* GetFloatingManaBarWidget() const;
 };

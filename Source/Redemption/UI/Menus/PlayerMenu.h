@@ -21,7 +21,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* InventoryButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		class UButton* CloseMenuButton;
+		class UButton* CloseButton;
+		UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UButton* PartyButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBackgroundBlur* Blur;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -32,7 +34,8 @@ protected:
 
 public:
 	UButton* GetInventoryButton() const;
-	UButton* GetCloseMenuButton() const;
+	UButton* GetPartyButton() const;
+	UButton* GetCloseButton() const;
 	UStackBox* GetButtonsStackBox() const;
 
 	UFUNCTION()
@@ -40,7 +43,11 @@ public:
 	UFUNCTION()
 	void InventoryButtonOnHovered();
 	UFUNCTION()
-	void CloseMenuButtonOnClicked();
+	void CloseButtonOnClicked();
 	UFUNCTION()
-	void CloseMenuButtonOnHovered();
+	void CloseButtonOnHovered();
+	UFUNCTION()
+	void PartyButtonOnClicked();
+	UFUNCTION()
+	void PartyButtonOnHovered();
 };

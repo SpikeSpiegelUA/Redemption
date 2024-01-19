@@ -25,6 +25,34 @@ enum class EBattleSide :uint8
 	ENEMIES UMETA(DisplayName = "Enemies")
 };
 
+UENUM(BlueprintType)
+enum class ECharacterStats :uint8
+{
+	NONE UMETA(Hidden),
+	STRENGTH UMETA(DisplayName = "Strength"),
+	PERCEPTION UMETA(DisplayName = "Perception"),
+	ENDURANCE UMETA(DisplayName = "Endurance"),
+	CHARISMA UMETA(DisplayName = "Charisma"),
+	INTELLIGENCE UMETA(DisplayName = "Intelligence"),
+	WILL UMETA(DisplayName = "Will"),
+	AGILITY UMETA(DisplayName = "Agility"),
+	LUCK UMETA(DisplayName = "Luck")
+};
+
+UENUM(BlueprintType)
+enum class ECharacterSkills :uint8
+{
+	NONE UMETA(Hidden),
+	MELEE UMETA(DisplayName = "Melee"),
+	RANGE UMETA(DisplayName = "Range"),
+	ASSAULTSPELLS UMETA(DisplayName = "Assault spells"),
+	DEBUFFSPELLS UMETA(DisplayName = "Debuff spells"),
+	RESTORATIONSPELLS UMETA(DisplayName = "Restoration spells"),
+	BUFFSPELLS UMETA(DisplayName = "Buff spells"),
+	DEFEND UMETA(DisplayName = "Defend"),
+	PERSUASION UMETA(DisplayName = "Persuasion")
+};
+
 UCLASS()
 class REDEMPTION_API ACombatNPC : public ACharacterInTheWorld, public ICombatActionsInterface
 {
@@ -48,11 +76,14 @@ public:
 	int GetRangeAttackValue() const;
 	int GetEvasionChance() const;
 	int GetRangeAmmo() const;
-	int GetLuck() const;
 	AActor* GetStartLocation() const;
 	const FRotator& GetStartRotation() const;
 	TSubclassOf<ASmartObject> GetAIClass() const;
 	const TArray<TSubclassOf<ASpell>>& GetAvailableSpells() const;
+	const int8 GetStat(const ECharacterStats StatToGet) const;
+	const int8 GetSkill(const ECharacterSkills SkillToGet) const;
+	void SetStat(const ECharacterStats StatToSet, const int8 NewValue);
+	void SetSkill(const ECharacterSkills SkillToSet, const int8 NewValue);
 
 
 	void SetRangeAmmo(int8 NewRangeAmmo);
@@ -66,21 +97,23 @@ public:
 		ASpell* SpellToUse {};
 	UPROPERTY(VisibleAnywhere, Category = "Combat")
 		AActor* Target {};
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", SaveGame)
 		float CurrentHP = 100;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", SaveGame)
 		float MaxHP = 100;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", SaveGame)
 		float CurrentMana = 100;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", SaveGame)
 		float MaxMana = 100;
 	//Chance, that this actor will be targeted by enemy
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", SaveGame)
 		int TargetingChance = 25;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VFX")
 		class UParticleSystemComponent* DizzyEmitterComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VFX")
 		class UNiagaraComponent* FlamesEmitterComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
+		int Level = 1;
 
 	UFUNCTION()
 		float GetHealthPercentage();
@@ -95,56 +128,53 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	//Use in constructor only.
+	void InitializeStats();
+	//Use in constructor only.
+	void InitializeSkills();
+
 	//Combat mode regarding variables
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", SaveGame)
 		int ArmorValue{};
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", SaveGame)
 		int MeleeAttackValue{};
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", SaveGame)
 		int RangeAttackValue{};
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", SaveGame)
 		int RangeAmmo{};
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", SaveGame)
 		int EvasionChance{};
+
 	UPROPERTY(EditAnywhere, Category = "Combat")
 		AActor* StartLocation {};
 	UPROPERTY(VisibleAnywhere, Category = "Combat")
 		FRotator StartRotation{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
-		int Strength = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
-		int Perception = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
-		int Endurance = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
-		int Charisma = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
-		int Intelligence = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
-		int Will = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
-		int Agility = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
-		int Luck = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System")
-		int Level = 1;
-	UPROPERTY(EditAnywhere, Category = "Combat")
+
+	UPROPERTY(EditAnywhere, Category = "Combat", SaveGame)
 		TArray<FElementAndItsPercentageStruct> ElementalResistances {};
-	UPROPERTY(EditAnywhere, Category = "Combat")
+	UPROPERTY(EditAnywhere, Category = "Combat", SaveGame)
 		TArray<FPhysicalTypeAndItsPercentageStruct> PhysicalResistances{};
-	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	UPROPERTY(EditDefaultsOnly, Category = "Combat", SaveGame)
 		TArray<FElementAndItsPercentageStruct> MeleeWeaponElements {};
-	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	UPROPERTY(EditDefaultsOnly, Category = "Combat", SaveGame)
 		TArray<FElementAndItsPercentageStruct> RangeWeaponElements {};
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 		UFloatingHealthBarWidget* FloatingHealthBarWidget {};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 		UWidgetComponent* FloatingHealthBarWidgetComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 		UWidgetComponent* CrosshairWidgetComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true))
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = true))
 		TSubclassOf<ASmartObject> AIClass;
+
 	//Spells and skills classes for the SkillBattleMenu and AI behavior.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells", meta = (AllowPrivateAccess = true), SaveGame)
 		TArray<TSubclassOf<ASpell>> AvailableSpells{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
+	TMap<ECharacterStats, int> StatsMap{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
+	TMap<ECharacterSkills, int> SkillsMap{};
 };

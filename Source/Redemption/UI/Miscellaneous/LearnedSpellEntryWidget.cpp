@@ -33,7 +33,7 @@ void ULearnedSpellEntryWidget::MainButtonOnClicked()
                 PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton = MainButton;
             }
             else if (PlayerCharacter->GetSkillBattleMenuWidget()->IsInViewport()) {
-                PlayerCharacter->GetSpellInfoWidget()->SetPositionInViewport(FVector2D(720, 20));
+                PlayerCharacter->GetSpellInfoWidget()->SetPositionInViewport(FVector2D(850, 79));
                 if (IsValid(PlayerCharacter->GetSkillBattleMenuWidget()->SelectedSkillButton))
                     PlayerCharacter->GetSkillBattleMenuWidget()->SelectedSkillButton->SetBackgroundColor(FLinearColor(0.6, 0.6, 0.6, 1));
                 PlayerCharacter->GetSkillBattleMenuWidget()->SelectedSkillButton = MainButton;
