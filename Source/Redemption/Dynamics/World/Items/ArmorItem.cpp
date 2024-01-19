@@ -13,6 +13,11 @@ TArray<FElementAndItsPercentageStruct> AArmorItem::GetElementsAndTheirPercentage
     return ElementsAndTheirPercentagesStructs;
 }
 
+TArray<FPhysicalTypeAndItsPercentageStruct> AArmorItem::GetPhysicalTypesAndTheirPercentagesStructs() const
+{
+    return PhysicalTypesAndTheirPercentagesStructs;
+}
+
 int AArmorItem::GetArmorValue() const
 {
     return ArmorValue;

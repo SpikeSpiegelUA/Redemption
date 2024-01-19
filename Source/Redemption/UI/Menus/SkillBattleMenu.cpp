@@ -34,21 +34,32 @@ void USkillBattleMenu::BackButtonWithNeighborsOnClicked()
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
 		this->RemoveFromParent();
-		PlayerCharacter->GetBattleMenuWidget()->AddToViewport();
-		PlayerCharacter->GetBattleMenuWidget()->GetMenuBorder()->SetVisibility(ESlateVisibility::Visible);
-		PlayerCharacter->GetSpellInfoWidget()->RemoveFromParent();
-		PlayerCharacter->GetBattleMenuWidget()->IsChoosingSkill = false;
-		PlayerCharacter->GetBattleManager()->IsSelectingAllyAsTarget = false;
-		PlayerCharacter->GetBattleMenuWidget()->IsChoosingAction = true;
+		if (!IsOpenedFromDetailedCharacterInfo) {
+			PlayerCharacter->GetBattleMenuWidget()->AddToViewport();
+			PlayerCharacter->GetBattleMenuWidget()->GetMenuBorder()->SetVisibility(ESlateVisibility::Visible);
+			PlayerCharacter->GetSpellInfoWidget()->RemoveFromParent();
+			PlayerCharacter->GetBattleMenuWidget()->IsChoosingSkill = false;
+			PlayerCharacter->GetBattleManager()->IsSelectingAllyAsTarget = false;
+			PlayerCharacter->GetBattleMenuWidget()->IsChoosingAction = true;
+			PlayerCharacter->GetSpellBattleMenuWidget()->SetCreatedSpell(nullptr);
+			HideNotificationAndClearItsTimer();
+		}
+		else {
+			PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->AddToViewport();
+			UseButtonWithNeighbors->SetVisibility(ESlateVisibility::Visible);
+			PlayerCharacter->GetSpellInfoWidget()->RemoveFromParent();
+			IsOpenedFromDetailedCharacterInfo = false;
+		}
 		if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
 			if (IsValid(UIManagerWorldSubsystem->PickedButton))
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.6f, 0.6f, 0.6f, 1.f));
-			UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetBattleMenuWidget()->GetAttackButton();
+			if (IsOpenedFromDetailedCharacterInfo)
+				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetBattleMenuWidget()->GetAttackButton();
+			else
+				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->GetToggleInfoButton();
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 			UIManagerWorldSubsystem->PickedButtonIndex = 0;
 		}
-		PlayerCharacter->GetSpellBattleMenuWidget()->SetCreatedSpell(nullptr);
-		HideNotificationAndClearItsTimer();
 	}
 }
 

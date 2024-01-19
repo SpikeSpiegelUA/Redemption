@@ -50,6 +50,7 @@ public:
 	//Selected skill button in scroll box, whose info is shown. Need this, to control which button to make green.
 	UButton* SelectedSkillButton{};
 	bool CanUseKeyboardButtonSelection = true;
+	bool IsOpenedFromDetailedCharacterInfo = false;
 
 	const class UScrollBox* GetSkillsScrollBox() const;
 	UButtonWithNeighbors* GetUseButtonWithNeighbors() const;

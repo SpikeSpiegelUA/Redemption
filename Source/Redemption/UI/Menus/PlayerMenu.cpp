@@ -74,15 +74,21 @@ void UPlayerMenu::InventoryButtonOnClicked()
 void UPlayerMenu::PartyButtonOnClicked()
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
-		PlayerCharacter->GetPlayerMenuWidget()->RemoveFromParent();
-		PlayerCharacter->GetPartyMenuWidget()->AddToViewport();
-		PlayerCharacter->GetPartyMenuWidget()->UpdateCharacterInfo(PlayerCharacter->GetAllies());
-		PartyButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-		UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
-		if (IsValid(UIManagerWorldSubsystem)) {
-			UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetPartyMenuWidget()->GetBackButton();
-			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+		if (IsValid(PlayerCharacter->GetPartyMenuClass()))
+			if (APlayerController* PlayerController = Cast<APlayerController>(PlayerCharacter->GetController()); IsValid(PlayerController))
+				PlayerCharacter->SetPartyMenuWidget(CreateWidget<UPartyMenu>(
+					PlayerController, PlayerCharacter->GetPartyMenuClass()));
+		if (IsValid(PlayerCharacter->GetPartyMenuWidget())) {
+			PlayerCharacter->GetPartyMenuWidget()->AddToViewport();
+			PlayerCharacter->GetPlayerMenuWidget()->RemoveFromParent();
+			PlayerCharacter->GetPartyMenuWidget()->UpdateCharacterInfo(PlayerCharacter->GetAllies());
+			PartyButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+			UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
+			if (IsValid(UIManagerWorldSubsystem)) {
+				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetPartyMenuWidget()->GetBackButton();
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			}
 		}
 	}
 }

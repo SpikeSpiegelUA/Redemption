@@ -25,11 +25,13 @@ void UPartyMenuGeneralCharacterInfo::SetCharacterInfo(const ACombatAllyNPC* cons
 	CharacterPortraitImage->Brush.SetImageSize(FVector2D(120, 100));
 	CharacterNameTextBlock->SetText(FText::FromName(AllyToSet->GetCharacterName()));
 	FString StringToSet{};
+	StringToSet.Append("Mana:");
 	StringToSet.AppendInt(AllyToSet->CurrentMana);
 	StringToSet.AppendChar('/');
 	StringToSet.AppendInt(AllyToSet->MaxMana);
 	CharacterManaTextBlock->SetText(FText::FromString(StringToSet));
 	StringToSet.Empty();
+	StringToSet.Append("HP:");
 	StringToSet.AppendInt(AllyToSet->CurrentHP);
 	StringToSet.AppendChar('/');
 	StringToSet.AppendInt(AllyToSet->MaxHP);
@@ -66,21 +68,28 @@ void UPartyMenuGeneralCharacterInfo::SetCharacterInfo(const APlayerCharacter* co
 void UPartyMenuGeneralCharacterInfo::CharacterNameButtonOnClicked()
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
-		PlayerCharacter->GetPartyMenuWidget()->RemoveFromParent();
-		PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->AddToViewport();
-		if (Ally != nullptr) {
-			PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->SetCharacterInfo(Ally);
-			PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->Ally = Ally;
-		}
-		else {
-			PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->SetCharacterInfo(PlayerCharacter);
-			PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->Ally = nullptr;
-		}
-		if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
-			if (IsValid(UIManagerWorldSubsystem->PickedButton))
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
-			UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->GetBackButton();
-			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+		if (IsValid(PlayerCharacter->GetDetailedCharacterInfoMenuClass()))
+			if(APlayerController* PlayerController = Cast<APlayerController>(PlayerCharacter->GetController()); IsValid(PlayerController))
+				PlayerCharacter->SetDetailedCharacterInfoMenuWidget(CreateWidget<UDetailedCharacterInfoMenu>(
+					PlayerController, PlayerCharacter->GetDetailedCharacterInfoMenuClass()));
+		if (IsValid(PlayerCharacter->GetDetailedCharacterInfoMenuWidget())) {
+			PlayerCharacter->GetPartyMenuWidget()->RemoveFromParent();
+			PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->AddToViewport();
+			if (Ally != nullptr) {
+				PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->Ally = Ally;
+				PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->SetCharacterInfoForAlly();
+
+			}
+			else {
+				PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->Ally = nullptr;
+				PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->SetCharacterInfoForPlayer(PlayerCharacter);
+			}
+			if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->GetBackButton();
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+			}
 		}
 	}
 }

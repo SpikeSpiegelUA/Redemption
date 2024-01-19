@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "..\Dynamics\World\Items\EquipmentItem.h"
 #include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
+#include "Redemption/Dynamics/Miscellaneous/PhysicalTypeAndItsPercentage.h"
 #include "ArmorItem.generated.h"
 
 /**
@@ -29,6 +30,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information")
 		TArray<FElementAndItsPercentageStruct> ElementsAndTheirPercentagesStructs {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information")
+		TArray<FPhysicalTypeAndItsPercentageStruct> PhysicalTypesAndTheirPercentagesStructs{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information")
 		EArmorType ArmorType{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information")
 		int ArmorValue{};
@@ -36,5 +39,6 @@ protected:
 public:
 	const EArmorType GetArmorType() const;
 	TArray<FElementAndItsPercentageStruct> GetElementsAndTheirPercentagesStructs() const;
+	TArray<FPhysicalTypeAndItsPercentageStruct> GetPhysicalTypesAndTheirPercentagesStructs() const;
 	int GetArmorValue() const;
 };
