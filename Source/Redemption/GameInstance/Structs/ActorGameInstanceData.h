@@ -10,7 +10,7 @@ struct FActorGameInstanceData
 	GENERATED_BODY()
 
 	/* Contains all 'SaveGame' marked variables of the Actor */
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	TArray<uint8> ByteData{};
 
 	/* Identifier for which Actor this belongs to */

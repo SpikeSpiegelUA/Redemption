@@ -15,21 +15,30 @@ void ACombatPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
-		Strength = PlayerCharacter->Strength;
-		Perception = PlayerCharacter->Perception;
-		Endurance = PlayerCharacter->Endurance;
-		Charisma = PlayerCharacter->Charisma;
-		Intelligence = PlayerCharacter->Intelligence;
-		Will = PlayerCharacter->Will;
-		Agility = PlayerCharacter->Agility;
-		Luck = PlayerCharacter->Luck;
+		SetStat(ECharacterStats::STRENGTH, PlayerCharacter->GetStat(ECharacterStats::STRENGTH));
+		SetStat(ECharacterStats::PERCEPTION, PlayerCharacter->GetStat(ECharacterStats::PERCEPTION));
+		SetStat(ECharacterStats::ENDURANCE, PlayerCharacter->GetStat(ECharacterStats::ENDURANCE));
+		SetStat(ECharacterStats::CHARISMA, PlayerCharacter->GetStat(ECharacterStats::CHARISMA));
+		SetStat(ECharacterStats::INTELLIGENCE, PlayerCharacter->GetStat(ECharacterStats::INTELLIGENCE));
+		SetStat(ECharacterStats::WILL, PlayerCharacter->GetStat(ECharacterStats::WILL));
+		SetStat(ECharacterStats::AGILITY, PlayerCharacter->GetStat(ECharacterStats::AGILITY));
+		SetStat(ECharacterStats::LUCK, PlayerCharacter->GetStat(ECharacterStats::LUCK));
+		SetSkill(ECharacterSkills::MELEE, PlayerCharacter->GetSkill(ECharacterSkills::MELEE));
+		SetSkill(ECharacterSkills::RANGE, PlayerCharacter->GetSkill(ECharacterSkills::RANGE));
+		SetSkill(ECharacterSkills::ASSAULTSPELLS, PlayerCharacter->GetSkill(ECharacterSkills::ASSAULTSPELLS));
+		SetSkill(ECharacterSkills::DEBUFFSPELLS, PlayerCharacter->GetSkill(ECharacterSkills::DEBUFFSPELLS));
+		SetSkill(ECharacterSkills::RESTORATIONSPELLS, PlayerCharacter->GetSkill(ECharacterSkills::RESTORATIONSPELLS));
+		SetSkill(ECharacterSkills::BUFFSPELLS, PlayerCharacter->GetSkill(ECharacterSkills::BUFFSPELLS));
+		SetSkill(ECharacterSkills::DEFEND, PlayerCharacter->GetSkill(ECharacterSkills::DEFEND));
+		SetSkill(ECharacterSkills::PERSUASION, PlayerCharacter->GetSkill(ECharacterSkills::PERSUASION));
+		Level = PlayerCharacter->Level;
 		if (IsValid(PlayerCharacter->GetInventoryMenuWidget())) {
 			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee)) {
 				MeleeAttackValue = PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee->GetAttackValue();
 				MeleeWeaponElements = PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee->GetElementsAndTheirPercentagesStructs();
 			}
 			else
-				MeleeAttackValue = 10;
+				MeleeAttackValue = 5;
 			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedRange)) {
 				RangeAmmo = PlayerCharacter->GetInventoryMenuWidget()->EquipedRange->GetAmmo();
 				RangeAttackValue = PlayerCharacter->GetInventoryMenuWidget()->EquipedRange->GetAttackValue();
@@ -54,6 +63,8 @@ void ACombatPlayerCharacter::BeginPlay()
 		MaxHP = PlayerCharacter->MaxHP;
 		CurrentMana = PlayerCharacter->CurrentMana;
 		MaxMana = PlayerCharacter->MaxMana;
+		EvasionChance = PlayerCharacter->EvasionChance;
+		TargetingChance = PlayerCharacter->TargetingChance;
 	}
 }
 

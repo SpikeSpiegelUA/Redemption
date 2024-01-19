@@ -1,4 +1,6 @@
 #include "CombatAllyNPC.h"
+#include "..\GameInstance\RedemptionGameInstance.h"
+#include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 
 // Sets default values
 ACombatAllyNPC::ACombatAllyNPC()
@@ -11,6 +13,8 @@ ACombatAllyNPC::ACombatAllyNPC()
 void ACombatAllyNPC::BeginPlay()
 {
 	Super::BeginPlay();
+	if (URedemptionGameInstance* RedemptionGameInstance = GetWorld()->GetGameInstance<URedemptionGameInstance>(); IsValid(RedemptionGameInstance))
+		Execute_LoadObjectFromGameInstance(this, RedemptionGameInstance);
 }
 
 // Called every frame
@@ -23,5 +27,22 @@ void ACombatAllyNPC::Tick(float DeltaTime)
 void ACombatAllyNPC::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+void ACombatAllyNPC::LoadObjectFromGameInstance_Implementation(const URedemptionGameInstance* const GameInstance)
+{
+	if (IsValid(GameInstance)) {
+		for (FCombatAllyNPCGameInstanceData CombatAllyNPCGameInstanceData : GameInstance->CombatAllyNPCs) {
+			if (CombatAllyNPCGameInstanceData.ActorName == this->GetFName())
+			{
+				FMemoryReader MemReader(CombatAllyNPCGameInstanceData.ByteData);
+				FObjectAndNameAsStringProxyArchive Ar(MemReader, true);
+				Ar.ArIsSaveGame = true;
+				// Convert binary array back into actor's variables
+				Serialize(Ar);
+				break;
+			}
+		}
+	}
 }
 

@@ -31,7 +31,8 @@
 #include "..\UI\Menus\DeathMenu.h"
 #include "..\UI\Menus\LearnedSpellsJournalMenu.h"
 #include "..\UI\Menus\SaveLoadGameMenu.h"
-#include "..\Characters\Combat\CombatAllies.h"
+#include "..\UI\Menus\DetailedCharacterInfoMenu.h"
+#include "..\Characters\Combat\CombatAllyNPC.h"
 #include "..\UI\SpecificFunction\SpellInfo.h"
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
@@ -55,6 +56,7 @@
 #include "Containers/EnumAsByte.h"
 #include "..\UI\HUD\AlliesInfoBars.h"
 #include "..\SaveSystem\Interfaces\SavableObjectInterface.h"
+#include "..\UI\Menus\PartyMenu.h"
 #include "PlayerCharacter.generated.h"
 
 /**
@@ -73,7 +75,10 @@ class APlayerCharacter : public ACharacter, public ISavableObjectInterface
 	
 private:
 	void CheckForwardRayHitResult();
-	void Death();
+	//Use in constructor only.
+	void InitializeStats();
+	//Use in constructor only.
+	void InitializeSkills();
 
 	UFUNCTION()
 		void RemoveNotification();
@@ -93,8 +98,8 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		URedemptionGameInstance* RedemptionGameInstance {};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true), SaveGame)
-		TArray<TSubclassOf<ACombatAllies>> Allies{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true))
+		TArray<ACombatAllyNPC*> Allies{};
 
 	UPROPERTY()
 		APlayerController* PlayerController {};
@@ -114,6 +119,11 @@ private:
 	//Timer Handles
 	FTimerHandle RemoveNotificationTimerHandle{};
 	FTimerHandle FinishGameTimerHandle{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame, meta = (AllowPrivateAccess = true))
+	TMap<ECharacterStats, int> StatsMap{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame, meta = (AllowPrivateAccess = true))
+	TMap<ECharacterSkills, int> SkillsMap{};
 public:
 	APlayerCharacter();
 
@@ -160,19 +170,27 @@ public:
 	UCombatCharacterInfoMenu* GetCombatCharacterInfoMenuWidget() const;
 	USaveLoadGameMenu* GetSaveLoadGameMenuWidget() const;
 	UResponsesBox* GetResponsesBox() const;
+	class UPartyMenu* GetPartyMenuWidget() const;
+	class UDetailedCharacterInfoMenu* GetDetailedCharacterInfoMenuWidget() const;
 	UTouchInterface* GetEmptyTouchInterface() const;
 	UTouchInterface* GetStandardTouchInterface() const;
-	TArray<TSubclassOf<ACombatAllies>> GetAllies();
+	TArray<ACombatAllyNPC*> GetAllies();
+	const TArray<TSubclassOf<ASpell>> GetAvailableSkills() const;
 
 	//Restore widgets to default state
 	void RestartBattleMenuWidget();
 	void RestartBattleResultsScreenWidget();
+	void AddNewAllyToAllies(const ACombatAllyNPC* const AllyToAdd);
 
 	void SetInventoryScrollBoxEntryWidget(const UInventoryScrollBoxEntryWidget* const NewWidget);
 	void SetGameManager(const AGameManager* const NewGameManager);
 	void SetBattleManager(const ABattleManager* const NewBattleManager);
 	void SetAudioManager(const AAudioManager* const NewAudioManager);
 	void SetAllies(const TArray<TSubclassOf<ACombatAllies>>& NewAllies);
+	const int8 GetStat(const ECharacterStats StatToGet) const;
+	const int8 GetSkill(const ECharacterSkills SkillToGet) const;
+	void SetStat(const ECharacterStats StatToSet, const int8 NewValue);
+	void SetSkill(const ECharacterSkills SkillToSet, const int8 NewValue);
 protected:
 	/**Called for forwards/backward input*/
 	void MoveForward(float Value);
@@ -208,51 +226,55 @@ protected:
 
 	//UI
 	//Widget classes to spawn widget instances
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<UAlliesInfoBars> AlliesInfoBarsClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UForwardRayInfo> ForwardRayInfoClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class ULoadingScreen> LoadingScreenClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UPlayerMenu> PlayerMenuClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UInventoryScrollBoxEntryWidget> InventoryScrollBoxEntryClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UInventoryMenu> InventoryMenuClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UPauseMenu> PauseMenuClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UBattleMenu> BattleMenuClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UBattleResultsScreen> BattleResultsScreenClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UDialogueBox> DialogueBoxClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UResponsesBox> ResponsesBoxClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UResponseEntry> ResponseEntryClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UNotification> NotificationClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UDeathMenu> DeathMenuClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class USpellBattleMenu> SpellBattleMenuClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class USettingsMenu> SettingsMenuClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UMainMenu> MainMenuClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class ULearnedSpellsJournalMenu> LearnedSpellsJournalMenuClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class USkillBattleMenu> SkillBattleMenuClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class USaveLoadGameMenu> SaveLoadGameMenuClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class USpellInfo> SpellInfoClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UCombatCharacterInfoMenu> CombatCharacterInfoMenuClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+		TSubclassOf<class UPartyMenu> PartyMenuClass{};
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+		TSubclassOf<class UDetailedCharacterInfoMenu> DetailedCharacterInfoMenuClass{};
+	UPROPERTY(EditAnywhere, Category = "World")
 		TSubclassOf<class ALootInTheWorld> LootInTheWorldClass{};
 	//The widget instances
 	UPROPERTY()
@@ -295,6 +317,10 @@ protected:
 		class USpellInfo* SpellInfoWidget{};
 	UPROPERTY()
 		class UCombatCharacterInfoMenu* CombatCharacterInfoMenuWidget{};
+	UPROPERTY()
+		class UPartyMenu* PartyMenuWidget{};
+	UPROPERTY()
+		class UDetailedCharacterInfoMenu* DetailedCharacterInfoMenuWidget{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells")
 		TArray<TSubclassOf<ASpell>> AvailableSkills{};
@@ -314,6 +340,10 @@ public:
 		float CurrentMana = 100;
 	UPROPERTY(EditAnywhere, Category = "Combat", SaveGame)
 		float MaxMana = 100;
+	UPROPERTY(EditAnywhere, Category = "Combat", SaveGame)
+		int EvasionChance = 5;
+	UPROPERTY(EditAnywhere, Category = "Combat", SaveGame)
+		int TargetingChance = 25;
 	UPROPERTY(EditAnywhere, Category = "Inventory", SaveGame)
 		int Gold = 0;
 	UPROPERTY(VisibleAnywhere, Category = "Combat")
@@ -326,30 +356,17 @@ public:
 	bool CanOpenOtherMenus = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
-		int Strength = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
-		int Perception = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
-		int Endurance = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
-		int Charisma = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
-		int Intelligence = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
-		int Will = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
-		int Agility = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
-		int Luck = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
 		int Level = 1;
 
+	//General character information.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "General Information")
+		FString CharacterName{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "General Information")
+		UTexture* CharacterPortrait{};
 	//This is used by right button in the battle menu.
 	void InputScrollRight();
 	//This is used by left button in the battle menu.
 	void InputScrollLeft();
-
-	const TArray<TSubclassOf<ASpell>> GetAvailableSkills() const;
 
 private:
 #pragma region

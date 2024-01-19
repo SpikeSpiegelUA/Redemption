@@ -72,31 +72,36 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 				}
 			}
 			//Create allies and combat player character
-			TArray<TSubclassOf<ACombatAllies>> ShuffledCombatAllies = PlayerCharacter->GetAllies();
+			TArray<ACombatAllies*> ShuffledCombatAllies{};
+			for (ACombatAllyNPC* CombatAllyNPC : PlayerCharacter->GetAllies())
+				ShuffledCombatAllies.Add(CombatAllyNPC);
 			ArrayActions::ShuffleArray(ShuffledCombatAllies);
-			PlayerCharacter->SetAllies(ShuffledCombatAllies);
+			for(ACombatAllies* CombatAllies : ShuffledCombatAllies)
+				PlayerCharacter->GetAllies().Add(Cast<ACombatAllyNPC>(CombatAllies));
 			for (uint8 i = 0; i < PlayerCharacter->GetAllies().Num() && i < 4; i++) {
-				const FVector Location = AlliesPlayerBattleSpawns[i]->GetActorLocation();
-				ACombatAllyNPC* SpawnedAlly = GetWorld()->SpawnActor<ACombatAllyNPC>(PlayerCharacter->GetAllies()[i], Location, FRotator(0, 180, 0));
-				if (IsValid(SpawnedAlly->GetAIClass())) 
-					if (ASmartObject* AISmartObject = GetWorld()->SpawnActor<ASmartObject>(SpawnedAlly->GetAIClass()); IsValid(SpawnedAlly) && IsValid(AISmartObject))
-						SpawnedAlly->SetSmartObject(AISmartObject);
-				ACombatAllyNPCAIController* AIController = Cast<ACombatAllyNPCAIController>(SpawnedAlly->GetController());
-				if (IsValid(AIController))
-					AIController->SetDynamicSubtree();
-				if (IsValid(BattleManager)) {
-					SpawnedAlly->SetStartLocation(AlliesPlayerBattleSpawns[i]);
-					SpawnedAlly->SetActorLocation(AlliesPlayerBattleSpawns[i]->GetActorLocation());
-					SpawnedAlly->SetStartRotation(SpawnedAlly->GetActorRotation());
-					BattleManager->BattleAlliesPlayer.Add(SpawnedAlly);
-					BattleManager->AlliesPlayerTurnQueue.Add(i);
+				if (IsValid(PlayerCharacter->GetAllies()[i])) {
+					const FVector Location = AlliesPlayerBattleSpawns[i]->GetActorLocation();
+					PlayerCharacter->GetAllies()[i]->SetActorLocation(Location);
+					PlayerCharacter->GetAllies()[i]->SetActorRotation(FRotator(0.0, 180.0, 0.0));
+					PlayerCharacter->GetAllies()[i]->SetStartLocation(AlliesPlayerBattleSpawns[i]);
+					PlayerCharacter->GetAllies()[i]->SetStartRotation(PlayerCharacter->GetAllies()[i]->GetActorRotation());
+					if (IsValid(PlayerCharacter->GetAllies()[i]->GetAIClass()))
+						if (ASmartObject* AISmartObject = GetWorld()->SpawnActor<ASmartObject>(PlayerCharacter->GetAllies()[i]->GetAIClass()); IsValid(AISmartObject))
+							PlayerCharacter->GetAllies()[i]->SetSmartObject(AISmartObject);
+					ACombatAllyNPCAIController* AIController = Cast<ACombatAllyNPCAIController>(PlayerCharacter->GetAllies()[i]->GetController());
+					if (IsValid(AIController))
+						AIController->SetDynamicSubtree();
+					if (IsValid(BattleManager)) {
+						BattleManager->BattleAlliesPlayer.Add(PlayerCharacter->GetAllies()[i]);
+						BattleManager->AlliesPlayerTurnQueue.Add(i);
+					}
+					PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesHealthBars()[i]->PercentDelegate.Clear();
+					PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesManaBars()[i]->PercentDelegate.Clear();
+					PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesInfoVerticalBoxes()[i]->SetVisibility(ESlateVisibility::Visible);
+					PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesHealthBars()[i]->PercentDelegate.BindUFunction(PlayerCharacter->GetAllies()[i], "GetHealthPercentage");
+					PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesManaBars()[i]->PercentDelegate.BindUFunction(PlayerCharacter->GetAllies()[i], "GetManaPercentage");
+					PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesNameTextBlockes()[i]->SetText(FText::FromName(PlayerCharacter->GetAllies()[i]->GetCharacterName()));
 				}
-				PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesHealthBars()[i]->PercentDelegate.Clear();
-				PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesManaBars()[i]->PercentDelegate.Clear();
-				PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesInfoVerticalBoxes()[i]->SetVisibility(ESlateVisibility::Visible);
-				PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesHealthBars()[i]->PercentDelegate.BindUFunction(SpawnedAlly, "GetHealthPercentage");
-				PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesManaBars()[i]->PercentDelegate.BindUFunction(SpawnedAlly, "GetManaPercentage");
-				PlayerCharacter->GetAlliesInfoBarsWidget()->GetAlliesNameTextBlockes()[i]->SetText(FText::FromName(SpawnedAlly->GetCharacterName()));
 			}
 			ACombatPlayerCharacter* CombatPlayerCharacter = GetWorld()->SpawnActor<ACombatPlayerCharacter>(CombatPlayerCharacterClass);
 			CombatPlayerCharacter->SetActorLocation(AlliesPlayerBattleSpawns[3]->GetActorLocation());
@@ -182,8 +187,14 @@ void AGameManager::EndBattle()
 		}
 		PlayerCharacter->CurrentHP = BattleManager->CombatPlayerCharacter->CurrentHP;
 		PlayerCharacter->CurrentMana = BattleManager->CombatPlayerCharacter->CurrentMana;
-		for (int i = BattleManager->BattleAlliesPlayer.Num() - 1; i >= 0; i--)
-			BattleManager->BattleAlliesPlayer[i]->Destroy();
+		for (int i = BattleManager->BattleAlliesPlayer.Num() - 1; i >= 0; i--) {
+			if (IsValid(Cast<ACombatPlayerCharacter>(BattleManager->BattleAlliesPlayer[i])))
+					BattleManager->BattleAlliesPlayer[i]->Destroy();
+			else {
+				BattleManager->BattleAlliesPlayer[i]->SetActorLocation(FVector(-500.0, -500.0, -500.0));
+				BattleManager->BattleAlliesPlayer.RemoveAt(i);
+			}
+		}
 		BattleManager->BattleEnemies.Empty();
 		PlayerCharacter->RestartBattleMenuWidget();
 		PlayerCharacter->RestartBattleResultsScreenWidget();

@@ -161,7 +161,7 @@ UTexture* AEffectsSpellsAndSkillsManager::GetNeighborsSpellRangeIcon() const
 
 UTexture* AEffectsSpellsAndSkillsManager::GetEveryoneSpellRangeIcon() const
 {
-	return EveryoneSpellRange;
+	return EveryoneSpellRangeIcon;
 }
 
 UTexture* AEffectsSpellsAndSkillsManager::GetSpellTypeImageTexture(ESpellType SpellType) const

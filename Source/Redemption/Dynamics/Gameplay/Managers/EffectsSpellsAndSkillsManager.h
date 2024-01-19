@@ -81,7 +81,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
 		UTexture* NeighborsSpellRangeIcon{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Assets", meta = (AllowPrivateAccess = true))
-		UTexture* EveryoneSpellRange{};
+		UTexture* EveryoneSpellRangeIcon{};
 public:	
 	// Sets default values for this actor's properties
 	AEffectsSpellsAndSkillsManager();

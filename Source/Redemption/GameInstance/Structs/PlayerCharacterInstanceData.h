@@ -10,7 +10,7 @@ struct FPlayerCharacterInstanceDataStruct
 	GENERATED_BODY()
 
 	/* Contains all 'SaveGame' marked variables of the Actor */
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	TArray<uint8> ByteData{};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, SaveGame)

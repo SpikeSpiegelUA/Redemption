@@ -70,6 +70,9 @@ APlayerCharacter::APlayerCharacter() {
 	ForwardRayInfoClass = nullptr;
 
 	PrimaryActorTick.bTickEvenWhenPaused = true;
+
+	InitializeSkills();
+	InitializeStats();
 }
 
 void APlayerCharacter::BeginPlay() 
@@ -131,6 +134,10 @@ void APlayerCharacter::BeginPlay()
 			CombatCharacterInfoMenuWidget = CreateWidget<UCombatCharacterInfoMenu>(PlayerController, CombatCharacterInfoMenuClass);
 		if (IsValid(SaveLoadGameMenuClass))
 			SaveLoadGameMenuWidget = CreateWidget<USaveLoadGameMenu>(PlayerController, SaveLoadGameMenuClass);
+		if (IsValid(PartyMenuClass))
+			PartyMenuWidget = CreateWidget<UPartyMenu>(PlayerController, PartyMenuClass);
+		if (IsValid(DetailedCharacterInfoMenuClass))
+			DetailedCharacterInfoMenuWidget = CreateWidget<UDetailedCharacterInfoMenu>(PlayerController, DetailedCharacterInfoMenuClass);
 	}
 	//Level change logic
 	if (IsValid(RedemptionGameInstance))
@@ -547,7 +554,8 @@ void APlayerCharacter::InputScrollUp()
 		else if (IsValid(PlayerMenuWidget) && PlayerMenuWidget->IsInViewport()) {
 			TArray<UWidget*> PlayerMenuButtons{};
 			PlayerMenuButtons.Add(PlayerMenuWidget->GetInventoryButton());
-			PlayerMenuButtons.Add(PlayerMenuWidget->GetCloseMenuButton());
+			PlayerMenuButtons.Add(PlayerMenuWidget->GetPartyButton());
+			PlayerMenuButtons.Add(PlayerMenuWidget->GetCloseButton());
 			if (UIManagerWorldSubsystem->PickedButtonIndex == 0) {
 				if (IsValid(UIManagerWorldSubsystem->PickedButton))
 					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
@@ -832,7 +840,8 @@ void APlayerCharacter::InputScrollDown()
 		else if (IsValid(PlayerMenuWidget) && PlayerMenuWidget->IsInViewport()) {
 			TArray<UWidget*> PlayerMenuButtons{};
 			PlayerMenuButtons.Add(PlayerMenuWidget->GetInventoryButton());
-			PlayerMenuButtons.Add(PlayerMenuWidget->GetCloseMenuButton());
+			PlayerMenuButtons.Add(PlayerMenuWidget->GetPartyButton());
+			PlayerMenuButtons.Add(PlayerMenuWidget->GetCloseButton());
 			if (UIManagerWorldSubsystem->PickedButtonIndex == PlayerMenuButtons.Num() - 1) {
 				if (IsValid(UIManagerWorldSubsystem->PickedButton))
 					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
@@ -1176,6 +1185,18 @@ void APlayerCharacter::ChangeLevel(const AActor* const ActorResult)
 				Ar.ArIsSaveGame = true;
 				Serialize(Ar);
 			}
+			//Save Allies into the GameInstance.
+			RedemptionGameInstance->CombatAllyNPCs.Empty();
+			for(ACombatAllyNPC* CombatAllyNPC : Allies){
+				FCombatAllyNPCGameInstanceData CombatAllyNPCGameInstanceData{};
+				CombatAllyNPCGameInstanceData.ActorClass = CombatAllyNPC->GetClass();
+				CombatAllyNPCGameInstanceData.ActorName = CombatAllyNPC->GetFName();
+				FMemoryWriter MemWriter(CombatAllyNPCGameInstanceData.ByteData);
+				FObjectAndNameAsStringProxyArchive Ar(MemWriter, true);
+				Ar.ArIsSaveGame = true;
+				CombatAllyNPC->Serialize(Ar);
+				RedemptionGameInstance->CombatAllyNPCs.Add(CombatAllyNPCGameInstanceData);
+			}
 			//Save level actors into the GameInstance.
 			if (UGameplayStatics::GetCurrentLevelName(GetWorld()) == "Town")
 				RedemptionGameInstance->TownActors.Empty();
@@ -1184,7 +1205,8 @@ void APlayerCharacter::ChangeLevel(const AActor* const ActorResult)
 			for (FActorIterator It(GetWorld()); It; ++It)
 			{
 				AActor* Actor = *It;
-				if (!IsValid(Actor) || !Actor->Implements<USavableObjectInterface>() || IsValid(Cast<APlayerCharacter>(Actor)))
+				if (!IsValid(Actor) || !Actor->Implements<USavableObjectInterface>() || IsValid(Cast<APlayerCharacter>(Actor)) 
+					|| IsValid(Cast<ACombatAllyNPC>(Actor)))
 				{
 					continue;
 				}
@@ -1301,7 +1323,7 @@ void APlayerCharacter::CheckForwardRayHitResult()
 
 void APlayerCharacter::LoadObjectFromGameInstance_Implementation(const URedemptionGameInstance* const GameInstance)
 {
-	if(GameInstance->PlayerCharacterInstanceDataStruct.PlayerTransform.GetLocation() != FVector(0.0, 0.0, 0.0) && 
+	if (GameInstance->PlayerCharacterInstanceDataStruct.PlayerTransform.GetLocation() != FVector(0.0, 0.0, 0.0) &&
 		GameInstance->PlayerCharacterInstanceDataStruct.PlayerTransform.GetLocation() != FVector(-1488.0, 1488.0, -1488.0))
 			SetActorTransform(GameInstance->PlayerCharacterInstanceDataStruct.PlayerTransform);
 	FMemoryReader MemReader(GameInstance->PlayerCharacterInstanceDataStruct.ByteData);
@@ -1362,9 +1384,28 @@ FHitResult APlayerCharacter::ForwardRay()
 	return HitResult;
 }
 
-void APlayerCharacter::Death()
+void APlayerCharacter::InitializeStats()
 {
+	StatsMap.Add(ECharacterStats::STRENGTH, 1);
+	StatsMap.Add(ECharacterStats::PERCEPTION, 1);
+	StatsMap.Add(ECharacterStats::ENDURANCE, 1);
+	StatsMap.Add(ECharacterStats::CHARISMA, 1);
+	StatsMap.Add(ECharacterStats::INTELLIGENCE, 1);
+	StatsMap.Add(ECharacterStats::WILL, 1);
+	StatsMap.Add(ECharacterStats::AGILITY, 1);
+	StatsMap.Add(ECharacterStats::LUCK, 1);
+}
 
+void APlayerCharacter::InitializeSkills()
+{
+	SkillsMap.Add(ECharacterSkills::MELEE, 1);
+	SkillsMap.Add(ECharacterSkills::RANGE, 1);
+	SkillsMap.Add(ECharacterSkills::ASSAULTSPELLS, 1);
+	SkillsMap.Add(ECharacterSkills::DEBUFFSPELLS, 1);
+	SkillsMap.Add(ECharacterSkills::RESTORATIONSPELLS, 1);
+	SkillsMap.Add(ECharacterSkills::BUFFSPELLS, 1);
+	SkillsMap.Add(ECharacterSkills::DEFEND, 1);
+	SkillsMap.Add(ECharacterSkills::PERSUASION, 1);
 }
 
 void APlayerCharacter::RemoveNotification()
@@ -1399,6 +1440,11 @@ void APlayerCharacter::RestartBattleResultsScreenWidget()
 {
 	if (IsValid(BattleResultsScreenClass) && IsValid(PlayerController))
 			BattleResultsScreenWidget = CreateWidget<UBattleResultsScreen>(PlayerController, BattleResultsScreenClass);
+}
+
+void APlayerCharacter::AddNewAllyToAllies(const ACombatAllyNPC* const AllyToAdd)
+{
+	Allies.Add(const_cast<ACombatAllyNPC*>(AllyToAdd));
 }
 
 UForwardRayInfo* APlayerCharacter::GetForwardRayInfoWidget() const
@@ -1536,6 +1582,16 @@ UResponsesBox* APlayerCharacter::GetResponsesBox() const
 	return ResponsesBoxWidget;
 }
 
+UPartyMenu* APlayerCharacter::GetPartyMenuWidget() const
+{
+	return PartyMenuWidget;
+}
+
+UDetailedCharacterInfoMenu* APlayerCharacter::GetDetailedCharacterInfoMenuWidget() const
+{
+	return DetailedCharacterInfoMenuWidget;
+}
+
 UTouchInterface* APlayerCharacter::GetEmptyTouchInterface() const
 {
 	return EmptyTouchInterface;
@@ -1551,7 +1607,7 @@ const TArray<TSubclassOf<ASpell>> APlayerCharacter::GetAvailableSkills() const
 	return AvailableSkills;
 }
 
-TArray<TSubclassOf<ACombatAllies>> APlayerCharacter::GetAllies()
+TArray<ACombatAllyNPC*> APlayerCharacter::GetAllies()
 {
 	return Allies;
 }
@@ -1559,6 +1615,17 @@ TArray<TSubclassOf<ACombatAllies>> APlayerCharacter::GetAllies()
 class UAlliesInfoBars* APlayerCharacter::GetAlliesInfoBarsWidget() const
 {
 	return AlliesInfoBarsWidget;
+}
+
+
+const int8 APlayerCharacter::GetStat(const ECharacterStats StatToGet) const
+{
+	return *StatsMap.Find(StatToGet);
+}
+
+const int8 APlayerCharacter::GetSkill(const ECharacterSkills SkillToGet) const
+{
+	return *SkillsMap.Find(SkillToGet);
 }
 
 void APlayerCharacter::SetInventoryScrollBoxEntryWidget(const UInventoryScrollBoxEntryWidget* const NewWidget) 
@@ -1588,4 +1655,14 @@ void APlayerCharacter::SetAudioManager(const AAudioManager* const NewAudioManage
 
 void APlayerCharacter::SetAllies(const TArray<TSubclassOf<ACombatAllies>>& NewAllies)
 {
+}
+
+void APlayerCharacter::SetStat(const ECharacterStats StatToSet, const int8 NewValue)
+{
+	StatsMap.Emplace(StatToSet, NewValue);
+}
+
+void APlayerCharacter::SetSkill(const ECharacterSkills SkillToSet, const int8 NewValue)
+{
+	SkillsMap.Emplace(SkillToSet, NewValue);
 }
