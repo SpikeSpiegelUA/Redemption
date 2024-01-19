@@ -43,6 +43,7 @@ void UPartyMenu::UpdateCharacterInfo(const TArray<ACombatAllyNPC*>& Allies)
 void UPartyMenu::BackButtonOnClicked()
 {
 	this->RemoveFromParent();
+	this->ConditionalBeginDestroy();
 	if (auto* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
 		PlayerCharacter->GetPlayerMenuWidget()->AddToViewport();
 		if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {

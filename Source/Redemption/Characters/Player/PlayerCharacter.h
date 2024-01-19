@@ -177,12 +177,17 @@ public:
 	TArray<ACombatAllyNPC*> GetAllies();
 	const TArray<TSubclassOf<ASpell>> GetAvailableSkills() const;
 
+	const TSubclassOf<UDetailedCharacterInfoMenu> GetDetailedCharacterInfoMenuClass() const;
+	const TSubclassOf<UPartyMenu> GetPartyMenuClass() const;
+
 	//Restore widgets to default state
 	void RestartBattleMenuWidget();
 	void RestartBattleResultsScreenWidget();
 	void AddNewAllyToAllies(const ACombatAllyNPC* const AllyToAdd);
 
 	void SetInventoryScrollBoxEntryWidget(const UInventoryScrollBoxEntryWidget* const NewWidget);
+	void SetDetailedCharacterInfoMenuWidget(const UDetailedCharacterInfoMenu* const NewWidget);
+	void SetPartyMenuWidget(const UPartyMenu* const NewWidget);
 	void SetGameManager(const AGameManager* const NewGameManager);
 	void SetBattleManager(const ABattleManager* const NewBattleManager);
 	void SetAudioManager(const AAudioManager* const NewAudioManager);

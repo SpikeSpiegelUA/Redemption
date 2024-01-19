@@ -7,6 +7,7 @@
 #include "Components\TextBlock.h"
 #include "Components\Image.h"
 #include "Components\Button.h"
+#include "Components\Border.h"
 #include "Redemption/Characters/Player/PlayerCharacter.h"
 #include "DetailedCharacterInfoMenu.generated.h"
 
@@ -19,12 +20,18 @@ class REDEMPTION_API UDetailedCharacterInfoMenu : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	void SetCharacterInfo(const class ACombatAllyNPC* const AllyToSet);
-	void SetCharacterInfo(const APlayerCharacter* const Player);
+	void SetCharacterInfoForAlly();
+	void SetCharacterInfoForPlayer(const APlayerCharacter* const Player);
 
 	UButton* GetBackButton() const;
+	UButton* GetAbilitiesButton() const;
+	UButton* GetToggleInfoButton() const;
+	UBorder* GetSkillsBorder() const;
+	UBorder* GetStatsBorder() const;
+	UBorder* GetPhysicalResistancesBorder() const;
+	UBorder* GetElementalResistancesBorder() const;
 
-	ACombatAllyNPC* Ally{};
+	class ACombatAllyNPC* Ally{};
 protected:
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
@@ -32,9 +39,19 @@ private:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
 	class UImage* CharacterPortraitImage;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UBorder* SkillsBorder{};
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UBorder* StatsBorder{};
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UBorder* PhysicalResistancesBorder{};
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UBorder* ElementalResistancesBorder{};
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
 	class UButton* BackButton;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
 	class UButton* AbilitiesButton;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UButton* ToggleInfoButton;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
 	class UTextBlock* CharacterNameTextBlock;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
@@ -87,6 +104,32 @@ private:
 	class UTextBlock* EvasionChanceTextBlock;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
 	class UTextBlock* TargetingChanceTextBlock;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UTextBlock* FireResistanceTextBlock;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UTextBlock* WaterResistanceTextBlock;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UTextBlock* WindResistanceTextBlock;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UTextBlock* EarthResistanceTextBlock;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UTextBlock* LightningResistanceTextBlock;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UTextBlock* HolyResistanceTextBlock;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UTextBlock* DarkResistanceTextBlock;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UTextBlock* BloodResistanceTextBlock;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UTextBlock* MultielementalResistanceTextBlock;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UTextBlock* SlashingResistanceTextBlock;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UTextBlock* CrushingResistanceTextBlock;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UTextBlock* PiercingResistanceTextBlock;
+
+	bool MoreInfoShowed = false;
 
 	UFUNCTION()
 	void BackButtonOnClicked();
@@ -96,4 +139,10 @@ private:
 	void AbilitiesButtonOnClicked();
 	UFUNCTION()
 	void AbilitiesButtonOnHovered();
+	UFUNCTION()
+	void ToggleInfoButtonOnClicked();
+	UFUNCTION()
+	void ToggleInfoButtonOnHovered();
+
+	void ButtonOnHoveredActions(const UButton* const HoveredButton, const uint8 Index);
 };

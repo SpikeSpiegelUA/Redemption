@@ -57,7 +57,8 @@ void ACombatPlayerCharacter::BeginPlay()
 			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor))
 				ArmorValue += PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetArmorValue();
 		}
-		GetResistancesFromEquipedItems();
+		GetElementalResistancesFromEquipedItems();
+		GetPhysicalResistancesFromEquipedItems();
 		AvailableSpells = PlayerCharacter->GetAvailableSkills();
 		CurrentHP = PlayerCharacter->CurrentHP;
 		MaxHP = PlayerCharacter->MaxHP;
@@ -74,12 +75,9 @@ void ACombatPlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ACombatPlayerCharacter::GetResistancesFromEquipedItems()
+void ACombatPlayerCharacter::GetElementalResistancesFromEquipedItems()
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter) && IsValid(PlayerCharacter->GetInventoryMenuWidget())) {
-			for (FElementAndItsPercentageStruct ResistancesArrayWhereToAddElementPercentage : ElementalResistances) {
-
-			}
 			for (int i = 0; i < ElementalResistances.Num(); i++) {
 				if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedHead))
 					for(int g = 0; g < PlayerCharacter->GetInventoryMenuWidget()->EquipedHead->GetElementsAndTheirPercentagesStructs().Num(); g++)
@@ -102,6 +100,34 @@ void ACombatPlayerCharacter::GetResistancesFromEquipedItems()
 							ElementalResistances[i].Percent = PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetElementsAndTheirPercentagesStructs()[g].Percent + ElementalResistances[i].Percent;
 						}
 			}
+	}
+}
+
+void ACombatPlayerCharacter::GetPhysicalResistancesFromEquipedItems()
+{
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter) && IsValid(PlayerCharacter->GetInventoryMenuWidget())) {
+		for (int i = 0; i < PhysicalResistances.Num(); i++) {
+			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedHead))
+				for (int g = 0; g < PlayerCharacter->GetInventoryMenuWidget()->EquipedHead->GetPhysicalTypesAndTheirPercentagesStructs().Num(); g++)
+					if (PlayerCharacter->GetInventoryMenuWidget()->EquipedHead->GetPhysicalTypesAndTheirPercentagesStructs()[g].PhysicalType == PhysicalResistances[i].PhysicalType) {
+						PhysicalResistances[i].Percent = PlayerCharacter->GetInventoryMenuWidget()->EquipedHead->GetPhysicalTypesAndTheirPercentagesStructs()[g].Percent + PhysicalResistances[i].Percent;
+					}
+			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse))
+				for (int g = 0; g < PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse->GetPhysicalTypesAndTheirPercentagesStructs().Num(); g++)
+					if (PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse->GetPhysicalTypesAndTheirPercentagesStructs()[g].PhysicalType == PhysicalResistances[i].PhysicalType) {
+						PhysicalResistances[i].Percent = PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse->GetPhysicalTypesAndTheirPercentagesStructs()[g].Percent + PhysicalResistances[i].Percent;
+					}
+			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedHand))
+				for (int g = 0; g < PlayerCharacter->GetInventoryMenuWidget()->EquipedHand->GetPhysicalTypesAndTheirPercentagesStructs().Num(); g++)
+					if (PlayerCharacter->GetInventoryMenuWidget()->EquipedHand->GetPhysicalTypesAndTheirPercentagesStructs()[g].PhysicalType == PhysicalResistances[i].PhysicalType) {
+						PhysicalResistances[i].Percent = PlayerCharacter->GetInventoryMenuWidget()->EquipedHand->GetPhysicalTypesAndTheirPercentagesStructs()[g].Percent + PhysicalResistances[i].Percent;
+					}
+			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor))
+				for (int g = 0; g < PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetPhysicalTypesAndTheirPercentagesStructs().Num(); g++)
+					if (PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetPhysicalTypesAndTheirPercentagesStructs()[g].PhysicalType == PhysicalResistances[i].PhysicalType) {
+						PhysicalResistances[i].Percent = PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetPhysicalTypesAndTheirPercentagesStructs()[g].Percent + PhysicalResistances[i].Percent;
+					}
+		}
 	}
 }
 

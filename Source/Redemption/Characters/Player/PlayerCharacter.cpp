@@ -134,10 +134,6 @@ void APlayerCharacter::BeginPlay()
 			CombatCharacterInfoMenuWidget = CreateWidget<UCombatCharacterInfoMenu>(PlayerController, CombatCharacterInfoMenuClass);
 		if (IsValid(SaveLoadGameMenuClass))
 			SaveLoadGameMenuWidget = CreateWidget<USaveLoadGameMenu>(PlayerController, SaveLoadGameMenuClass);
-		if (IsValid(PartyMenuClass))
-			PartyMenuWidget = CreateWidget<UPartyMenu>(PlayerController, PartyMenuClass);
-		if (IsValid(DetailedCharacterInfoMenuClass))
-			DetailedCharacterInfoMenuWidget = CreateWidget<UDetailedCharacterInfoMenu>(PlayerController, DetailedCharacterInfoMenuClass);
 	}
 	//Level change logic
 	if (IsValid(RedemptionGameInstance))
@@ -1607,6 +1603,16 @@ const TArray<TSubclassOf<ASpell>> APlayerCharacter::GetAvailableSkills() const
 	return AvailableSkills;
 }
 
+const TSubclassOf<UDetailedCharacterInfoMenu> APlayerCharacter::GetDetailedCharacterInfoMenuClass() const
+{
+	return DetailedCharacterInfoMenuClass;
+}
+
+const TSubclassOf<UPartyMenu> APlayerCharacter::GetPartyMenuClass() const
+{
+	return PartyMenuClass;
+}
+
 TArray<ACombatAllyNPC*> APlayerCharacter::GetAllies()
 {
 	return Allies;
@@ -1631,6 +1637,16 @@ const int8 APlayerCharacter::GetSkill(const ECharacterSkills SkillToGet) const
 void APlayerCharacter::SetInventoryScrollBoxEntryWidget(const UInventoryScrollBoxEntryWidget* const NewWidget) 
 {
 	InventoryScrollBoxEntryWidget = const_cast<UInventoryScrollBoxEntryWidget*>(NewWidget);
+}
+
+void APlayerCharacter::SetDetailedCharacterInfoMenuWidget(const UDetailedCharacterInfoMenu* const NewWidget)
+{
+	DetailedCharacterInfoMenuWidget = const_cast<UDetailedCharacterInfoMenu*>(NewWidget);
+}
+
+void APlayerCharacter::SetPartyMenuWidget(const UPartyMenu* const NewWidget)
+{
+	PartyMenuWidget = const_cast<UPartyMenu*>(NewWidget);
 }
 
 void APlayerCharacter::SetCanInput(bool Value)
