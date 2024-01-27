@@ -379,7 +379,7 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 				uint8 UsageCount = 0;
 				for (ACombatNPC* UseTarget : UseTargets) {
 					if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH && UseTarget->CurrentHP < UseTarget->MaxHP) {
-						int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(UseTarget->MaxHP * RestorationItem->GetRestorationValuePercent() / 100,
+						int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(UseTarget->MaxHP * RestorationItem->GetRestorationValuePercent() / 100,
 							UseTarget->Effects, UseTarget->GetElementalResistances(), RestorationItem->GetElementsAndTheirPercentagesStructs());
 						UseTarget->CurrentHP += AmountToHeal;
 						ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
@@ -394,7 +394,7 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 						UsageCount++;
 					}
 					else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA && UseTarget->CurrentMana < UseTarget->MaxMana) {
-						int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(UseTarget->MaxMana * RestorationItem->GetRestorationValuePercent() / 100,
+						int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(UseTarget->MaxMana * RestorationItem->GetRestorationValuePercent() / 100,
 							UseTarget->Effects, UseTarget->GetElementalResistances(), RestorationItem->GetElementsAndTheirPercentagesStructs());
 						UseTarget->CurrentMana += AmountToRestore;
 						ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
@@ -500,9 +500,9 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 				FVector2D TargetForCenterMark = FVector2D(-52,-12);
 				CurrentTurnAlliesNPC->Target = SelectedCombatNPC;
 				if ((RangeCrosshairCanvasSlot->GetPosition() - TargetForCenterMark).Length() <= 90.0)
-					SelectedCombatNPC->Execute_GetHit(SelectedCombatNPC, CurrentTurnAlliesNPC->GetRangeAttackValue(), CurrentTurnAlliesNPC->GetRangeWeaponElements(), false);
+					SelectedCombatNPC->Execute_GetHit(SelectedCombatNPC, CurrentTurnAlliesNPC->GetRangeAttackValue(), CurrentTurnAlliesNPC->GetRangeWeaponElements(), CurrentTurnAlliesNPC->GetRangePhysicalType(), false);
 				else
-					SelectedCombatNPC->Execute_GetHit(SelectedCombatNPC, CurrentTurnAlliesNPC->GetRangeAttackValue(), CurrentTurnAlliesNPC->GetRangeWeaponElements(), true);
+					SelectedCombatNPC->Execute_GetHit(SelectedCombatNPC, CurrentTurnAlliesNPC->GetRangeAttackValue(), CurrentTurnAlliesNPC->GetRangeWeaponElements(), CurrentTurnAlliesNPC->GetRangePhysicalType(), true);
 				CurrentTurnAlliesNPC->GetRangeAmmo();
 				UGameplayStatics::PlaySound2D(GetWorld(), PlayerCharacter->GetAudioManager()->GetShotSoundCue(), 2.5f, 1.f, 0.3f);
 				if (UCombatAlliesAnimInstance* AnimInstance = Cast<UCombatAlliesAnimInstance>(CurrentTurnAlliesNPC->GetMesh()->GetAnimInstance()); IsValid(AnimInstance)) {
@@ -603,7 +603,7 @@ bool UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 	uint8 UsageCount = 0;
 	for (ACombatNPC* UseTarget : UseTargets) {
 		if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::HEALTH && UseTarget->CurrentHP < UseTarget->MaxHP && UseTarget->CurrentHP > 0) {
-			int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(UseTarget->MaxHP * SpellToUse->GetRestorationValuePercent() / 100,
+			int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(UseTarget->MaxHP * SpellToUse->GetRestorationValuePercent() / 100,
 				UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 			UseTarget->CurrentHP += AmountToHeal;
 			ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->
@@ -619,7 +619,7 @@ bool UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 			UsageCount++;
 		}
 		else if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::MANA && UseTarget->CurrentMana < UseTarget->MaxMana && UseTarget->CurrentHP > 0) {
-			int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(UseTarget->MaxMana * SpellToUse->GetRestorationValuePercent() / 100,
+			int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(UseTarget->MaxMana * SpellToUse->GetRestorationValuePercent() / 100,
 				UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 			UseTarget->CurrentMana += AmountToRestore;
 			ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->

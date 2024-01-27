@@ -43,6 +43,7 @@ EBTNodeResult::Type UBTTask_CalculateSpellUseChance::ExecuteTask(UBehaviorTreeCo
 	}
 	else {
 		OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Enum>("CombatAction", uint8(ECombatAction::MELEEATTACK));
+		CombatEnemyNPC->SpellToUse = nullptr;
 	}
 	return EBTNodeResult::Succeeded;
 }

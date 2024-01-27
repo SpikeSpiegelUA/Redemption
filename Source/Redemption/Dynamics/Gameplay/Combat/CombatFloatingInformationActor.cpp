@@ -22,7 +22,7 @@ void ACombatFloatingInformationActor::BeginPlay()
 	UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(GetComponentByClass(UStaticMeshComponent::StaticClass()));
 	if(IsValid(StaticMeshComponent))
 		StaticMeshComponent->AddImpulse(FVector(FMath::FRandRange(-200.0, 200.0), FMath::FRandRange(-200.0, 200.0), FMath::FRandRange(-200.0, 200.0)), NAME_None, true);
-	GetWorld()->GetTimerManager().SetTimer(ActorDestroyTimerHandle, this, &ACombatFloatingInformationActor::DestroyThisActor, 2.f, false);
+	GetWorld()->GetTimerManager().SetTimer(ActorDestroyTimerHandle, this, &ACombatFloatingInformationActor::DestroyThisActor, 3.f, false);
 }
 
 // Called every frame

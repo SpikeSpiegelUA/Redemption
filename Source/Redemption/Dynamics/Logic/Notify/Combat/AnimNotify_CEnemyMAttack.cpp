@@ -14,6 +14,6 @@ void UAnimNotify_CEnemyMAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 		if(IsValid(Owner))
 			Enemy = Cast<ACombatNPC>(Owner->Target);
 		if (IsValid(Enemy) && IsValid(Owner))
-			Enemy->Execute_GetHit(Enemy, BattleActions::CalculateAttackValueAfterEffects(Owner->GetMeleeAttackValue(), Owner), Owner->GetMeleeWeaponElements(), false);
+			Enemy->Execute_GetHit(Enemy, BattleActions::CalculateAttackValueAfterEffects(Owner->GetMeleeAttackValue(), Owner), Owner->GetMeleeWeaponElements(), EPhysicalType::NONE, false);
 	}
 }

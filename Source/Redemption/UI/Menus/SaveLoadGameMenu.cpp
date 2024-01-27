@@ -97,12 +97,11 @@ void USaveLoadGameMenu::DeleteButtonWithNeighborsOnClicked()
 					//Delete save and corresponding save slot.
 					if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
 						uint16 SaveSlotIndex = RedemptionSaveGame->SaveIndex;
-						for (UWidget* Widget : PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren())
-							if (USaveSlotEntry* SaveSlotEntry = Cast<USaveSlotEntry>(Widget); IsValid(SaveSlotEntry) && IsValid(Widget))
-								if (SaveSlotEntry->GetSlotIndex() == SaveSlotIndex) {
-									Widget->RemoveFromParent();
-									Widget->ConditionalBeginDestroy();
-								}
+						for (int8 Index = PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
+							if (USaveSlotEntry* SaveSlotEntry = Cast<USaveSlotEntry>(PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren()[Index]); 
+								IsValid(SaveSlotEntry) && IsValid(PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren()[Index]))
+								if (SaveSlotEntry->GetSlotIndex() == SaveSlotIndex)
+									PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetChildAt(Index)->RemoveFromParent();
 					}
 					UGameplayStatics::DeleteGameInSlot(RedemptionGameInstance->SaveFileName, 0);
 					//Save system file save.

@@ -47,10 +47,8 @@ EBTNodeResult::Type UBTTask_AskQuestion::PrepareResponses(APlayerController*& Pl
 	PlayerCharacter->GetDialogueBoxWidget()->GetContinueButton()->SetVisibility(ESlateVisibility::Hidden);
 	PlayerCharacter->GetDialogueBoxWidget()->SetDialogueText(NPCQuestion);
 
-	for (UWidget* Widget : PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetAllChildren()) {
-		Widget->RemoveFromParent();
-		Widget->ConditionalBeginDestroy();
-	}
+	for (int8 Index = PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
+		PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetChildAt(Index)->RemoveFromParent();
 	
 	for (auto Response : PlayerResponses) {
 		UResponseEntry* ResponseEntry = CreateWidget<UResponseEntry>(PlayerController, PlayerCharacter->GetResponseEntryClass());

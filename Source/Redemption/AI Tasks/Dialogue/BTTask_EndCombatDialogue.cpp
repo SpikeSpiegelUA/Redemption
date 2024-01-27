@@ -25,10 +25,10 @@ EBTNodeResult::Type UBTTask_EndCombatDialogue::ExecuteTask(UBehaviorTreeComponen
 
 	PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(false);
 	PlayerCharacter->GetAudioManager()->GetDungeonTalkBackgroundMusicAudioComponent_Daat()->SetPaused(true);
-	for (UWidget* Response : PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetAllChildren()) {
-		Response->RemoveFromParent();
-		Response->ConditionalBeginDestroy();
-	}
+
+	for (int8 Index = PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetAllChildren().Num() - 1; Index >= 0; Index--) 
+		PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetChildAt(Index)->RemoveFromParent();
+
 	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("FirstDialoguePassed", false);
 	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("IsInDialogue", false);
 

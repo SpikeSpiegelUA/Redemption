@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "..\Characters\CharacterInTheWorld.h"
 #include "..\UI\HUD\FloatingHealthBarWidget.h"
+#include "..\Dynamics\World\Items\WeaponItem.h"
 #include "..\Dynamics\Logic\Interfaces\CombatActionsInterface.h"
 #include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\Spell.h"
@@ -84,6 +85,8 @@ public:
 	const int8 GetSkill(const ECharacterSkills SkillToGet) const;
 	void SetStat(const ECharacterStats StatToSet, const int8 NewValue);
 	void SetSkill(const ECharacterSkills SkillToSet, const int8 NewValue);
+	const EPhysicalType GetMeleePhysicalType() const;
+	const EPhysicalType GetRangePhysicalType() const;
 
 
 	void SetRangeAmmo(int8 NewRangeAmmo);
@@ -121,7 +124,7 @@ public:
 		float GetManaPercentage();
 
 	//Function to call, when a NPC got hit. Parameters for a standard attack.
-	bool GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, bool ForcedMiss = false) override;
+	bool GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, const EPhysicalType ContainedPhysicalType, bool ForcedMiss = false) override;
 	//Function to call, when a NPC got hit. Parameters for a buff/debuff attack.
 	bool GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements, const ESpellType BuffOrDebuff) override;
 protected:
@@ -144,6 +147,10 @@ protected:
 		int RangeAmmo{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", SaveGame)
 		int EvasionChance{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", SaveGame)
+		EPhysicalType MeleePhysicalType{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", SaveGame)
+		EPhysicalType RangePhysicalType{};
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 		AActor* StartLocation {};

@@ -928,14 +928,14 @@ void USpellBattleMenu::ResetButtonOnClicked()
 
 void USpellBattleMenu::Reset(const bool SetCreatedSpellToNullPtr)
 {
-	for (UWidget* Child : SelectedElementsHorizontalBox->GetAllChildren())
-		Child->ConditionalBeginDestroy();
+	for (int8 Index = SelectedElementsHorizontalBox->GetAllChildren().Num() - 1; Index >= 0; Index--)
+		SelectedElementsHorizontalBox->GetChildAt(Index)->RemoveFromParent();
 	SelectedElementsHorizontalBox->ClearChildren();
 	SelectedSpellElements.Empty();
-	for (UWidget* Child : SelectedSpellTypeHorizontalBox->GetAllChildren())
-		Child->ConditionalBeginDestroy();
-	for (UWidget* Child : SelectedSpellRangeHorizontalBox->GetAllChildren())
-		Child->ConditionalBeginDestroy();
+	for (int8 Index = SelectedSpellTypeHorizontalBox->GetAllChildren().Num() - 1; Index >= 0; Index--)
+		SelectedSpellTypeHorizontalBox->GetChildAt(Index)->RemoveFromParent();
+	for (int8 Index = SelectedSpellRangeHorizontalBox->GetAllChildren().Num() - 1; Index >= 0; Index--)
+		SelectedSpellRangeHorizontalBox->GetChildAt(Index)->RemoveFromParent();
 	SelectedSpellTypeHorizontalBox->ClearChildren();
 	SelectedSpellRangeHorizontalBox->ClearChildren();
 	SelectedSpellType = ESpellType::NONE;

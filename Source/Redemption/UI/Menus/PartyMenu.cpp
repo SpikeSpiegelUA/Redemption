@@ -24,7 +24,7 @@ void UPartyMenu::NativeConstruct()
 
 void UPartyMenu::UpdateCharacterInfo(const TArray<ACombatAllyNPC*>& Allies)
 {
-	for (uint8 Index = 1; Index < MainHorizontalBox->GetAllChildren().Num(); Index++)
+	for (int8 Index = MainHorizontalBox->GetAllChildren().Num() - 1; Index >= 1 ; Index--)
 		if (Index >= Allies.Num())
 			MainHorizontalBox->GetAllChildren()[Index]->ConditionalBeginDestroy();
 	for (uint8 Index = 0; Index < Allies.Num(); Index++) {

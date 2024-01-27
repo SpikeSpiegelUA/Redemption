@@ -105,7 +105,7 @@ bool ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffec
 	return false;
 }
 
-bool ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, bool ForcedMiss)
+bool ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, const EPhysicalType ContainedPhysicalType, bool ForcedMiss)
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
 		if (ABattleManager* BattleManager = PlayerCharacter->GetBattleManager(); IsValid(BattleManager)) {
@@ -120,7 +120,7 @@ bool ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementA
 			}
 			else {
 				int ValueOfArmor = SkillsSpellsAndEffectsActions::GetValueAfterEffects(ArmorValue, Effects, EEffectArea::ARMOR);
-				int ValueOfAttackWithResistances = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(ValueOfAttack, Effects, ElementalResistances, ContainedElements);
+				int ValueOfAttackWithResistances = SkillsSpellsAndEffectsActions::GetAttackValueAfterResistances(ValueOfAttack, Effects, ElementalResistances, ContainedElements,  ContainedPhysicalType, PhysicalResistances);
 				if (CurrentHP - (ValueOfAttackWithResistances - ValueOfArmor / 10) < 0) {
 					CurrentHP = 0;
 					if (IsValid(DizzyEmitterComponent)) {
@@ -265,6 +265,16 @@ void ACombatNPC::SetStat(const ECharacterStats StatToSet, const int8 NewValue)
 void ACombatNPC::SetSkill(const ECharacterSkills SkillToSet, const int8 NewValue)
 {
 	SkillsMap.Emplace(SkillToSet, NewValue);
+}
+
+const EPhysicalType ACombatNPC::GetMeleePhysicalType() const
+{
+	return MeleePhysicalType;
+}
+
+const EPhysicalType ACombatNPC::GetRangePhysicalType() const
+{
+	return RangePhysicalType;
 }
 
 float ACombatNPC::GetHealthPercentage()

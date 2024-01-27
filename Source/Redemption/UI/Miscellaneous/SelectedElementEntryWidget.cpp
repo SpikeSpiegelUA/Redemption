@@ -26,13 +26,13 @@ void USelectedElementEntryWidget::MainButtonOnClicked()
 	//Delete this widget and decrease selected elements count on click
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) 
 		if (USpellBattleMenu* SpellBattleMenu = PlayerCharacter->GetSpellBattleMenuWidget(); IsValid(PlayerCharacter)) {
-			for (UWidget* Child : SpellBattleMenu->GetSelectedElementsHorizontalBox()->GetAllChildren())
-				if (USelectedElementEntryWidget* SelectedElementEntryWidget = Cast<USelectedElementEntryWidget>(Child); IsValid(SelectedElementEntryWidget))
-					if (Child == this) {
+			for (int8 Index = SpellBattleMenu->GetSelectedElementsHorizontalBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
+				if (USelectedElementEntryWidget* SelectedElementEntryWidget = Cast<USelectedElementEntryWidget>(SpellBattleMenu->GetSelectedElementsHorizontalBox()->GetAllChildren()[Index]); IsValid(SelectedElementEntryWidget))
+					if (SpellBattleMenu->GetSelectedElementsHorizontalBox()->GetAllChildren()[Index] == this) {
 						SpellBattleMenu->SelectedSpellElementsRemoveSingleItem(Element);
-						SpellBattleMenu->GetSelectedElementsHorizontalBox()->RemoveChild(Child);
-						if (IsValid(Child))
-							Child->ConditionalBeginDestroy();
+						SpellBattleMenu->GetSelectedElementsHorizontalBox()->RemoveChild(SpellBattleMenu->GetSelectedElementsHorizontalBox()->GetAllChildren()[Index]);
+						if (IsValid(SpellBattleMenu->GetSelectedElementsHorizontalBox()->GetAllChildren()[Index]))
+							SpellBattleMenu->GetSelectedElementsHorizontalBox()->GetChildAt(Index)->RemoveFromParent();
 						SpellBattleMenu->SetCreatedSpell(nullptr);
 					}
 			if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = PlayerCharacter->GetUIManagerWorldSubsystem(); IsValid(UIManagerWorldSubsystem)) {

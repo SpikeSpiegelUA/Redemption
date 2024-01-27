@@ -46,10 +46,8 @@ EBTNodeResult::Type UBTTask_EndDialogue::ExecuteTask(UBehaviorTreeComponent& Own
 	PlayerController->bShowMouseCursor = false;
 	PlayerCharacter->EnableInput(PlayerController);
 	//PlayerController->ActivateTouchInterface(PlayerCharacter->GetStandardTouchInterface());
-	for (UWidget* Response : PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetAllChildren()) {
-		Response->RemoveFromParent();
-		Response->ConditionalBeginDestroy();
-	}
+	for (int8 Index = PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
+		PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetChildAt(Index)->RemoveFromParent();
 
 	return EBTNodeResult::Succeeded;
 }

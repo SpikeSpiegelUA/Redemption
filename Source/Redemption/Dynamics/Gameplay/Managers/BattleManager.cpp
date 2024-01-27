@@ -233,7 +233,7 @@ void ABattleManager::TurnChange()
 						if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
 							BattleEnemies[NextActor]->Execute_GetHit(PlayerCharacter->GetBattleManager()->BattleEnemies[NextActor],
 								BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleEnemies[NextActor]),
-								ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), false);
+								ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, false);
 							GotHit = true;
 						}
 					}
@@ -269,8 +269,7 @@ void ABattleManager::TurnChange()
 				}
 				if (GotHit) {
 					if (IsValid(CombatPlayerCharacter) && CombatPlayerCharacter->CurrentHP <= 0) {
-						FTimerHandle PlayerDeathLogicTimerHandle{};
-						GetWorld()->GetTimerManager().SetTimer(PlayerDeathLogicTimerHandle, this, &ABattleManager::PlayerDeathLogic, 1.f, false);
+						PlayerDeathLogic();
 					}
 					else {
 						FTimerHandle EnableTurnAIControllerTimerHandle{};
@@ -363,7 +362,7 @@ void ABattleManager::TurnChange()
 							if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
 								BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Execute_GetHit(PlayerCharacter->GetBattleManager()->BattleAlliesPlayer[CurrentTurnCombatNPCIndex],
 									BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleAlliesPlayer[CurrentTurnCombatNPCIndex]),
-									ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), false);
+									ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, false);
 								GotHit = true;
 							}
 						}
@@ -373,15 +372,14 @@ void ABattleManager::TurnChange()
 					}
 					if (GotHit) {
 						if (IsValid(CombatPlayerCharacter) && CombatPlayerCharacter->CurrentHP <= 0) {
-							FTimerHandle PlayerDeathLogicTimerHandle{};
-							GetWorld()->GetTimerManager().SetTimer(PlayerDeathLogicTimerHandle, this, &ABattleManager::PlayerDeathLogic, 1.f, false);
+							PlayerDeathLogic();
 						}
 						else {
 							FTimerHandle GotHitTimerHandle{};
 							if (IsDizzy)
-								GetWorld()->GetTimerManager().SetTimer(GotHitTimerHandle, this, &ABattleManager::PlayerAllyDizzyActions, 2.25f, false);
+								GetWorld()->GetTimerManager().SetTimer(GotHitTimerHandle, this, &ABattleManager::PlayerAllyDizzyActions, 1.9f, false);
 							else
-								GetWorld()->GetTimerManager().SetTimer(GotHitTimerHandle, this, &ABattleManager::ToPlayerTurnPassInTurnChangeFunction, 2.25f, false);
+								GetWorld()->GetTimerManager().SetTimer(GotHitTimerHandle, this, &ABattleManager::ToPlayerTurnPassInTurnChangeFunction, 1.9f, false);
 						}
 					}
 					else {
@@ -428,8 +426,7 @@ void ABattleManager::TurnChange()
 	}
 	//Player's death logic
 	else if (IsValid(CombatPlayerCharacter) && CombatPlayerCharacter->CurrentHP <= 0) {
-		FTimerHandle PlayerDeathLogicTimerHandle{};
-		GetWorld()->GetTimerManager().SetTimer(PlayerDeathLogicTimerHandle, this, &ABattleManager::PlayerDeathLogic, 1.f, false);
+		PlayerDeathLogic();
 	}
 }
 
@@ -526,7 +523,7 @@ void ABattleManager::PlayerTurnController()
 							if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
 								BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Execute_GetHit(PlayerCharacter->GetBattleManager()->BattleAlliesPlayer[CurrentTurnCombatNPCIndex],
 									BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleAlliesPlayer[CurrentTurnCombatNPCIndex]),
-									ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), false);
+									ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, false);
 								GotHit = true;
 							}
 						}
@@ -536,15 +533,14 @@ void ABattleManager::PlayerTurnController()
 					}
 					if (GotHit) {
 						if (IsValid(CombatPlayerCharacter) && CombatPlayerCharacter->CurrentHP <= 0) {
-							FTimerHandle PlayerDeathLogicTimerHandle{};
-							GetWorld()->GetTimerManager().SetTimer(PlayerDeathLogicTimerHandle, this, &ABattleManager::PlayerDeathLogic, 1.f, false);
+							PlayerDeathLogic();
 						}
 						else {
 							FTimerHandle GotHitTimerHandle{};
 							if (IsDizzy)
-								GetWorld()->GetTimerManager().SetTimer(GotHitTimerHandle, this, &ABattleManager::PlayerAllyDizzyActions, 2.25f, false);
+								GetWorld()->GetTimerManager().SetTimer(GotHitTimerHandle, this, &ABattleManager::PlayerAllyDizzyActions, 1.9f, false);
 							else
-								GetWorld()->GetTimerManager().SetTimer(GotHitTimerHandle, this, &ABattleManager::ToPlayerTurnPassInTurnChangeFunction, 2.25f, false);
+								GetWorld()->GetTimerManager().SetTimer(GotHitTimerHandle, this, &ABattleManager::ToPlayerTurnPassInTurnChangeFunction, 1.9f, false);
 						}
 					}
 					else {
@@ -646,7 +642,7 @@ void ABattleManager::PlayerAlliesEffectsDurationLogic(const TArray<uint8>& Passe
 						if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
 							BattleAlliesPlayer[Index]->Execute_GetHit(PlayerCharacter->GetBattleManager()->BattleAlliesPlayer[Index],
 								BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleAlliesPlayer[Index]),
-								ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), false);
+								ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, false);
 						}
 					}
 				}
@@ -802,10 +798,16 @@ void ABattleManager::PlayerAllyDizzyActions()
 
 void ABattleManager::PlayerDeathLogic()
 {
+	if (CurrentTurnCombatNPCIndex >= 0 && CurrentTurnCombatNPCIndex < BattleEnemies.Num())
+		if (auto* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[CurrentTurnCombatNPCIndex]->GetController()); IsValid(AIController))
+			AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
+	FTimerHandle PlayerDeathLogicTimerHandle{};
+	GetWorld()->GetTimerManager().SetTimer(PlayerDeathLogicTimerHandle, this, &ABattleManager::PlayerDeathLogicOnTimer, 1.f, false);
+}
+
+void ABattleManager::PlayerDeathLogicOnTimer()
+{
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
-		if (CurrentTurnCombatNPCIndex >= 0)
-			if (auto* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[CurrentTurnCombatNPCIndex]->GetController()); IsValid(AIController))
-				AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
 		PlayerCharacter->GetBattleMenuWidget()->RemoveFromParent();
 		PlayerCharacter->GetDeathMenuWidget()->AddToViewport();
 		PlayerCharacter->GetAudioManager()->GetDeathMenuBackgroundMusicAudioComponent()->Play(0.0f);

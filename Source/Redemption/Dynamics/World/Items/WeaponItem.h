@@ -19,6 +19,17 @@ enum class EWeaponType :uint8
 	RANGE UMETA(DisplayName = "Range"),
 };
 
+
+UENUM(BlueprintType)
+enum class EPhysicalType :uint8
+{
+	NONE UMETA(Hidden),
+	SLASHING UMETA(DisplayName = "Slashing"),
+	CRUSHING UMETA(DisplayName = "Crushing"),
+	PIERCING UMETA(DisplayName = "Piercing")
+};
+ENUM_RANGE_BY_FIRST_AND_LAST(EPhysicalType, EPhysicalType::SLASHING, EPhysicalType::PIERCING);
+
 UCLASS()
 class REDEMPTION_API AWeaponItem : public AEquipmentItem
 {
@@ -29,10 +40,13 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information", meta = (AllowPrivateAccess = true))
 		EWeaponType WeaponType{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information", meta = (AllowPrivateAccess = true))
+		EPhysicalType PhysicalType{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General information", meta = (AllowPrivateAccess = true))
 		int AttackValue{};
 
 public:
 	const EWeaponType GetWeaponType() const;
+	const EPhysicalType GetPhysicalType() const;
 	TArray<FElementAndItsPercentageStruct> GetElementsAndTheirPercentagesStructs() const;
 	int GetAttackValue() const;
 };

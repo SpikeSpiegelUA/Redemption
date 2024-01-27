@@ -51,23 +51,45 @@ void UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnHovered()
 		UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 		IsValid(PlayerCharacter) && IsValid(UIManagerWorldSubsystem) && IsValid(Item)) {
-		PlayerCharacter->GetInventoryMenuWidget()->SetPickedItem(Item);
-		PlayerCharacter->GetInventoryMenuWidget()->GetItemInfoBorder()->SetVisibility(ESlateVisibility::Visible);
-		PlayerCharacter->GetInventoryMenuWidget()->SetItemInfo(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem());
-		MainButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-		if (UIManagerWorldSubsystem->PickedButton)
-			if (UIManagerWorldSubsystem->PickedButton != MainButton)
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0));
-		if (IsValid(Cast<UButton>(PlayerCharacter->GetInventoryMenuWidget()->GetItemTypeStackBox()->GetAllChildren()[PlayerCharacter->GetInventoryMenuWidget()->SelectedTypeButtonIndex])))
-			Cast<UButton>(PlayerCharacter->GetInventoryMenuWidget()->GetItemTypeStackBox()->GetAllChildren()[PlayerCharacter->GetInventoryMenuWidget()->SelectedTypeButtonIndex])->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-		UIManagerWorldSubsystem->PickedButton = MainButton;
-		//Set picked button index
-		UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(PlayerCharacter->GetInventoryMenuWidget(), Item);
-		for (int i = 0; i < CurrentScrollBox->GetAllChildren().Num(); i++)
-			if (CurrentScrollBox->GetAllChildren()[i] == this) {
-				UIManagerWorldSubsystem->PickedButtonIndex = i;
-				break;
+		if (UInventoryMenu* InventoryMenu = PlayerCharacter->GetInventoryMenuWidget(); IsValid(InventoryMenu)) {
+			InventoryMenu->SetPickedItem(Item);
+			InventoryMenu->GetItemInfoBorder()->SetVisibility(ESlateVisibility::Visible);
+			InventoryMenu->SetItemInfo(Item);
+			MainButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			if (UIManagerWorldSubsystem->PickedButton) {
+				if (UIManagerWorldSubsystem->PickedButton != MainButton) {
+					if (UButtonWithHoverColors* ButtonWithColors = Cast<UButtonWithHoverColors>(UIManagerWorldSubsystem->PickedButton); IsValid(ButtonWithColors))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(ButtonWithColors->GetOnUnhoverColor()));
+					else {
+						if (InventoryMenu->GetInventoryScrollBox()->GetVisibility() == ESlateVisibility::Visible && InventoryMenu->SelectedItemButtonIndex >= 0) {
+							if (InventoryMenu->GetInventoryScrollBox()->GetAllChildren().Num() > InventoryMenu->SelectedItemButtonIndex) {
+								if (InventoryMenu->GetInventoryScrollBox()->GetChildAt(InventoryMenu->SelectedItemButtonIndex) == 
+									Cast<UWidget>(UIManagerWorldSubsystem->PickedButton->GetOuter()->GetOuter()))
+										UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.f, 0.f, 1.f, 1.f));
+								else
+									UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.f, 0.f, 0.f, 0.f));
+							}
+										
+						}
+						else
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.f, 0.f, 0.f, 0.f));
+					}
+				}
 			}
+			if (IsValid(Cast<UButton>(InventoryMenu->GetItemTypeStackBox()->GetAllChildren()[InventoryMenu->SelectedTypeButtonIndex])))
+				Cast<UButton>(InventoryMenu->GetItemTypeStackBox()->GetAllChildren()[InventoryMenu->SelectedTypeButtonIndex])->SetBackgroundColor(FLinearColor(0, 1.f, 0, 1.f));
+			UIManagerWorldSubsystem->PickedButton = MainButton;
+			//Set picked button index
+			UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(InventoryMenu, Item);
+			InventoryMenu->SelectedPanelWidget = CurrentScrollBox;
+			for (int i = 0; i < CurrentScrollBox->GetAllChildren().Num(); i++)
+				if (CurrentScrollBox->GetAllChildren()[i] == this) {
+					UIManagerWorldSubsystem->PickedButtonIndex = i;
+					break;
+				}
+			InventoryMenu->IsSelectingSpecificItem = true;
+			InventoryMenu->IsSelectingTarget = false;
+		}
 	}
 }
 

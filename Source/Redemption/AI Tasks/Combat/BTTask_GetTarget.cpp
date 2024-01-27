@@ -140,7 +140,7 @@ EBTNodeResult::Type UBTTask_GetTarget::ExecuteTask(UBehaviorTreeComponent& Owner
 								float CurrentRestorationAmount = 0.f;
 								if (Index == 0) {
 									if (TargetsWithDeadAlso[Index]->CurrentHP > 0) {
-										int16 IndexZeroAmountToHeal = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(TargetsWithDeadAlso[Index]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
+										int16 IndexZeroAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(TargetsWithDeadAlso[Index]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
 											TargetsWithDeadAlso[Index]->Effects, TargetsWithDeadAlso[Index]->GetElementalResistances(), ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()));
 										if (TargetsWithDeadAlso[Index]->CurrentHP + IndexZeroAmountToHeal > TargetsWithDeadAlso[Index]->MaxHP)
 											CurrentRestorationAmount += TargetsWithDeadAlso[Index]->MaxHP - TargetsWithDeadAlso[Index]->CurrentHP;
@@ -149,7 +149,7 @@ EBTNodeResult::Type UBTTask_GetTarget::ExecuteTask(UBehaviorTreeComponent& Owner
 									}
 									if (TargetsWithDeadAlso.Num() > 1) {
 										if (TargetsWithDeadAlso[Index + 1]->CurrentHP > 0) {
-											int16 IndexPlusOneAmountToHeal = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(TargetsWithDeadAlso[Index + 1]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
+											int16 IndexPlusOneAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(TargetsWithDeadAlso[Index + 1]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
 												TargetsWithDeadAlso[Index + 1]->Effects, TargetsWithDeadAlso[Index + 1]->GetElementalResistances(), ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()));
 											if (TargetsWithDeadAlso[Index + 1]->CurrentHP + IndexPlusOneAmountToHeal > TargetsWithDeadAlso[Index + 1]->MaxHP)
 												CurrentRestorationAmount += TargetsWithDeadAlso[Index + 1]->MaxHP - TargetsWithDeadAlso[Index + 1]->CurrentHP;
@@ -160,7 +160,7 @@ EBTNodeResult::Type UBTTask_GetTarget::ExecuteTask(UBehaviorTreeComponent& Owner
 								}
 								else if (Index == TargetsWithDeadAlso.Num() - 1) {
 									if (TargetsWithDeadAlso[Index]->CurrentHP > 0) {
-										int16 IndexAmountToHeal = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(TargetsWithDeadAlso[Index]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
+										int16 IndexAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(TargetsWithDeadAlso[Index]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
 											TargetsWithDeadAlso[Index]->Effects, TargetsWithDeadAlso[Index]->GetElementalResistances(), ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()));
 										if (TargetsWithDeadAlso[Index]->CurrentHP + IndexAmountToHeal > TargetsWithDeadAlso[Index]->MaxHP)
 											CurrentRestorationAmount += TargetsWithDeadAlso[Index]->MaxHP - TargetsWithDeadAlso[Index]->CurrentHP;
@@ -168,7 +168,7 @@ EBTNodeResult::Type UBTTask_GetTarget::ExecuteTask(UBehaviorTreeComponent& Owner
 											CurrentRestorationAmount += IndexAmountToHeal;
 									}
 									if (TargetsWithDeadAlso[Index - 1]->CurrentHP > 0) {
-										int16 IndexMinusOneAmountToHeal = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(TargetsWithDeadAlso[Index - 1]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
+										int16 IndexMinusOneAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(TargetsWithDeadAlso[Index - 1]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
 											TargetsWithDeadAlso[Index - 1]->Effects, TargetsWithDeadAlso[Index - 1]->GetElementalResistances(), ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()));
 										if (TargetsWithDeadAlso[Index - 1]->CurrentHP + IndexMinusOneAmountToHeal > TargetsWithDeadAlso[Index - 1]->MaxHP)
 											CurrentRestorationAmount += TargetsWithDeadAlso[Index - 1]->MaxHP - TargetsWithDeadAlso[Index - 1]->CurrentHP;
@@ -178,7 +178,7 @@ EBTNodeResult::Type UBTTask_GetTarget::ExecuteTask(UBehaviorTreeComponent& Owner
 								}
 								else {
 									if (TargetsWithDeadAlso[Index]->CurrentHP > 0) {
-										int16 IndexAmountToHeal = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(TargetsWithDeadAlso[Index]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
+										int16 IndexAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(TargetsWithDeadAlso[Index]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
 											TargetsWithDeadAlso[Index]->Effects, TargetsWithDeadAlso[Index]->GetElementalResistances(), ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()));
 										if (TargetsWithDeadAlso[Index]->CurrentHP + IndexAmountToHeal > TargetsWithDeadAlso[Index]->MaxHP)
 											CurrentRestorationAmount += TargetsWithDeadAlso[Index]->MaxHP - TargetsWithDeadAlso[Index]->CurrentHP;
@@ -186,7 +186,7 @@ EBTNodeResult::Type UBTTask_GetTarget::ExecuteTask(UBehaviorTreeComponent& Owner
 											CurrentRestorationAmount += IndexAmountToHeal;
 									}
 									if (TargetsWithDeadAlso[Index - 1]->CurrentHP > 0) {
-										int16 IndexMinusOneAmountToHeal = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(TargetsWithDeadAlso[Index - 1]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
+										int16 IndexMinusOneAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(TargetsWithDeadAlso[Index - 1]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
 											TargetsWithDeadAlso[Index - 1]->Effects, TargetsWithDeadAlso[Index - 1]->GetElementalResistances(), ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()));
 										if (TargetsWithDeadAlso[Index - 1]->CurrentHP + IndexMinusOneAmountToHeal > TargetsWithDeadAlso[Index - 1]->MaxHP)
 											CurrentRestorationAmount += TargetsWithDeadAlso[Index - 1]->MaxHP - TargetsWithDeadAlso[Index - 1]->CurrentHP;
@@ -194,7 +194,7 @@ EBTNodeResult::Type UBTTask_GetTarget::ExecuteTask(UBehaviorTreeComponent& Owner
 											CurrentRestorationAmount += IndexMinusOneAmountToHeal;
 									}
 									if (TargetsWithDeadAlso[Index + 1]->CurrentHP > 0) {
-										int16 IndexPlusOneAmountToHeal = SkillsSpellsAndEffectsActions::GetAttackOrRestorationValueAfterResistances(TargetsWithDeadAlso[Index + 1]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
+										int16 IndexPlusOneAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(TargetsWithDeadAlso[Index + 1]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
 											TargetsWithDeadAlso[Index + 1]->Effects, TargetsWithDeadAlso[Index + 1]->GetElementalResistances(), ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()));
 										if (TargetsWithDeadAlso[Index + 1]->CurrentHP + IndexPlusOneAmountToHeal > TargetsWithDeadAlso[Index + 1]->MaxHP)
 											CurrentRestorationAmount += TargetsWithDeadAlso[Index + 1]->MaxHP - TargetsWithDeadAlso[Index + 1]->CurrentHP;

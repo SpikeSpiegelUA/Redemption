@@ -55,10 +55,8 @@ EBTNodeResult::Type UBTTask_AskRepeatedQuestion::PrepareResponses(APlayerControl
 		PlayerCharacter->GetDialogueBoxWidget()->SetDialogueText(NPCRepeatedQuestion);
 	}
 
-	for (UWidget* Widget : PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetAllChildren()) {
-		Widget->RemoveFromParent();
-		Widget->ConditionalBeginDestroy();
-	}
+	for (int8 Index = PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
+		PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetChildAt(Index)->RemoveFromParent();
 
 	for (auto Response : PlayerResponses) {
 		UResponseEntry* ResponseEntry = CreateWidget<UResponseEntry>(PlayerController, PlayerCharacter->GetResponseEntryClass());

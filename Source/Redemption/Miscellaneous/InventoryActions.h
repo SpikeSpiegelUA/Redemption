@@ -14,6 +14,8 @@ namespace InventoryActions{
 	void ItemAmountInInventoryLogic(UInventoryScrollBoxEntryWidget* const ItemWidget, UScrollBox* const ScrollBoxWithWidget, const AGameItem* const UsedItem);
 	//Remove used or equiped item from InstanceItemsInTheInventory in RedemptionGameInstance.
 	void RemoveItemFromGameInstance(URedemptionGameInstance* const GameInstance, const AGameItem* const UsedOrEquipedItem);
+	//Remove used or equiped item from InstanceItemsInTheInventory in RedemptionGameInstance.
+	void RemoveItemFromGameInstance(URedemptionGameInstance* const GameInstance, const AGameItem* const UsedOrEquipedItem);
 	//If Item is in an inventory, return Item's inventory widget.
 	UInventoryScrollBoxEntryWidget* FindItemInventoryEntryWidget(const AGameItem* const ItemToSearchFor, const UScrollBox* const ItemScrollBox);
 	//Return scroll box corresponding to the item's type.
