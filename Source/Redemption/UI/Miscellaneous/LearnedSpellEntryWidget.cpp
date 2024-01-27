@@ -25,7 +25,8 @@ void ULearnedSpellEntryWidget::MainButtonOnClicked()
 {
     if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
         if (IsValid(PlayerCharacter->GetSpellBattleMenuWidget()) && IsValid(PlayerCharacter->GetSkillBattleMenuWidget()) && PlayerCharacter->GetSpellInfoWidget()) {
-            PlayerCharacter->GetSpellInfoWidget()->AddToViewport();
+            if(!PlayerCharacter->GetSpellInfoWidget()->IsInViewport())
+                PlayerCharacter->GetSpellInfoWidget()->AddToViewport();
             if (PlayerCharacter->GetLearnedSpellsJournalMenu()->IsInViewport()) {
                 PlayerCharacter->GetSpellInfoWidget()->SetPositionInViewport(FVector2D(300, 60));
                 if (IsValid(PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton))

@@ -22,6 +22,20 @@ bool USkillBattleMenu::Initialize()
 void USkillBattleMenu::NativeConstruct()
 {
 	Super::NativeConstruct();
+	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+		if (SkillsScrollBox->GetAllChildren().Num() > 0) {
+			if (ULearnedSpellEntryWidget* EntryWidget = Cast<ULearnedSpellEntryWidget>(SkillsScrollBox->GetAllChildren()[0]); IsValid(EntryWidget)) {
+				UIManagerWorldSubsystem->PickedButton = EntryWidget->GetMainButton();
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			}
+		}
+		else {
+			UIManagerWorldSubsystem->PickedButton = UseButtonWithNeighbors;
+			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+		}
+		if (IsValid(UIManagerWorldSubsystem->PickedButton))
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+	}
 }
 
 void USkillBattleMenu::UseButtonWithNeighborsOnClicked()
@@ -48,13 +62,14 @@ void USkillBattleMenu::BackButtonWithNeighborsOnClicked()
 			PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->AddToViewport();
 			UseButtonWithNeighbors->SetVisibility(ESlateVisibility::Visible);
 			PlayerCharacter->GetSpellInfoWidget()->RemoveFromParent();
-			IsOpenedFromDetailedCharacterInfo = false;
 		}
 		if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
 			if (IsValid(UIManagerWorldSubsystem->PickedButton))
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.6f, 0.6f, 0.6f, 1.f));
-			if (IsOpenedFromDetailedCharacterInfo)
+			if (IsOpenedFromDetailedCharacterInfo) {
 				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->GetToggleInfoButton();
+				IsOpenedFromDetailedCharacterInfo = false;
+			}
 			else
 				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetBattleMenuWidget()->GetAttackButton();
 			if(UIManagerWorldSubsystem->PickedButton)

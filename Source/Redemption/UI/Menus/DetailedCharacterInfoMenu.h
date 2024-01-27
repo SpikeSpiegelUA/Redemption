@@ -23,6 +23,9 @@ public:
 	void SetCharacterInfoForAlly();
 	void SetCharacterInfoForPlayer(const APlayerCharacter* const Player);
 
+	UFUNCTION()
+	void BackButtonOnClicked();
+
 	UButton* GetBackButton() const;
 	UButton* GetAbilitiesButton() const;
 	UButton* GetToggleInfoButton() const;
@@ -30,6 +33,7 @@ public:
 	UBorder* GetStatsBorder() const;
 	UBorder* GetPhysicalResistancesBorder() const;
 	UBorder* GetElementalResistancesBorder() const;
+	UVerticalBox* GetButtonsVerticalBox() const;
 
 	class ACombatAllyNPC* Ally{};
 protected:
@@ -44,6 +48,8 @@ private:
 	class UBorder* StatsBorder{};
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
 	class UBorder* PhysicalResistancesBorder{};
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UVerticalBox* ButtonsVerticalBox{};
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
 	class UBorder* ElementalResistancesBorder{};
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
@@ -131,8 +137,6 @@ private:
 
 	bool MoreInfoShowed = false;
 
-	UFUNCTION()
-	void BackButtonOnClicked();
 	UFUNCTION()
 	void BackButtonOnHovered();
 	UFUNCTION()

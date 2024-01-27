@@ -49,4 +49,5 @@ public:
 	void SetCharacterInfo(const APlayerCharacter* const PlayerToSet);
 
 	ACombatAllyNPC* Ally{};
+	UButton* GetCharacterNameButton() const;
 };
