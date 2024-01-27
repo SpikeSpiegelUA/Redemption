@@ -560,8 +560,12 @@ void UDetailedCharacterInfoMenu::BackButtonOnClicked()
 		if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
 			if (IsValid(UIManagerWorldSubsystem->PickedButton))
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
-			UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetPartyMenuWidget()->GetBackButton();
-			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+			if (auto* GeneralCharacterInfoWidget = Cast<UPartyMenuGeneralCharacterInfo>
+				(PlayerCharacter->GetPartyMenuWidget()->GetCharactersHorizontalBox()->GetChildAt(0)); IsValid(GeneralCharacterInfoWidget)) {
+				UIManagerWorldSubsystem->PickedButton = GeneralCharacterInfoWidget->GetCharacterNameButton();
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			}
 		}
 		if (MoreInfoShowed) {
 			SkillsBorder->SetVisibility(ESlateVisibility::Visible);
@@ -582,10 +586,7 @@ void UDetailedCharacterInfoMenu::AbilitiesButtonOnClicked()
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter())) {
 		this->RemoveFromParent();
-		PlayerCharacter->GetSkillBattleMenuWidget()->AddToViewport();
 		PlayerCharacter->GetSkillBattleMenuWidget()->ResetSkillsScrollBox();
-		PlayerCharacter->GetSkillBattleMenuWidget()->GetUseButtonWithNeighbors()->SetVisibility(ESlateVisibility::Hidden);
-		PlayerCharacter->GetSkillBattleMenuWidget()->IsOpenedFromDetailedCharacterInfo = true;
 		if (Ally != nullptr) {
 			for (TSubclassOf<ASpell> SpellClass : Ally->GetAvailableSpells())
 				PlayerCharacter->GetSkillBattleMenuWidget()->AddSkillEntryToSkillsScrollBox(Cast<ASpell>(SpellClass->GetDefaultObject()));
@@ -594,6 +595,10 @@ void UDetailedCharacterInfoMenu::AbilitiesButtonOnClicked()
 			for (TSubclassOf<ASpell> SpellClass : PlayerCharacter->GetAvailableSkills())
 				PlayerCharacter->GetSkillBattleMenuWidget()->AddSkillEntryToSkillsScrollBox(Cast<ASpell>(SpellClass->GetDefaultObject()));
 		}
+		PlayerCharacter->GetSkillBattleMenuWidget()->AddToViewport();
+		PlayerCharacter->GetSkillBattleMenuWidget()->GetUseButtonWithNeighbors()->SetVisibility(ESlateVisibility::Hidden);
+		PlayerCharacter->GetSkillBattleMenuWidget()->IsOpenedFromDetailedCharacterInfo = true;
+		AbilitiesButton->SetBackgroundColor(FLinearColor(0.7f, 0.7f, 0.7f, 1.f));
 	}
 }
 
@@ -669,4 +674,9 @@ UBorder* UDetailedCharacterInfoMenu::GetPhysicalResistancesBorder() const
 UBorder* UDetailedCharacterInfoMenu::GetElementalResistancesBorder() const
 {
 	return ElementalResistancesBorder;
+}
+
+UVerticalBox* UDetailedCharacterInfoMenu::GetButtonsVerticalBox() const
+{
+	return ButtonsVerticalBox;
 }

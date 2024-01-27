@@ -83,12 +83,13 @@ void UPlayerMenu::PartyButtonOnClicked()
 			PlayerCharacter->GetPlayerMenuWidget()->RemoveFromParent();
 			PlayerCharacter->GetPartyMenuWidget()->UpdateCharacterInfo(PlayerCharacter->GetAllies());
 			PartyButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
-			UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
-			if (IsValid(UIManagerWorldSubsystem)) {
-				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetPartyMenuWidget()->GetBackButton();
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
-				UIManagerWorldSubsystem->PickedButtonIndex = 0;
-			}
+			if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+				if (auto* GeneralCharacterInfoWidget = Cast<UPartyMenuGeneralCharacterInfo>
+					(PlayerCharacter->GetPartyMenuWidget()->GetCharactersHorizontalBox()->GetChildAt(0)); IsValid(GeneralCharacterInfoWidget)) {
+					UIManagerWorldSubsystem->PickedButton = GeneralCharacterInfoWidget->GetCharacterNameButton();
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+					UIManagerWorldSubsystem->PickedButtonIndex = 0;
+				}
 		}
 	}
 }

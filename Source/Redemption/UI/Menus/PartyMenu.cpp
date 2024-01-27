@@ -20,22 +20,23 @@ bool UPartyMenu::Initialize()
 void UPartyMenu::NativeConstruct()
 {
 	Super::NativeConstruct();
+	IsSelectingCharacter = true;
 }
 
 void UPartyMenu::UpdateCharacterInfo(const TArray<ACombatAllyNPC*>& Allies)
 {
-	for (int8 Index = MainHorizontalBox->GetAllChildren().Num() - 1; Index >= 1 ; Index--)
+	for (int8 Index = CharactersHorizontalBox->GetAllChildren().Num() - 1; Index >= 1 ; Index--)
 		if (Index >= Allies.Num())
-			MainHorizontalBox->GetAllChildren()[Index]->ConditionalBeginDestroy();
+			CharactersHorizontalBox->GetAllChildren()[Index]->ConditionalBeginDestroy();
 	for (uint8 Index = 0; Index < Allies.Num(); Index++) {
 		PartyMenuGeneralCharacterInfoWidget = CreateWidget<UPartyMenuGeneralCharacterInfo>(this, PartyMenuGeneralCharacterInfoClass);
-		MainHorizontalBox->AddChild(PartyMenuGeneralCharacterInfoWidget);
+		CharactersHorizontalBox->AddChild(PartyMenuGeneralCharacterInfoWidget);
 		if (UHorizontalBoxSlot* WidgetAsSlot = UWidgetLayoutLibrary::SlotAsHorizontalBoxSlot(PartyMenuGeneralCharacterInfoWidget); IsValid(WidgetAsSlot))
 			WidgetAsSlot->SetPadding(FMargin(28.f));
 		PartyMenuGeneralCharacterInfoWidget->SetCharacterInfo(Allies[Index]);
 	}
 	PartyMenuGeneralCharacterInfoWidget = nullptr;
-	if (auto* PlayerCharacterInfo = Cast<UPartyMenuGeneralCharacterInfo>(MainHorizontalBox->GetChildAt(0)); IsValid(PlayerCharacterInfo))
+	if (auto* PlayerCharacterInfo = Cast<UPartyMenuGeneralCharacterInfo>(CharactersHorizontalBox->GetChildAt(0)); IsValid(PlayerCharacterInfo))
 		if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
 			PlayerCharacterInfo->SetCharacterInfo(PlayerCharacter);
 }
@@ -63,10 +64,16 @@ void UPartyMenu::BackButtonOnHovered()
 		UIManagerWorldSubsystem->PickedButton = BackButton;
 		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 		UIManagerWorldSubsystem->PickedButtonIndex = 0;
+		IsSelectingCharacter = false;
 	}
 }
 
 UButton* UPartyMenu::GetBackButton() const
 {
 	return BackButton;
+}
+
+UHorizontalBox* UPartyMenu::GetCharactersHorizontalBox() const
+{
+	return CharactersHorizontalBox;
 }

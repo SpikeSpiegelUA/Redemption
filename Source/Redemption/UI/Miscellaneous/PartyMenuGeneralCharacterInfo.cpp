@@ -78,7 +78,6 @@ void UPartyMenuGeneralCharacterInfo::CharacterNameButtonOnClicked()
 			if (Ally != nullptr) {
 				PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->Ally = Ally;
 				PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->SetCharacterInfoForAlly();
-
 			}
 			else {
 				PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->Ally = nullptr;
@@ -87,7 +86,8 @@ void UPartyMenuGeneralCharacterInfo::CharacterNameButtonOnClicked()
 			if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
 				if (IsValid(UIManagerWorldSubsystem->PickedButton))
 					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
-				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->GetBackButton();
+				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->GetToggleInfoButton();
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 			}
 		}
@@ -102,6 +102,9 @@ void UPartyMenuGeneralCharacterInfo::CharacterNameButtonOnHovered()
 		UIManagerWorldSubsystem->PickedButton = CharacterNameButton;
 		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 		UIManagerWorldSubsystem->PickedButtonIndex = 0;
+		if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
+			if(IsValid(PlayerCharacter->GetPartyMenuWidget()))
+				PlayerCharacter->GetPartyMenuWidget()->IsSelectingCharacter = true;
 	}
 }
 
@@ -129,4 +132,9 @@ void UPartyMenuGeneralCharacterInfo::SetCharacterPortraitImage(const UTexture* c
 {
 	CharacterPortraitImage->Brush.SetResourceObject(const_cast<UTexture*>(ImageToSet));
 	CharacterPortraitImage->Brush.SetImageSize(FVector2D(120, 100));
+}
+
+UButton* UPartyMenuGeneralCharacterInfo::GetCharacterNameButton() const
+{
+	return CharacterNameButton;
 }

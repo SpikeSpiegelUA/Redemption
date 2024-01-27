@@ -25,18 +25,23 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
 		class UButton* BackButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
-		class UHorizontalBox* MainHorizontalBox;
+		class UHorizontalBox* CharactersHorizontalBox;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Classes", meta = (AllowPrivateAccess = true))
 		TSubclassOf<class UPartyMenuGeneralCharacterInfo> PartyMenuGeneralCharacterInfoClass{};
 	UPROPERTY()
 		UPartyMenuGeneralCharacterInfo* PartyMenuGeneralCharacterInfoWidget{};
 
 	UFUNCTION()
-	void BackButtonOnClicked();
-	UFUNCTION()
 	void BackButtonOnHovered();
 public:
 	void UpdateCharacterInfo(const TArray<ACombatAllyNPC*>& Allies);
 
+	UFUNCTION()
+	void BackButtonOnClicked();
+
 	UButton* GetBackButton() const;
+	UHorizontalBox* GetCharactersHorizontalBox() const;
+
+	//Need this boolean to control whether the player is selecting one of the character buttons or another button(BackButton, e.g.);
+	bool IsSelectingCharacter = true;
 };

@@ -817,17 +817,6 @@ void UBattleMenu::SkillButtonOnClicked()
 		if (USkillBattleMenu* SkillBattleMenu = PlayerCharacter->GetSkillBattleMenuWidget(); IsValid(SkillBattleMenu)) {
 			SkillBattleMenu->AddToViewport();
 			MenuBorder->SetVisibility(ESlateVisibility::Hidden);
-			if (SkillBattleMenu->GetSkillsScrollBox()->GetAllChildren().Num() > 0) {
-				ULearnedSpellEntryWidget* EntryWidget = Cast<ULearnedSpellEntryWidget>(SkillBattleMenu->GetSkillsScrollBox()->GetAllChildren()[0]);
-				EntryWidget->GetMainButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-				UIManagerWorldSubsystem->PickedButton = EntryWidget->GetMainButton();
-				UIManagerWorldSubsystem->PickedButtonIndex = 0;
-				//EntryWidget->SetPickedItem(EntryWidget->GetItem());
-			}
-			else {
-				UIManagerWorldSubsystem->PickedButton = SkillBattleMenu->GetUseButtonWithNeighbors();
-				UIManagerWorldSubsystem->PickedButtonIndex = 0;
-			}
 			this->RemoveFromParent();
 		}
 	}
