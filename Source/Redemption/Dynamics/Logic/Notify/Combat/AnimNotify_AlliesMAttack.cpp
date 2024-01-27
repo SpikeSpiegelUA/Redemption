@@ -26,7 +26,7 @@ void UAnimNotify_AlliesMAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 			if (PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem && IsValid(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem())) {
 				if (AAssaultItem* AssaultItem = Cast<AAssaultItem>(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem()); IsValid(AssaultItem)) {
 					TargetEnemy->Execute_GetHit(TargetEnemy, BattleActions::CalculateAttackValueAfterEffects(AssaultItem->GetAttackValue(), 
-						CombatAllyPlayer), AssaultItem->GetElementsAndTheirPercentagesStructs(), false);
+						CombatAllyPlayer), AssaultItem->GetElementsAndTheirPercentagesStructs(), EPhysicalType::NONE, false);
 					PlayerCharacter->GetInventoryMenuWidget()->SetPickedItem(nullptr);
 					PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem = false;
 				}
@@ -34,14 +34,14 @@ void UAnimNotify_AlliesMAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 			else if (PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell && IsValid(PlayerCharacter->GetSpellBattleMenuWidget()->GetCreatedSpell())) {
 				if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(PlayerCharacter->GetSpellBattleMenuWidget()->GetCreatedSpell()); IsValid(AssaultSpell)) {
 					TargetEnemy->Execute_GetHit(TargetEnemy, BattleActions::CalculateAttackValueAfterEffects(AssaultSpell->GetAttackValue(), 
-						CombatAllyPlayer), ElementsActions::FindContainedElements(AssaultSpell->GetSpellElements()), false);
+						CombatAllyPlayer), ElementsActions::FindContainedElements(AssaultSpell->GetSpellElements()), EPhysicalType::NONE, false);
 					PlayerCharacter->GetSpellBattleMenuWidget()->SetCreatedSpell(nullptr);
 					PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell = false;
 				}
 			}
 			else if (!PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem && !PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell) {
 				TargetEnemy->Execute_GetHit(TargetEnemy, BattleActions::CalculateAttackValueAfterEffects(CombatAllyPlayer->GetMeleeAttackValue(), 
-					CombatAllyPlayer), CombatAllyPlayer->GetMeleeWeaponElements(), false);
+					CombatAllyPlayer), CombatAllyPlayer->GetMeleeWeaponElements(), EPhysicalType::NONE, false);
 				PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithMelee = false;
 			}
 		}

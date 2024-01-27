@@ -142,7 +142,7 @@ public:
 	//Access functions
 	class UAlliesInfoBars* GetAlliesInfoBarsWidget() const;
 	UPlayerMenu* GetPlayerMenuWidget() const;
-	UInventoryMenu* GetInventoryMenuWidget() const;
+	class UInventoryMenu* GetInventoryMenuWidget() const;
 	UBattleResultsScreen* GetBattleResultsScreenWidget() const;
 	TSubclassOf<class UInventoryScrollBoxEntryWidget> GetInventoryScrollBoxEntryClass() const;
 	TSubclassOf<class UResponseEntry> GetResponseEntryClass() const;

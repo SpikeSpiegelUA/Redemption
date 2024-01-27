@@ -54,10 +54,11 @@ void USkillBattleMenu::BackButtonWithNeighborsOnClicked()
 			if (IsValid(UIManagerWorldSubsystem->PickedButton))
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.6f, 0.6f, 0.6f, 1.f));
 			if (IsOpenedFromDetailedCharacterInfo)
-				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetBattleMenuWidget()->GetAttackButton();
-			else
 				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->GetToggleInfoButton();
-			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+			else
+				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetBattleMenuWidget()->GetAttackButton();
+			if(UIManagerWorldSubsystem->PickedButton)
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 			UIManagerWorldSubsystem->PickedButtonIndex = 0;
 		}
 	}

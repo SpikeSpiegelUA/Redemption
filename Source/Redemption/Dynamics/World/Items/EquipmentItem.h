@@ -10,17 +10,6 @@
  * 
  */
 
-
-UENUM(BlueprintType)
-enum class EPhysicalType :uint8
-{
-	SLASHING UMETA(DisplayName = "Slashing"),
-	CRUSHING UMETA(DisplayName = "Crushing"),
-	PIERCING UMETA(DisplayName = "Piercing"),
-};
-ENUM_RANGE_BY_FIRST_AND_LAST(EPhysicalType, EPhysicalType::SLASHING, EPhysicalType::PIERCING);
-
-
 UCLASS()
 class AEquipmentItem : public AGameItem
 {

@@ -11,6 +11,8 @@
 #include "..\Dynamics\World\Items\ArmorItem.h"
 #include "..\Dynamics\World\Items\RangeWeapon.h"
 #include "Components/ScrollBox.h"
+#include "Components/VerticalBox.h"
+#include "Redemption/UI/Miscellaneous/InventoryTargetEntry.h"
 #include "InventoryMenu.generated.h"
 
 /**
@@ -36,8 +38,12 @@ private:
 	//Set SelectedButton color to green, make PickedButton opaque, set PickedButton to SelectedButton and PickedButtonIndex to Index,SelectedPanelWidget to ItemTypeStackBox
 	//PickedItem to nullptr and IsSelectingSpecificItem to false;
 	void TypeButtonsOnHoveredActions(class UButton* const SelectedButtonParameter, int8 Index);
-	//So if we picked type, its button has to be green. But when we hover over another button, PickedButton is set opaque. This method checks, if type's border is visible and then set opaque or not.
-	void SetPickedTypeButtonColor(const class UButton* const SelectedButton);
+	//Use this in NativeConstruct to create target widgets for TargetsVerticalBox.
+	void FillTargetsVerticalBox();
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Classes", meta = (AllowPrivateAccess = true))
+	TSubclassOf<class UInventoryTargetEntry> InventoryTargetEntryClass{};
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	class UInventoryTargetEntry* InventoryTargetEntryWidget{};
 
 	UFUNCTION()
 	void MeleeButtonOnClicked();
@@ -84,6 +90,10 @@ protected:
 		class UScrollBox* HandInventoryScrollBox;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UScrollBox* LowerArmorInventoryScrollBox;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UVerticalBox* TargetsVerticalBox;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UScaleBox* TargetsScaleBox;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* InventoryBorder;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -146,6 +156,8 @@ protected:
 		class UTextBlock* ItemNameTextBlock;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* ItemTypeTextBlock;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UTextBlock* ItemPhysicalTypeTextBlock;
 	//Attack, Armor, HP restore, Mana restore, etc...
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* ItemEffectValueTextBlock;
@@ -188,13 +200,19 @@ public:
 
 	//After we select the type of an item in the ItemTypeStackBox, select specific item in the scroll box corresponding to the selected item type. Need this variable for selection and equip control with a keyboard.
 	bool IsSelectingSpecificItem = false;
+	//After we select a target in the TargetsVerticalBox, select specific item in the scroll box corresponding to the selected item type. Need this variable for selection and equip control with a keyboard.
+	bool IsSelectingTarget = false;
+	//If we select a target for a restoration item, then there is some special logic, that we run through this bool. Yeah, this sucks. Too bad.
+	//bool IsSelectingTarget = false;
 
 	//Either ScrollBox or StackBox. Need this for an input from a keyboard.
 	UPROPERTY()
 		UPanelWidget* SelectedPanelWidget{};
 	//Index of a button that was picked in type stack box. Has a green color
 	int8 SelectedTypeButtonIndex{};
-
+	// Set it to -1, if no item with targets is selected.
+	// Index of a button that was picked in the stack box of the selected type. Has a blue color. Is for a restoration item.
+	int16 SelectedItemButtonIndex = -1;
 	UScrollBox* GetInventoryScrollBox() const;
 	UScrollBox* GetMeleeInventoryScrollBox() const;
 	UScrollBox* GetRangeInventoryScrollBox() const;
@@ -204,6 +222,7 @@ public:
 	UScrollBox* GetLowerArmorInventoryScrollBox() const;
 	UStackBox* GetItemTypeStackBox() const;
 	UVerticalBox* GetBattleMenuButtonsForItemsVerticalBox() const;
+	UVerticalBox* GetTargetsVerticalBox() const;
 	AGameItem* GetPickedItem() const;
 	UCanvasPanel* GetMainCanvasPanel() const;
 	UCanvasPanel* GetNotInBattleMenuIncludedCanvasPanel() const;
@@ -233,7 +252,7 @@ public:
 	void SetTextOfItemDescriptionTextBlock(const FText& NewText);
 	void SetTextOfItemRangeTextBlock(const FText& NewText);
 
-	//Set ItemInfo for ItemInfoBorder
+	//Set ItemInfo for ItemInfoBorder. Checks, whether GameItem is valid.
 	void SetItemInfo(const AGameItem* const GameItem);
 
 	void CreateNotification(const FText& NotificationText);
@@ -259,6 +278,9 @@ public:
 	void BattleMenuItemsBackButtonOnClicked();
 	UFUNCTION()
 	void UseButtonOnClicked();
+	//Is used in UseButtonOnClicked. Hides TargetsMenu and sets the SelectedItemButtonIndex button's color to (0.f, 0.f, 0.f, 0.f).
+	//Sets the SelectedItemButtonIndex to -1.
+	void HideTargetsMenu();
 	UFUNCTION()
 	void EquipButtonOnClicked();
 
@@ -266,4 +288,6 @@ public:
 	void BuffOrRestorationItemHasBeenUsedActions(class UBattleMenu* const BattleMenu, class ABattleManager* const BattleManager);
 	//Same as above, but without timer for PlayerTurnController and without setting PickedItem to nullptr.
 	void DebuffOrAssaultItemHasBeenUsedActions(UBattleMenu* const& BattleMenu);
+	//So if we picked type, its button has to be green. But when we hover over another button, PickedButton is set opaque. This method checks, if type's border is visible and then set opaque or not.
+	void SetPickedTypeButtonColor(class UButton* const SelectedButton);
 };

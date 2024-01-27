@@ -8,6 +8,11 @@ const EWeaponType AWeaponItem::GetWeaponType() const
     return WeaponType;
 }
 
+const EPhysicalType AWeaponItem::GetPhysicalType() const
+{
+    return PhysicalType;
+}
+
 TArray<FElementAndItsPercentageStruct> AWeaponItem::GetElementsAndTheirPercentagesStructs() const
 {
     return ElementsAndTheirPercentagesStructs;

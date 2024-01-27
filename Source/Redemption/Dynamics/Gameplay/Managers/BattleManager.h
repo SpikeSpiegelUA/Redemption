@@ -125,4 +125,7 @@ private:
 	void PlayerAllyDizzyActions();
 	UFUNCTION()
 	void PlayerDeathLogic();
+	//Use this in PlayerDeathLogic with TimerHandle.
+	UFUNCTION()
+	void PlayerDeathLogicOnTimer();
 };

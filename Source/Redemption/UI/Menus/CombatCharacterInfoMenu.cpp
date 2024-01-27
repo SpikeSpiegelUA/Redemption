@@ -44,6 +44,7 @@ void UCombatCharacterInfoMenu::BackButtonOnClicked()
 			BattleMenu->AddToViewport();
 			if (IsValid(PlayerCharacter->GetBattleManager()) && IsValid(PlayerCharacter->GetBattleManager()->SelectedCombatNPC))
 				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(false);
+			PlayerCharacter->GetBattleManager()->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
 			BattleMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
 			BattleMenu->GetLeftRightMenuBorder()->SetVisibility(ESlateVisibility::Visible);
 			BattleMenu->GetAttackMenuBorder()->SetVisibility(ESlateVisibility::Visible);

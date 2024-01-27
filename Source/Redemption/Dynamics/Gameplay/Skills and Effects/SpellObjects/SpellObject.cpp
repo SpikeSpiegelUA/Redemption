@@ -63,11 +63,11 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 				if (CombatTarget->CurrentHP > 0) {
 					if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(Spell); IsValid(AssaultSpell)) {
 						//Logic for special effects of the spell(frozen, burn...).
-						if (CombatTarget->Execute_GetHit(CombatTarget, AssaultSpell->GetAttackValue(), ElementsActions::FindContainedElements(AssaultSpell->GetSpellElements()), false)) {
+						if (CombatTarget->Execute_GetHit(CombatTarget, AssaultSpell->GetAttackValue(), ElementsActions::FindContainedElements(AssaultSpell->GetSpellElements()), EPhysicalType::NONE, false)) {
 							if (AssaultSpell->GetEffectsAndTheirChances().Num() > 0) {
 								for (uint8 Index = 0; Index < AssaultSpell->GetEffectsAndTheirChances().Num(); Index++) {
 									int8 Chance = FMath::RandRange(0, 100);
-									ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(PlayerCharacter->GetBattleManager()->GetCombatFloatingInformationActorClass(), GetActorLocation(), GetActorRotation());
+									ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(PlayerCharacter->GetBattleManager()->GetCombatFloatingInformationActorClass(), CombatTarget->GetActorLocation(), GetActorRotation());
 									FString TextForCombatFloatingInformationActor = FString();
 									if (AssaultSpell->GetEffectsAndTheirChances()[Index].Chance >= Chance) {
 										if (IsValid(Cast<ATurnStartDamageEffect>(AssaultSpell->GetEffectsAndTheirChances()[Index].Effect->GetDefaultObject()))) {

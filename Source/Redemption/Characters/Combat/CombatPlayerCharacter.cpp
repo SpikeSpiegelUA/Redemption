@@ -36,13 +36,17 @@ void ACombatPlayerCharacter::BeginPlay()
 			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee)) {
 				MeleeAttackValue = PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee->GetAttackValue();
 				MeleeWeaponElements = PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee->GetElementsAndTheirPercentagesStructs();
+				MeleePhysicalType = PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee->GetPhysicalType();
 			}
-			else
+			else {
 				MeleeAttackValue = 5;
+				MeleePhysicalType = EPhysicalType::CRUSHING;
+			}
 			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedRange)) {
 				RangeAmmo = PlayerCharacter->GetInventoryMenuWidget()->EquipedRange->GetAmmo();
 				RangeAttackValue = PlayerCharacter->GetInventoryMenuWidget()->EquipedRange->GetAttackValue();
 				RangeWeaponElements = PlayerCharacter->GetInventoryMenuWidget()->EquipedRange->GetElementsAndTheirPercentagesStructs();
+				RangePhysicalType = PlayerCharacter->GetInventoryMenuWidget()->EquipedRange->GetPhysicalType();
 			} 
 			else {
 				RangeAmmo = 0;

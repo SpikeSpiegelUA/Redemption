@@ -58,13 +58,13 @@ void UPlayerMenu::InventoryButtonOnClicked()
 		PlayerCharacter->GetInventoryMenuWidget()->GetInventoryBorder()->SetVisibility(ESlateVisibility::Visible);
 		PlayerCharacter->GetInventoryMenuWidget()->GetNotInBattleMenuIncludedCanvasPanel()->SetVisibility(ESlateVisibility::Visible);
 		PlayerCharacter->GetInventoryMenuWidget()->GetBattleMenuButtonsForItemsBorder()->SetVisibility(ESlateVisibility::Hidden);
-		InventoryButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+		InventoryButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 		PlayerCharacter->GetInventoryMenuWidget()->SelectedPanelWidget = PlayerCharacter->GetInventoryMenuWidget()->GetItemTypeStackBox();
 		PlayerCharacter->GetInventoryMenuWidget()->SelectedTypeButtonIndex = 0;
 		UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
 		if (IsValid(UIManagerWorldSubsystem)) {
 			UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetInventoryMenuWidget()->GetInventoryButton();
-			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 			UIManagerWorldSubsystem->PickedButtonIndex = 0;
 
 		}
@@ -82,11 +82,11 @@ void UPlayerMenu::PartyButtonOnClicked()
 			PlayerCharacter->GetPartyMenuWidget()->AddToViewport();
 			PlayerCharacter->GetPlayerMenuWidget()->RemoveFromParent();
 			PlayerCharacter->GetPartyMenuWidget()->UpdateCharacterInfo(PlayerCharacter->GetAllies());
-			PartyButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+			PartyButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 			UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
 			if (IsValid(UIManagerWorldSubsystem)) {
 				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetPartyMenuWidget()->GetBackButton();
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 				UIManagerWorldSubsystem->PickedButtonIndex = 0;
 			}
 		}
@@ -114,13 +114,13 @@ void UPlayerMenu::ButtonOnHoveredActions(UButton* const PickedButton)
 	if (IsValid(UIManagerWorldSubsystem) && IsValid(PickedButton))
 	{
 		if(IsValid(UIManagerWorldSubsystem->PickedButton))
-			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 		UIManagerWorldSubsystem->PickedButton = PickedButton;
 		UIManagerWorldSubsystem->PickedButtonIndex = ButtonsStackBox->GetAllChildren().IndexOfByPredicate([&](UWidget* CurrentArrayWidget)
 			{
 				return CurrentArrayWidget == PickedButton;
 			});
-		PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+		PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 	}
 }
 

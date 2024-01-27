@@ -16,12 +16,16 @@
 
 namespace SkillsSpellsAndEffectsActions {
 	int GetValueAfterEffects(int ValueBeforeEffects, const TArray<AEffect*>& Effects, EEffectArea EffectArea);
-	int GetAttackOrRestorationValueAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
+	int GetAttackValueAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
+		const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements, EPhysicalType AttackerPhysicalType, const TArray<FPhysicalTypeAndItsPercentageStruct> ReceiverPhysicalResistances);
+	int GetRestorationValueAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
 		const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements);
 	int GetBuffOrDebuffEvasionChanceAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
 		const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements);
 	//In EEffectArea we have different resistance to elements, so we get element corresponding to the area passed by value.
-	ESpellElements GetSpellElementCorrespondingToEffectArea(EEffectArea EffectArea);
+	ESpellElements GetSpellElementCorrespondingToEffectArea(const EEffectArea EffectArea);
+	//In EEffectArea we have different resistance to physical types, so we get physical type corresponding to the area passed by value.
+	EPhysicalType GetPhysicalTypeCorrespondingToEffectArea(const EEffectArea EffectArea);
 	//For the logic to work we need to have resistances for each element. Call this function in a BeginPlay() of CombatEnemies and the Player.
 	void InitializeElementalResistances(TArray<FElementAndItsPercentageStruct>& ElementalResistances);
 	//Same as the function above, just for physical resistances;
