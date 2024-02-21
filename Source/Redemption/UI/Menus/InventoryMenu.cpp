@@ -24,6 +24,8 @@
 #include "..\Miscellaneous\SkillsSpellsAndEffectsActions.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "..\UI\HUD\FloatingManaBarWidget.h"
+#include "..\Miscellaneous\UIActions.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 
 
 bool UInventoryMenu::Initialize()
@@ -377,9 +379,13 @@ void UInventoryMenu::BackButtonOnClicked()
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 0.f));
 		PickedItem = nullptr;
 		this->RemoveFromParent();
-		if(APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
-			PlayerCharacter->GetPlayerMenuWidget()->AddToViewport();
-			UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetPlayerMenuWidget()->GetInventoryButton();
+		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>(); IsValid(PlayerController))
+			if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+				if (IsValid(RedemptionGameModeBase->GetPlayerMenuClass()))
+					UIManagerWorldSubsystem->PlayerMenuWidget = CreateWidget<UPlayerMenu>(PlayerController, RedemptionGameModeBase->GetPlayerMenuClass());
+		if (IsValid(UIManagerWorldSubsystem->PlayerMenuWidget)) {
+			UIManagerWorldSubsystem->PlayerMenuWidget->AddToViewport();
+			UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PlayerMenuWidget->GetInventoryButton();
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 		}
 	}
@@ -723,10 +729,10 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 		ABattleManager* BattleManager = nullptr;
 		UBattleMenu* BattleMenu = nullptr;
-		if (IsValid(PlayerCharacter)) {
-			BattleManager = PlayerCharacter->GetBattleManager();
-			BattleMenu = PlayerCharacter->GetBattleMenuWidget();
-		}
+		if (IsValid(UIManagerWorldSubsystem))
+			BattleMenu = UIManagerWorldSubsystem->BattleMenuWidget;
+		if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+			BattleManager = RedemptionGameModeBase->GetBattleManager();
 		if (IsValid(GameInstance) && IsValid(PlayerCharacter) && IsValid(BattleManager) && IsValid(BattleMenu) && IsValid(PickedItem) && IsValid(UIManagerWorldSubsystem)) 
 			if ((IsValid(Cast<AAssaultItem>(PickedItem)) || IsValid(Cast<ADebuffItem>(PickedItem)) || IsValid(Cast<ARestorationItem>(PickedItem)) || IsValid(Cast<ABuffItem>(PickedItem)))) {
 				if (IsValid(Cast<ARestorationItem>(PickedItem)) || IsValid(Cast<ABuffItem>(PickedItem))) {
@@ -737,12 +743,6 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 							BattleMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(AllyPlayerNPC->GetCharacterName()));
 							break;
 						}
-					if (IsValid(Cast<ARestorationItem>(PickedItem))) {
-						if (Cast<ARestorationItem>(PickedItem)->GetTypeOfRestoration() == EItemRestorationType::HEALTH)
-							BattleManager->SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
-						else
-							Cast<ACombatAllies>(BattleManager->SelectedCombatNPC)->GetFloatingManaBarWidget()->GetManaBar()->SetVisibility(ESlateVisibility::Visible);
-					}
 				}
 				else if (IsValid(Cast<AAssaultItem>(PickedItem)) || IsValid(Cast<ADebuffItem>(PickedItem))) {
 					BattleManager->IsSelectingAllyAsTarget = false;
@@ -752,7 +752,6 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 							BattleMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(EnemyNPC->GetCharacterName()));
 							break;
 						}
-					BattleManager->SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
 				}
 				BattleMenu->AddToViewport();
 				UIManagerWorldSubsystem->PickedButtonIndex = 0;
@@ -777,29 +776,38 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 					for (ACombatNPC* CombatNPC : BattleManager->BattleEnemies)
 						if(CombatNPC->CurrentHP > 0)
 							TargetsForSelection.Add(CombatNPC);
+				//We can restore mana to allies or hp or deal damage, so we need to decide whether show the mana or the health bar.
+				FString BarToShow{};
+				if (IsValid(Cast<ARestorationItem>(PickedItem))) {
+					if (Cast<ARestorationItem>(PickedItem)->GetTypeOfRestoration() == EItemRestorationType::HEALTH)
+						BarToShow = "Health";
+					else
+						BarToShow = "Mana";
+				}
+				else
+					BarToShow = "Health";
 				switch (PickedItem->GetItemRange()) {
 					case EItemRange::SINGLE:
-						if(IsValid(BattleManager->SelectedCombatNPC))
-							BattleManager->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
+						if (IsValid(BattleManager->SelectedCombatNPC))
+							UIActions::SetCrosshairAndManaHealthBarsVisibility(BattleManager->SelectedCombatNPC, BarToShow);
 						break;
 					case EItemRange::NEIGHBORS:
 						if (TargetsForSelection.Num() > 1) {
-							if (IsValid(BattleManager->SelectedCombatNPC))
-								BattleManager->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
+							if (IsValid(BattleManager->SelectedCombatNPC)) 
+								UIActions::SetCrosshairAndManaHealthBarsVisibility(BattleManager->SelectedCombatNPC, BarToShow);
 							if (BattleManager->SelectedCombatNPCIndex - 1 >= 0)
-								TargetsForSelection[BattleManager->SelectedCombatNPCIndex - 1]->GetCrosshairWidgetComponent()->SetVisibility(true);
+								UIActions::SetCrosshairAndManaHealthBarsVisibility(TargetsForSelection[BattleManager->SelectedCombatNPCIndex - 1], BarToShow);
 							if (BattleManager->SelectedCombatNPCIndex + 1 < TargetsForSelection.Num())
-								TargetsForSelection[BattleManager->SelectedCombatNPCIndex + 1]->GetCrosshairWidgetComponent()->SetVisibility(true);
+								UIActions::SetCrosshairAndManaHealthBarsVisibility(TargetsForSelection[BattleManager->SelectedCombatNPCIndex + 1], BarToShow);
 						}
 						else {
 							BattleMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
-							if (IsValid(BattleManager->SelectedCombatNPC))
-								BattleManager->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
+								UIActions::SetCrosshairAndManaHealthBarsVisibility(BattleManager->SelectedCombatNPC, BarToShow);
 						}
 						break;
 					case EItemRange::EVERYONE:
 						for (ACombatNPC* Target : TargetsForSelection)
-							Target->GetCrosshairWidgetComponent()->SetVisibility(true);
+							UIActions::SetCrosshairAndManaHealthBarsVisibility(Target, BarToShow);
 				}
 				BattleMenu->GetAttackMenuBorder()->SetVisibility(ESlateVisibility::Visible);
 				BattleMenu->GetLeftRightMenuBorder()->SetVisibility(ESlateVisibility::Visible);
@@ -816,7 +824,7 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 void UInventoryMenu::BattleMenuItemsBackButtonOnClicked()
 {
 	if(APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-		if (UBattleMenu* BattleMenu = PlayerCharacter->GetBattleMenuWidget(); IsValid(BattleMenu)) {
+		if (UBattleMenu* BattleMenu = UIManagerWorldSubsystem->BattleMenuWidget; IsValid(BattleMenu)) {
 			BattleMenu->AddToViewport();
 			BattleMenu->GetMenuBorder()->SetVisibility(ESlateVisibility::Visible);
 			this->RemoveFromParent();
@@ -827,7 +835,8 @@ void UInventoryMenu::BattleMenuItemsBackButtonOnClicked()
 			UIManagerWorldSubsystem->PickedButton = BattleMenu->GetAttackButton();
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 			SelectedPanelWidget = nullptr;
-			PlayerCharacter->GetBattleManager()->IsSelectingAllyAsTarget = false;
+			if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+				RedemptionGameModeBase->GetBattleManager()->IsSelectingAllyAsTarget = false;
 	    }
 }
 

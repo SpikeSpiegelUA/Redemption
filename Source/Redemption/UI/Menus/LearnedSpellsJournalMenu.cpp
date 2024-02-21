@@ -4,6 +4,8 @@
 #include "..\UI\Menus\LearnedSpellsJournalMenu.h"
 #include "..\Miscellaneous\ElementsActions.h"
 #include "Redemption/Characters/Player/PlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 
 bool ULearnedSpellsJournalMenu::Initialize()
 {
@@ -26,50 +28,51 @@ bool ULearnedSpellsJournalMenu::Initialize()
 void ULearnedSpellsJournalMenu::NativeConstruct()
 {
     Super::NativeConstruct();
-    if (IsValid(PlayerCharacter))
-        for (TSubclassOf<ASpell> InstanceSpellClass : PlayerCharacter->GetGameInstance()->InstanceLearnedSpells)
+    if (auto* RedemptionGameInstance = GetWorld()->GetGameInstance<URedemptionGameInstance>(); IsValid(RedemptionGameInstance) && IsValid(PlayerCharacter))
+        for (TSubclassOf<ASpell> InstanceSpellClass : RedemptionGameInstance->InstanceLearnedSpells)
             if (IsValid(Cast<ASpell>(InstanceSpellClass->GetDefaultObject())))
                 AddLearnedSpellEntryToMainScrollBox(Cast<ASpell>(InstanceSpellClass->GetDefaultObject()));
 }
 
 void ULearnedSpellsJournalMenu::UseButtonOnClicked()
 {
-    if (IsValid(PlayerCharacter)) 
-        if (ASpell* CreatedSpell = PlayerCharacter->GetSpellBattleMenuWidget()->GetCreatedSpell(); IsValid(CreatedSpell)) 
-            if (ABattleManager* BManager = PlayerCharacter->GetBattleManager(); IsValid(BManager)) {
-                float VariableCorrespondingToSpellCostType{};
-                if (CreatedSpell->GetSpellCostType() == ESpellCostType::MANA)
-                    VariableCorrespondingToSpellCostType = BManager->BattleAlliesPlayer[BManager->CurrentTurnCombatNPCIndex]->CurrentMana;
-                else
-                    VariableCorrespondingToSpellCostType = BManager->BattleAlliesPlayer[BManager->CurrentTurnCombatNPCIndex]->CurrentHP;
-                if ((CreatedSpell->GetSpellCostType() == ESpellCostType::MANA && VariableCorrespondingToSpellCostType >= CreatedSpell->GetCost()) ||
-                    (CreatedSpell->GetSpellCostType() == ESpellCostType::HEALTH && VariableCorrespondingToSpellCostType > CreatedSpell->GetCost())) {
-                    PlayerCharacter->GetSpellBattleMenuWidget()->UseSpell();
-                    this->RemoveFromParent();
-                    if (PlayerCharacter->GetSpellInfoWidget()->IsInViewport())
-                        PlayerCharacter->GetSpellInfoWidget()->RemoveFromParent();
-                    PlayerCharacter->GetAlliesInfoBarsWidget()->AddToViewport();
+    if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) 
+        if (ASpell* CreatedSpell = UIManagerWorldSubsystem->SpellBattleMenuWidget->GetCreatedSpell(); IsValid(CreatedSpell))
+            if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+                if (ABattleManager* BManager = RedemptionGameModeBase->GetBattleManager(); IsValid(BManager)) {
+                    float VariableCorrespondingToSpellCostType{};
+                    if (CreatedSpell->GetSpellCostType() == ESpellCostType::MANA)
+                        VariableCorrespondingToSpellCostType = BManager->BattleAlliesPlayer[BManager->CurrentTurnCombatNPCIndex]->CurrentMana;
+                    else
+                        VariableCorrespondingToSpellCostType = BManager->BattleAlliesPlayer[BManager->CurrentTurnCombatNPCIndex]->CurrentHP;
+                    if ((CreatedSpell->GetSpellCostType() == ESpellCostType::MANA && VariableCorrespondingToSpellCostType >= CreatedSpell->GetCost()) ||
+                        (CreatedSpell->GetSpellCostType() == ESpellCostType::HEALTH && VariableCorrespondingToSpellCostType > CreatedSpell->GetCost())) {
+                        UIManagerWorldSubsystem->SpellBattleMenuWidget->UseSpell();
+                        this->RemoveFromParent();
+                        if (UIManagerWorldSubsystem->SpellInfoWidget->IsInViewport())
+                            UIManagerWorldSubsystem->SpellInfoWidget->RemoveFromParent();
+                        UIManagerWorldSubsystem->AlliesInfoBarsWidget->AddToViewport();
+                    }
+                    else if (CreatedSpell->GetSpellCostType() == ESpellCostType::MANA && VariableCorrespondingToSpellCostType < CreatedSpell->GetCost())
+                        CreateNotification(FText::FromString("Not enough mana!"));
+                    else if(CreatedSpell->GetSpellCostType() == ESpellCostType::HEALTH && VariableCorrespondingToSpellCostType > CreatedSpell->GetCost())
+                        CreateNotification(FText::FromString("Not enough health!"));
                 }
-                else if (CreatedSpell->GetSpellCostType() == ESpellCostType::MANA && VariableCorrespondingToSpellCostType < CreatedSpell->GetCost())
-                    CreateNotification(FText::FromString("Not enough mana!"));
-                else if(CreatedSpell->GetSpellCostType() == ESpellCostType::HEALTH && VariableCorrespondingToSpellCostType > CreatedSpell->GetCost())
-                    CreateNotification(FText::FromString("Not enough health!"));
-            }
 }
 
 void ULearnedSpellsJournalMenu::BackButtonOnClicked()
 {
     this->RemoveFromParent();
-    if (IsValid(PlayerCharacter)) {
-        PlayerCharacter->GetSpellBattleMenuWidget()->AddToViewport();
-        PlayerCharacter->GetSpellBattleMenuWidget()->OnMenuOpenUIManagerLogic();
-        PlayerCharacter->GetAlliesInfoBarsWidget()->AddToViewport(-1);
-        PlayerCharacter->GetSpellBattleMenuWidget()->CanUseKeyboardButtonSelection = true;
-        if (IsValid(PlayerCharacter->GetBattleMenuWidget()))
-            PlayerCharacter->GetBattleMenuWidget()->IsChoosingLearnedSpell = false;
+    if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+        UIManagerWorldSubsystem->SpellBattleMenuWidget->AddToViewport();
+        UIManagerWorldSubsystem->SpellBattleMenuWidget->OnMenuOpenUIManagerLogic();
+        UIManagerWorldSubsystem->AlliesInfoBarsWidget->AddToViewport(-1);
+        UIManagerWorldSubsystem->SpellBattleMenuWidget->CanUseKeyboardButtonSelection = true;
+        if (IsValid(UIManagerWorldSubsystem->BattleMenuWidget))
+            UIManagerWorldSubsystem->BattleMenuWidget->IsChoosingLearnedSpell = false;
         SelectedSpellButton = nullptr;
-        if (PlayerCharacter->GetSpellInfoWidget()->IsInViewport())
-            PlayerCharacter->GetSpellInfoWidget()->RemoveFromParent();
+        if (UIManagerWorldSubsystem->SpellInfoWidget->IsInViewport())
+            UIManagerWorldSubsystem->SpellInfoWidget->RemoveFromParent();
     }
 }
 
@@ -84,8 +87,7 @@ void ULearnedSpellsJournalMenu::UseButtonOnHovered()
         }
         UIManagerWorldSubsystem->PickedButton = UseButtonWithNeighbors;
         UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-        if(IsValid(PlayerCharacter))
-            PlayerCharacter->GetLearnedSpellsJournalMenu()->CanUseKeyboardButtonSelection = false;
+        UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->CanUseKeyboardButtonSelection = false;
     }
 }
 
@@ -101,7 +103,7 @@ void ULearnedSpellsJournalMenu::BackButtonOnHovered()
         UIManagerWorldSubsystem->PickedButton = BackButtonWithNeighbors;
         UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
         if (IsValid(PlayerCharacter))
-            PlayerCharacter->GetLearnedSpellsJournalMenu()->CanUseKeyboardButtonSelection = false;
+            UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->CanUseKeyboardButtonSelection = false;
     }
 }
 
@@ -109,13 +111,14 @@ void ULearnedSpellsJournalMenu::AddLearnedSpellEntryToMainScrollBox(const class 
 {
     if(IsValid(LearnedSpellEntryWidgetClass))
         LearnedSpellEntryWidget = CreateWidget<ULearnedSpellEntryWidget>(GetWorld(), LearnedSpellEntryWidgetClass);
-    if (IsValid(PlayerCharacter) && IsValid(LearnedSpellEntryWidget) && IsValid(PlayerCharacter->GetEffectsSpellsAndSkillsManager())) {
-        LearnedSpellEntryWidget->SetSpellTypeImage(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetSpellTypeImageTexture(SpellToAdd->GetTypeOfSpell()));
-        LearnedSpellEntryWidget->SetSpellMainElementImage(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetMainSpellElementImageTexture(ElementsActions::FindSpellsMainElement(SpellToAdd->GetSpellElements())));
-        LearnedSpellEntryWidget->SetSpellNameText(SpellToAdd->GetSpellName());
-        LearnedSpellEntryWidget->EntrySpell = const_cast<ASpell*>(SpellToAdd);
-        MainScrollBox->AddChild(LearnedSpellEntryWidget);
-    }
+    if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+        if (IsValid(LearnedSpellEntryWidget) && IsValid(RedemptionGameModeBase->GetEffectsSpellsAndSkillsManager())) {
+            LearnedSpellEntryWidget->SetSpellTypeImage(RedemptionGameModeBase->GetEffectsSpellsAndSkillsManager()->GetSpellTypeImageTexture(SpellToAdd->GetTypeOfSpell()));
+            LearnedSpellEntryWidget->SetSpellMainElementImage(RedemptionGameModeBase->GetEffectsSpellsAndSkillsManager()->GetMainSpellElementImageTexture(ElementsActions::FindSpellsMainElement(SpellToAdd->GetSpellElements())));
+            LearnedSpellEntryWidget->SetSpellNameText(SpellToAdd->GetSpellName());
+            LearnedSpellEntryWidget->EntrySpell = const_cast<ASpell*>(SpellToAdd);
+            MainScrollBox->AddChild(LearnedSpellEntryWidget);
+        }
 }
 
 void ULearnedSpellsJournalMenu::CreateNotification(const FText& NotificationText)

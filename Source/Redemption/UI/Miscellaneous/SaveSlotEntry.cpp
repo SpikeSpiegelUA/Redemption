@@ -23,36 +23,36 @@ void USaveSlotEntry::NativeConstruct()
 
 void USaveSlotEntry::SlotButtonOnClicked()
 {
-	if (URedemptionGameInstance* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance)) {
-		FString SaveFileName = "Save " + FString::FromInt(SlotIndex);
-		RedemptionGameInstance->SaveFileName = SaveFileName;
-		if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-			if (IsValid(PlayerCharacter->GetSaveLoadGameMenuWidget())) {
-				if (IsValid(PlayerCharacter->GetSaveLoadGameMenuWidget()->SelectedSaveSlotButton))
-					PlayerCharacter->GetSaveLoadGameMenuWidget()->SelectedSaveSlotButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
-				PlayerCharacter->GetSaveLoadGameMenuWidget()->SelectedSaveSlotButton = SlotButton;
+	if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+		if (URedemptionGameInstance* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance)) {
+			FString SaveFileName = "Save " + FString::FromInt(SlotIndex);
+			RedemptionGameInstance->SaveFileName = SaveFileName;
+			if (IsValid(UIManagerWorldSubsystem->SaveLoadGameMenuWidget)) {
+				if (IsValid(UIManagerWorldSubsystem->SaveLoadGameMenuWidget->SelectedSaveSlotButton))
+					UIManagerWorldSubsystem->SaveLoadGameMenuWidget->SelectedSaveSlotButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+				UIManagerWorldSubsystem->SaveLoadGameMenuWidget->SelectedSaveSlotButton = SlotButton;
 				SlotButton->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
 			}
+		}
 	}
 }
 
 void USaveSlotEntry::SlotButtonOnHovered()
 {
-	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) 
-		if(APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter())){
-			if (IsValid(UIManagerWorldSubsystem->PickedButton))
-				if (UIManagerWorldSubsystem->PickedButton == PlayerCharacter->GetSaveLoadGameMenuWidget()->SelectedSaveSlotButton)
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-				else
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-			UIManagerWorldSubsystem->PickedButton = SlotButton;
-			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-			for (uint16 Index = 0; Index < PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren().Num(); Index++)
-				if (PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren()[Index] == this) {
-					UIManagerWorldSubsystem->PickedButtonIndex = Index;
-					break;
-				}
-		}
+	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+		if (IsValid(UIManagerWorldSubsystem->PickedButton))
+			if (UIManagerWorldSubsystem->PickedButton == UIManagerWorldSubsystem->SaveLoadGameMenuWidget->SelectedSaveSlotButton)
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+			else
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+		UIManagerWorldSubsystem->PickedButton = SlotButton;
+		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+		for (uint16 Index = 0; Index < UIManagerWorldSubsystem->SaveLoadGameMenuWidget->GetSaveSlotsScrollBox()->GetAllChildren().Num(); Index++)
+			if (UIManagerWorldSubsystem->SaveLoadGameMenuWidget->GetSaveSlotsScrollBox()->GetAllChildren()[Index] == this) {
+				UIManagerWorldSubsystem->PickedButtonIndex = Index;
+				break;
+			}
+	}
 }
 
 uint16 USaveSlotEntry::GetSlotIndex() const

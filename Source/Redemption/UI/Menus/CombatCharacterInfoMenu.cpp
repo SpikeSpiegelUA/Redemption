@@ -4,6 +4,8 @@
 #include "CombatCharacterInfoMenu.h"
 #include "..\Characters\Combat\CombatNPC.h"
 #include "..\Characters\Player\PlayerCharacter.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 bool UCombatCharacterInfoMenu::Initialize()
 {
@@ -27,24 +29,26 @@ void UCombatCharacterInfoMenu::NativeConstruct()
 
 void UCombatCharacterInfoMenu::BackButtonOnClicked()
 {
-	if(APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-		if (UBattleMenu* BattleMenu = PlayerCharacter->GetBattleMenuWidget(); IsValid(BattleMenu)) {
+	if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+		if (UBattleMenu* BattleMenu = UIManagerWorldSubsystem->BattleMenuWidget; IsValid(BattleMenu)) {
 			this->RemoveFromParent();
 			EffectInfoBorder->SetVisibility(ESlateVisibility::Hidden);
 			GeneralInformationBorder->SetVisibility(ESlateVisibility::Visible);
 			ResistancesBorder->SetVisibility(ESlateVisibility::Hidden);
 			EffectsResistancesToggleTextBlock->SetText(FText::FromString("View resistances"));
-			if (IsValid(PlayerCharacter->GetUIManagerWorldSubsystem())) {
-				if (IsValid(PlayerCharacter->GetUIManagerWorldSubsystem()->PickedButton))
-					PlayerCharacter->GetUIManagerWorldSubsystem()->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
-				PlayerCharacter->GetUIManagerWorldSubsystem()->PickedButton = BattleMenu->GetAttackTalkInfoActionButton();
-				PlayerCharacter->GetUIManagerWorldSubsystem()->PickedButtonIndex = 0;
-				PlayerCharacter->GetUIManagerWorldSubsystem()->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			if (IsValid(UIManagerWorldSubsystem)) {
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+				UIManagerWorldSubsystem->PickedButton = BattleMenu->GetAttackTalkInfoActionButton();
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 			}
 			BattleMenu->AddToViewport();
-			if (IsValid(PlayerCharacter->GetBattleManager()) && IsValid(PlayerCharacter->GetBattleManager()->SelectedCombatNPC))
-				PlayerCharacter->GetBattleManager()->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(false);
-			PlayerCharacter->GetBattleManager()->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
+			if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
+				if (IsValid(RedemptionGameModeBase->GetBattleManager()) && IsValid(RedemptionGameModeBase->GetBattleManager()->SelectedCombatNPC))
+					RedemptionGameModeBase->GetBattleManager()->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(false);
+				RedemptionGameModeBase->GetBattleManager()->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
+			}
 			BattleMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
 			BattleMenu->GetLeftRightMenuBorder()->SetVisibility(ESlateVisibility::Visible);
 			BattleMenu->GetAttackMenuBorder()->SetVisibility(ESlateVisibility::Visible);
@@ -67,26 +71,26 @@ void UCombatCharacterInfoMenu::EffectsResistancesToggleButtonOnClicked()
 
 void UCombatCharacterInfoMenu::BackButtonOnHovered()
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-		if (IsValid(PlayerCharacter->GetUIManagerWorldSubsystem())) {
-			if (IsValid(PlayerCharacter->GetUIManagerWorldSubsystem()->PickedButton))
-				PlayerCharacter->GetUIManagerWorldSubsystem()->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
-			PlayerCharacter->GetUIManagerWorldSubsystem()->PickedButton = BackButtonWithNeighbors;
-			PlayerCharacter->GetUIManagerWorldSubsystem()->PickedButtonIndex = 0;
-			PlayerCharacter->GetUIManagerWorldSubsystem()->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+	if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) 
+		if (IsValid(UIManagerWorldSubsystem)) {
+			if (IsValid(UIManagerWorldSubsystem->PickedButton))
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
+			UIManagerWorldSubsystem->PickedButton = BackButtonWithNeighbors;
+			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 		}
 	CanUseKeyboardButtonSelection = false;
 }
 
 void UCombatCharacterInfoMenu::EffectsResistancesToggleButtonOnHovered()
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-		if (IsValid(PlayerCharacter->GetUIManagerWorldSubsystem())) {
-			if (IsValid(PlayerCharacter->GetUIManagerWorldSubsystem()->PickedButton))
-				PlayerCharacter->GetUIManagerWorldSubsystem()->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
-			PlayerCharacter->GetUIManagerWorldSubsystem()->PickedButton = EffectsResistancesToggleButtonWithNeighbors;
-			PlayerCharacter->GetUIManagerWorldSubsystem()->PickedButtonIndex = 0;
-			PlayerCharacter->GetUIManagerWorldSubsystem()->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+	if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+		if (IsValid(UIManagerWorldSubsystem)) {
+			if (IsValid(UIManagerWorldSubsystem->PickedButton))
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
+			UIManagerWorldSubsystem->PickedButton = EffectsResistancesToggleButtonWithNeighbors;
+			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 		}
 	CanUseKeyboardButtonSelection = false;
 }
@@ -223,10 +227,12 @@ void UCombatCharacterInfoMenu::AddActiveEffectEntryToActiveEffectsScrollBox(cons
 {
 	if (IsValid(ActiveEffectEntryClass))
 		ActiveEffectEntryWidget = CreateWidget<UActiveEffectEntryWidget>(GetWorld(), ActiveEffectEntryClass);
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());IsValid(PlayerCharacter) && IsValid(ActiveEffectEntryWidget)) {
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter) && IsValid(ActiveEffectEntryWidget)) {
 		ActiveEffectEntryWidget->SetEffectNameText(EffectToAdd->GetEffectName());
-		ActiveEffectEntryWidget->SetEffectTypeImage(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetEffectTypeImageTexture(EffectToAdd->GetEffectType()));
-		ActiveEffectEntryWidget->SetEffectAreaImage(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetEffectAreaImageTexture(EffectToAdd->GetEffectArea()));;
+		if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
+			ActiveEffectEntryWidget->SetEffectTypeImage(RedemptionGameModeBase->GetEffectsSpellsAndSkillsManager()->GetEffectTypeImageTexture(EffectToAdd->GetEffectType()));
+			ActiveEffectEntryWidget->SetEffectAreaImage(RedemptionGameModeBase->GetEffectsSpellsAndSkillsManager()->GetEffectAreaImageTexture(EffectToAdd->GetEffectArea()));
+		}
 		ActiveEffectEntryWidget->EntryEffect = const_cast<AEffect*>(EffectToAdd);
 		ActiveEffectsScrollBox->AddChild(ActiveEffectEntryWidget);
 	}

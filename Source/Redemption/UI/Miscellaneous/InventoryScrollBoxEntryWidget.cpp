@@ -31,15 +31,15 @@ void UInventoryScrollBoxEntryWidget::NativeConstruct()
 
 void UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnClicked()
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); 
-		IsValid(PlayerCharacter) && IsValid(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem())) {
+	if(const auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem) 
+		&& IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->GetPickedItem())) {
 		if (IsValid(Cast<AEquipmentItem>(Item)))
-			PlayerCharacter->GetInventoryMenuWidget()->EquipButtonOnClicked();
+			UIManagerWorldSubsystem->InventoryMenuWidget->EquipButtonOnClicked();
 		else {
-			if (PlayerCharacter->GetInventoryMenuWidget()->GetBattleMenuButtonsForItemsBorder()->GetVisibility() == ESlateVisibility::Visible)
-				PlayerCharacter->GetInventoryMenuWidget()->BattleMenuItemsUseButtonOnClicked();
+			if (UIManagerWorldSubsystem->InventoryMenuWidget->GetBattleMenuButtonsForItemsBorder()->GetVisibility() == ESlateVisibility::Visible)
+				UIManagerWorldSubsystem->InventoryMenuWidget->BattleMenuItemsUseButtonOnClicked();
 			else
-				PlayerCharacter->GetInventoryMenuWidget()->UseButtonOnClicked();
+				UIManagerWorldSubsystem->InventoryMenuWidget->UseButtonOnClicked();
 		}
 	}
 }
@@ -49,9 +49,8 @@ void UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnHovered()
 	UUIManagerWorldSubsystem* UIManagerWorldSubsystem = nullptr;
 	if (GetWorld())
 		UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-		IsValid(PlayerCharacter) && IsValid(UIManagerWorldSubsystem) && IsValid(Item)) {
-		if (UInventoryMenu* InventoryMenu = PlayerCharacter->GetInventoryMenuWidget(); IsValid(InventoryMenu)) {
+	if (IsValid(UIManagerWorldSubsystem) && IsValid(Item)) {
+		if (UInventoryMenu* InventoryMenu = UIManagerWorldSubsystem->InventoryMenuWidget; IsValid(InventoryMenu)) {
 			InventoryMenu->SetPickedItem(Item);
 			InventoryMenu->GetItemInfoBorder()->SetVisibility(ESlateVisibility::Visible);
 			InventoryMenu->SetItemInfo(Item);

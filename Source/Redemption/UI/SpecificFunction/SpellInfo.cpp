@@ -23,11 +23,11 @@ void USpellInfo::NativeConstruct()
 void USpellInfo::SetSpellInfo(const ASpell* const SpellToShow)
 {
 	if (IsValid(SpellToShow)) {
-		FString SpellNameString = FString("Name: ");
-		SpellNameString.Append(SpellToShow->GetSpellName().ToString());
-		SpellNameTextBlock->SetText(FText::FromString(SpellNameString));
-		FString SpellRangeString = FString("Range: ");
-		SpellRangeString.Append(*SkillsSpellsAndEffectsActions::GetEnumDisplayName<ESpellRange>(SpellToShow->GetSpellRange()).ToString());
+		FString StringToSet = FString("Name: ");
+		StringToSet.Append(SpellToShow->GetSpellName().ToString());
+		SpellNameTextBlock->SetText(FText::FromString(StringToSet));
+		StringToSet = "Range: ";
+		StringToSet.Append(*SkillsSpellsAndEffectsActions::GetEnumDisplayName<ESpellRange>(SpellToShow->GetSpellRange()).ToString());
 		FString SpellTypeString = FString("Type: ");
 		FString SpellEffectValueString = FString("");
 		switch (SpellToShow->GetTypeOfSpell()) {
@@ -120,9 +120,12 @@ void USpellInfo::SetSpellInfo(const ASpell* const SpellToShow)
 		}
 		SpellTypeTextBlock->SetText(FText::FromString(SpellTypeString));
 		SpellEffectValueTextBlock->SetText(FText::FromString(SpellEffectValueString));
-		FString SpellManaCostString = FString("Mana cost: ");
-		SpellManaCostString.AppendInt(SpellToShow->GetCost());
-		SpellManaCostTextBlock->SetText(FText::FromString(SpellManaCostString));
+		StringToSet = "Range: ";
+		StringToSet.Append(*SkillsSpellsAndEffectsActions::GetEnumDisplayName<ESpellRange>(SpellToShow->GetSpellRange()).ToString());
+		SpellRangeTextBlock->SetText(FText::FromString(StringToSet));
+		StringToSet = "Mana cost : ";
+		StringToSet.AppendInt(SpellToShow->GetCost());
+		SpellManaCostTextBlock->SetText(FText::FromString(StringToSet));
 		SpellDescriptionTextBlock->SetText(SpellToShow->GetDescription());
 	}
 }

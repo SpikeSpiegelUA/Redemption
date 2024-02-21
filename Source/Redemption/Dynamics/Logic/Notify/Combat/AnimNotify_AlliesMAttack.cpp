@@ -17,32 +17,36 @@ void UAnimNotify_AlliesMAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 {
 //Hit a selected enemy
 	if (IsValid(MeshComp->GetWorld()) && IsValid(MeshComp->GetWorld()->GetFirstPlayerController())) {
-		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(MeshComp->GetWorld()->GetFirstPlayerController()->GetCharacter());
+		const auto* const UIManagerWorldSubsystem = MeshComp->GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
 		ACombatAllies* CombatAllyPlayer = Cast<ACombatAllies>(MeshComp->GetOwner());
 		ACombatNPC* TargetEnemy{};
 		if(IsValid(CombatAllyPlayer) && IsValid(CombatAllyPlayer->Target))
 			TargetEnemy = Cast<ACombatNPC>(CombatAllyPlayer->Target);
-		if (IsValid(TargetEnemy) && IsValid(PlayerCharacter) && IsValid(PlayerCharacter->GetBattleManager()) && IsValid(PlayerCharacter->GetInventoryMenuWidget()) && IsValid(PlayerCharacter->GetSpellBattleMenuWidget())) {
-			if (PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem && IsValid(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem())) {
-				if (AAssaultItem* AssaultItem = Cast<AAssaultItem>(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem()); IsValid(AssaultItem)) {
+		if (IsValid(TargetEnemy) && IsValid(UIManagerWorldSubsystem) && IsValid(UIManagerWorldSubsystem->InventoryMenuWidget) && IsValid(UIManagerWorldSubsystem->SpellBattleMenuWidget)) {
+			if (UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithItem && IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->GetPickedItem())) {
+				if (AAssaultItem* AssaultItem = Cast<AAssaultItem>(UIManagerWorldSubsystem->InventoryMenuWidget->GetPickedItem()); IsValid(AssaultItem)) {
 					TargetEnemy->Execute_GetHit(TargetEnemy, BattleActions::CalculateAttackValueAfterEffects(AssaultItem->GetAttackValue(), 
 						CombatAllyPlayer), AssaultItem->GetElementsAndTheirPercentagesStructs(), EPhysicalType::NONE, false);
-					PlayerCharacter->GetInventoryMenuWidget()->SetPickedItem(nullptr);
-					PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem = false;
+					UIManagerWorldSubsystem->InventoryMenuWidget->SetPickedItem(nullptr);
+					UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithItem = false;
 				}
 			}
-			else if (PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell && IsValid(PlayerCharacter->GetSpellBattleMenuWidget()->GetCreatedSpell())) {
-				if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(PlayerCharacter->GetSpellBattleMenuWidget()->GetCreatedSpell()); IsValid(AssaultSpell)) {
+			else if (UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithSpell && IsValid(UIManagerWorldSubsystem->SpellBattleMenuWidget->GetCreatedSpell())) {
+				if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(UIManagerWorldSubsystem->SpellBattleMenuWidget->GetCreatedSpell()); IsValid(AssaultSpell)) {
 					TargetEnemy->Execute_GetHit(TargetEnemy, BattleActions::CalculateAttackValueAfterEffects(AssaultSpell->GetAttackValue(), 
 						CombatAllyPlayer), ElementsActions::FindContainedElements(AssaultSpell->GetSpellElements()), EPhysicalType::NONE, false);
-					PlayerCharacter->GetSpellBattleMenuWidget()->SetCreatedSpell(nullptr);
-					PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell = false;
+					UIManagerWorldSubsystem->SpellBattleMenuWidget->SetCreatedSpell(nullptr);
+					UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithSpell = false;
 				}
 			}
-			else if (!PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem && !PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell) {
-				TargetEnemy->Execute_GetHit(TargetEnemy, BattleActions::CalculateAttackValueAfterEffects(CombatAllyPlayer->GetMeleeAttackValue(), 
+			else if (!UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithItem && !UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithSpell) {
+				bool Hit = TargetEnemy->Execute_GetHit(TargetEnemy, BattleActions::CalculateAttackValueAfterEffects(CombatAllyPlayer->GetMeleeAttackValue(), 
 					CombatAllyPlayer), CombatAllyPlayer->GetMeleeWeaponElements(), EPhysicalType::NONE, false);
-				PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithMelee = false;
+				if (Hit) {
+					CombatAllyPlayer->AddSkillsProgress(ECharacterSkills::MELEE, 3);
+					CombatAllyPlayer->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpMelee, true);
+				}
+				UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithMelee = false;
 			}
 		}
 	}

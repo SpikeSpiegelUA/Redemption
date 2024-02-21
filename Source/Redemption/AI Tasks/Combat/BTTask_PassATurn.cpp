@@ -3,6 +3,8 @@
 #include "..\Characters\Player\PlayerCharacter.h"
 #include "..\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 UBTTask_PassATurn::UBTTask_PassATurn(const FObjectInitializer& ObjectInitializer)
 {
@@ -21,9 +23,11 @@ EBTNodeResult::Type UBTTask_PassATurn::ExecuteTask(UBehaviorTreeComponent& Owner
 	if(!IsValid(PlayerCharacter))
 		return EBTNodeResult::Failed;
 
-	ABattleManager* BattleManager = PlayerCharacter->GetBattleManager();
-
-	BattleManager->TurnChange();
+	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+		if(ABattleManager* BattleManager = RedemptionGameModeBase->GetBattleManager(); IsValid(BattleManager))
+			BattleManager->TurnChange();
+	else
+		return EBTNodeResult::Failed;
 
 	return EBTNodeResult::Succeeded;
 }

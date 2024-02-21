@@ -23,34 +23,33 @@ void UActiveEffectEntryWidget::NativeConstruct()
 
 void UActiveEffectEntryWidget::MainButtonOnClicked()
 {
-    if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter())) {
-        if (IsValid(PlayerCharacter->GetCombatCharacterInfoMenuWidget()->SelectedEffectButton))
-            PlayerCharacter->GetCombatCharacterInfoMenuWidget()->SelectedEffectButton->SetBackgroundColor(FLinearColor(0.6, 0.6, 0.6, 1));
-        PlayerCharacter->GetCombatCharacterInfoMenuWidget()->SelectedEffectButton = MainButton;
-        PlayerCharacter->GetCombatCharacterInfoMenuWidget()->SetEffectInfo(EntryEffect);
+    if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+        if (IsValid(UIManagerWorldSubsystem->CombatCharacterInfoMenuWidget->SelectedEffectButton))
+            UIManagerWorldSubsystem->CombatCharacterInfoMenuWidget->SelectedEffectButton->SetBackgroundColor(FLinearColor(0.6, 0.6, 0.6, 1));
+        UIManagerWorldSubsystem->CombatCharacterInfoMenuWidget->SelectedEffectButton = MainButton;
+        UIManagerWorldSubsystem->CombatCharacterInfoMenuWidget->SetEffectInfo(EntryEffect);
         MainButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
     }
 }
 
 void UActiveEffectEntryWidget::MainButtonOnHovered()
 {
-    if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
-        if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter())) {
-            if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
-                if (PlayerCharacter->GetCombatCharacterInfoMenuWidget()->SelectedEffectButton == UIManagerWorldSubsystem->PickedButton)
-                    UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-                else
-                    UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
-            }
-            PlayerCharacter->GetCombatCharacterInfoMenuWidget()->CanUseKeyboardButtonSelection = true;
-            for (uint8 Index = 0; Index < PlayerCharacter->GetCombatCharacterInfoMenuWidget()->GetActiveEffectsScrollBox()->GetAllChildren().Num(); Index++)
-                if (PlayerCharacter->GetCombatCharacterInfoMenuWidget()->GetActiveEffectsScrollBox()->GetAllChildren()[Index] == this) {
-                    UIManagerWorldSubsystem->PickedButtonIndex = Index;
-                    break;
-                }
-            UIManagerWorldSubsystem->PickedButton = MainButton;
-            UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+    if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+        if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+            if (UIManagerWorldSubsystem->CombatCharacterInfoMenuWidget->SelectedEffectButton == UIManagerWorldSubsystem->PickedButton)
+                UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+            else
+                UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
         }
+        UIManagerWorldSubsystem->CombatCharacterInfoMenuWidget->CanUseKeyboardButtonSelection = true;
+        for (uint8 Index = 0; Index < UIManagerWorldSubsystem->CombatCharacterInfoMenuWidget->GetActiveEffectsScrollBox()->GetAllChildren().Num(); Index++)
+            if (UIManagerWorldSubsystem->CombatCharacterInfoMenuWidget->GetActiveEffectsScrollBox()->GetAllChildren()[Index] == this) {
+                UIManagerWorldSubsystem->PickedButtonIndex = Index;
+                break;
+            }
+        UIManagerWorldSubsystem->PickedButton = MainButton;
+        UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+    }
 }
 
 void UActiveEffectEntryWidget::SetEffectTypeImage(const UTexture* const ImageTexture)

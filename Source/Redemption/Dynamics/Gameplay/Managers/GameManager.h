@@ -49,7 +49,6 @@ public:
 	void StartBattle(AActor* const AttackingNPC);
 	void EndBattle();
 
-	ABattleManager* GetBattleManager() const;
 	TArray<AActor*> GetEnemyBattleSpawns() const;
 	TArray<ACombatStartLocation*> GetAlliesPlayerBattleSpawns() const;
 
@@ -57,8 +56,6 @@ public:
 	void RestartBattleTransitionScreenWidget();
 
 private:
-	UPROPERTY(BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true), transient)
-		ABattleManager* BattleManager {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true))
 		TSubclassOf<class ACombatPlayerCharacter> CombatPlayerCharacterClass {};
 	//End Battle variables

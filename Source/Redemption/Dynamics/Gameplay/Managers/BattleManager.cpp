@@ -17,6 +17,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Redemption/Characters/AI Controllers/Combat/CombatAlliesAIController.h"
 #include "D:/UE_5.1/Engine/Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
+#include "Redemption/Dynamics/World/Items/RestorationItem.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 
 // Sets default values
 ABattleManager::ABattleManager()
@@ -30,7 +32,10 @@ ABattleManager::ABattleManager()
 void ABattleManager::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+	verify(PlayerCharacter);
+	if (auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+		RedemptionGameModeBase->SetBattleManager(this);
 }
 
 // Called every frame
@@ -62,123 +67,102 @@ void ABattleManager::Tick(float DeltaTime)
 void ABattleManager::SelectNewTarget(const ACombatNPC* const Target, int8 Index)
 {
 	if (IsValid(Target)) {
-		//if (SelectedCombatNPC->GetFloatingHealthBarWidget())
-		//	SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
-		//if (Target->GetFloatingHealthBarWidget())
-		//	Target->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
 		SelectedCombatNPC = const_cast<ACombatNPC*>(Target);
 		SelectedCombatNPCIndex = Index;
 		CanTurnBehindPlayerCameraToTarget = true;
 		if (CurrentTurnCombatNPCIndex >= 0 && CurrentTurnCombatNPCIndex < BattleAlliesPlayer.Num())
 			BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Target = const_cast<ACombatNPC*>(Target);
-		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-		if(IsValid(PlayerCharacter))
-			PlayerCharacter->GetBattleMenuWidget()->SetTargetName(FText::FromName(Target->GetCharacterName()));
+		if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+			UIManagerWorldSubsystem->BattleMenuWidget->SetTargetName(FText::FromName(Target->GetCharacterName()));
 	}
 }
 
 void ABattleManager::SelectNewTargetCrosshairLogic(const TArray<ACombatNPC*>& TargetsForSelection, int8 NewIndex, int8 CurrentIndex, const std::string_view Direction)
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
-		//Value corresponds to the Range value: 1 - Single, 2 - Neighbors, 3 - Everybody.
+	if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+		//Value corresponds to the Range value: 1 - Single, 2 - Neighbors.
 		uint8 RangeValue{};
-		if (PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell || PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem) {
-			if (PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell) {
-				if (IsValid(PlayerCharacter->GetSpellBattleMenuWidget()->GetCreatedSpell())) {
-					switch (PlayerCharacter->GetSpellBattleMenuWidget()->GetCreatedSpell()->GetSpellRange()) {
+		//Health or Mana.
+		FString TypeOfBar = "Health";
+		if (UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithSpell || UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithItem) {
+			if (UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithSpell) {
+				if (ASpell* CreatedSpell = UIManagerWorldSubsystem->SpellBattleMenuWidget->GetCreatedSpell(); IsValid(CreatedSpell)) {
+					switch (UIManagerWorldSubsystem->SpellBattleMenuWidget->GetCreatedSpell()->GetSpellRange()) {
 						case ESpellRange::SINGLE:
 							RangeValue = 1;
 							break;
 						case ESpellRange::NEIGHBORS:
 							RangeValue = 2;
 							break;
-						case ESpellRange::EVERYONE:
-							RangeValue = 3;
-							break;
-						}
+					}
+					if (ARestorationSpell* RestorationSpell = Cast<ARestorationSpell>(CreatedSpell); IsValid(RestorationSpell))
+						if (RestorationSpell->GetTypeOfRestoration() == ESpellRestorationType::MANA)
+							TypeOfBar = "Mana";
 				}
 			}
-			else if (PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem) {
-				if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem())) {
-					switch (PlayerCharacter->GetInventoryMenuWidget()->GetPickedItem()->GetItemRange()) {
+			else if (UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithItem) {
+				if (AGameItem* Item = UIManagerWorldSubsystem->InventoryMenuWidget->GetPickedItem(); IsValid(Item)) {
+					switch (Item->GetItemRange()) {
 						case EItemRange::SINGLE:
 							RangeValue = 1;
 							break;
 						case EItemRange::NEIGHBORS:
 							RangeValue = 2;
 							break;
-						case EItemRange::EVERYONE:
-							RangeValue = 3;
-							break;
-						}
+					}
+					if (auto* RestorationItem = Cast<ARestorationItem>(Item); IsValid(RestorationItem))
+						if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA)
+							TypeOfBar = "Mana";
 				}
 			}
 			if (RangeValue == 1) {
-				TargetsForSelection[NewIndex]->GetCrosshairWidgetComponent()->SetVisibility(true);
-				TargetsForSelection[NewIndex]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
-				TargetsForSelection[CurrentIndex]->GetCrosshairWidgetComponent()->SetVisibility(false);
-				TargetsForSelection[CurrentIndex]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
+				SelectNewTargetCrosshairActions(TargetsForSelection, NewIndex, TypeOfBar, true);
+				SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex, TypeOfBar, false);
 			}
 			else if (RangeValue == 2) {
-				TargetsForSelection[NewIndex]->GetCrosshairWidgetComponent()->SetVisibility(true);
-				TargetsForSelection[NewIndex]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
-				if (NewIndex == 0) {
-					TargetsForSelection[CurrentIndex]->GetCrosshairWidgetComponent()->SetVisibility(false);
-					TargetsForSelection[CurrentIndex]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
-					if (NewIndex + 1 < TargetsForSelection.Num()) {
-						TargetsForSelection[NewIndex + 1]->GetCrosshairWidgetComponent()->SetVisibility(true);
-						TargetsForSelection[NewIndex + 1]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
+				if (TargetsForSelection.Num() >= 3) {
+					SelectNewTargetCrosshairActions(TargetsForSelection, NewIndex, TypeOfBar, true);
+					if (Direction == "Left") {
+						if (CurrentIndex - 1 >= 0) 
+							SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex - 1, TypeOfBar, false);
+						if (CurrentIndex + 1 < TargetsForSelection.Num())
+							SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex + 1, TypeOfBar, true);
+						if (CurrentIndex + 2 < TargetsForSelection.Num())
+							SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex + 2, TypeOfBar, true);
 					}
+					else if (Direction == "Right") {
+						if (CurrentIndex + 1 < TargetsForSelection.Num())
+							SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex + 1, TypeOfBar, false);
+						if (CurrentIndex - 1 >= 0) 
+							SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex - 1, TypeOfBar, true);
+						if (CurrentIndex - 2 >= 0) 
+							SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex - 2, TypeOfBar, true);
+					}
+					if (NewIndex == 0) {
+						SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex, TypeOfBar, false);
+						if (NewIndex + 1 < TargetsForSelection.Num())
+							SelectNewTargetCrosshairActions(TargetsForSelection, NewIndex + 1, TypeOfBar, true);
+					}
+					else if (NewIndex == TargetsForSelection.Num() - 1) {
+						SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex, TypeOfBar, false);
+						if (NewIndex - 1 >= 0)
+							SelectNewTargetCrosshairActions(TargetsForSelection, NewIndex - 1, TypeOfBar, true);
+					}
+					else
+						SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex, TypeOfBar, true);
 				}
-				else if (NewIndex == TargetsForSelection.Num() - 1) {
-					TargetsForSelection[CurrentIndex]->GetCrosshairWidgetComponent()->SetVisibility(false);
-					TargetsForSelection[CurrentIndex]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
-					if (NewIndex - 1 >= 0) {
-						TargetsForSelection[NewIndex - 1]->GetCrosshairWidgetComponent()->SetVisibility(true);
-						TargetsForSelection[NewIndex - 1]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
-					}
+				else if(TargetsForSelection.Num() == 2) {
+					SelectNewTargetCrosshairActions(TargetsForSelection, 0, TypeOfBar, true);
+					SelectNewTargetCrosshairActions(TargetsForSelection, 1, TypeOfBar, true);
 				}
-				else {
-					TargetsForSelection[CurrentIndex]->GetCrosshairWidgetComponent()->SetVisibility(true);
-					TargetsForSelection[CurrentIndex]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
+				else if (TargetsForSelection.Num() == 1) {
+					SelectNewTargetCrosshairActions(TargetsForSelection, 0, TypeOfBar, true);
 				}
-				if (Direction == "Left") {
-					if (CurrentIndex - 1 >= 0) {
-						TargetsForSelection[CurrentIndex - 1]->GetCrosshairWidgetComponent()->SetVisibility(false);
-						TargetsForSelection[CurrentIndex - 1]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
-					}
-					if (CurrentIndex + 1 < TargetsForSelection.Num()) {
-						TargetsForSelection[CurrentIndex + 1]->GetCrosshairWidgetComponent()->SetVisibility(true);
-						TargetsForSelection[CurrentIndex + 1]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
-					}
-					if (CurrentIndex + 2 < TargetsForSelection.Num()) {
-						TargetsForSelection[CurrentIndex + 2]->GetCrosshairWidgetComponent()->SetVisibility(true);
-						TargetsForSelection[CurrentIndex + 2]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
-					}
-				}
-				else if(Direction == "Right") {
-					if (CurrentIndex + 1 < TargetsForSelection.Num()) {
-						TargetsForSelection[CurrentIndex + 1]->GetCrosshairWidgetComponent()->SetVisibility(false);
-						TargetsForSelection[CurrentIndex + 1]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
-					}
-					if (CurrentIndex - 1 >= 0) {
-						TargetsForSelection[CurrentIndex - 1]->GetCrosshairWidgetComponent()->SetVisibility(true);
-						TargetsForSelection[CurrentIndex - 1]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
-					}
-					if (CurrentIndex - 2 >= 0) {
-						TargetsForSelection[CurrentIndex - 2]->GetCrosshairWidgetComponent()->SetVisibility(true);
-						TargetsForSelection[CurrentIndex - 2]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
-					}
-				}
-			}
-			else if (RangeValue == 3) {
-				TargetsForSelection[CurrentIndex]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
-				if (NewIndex < TargetsForSelection.Num()) 
-					TargetsForSelection[NewIndex]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
 			}
 		}
 		else {
-			TargetsForSelection[NewIndex]->GetCrosshairWidgetComponent()->SetVisibility(true);
+			if (!UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithRange)
+				TargetsForSelection[NewIndex]->GetCrosshairWidgetComponent()->SetVisibility(true);
 			TargetsForSelection[NewIndex]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
 			TargetsForSelection[CurrentIndex]->GetCrosshairWidgetComponent()->SetVisibility(false);
 			TargetsForSelection[CurrentIndex]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
@@ -186,20 +170,29 @@ void ABattleManager::SelectNewTargetCrosshairLogic(const TArray<ACombatNPC*>& Ta
 	}
 }
 
+void ABattleManager::SelectNewTargetCrosshairActions(const TArray<ACombatNPC*>& TargetsForSelection, int8 Index, const FString& TypeOfBar, const bool WhetherToShow)
+{
+	ESlateVisibility SlateVisibility{};
+	if (WhetherToShow)
+		SlateVisibility = ESlateVisibility::Visible;
+	else
+		SlateVisibility = ESlateVisibility::Hidden;
+	TargetsForSelection[Index]->GetCrosshairWidgetComponent()->SetVisibility(WhetherToShow);
+	if (TypeOfBar == "Health")
+		TargetsForSelection[Index]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(SlateVisibility);
+	else if (TypeOfBar == "Mana")
+		if (ACombatAllies* CombatAlliesNPC = Cast<ACombatAllies>(TargetsForSelection[Index]); IsValid(CombatAlliesNPC))
+			CombatAlliesNPC->GetFloatingManaBarWidget()->GetManaBar()->SetVisibility(SlateVisibility);
+}
+
 void ABattleManager::TurnChange()
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	//Pass turn to next random enemy
 	if (IsValid(CombatPlayerCharacter) && CombatPlayerCharacter->CurrentHP > 0 && IsValid(PlayerCharacter)) {
 		if (EnemyTurnQueue.Num() > 0) {
 			if (CurrentTurnCombatNPCIndex >= 0) {
-				if(ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[CurrentTurnCombatNPCIndex]->GetController()); IsValid(AIController))
-					AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
 				BattleEnemies[CurrentTurnCombatNPCIndex]->SetActorRotation(FRotator(0, 0, 0));
 			}
-			/*for (int i = BattleAlliesPlayer.Num() - 1; i >= 0; i--)
-				if (BattleAlliesPlayer[i]->GetCurrentHP() <= 0) 
-					BattleAlliesPlayer.RemoveAt(i);*/
 			if(IsValid(SelectedCombatNPC))
 				SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
 			if (IsValid(Cast<ACombatAllies>(SelectedCombatNPC)))
@@ -231,9 +224,10 @@ void ABattleManager::TurnChange()
 				for (AEffect* Effect : BattleEnemies[NextActor]->Effects) {
 					if (Effect->GetEffectType() == EEffectType::TURNSTARTDAMAGE) {
 						if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
-							BattleEnemies[NextActor]->Execute_GetHit(PlayerCharacter->GetBattleManager()->BattleEnemies[NextActor],
-								BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleEnemies[NextActor]),
-								ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, false);
+							if(const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+								BattleEnemies[NextActor]->Execute_GetHit(RedemptionGameModeBase->GetBattleManager()->BattleEnemies[NextActor],
+									BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleEnemies[NextActor]),
+									ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, false);
 							GotHit = true;
 						}
 					}
@@ -299,14 +293,12 @@ void ABattleManager::TurnChange()
 				}
 			if (AreAliveEnemies) {
 				if (CurrentTurnCombatNPCIndex >= 0) {
-					if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[CurrentTurnCombatNPCIndex]->GetController()); IsValid(AIController))
-						AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
 					BattleEnemies[CurrentTurnCombatNPCIndex]->SetActorRotation(FRotator(0, 0, 0));
 				}
 				UUIManagerWorldSubsystem* UIManagerWorldSubsystem = nullptr;
 				if (IsValid(GetWorld()))
 					UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
-				UBattleMenu* BattleMenu = PlayerCharacter->GetBattleMenuWidget();
+				UBattleMenu* BattleMenu = UIManagerWorldSubsystem->BattleMenuWidget;
 				CanTurnBehindPlayerCameraToTarget = false;
 				CanTurnBehindPlayerCameraToStartPosition = true;
 				/*for (int8 i = BattleAlliesPlayer.Num() - 1; i >= 0; i--)
@@ -319,7 +311,7 @@ void ABattleManager::TurnChange()
 				if (BattleAlliesPlayer.Num() > 0)
 					BehindPlayerCamera->SetActorLocation(Cast<ACombatStartLocation>(BattleAlliesPlayer[AlliesPlayerTurnQueue[0]]->GetStartLocation())->CombatCameraLocation);
 				CurrentTurnCombatNPCIndex = AlliesPlayerTurnQueue[0];
-				if (UAlliesInfoBars* AlliesInfoBarsWidget = PlayerCharacter->GetAlliesInfoBarsWidget(); IsValid(AlliesInfoBarsWidget)) {
+				if (UAlliesInfoBars* AlliesInfoBarsWidget = UIManagerWorldSubsystem->AlliesInfoBarsWidget; IsValid(AlliesInfoBarsWidget)) {
 					AlliesInfoBarsWidget->GetAlliesNameBorders()[AlliesPlayerTurnQueue[0]]->SetBrushColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
 					AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder = AlliesPlayerTurnQueue[0];
 				}
@@ -359,12 +351,13 @@ void ABattleManager::TurnChange()
 					bool IsDizzy = false;
 					for (AEffect* Effect : BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects) {
 						if (Effect->GetEffectType() == EEffectType::TURNSTARTDAMAGE) {
-							if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
-								BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Execute_GetHit(PlayerCharacter->GetBattleManager()->BattleAlliesPlayer[CurrentTurnCombatNPCIndex],
-									BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleAlliesPlayer[CurrentTurnCombatNPCIndex]),
-									ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, false);
-								GotHit = true;
-							}
+							if(const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+								if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
+									BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Execute_GetHit(RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer[CurrentTurnCombatNPCIndex],
+										BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleAlliesPlayer[CurrentTurnCombatNPCIndex]),
+										ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, false);
+									GotHit = true;
+								}
 						}
 						else if (Effect->GetEffectType() == EEffectType::DIZZINESS) {
 							IsDizzy = true;
@@ -396,30 +389,9 @@ void ABattleManager::TurnChange()
 			}
 			else {
 				if (CurrentTurnCombatNPCIndex >= 0) {
-					if(ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[CurrentTurnCombatNPCIndex]->GetController()); IsValid(AIController))
-					AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
 					BattleEnemies[CurrentTurnCombatNPCIndex]->SetActorRotation(FRotator(0, 0, 0));
 				}
-				//Show results screen
-				CurrentTurnCombatNPCIndex = -1;
-				PlayerCharacter->GetBattleMenuWidget()->RemoveFromParent();
-				PlayerCharacter->GetBattleResultsScreenWidget()->AddToViewport();
-				GetWorld()->GetTimerManager().SetTimer(ShowExperienceTextTimerHandle, this, &ABattleManager::ShowExperienceText, 1.f, false);
-				GetWorld()->GetTimerManager().SetTimer(ShowGoldTextTimerHandle, this, &ABattleManager::ShowGoldText, 3.f, false);
-				FTimerDelegate SetAmountOfGoldTimerDelegate = FTimerDelegate::CreateUObject(this, &ABattleManager::SetAmountOfGoldText, PlayerCharacter->Gold);
-				GetWorldTimerManager().SetTimer(SetAmountOfGoldTextTimerHandle, SetAmountOfGoldTimerDelegate, 4.f, false);
-				GetWorld()->GetTimerManager().SetTimer(ShowContinueButtonTimerHandle, this, &ABattleManager::ShowContinueButton, 5.f, false);
-				//Background Music set
-				PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->Play(0.0f);
-				PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(true);
-				PlayerCharacter->GetAudioManager()->GetDungeonBattleResultsBackgroundMusicAudioComponent()->Play(0.0f);
-				PlayerCharacter->GetAudioManager()->GetDungeonBattleResultsBackgroundMusicAudioComponent()->SetPaused(false);
-				for (int8 i = CombatPlayerCharacter->Effects.Num() - 1; i >= 0; i--) {
-					if (IsValid(CombatPlayerCharacter->Effects[i])) {
-						CombatPlayerCharacter->Effects[i]->ConditionalBeginDestroy();
-						CombatPlayerCharacter->Effects.RemoveAt(i);
-					}
-				}
+				EndBattle();
 			}
 		}
 
@@ -437,19 +409,19 @@ void ABattleManager::SetTimerForPlayerTurnController()
 
 void ABattleManager::PlayerTurnController()
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
-		PlayerCharacter->GetBattleMenuWidget()->IsChoosingAction = true;
-		PlayerCharacter->GetBattleMenuWidget()->IsChoosingSpell = false;
-		PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithSpell = false;
-		PlayerCharacter->GetBattleMenuWidget()->IsPreparingToAttack = false;
-		PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithRange = false;
-		PlayerCharacter->GetBattleMenuWidget()->IsPreparingToTalk = false;
-		PlayerCharacter->GetBattleMenuWidget()->IsPreparingToViewInfo = false;
-		PlayerCharacter->GetBattleMenuWidget()->IsChoosingItem = false;
-		PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem = false;
-		PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithMelee = false;
-		PlayerCharacter->GetBattleMenuWidget()->IsChoosingSkill = false;
-		PlayerCharacter->GetBattleMenuWidget()->IsChoosingLearnedSpell = false;
+	if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+		UIManagerWorldSubsystem->BattleMenuWidget->IsChoosingAction = true;
+		UIManagerWorldSubsystem->BattleMenuWidget->IsChoosingSpell = false;
+		UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithSpell = false;
+		UIManagerWorldSubsystem->BattleMenuWidget->IsPreparingToAttack = false;
+		UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithRange = false;
+		UIManagerWorldSubsystem->BattleMenuWidget->IsPreparingToTalk = false;
+		UIManagerWorldSubsystem->BattleMenuWidget->IsPreparingToViewInfo = false;
+		UIManagerWorldSubsystem->BattleMenuWidget->IsChoosingItem = false;
+		UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithItem = false;
+		UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithMelee = false;
+		UIManagerWorldSubsystem->BattleMenuWidget->IsChoosingSkill = false;
+		UIManagerWorldSubsystem->BattleMenuWidget->IsChoosingLearnedSpell = false;
 		IsSelectingAllyAsTarget = false;
 		if (AlliesPlayerTurnQueue.Num() > 0) {
 			bool AreAliveEnemies = false;
@@ -460,8 +432,6 @@ void ABattleManager::PlayerTurnController()
 				}
 			if (AreAliveEnemies) {
 				/*	if (ActorNumberOfTheCurrentTurn >= 0) {
-						if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[ActorNumberOfTheCurrentTurn]->GetController()); IsValid(AIController))
-							AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
 						BattleEnemies[ActorNumberOfTheCurrentTurn]->SetActorRotation(FRotator(0, 0, 0));
 					}*/
 				BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->SetActorRotation(FRotator(0, 180, 0));
@@ -473,7 +443,7 @@ void ABattleManager::PlayerTurnController()
 				SelectedCombatNPC = BattleAlliesPlayer[NextActor];
 				CurrentTurnCombatNPCIndex = NextActor;
 				BehindPlayerCamera->SetActorLocation(Cast<ACombatStartLocation>(BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetStartLocation())->CombatCameraLocation);
-				if (UAlliesInfoBars* AlliesInfoBarsWidget = PlayerCharacter->GetAlliesInfoBarsWidget(); IsValid(AlliesInfoBarsWidget)) {
+				if (UAlliesInfoBars* AlliesInfoBarsWidget = UIManagerWorldSubsystem->AlliesInfoBarsWidget; IsValid(AlliesInfoBarsWidget)) {
 					if (AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder < AlliesInfoBarsWidget->GetAlliesNameBorders().Num())
 						AlliesInfoBarsWidget->GetAlliesNameBorders()[AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder]->SetBrushColor(FLinearColor(0.3f, 0.3f, 0.3f, 1.f));
 					AlliesInfoBarsWidget->GetAlliesNameBorders()[CurrentTurnCombatNPCIndex]->SetBrushColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
@@ -481,10 +451,7 @@ void ABattleManager::PlayerTurnController()
 				}
 				//CanTurnBehindPlayerCameraToTarget = true;
 				AlliesPlayerTurnQueue.Remove(NextActor);
-				UUIManagerWorldSubsystem* UIManagerWorldSubsystem = nullptr;
-				if (IsValid(GetWorld()))
-					UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
-				UBattleMenu* BattleMenu = PlayerCharacter->GetBattleMenuWidget();
+				UBattleMenu* BattleMenu = UIManagerWorldSubsystem->BattleMenuWidget;
 				CanTurnBehindPlayerCameraToTarget = false;
 				CanTurnBehindPlayerCameraToStartPosition = true;
 				//Check if skip the turn.
@@ -520,12 +487,13 @@ void ABattleManager::PlayerTurnController()
 					bool IsDizzy = false;
 					for (AEffect* Effect : BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Effects) {
 						if (Effect->GetEffectType() == EEffectType::TURNSTARTDAMAGE) {
-							if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
-								BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Execute_GetHit(PlayerCharacter->GetBattleManager()->BattleAlliesPlayer[CurrentTurnCombatNPCIndex],
-									BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleAlliesPlayer[CurrentTurnCombatNPCIndex]),
-									ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, false);
-								GotHit = true;
-							}
+							if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+								if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
+									BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Execute_GetHit(RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer[CurrentTurnCombatNPCIndex],
+										BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleAlliesPlayer[CurrentTurnCombatNPCIndex]),
+										ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, false);
+									GotHit = true;
+								}
 						}
 						else if (Effect->GetEffectType() == EEffectType::DIZZINESS) {
 							IsDizzy = true;
@@ -558,39 +526,11 @@ void ABattleManager::PlayerTurnController()
 					GetWorld()->GetTimerManager().SetTimer(SkipTurnTimerHandle, this, &ABattleManager::SkipAllyTurnActions, 1.f, false);
 				}
 			}
-			else {
-				//Show results screen
-				CurrentTurnCombatNPCIndex = -1;
-				PlayerCharacter->GetBattleMenuWidget()->RemoveFromParent();
-				PlayerCharacter->GetBattleResultsScreenWidget()->AddToViewport();
-				GetWorld()->GetTimerManager().SetTimer(ShowExperienceTextTimerHandle, this, &ABattleManager::ShowExperienceText, 1, false);
-				GetWorld()->GetTimerManager().SetTimer(ShowGoldTextTimerHandle, this, &ABattleManager::ShowGoldText, 3, false);
-				FTimerDelegate SetAmountOfGoldTimerDelegate = FTimerDelegate::CreateUObject(this, &ABattleManager::SetAmountOfGoldText, PlayerCharacter->Gold);
-				GetWorldTimerManager().SetTimer(SetAmountOfGoldTextTimerHandle, SetAmountOfGoldTimerDelegate, 4, false);
-				GetWorld()->GetTimerManager().SetTimer(ShowContinueButtonTimerHandle, this, &ABattleManager::ShowContinueButton, 5, false);
-				//Background Music set
-				PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->Play(0.0f);
-				PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(true);
-				PlayerCharacter->GetAudioManager()->GetDungeonBattleResultsBackgroundMusicAudioComponent()->Play(0.0f);
-				PlayerCharacter->GetAudioManager()->GetDungeonBattleResultsBackgroundMusicAudioComponent()->SetPaused(false);
-				if (IsValid(SelectedCombatNPC))
-					SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
-				for (int16 i = CombatPlayerCharacter->Effects.Num() - 1; i >= 0; i--) {
-					if (IsValid(CombatPlayerCharacter->Effects[i])) {
-						CombatPlayerCharacter->Effects[i]->ConditionalBeginDestroy();
-						CombatPlayerCharacter->Effects.RemoveAt(i);
-					}
-				}
-			}
+			else
+				EndBattle();
 		}
 		else {
-			//Delete dead enemies and fill the queue
-			/*for (int i = BattleEnemies.Num() - 1; i >= 0; i--)
-				if (BattleEnemies[i]->GetCurrentHP() <= 0) {
-					PlayerCharacter->Gold += BattleEnemies[i]->GetGoldReward();
-					BattleEnemies.RemoveAt(i);
-				}*/
-			if (UAlliesInfoBars* AlliesInfoBarsWidget = PlayerCharacter->GetAlliesInfoBarsWidget(); IsValid(AlliesInfoBarsWidget)) 
+			if (UAlliesInfoBars* AlliesInfoBarsWidget = UIManagerWorldSubsystem->AlliesInfoBarsWidget; IsValid(AlliesInfoBarsWidget))
 				if (AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder < AlliesInfoBarsWidget->GetAlliesNameBorders().Num())
 					AlliesInfoBarsWidget->GetAlliesNameBorders()[AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder]->SetBrushColor(FLinearColor(0.3f, 0.3f, 0.3f, 1.f));
 			if(CurrentTurnCombatNPCIndex >= 0)
@@ -607,7 +547,7 @@ void ABattleManager::PlayerTurnController()
 
 void ABattleManager::PlayerAlliesEffectsDurationLogic(const TArray<uint8>& PassedAlliesPlayerTurnQueue)
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+	if (IsValid(PlayerCharacter)) {
 		for (int8 Index : PassedAlliesPlayerTurnQueue) {
 			//Check if skip the turn.
 			bool ContinueTurn = true;
@@ -639,11 +579,12 @@ void ABattleManager::PlayerAlliesEffectsDurationLogic(const TArray<uint8>& Passe
 						CombatAlliesAnimInstance->ToggleCombatAlliesIsBlocking(false);
 				for (AEffect* Effect : BattleAlliesPlayer[Index]->Effects) {
 					if (Effect->GetEffectType() == EEffectType::TURNSTARTDAMAGE) {
-						if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
-							BattleAlliesPlayer[Index]->Execute_GetHit(PlayerCharacter->GetBattleManager()->BattleAlliesPlayer[Index],
-								BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleAlliesPlayer[Index]),
-								ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, false);
-						}
+						if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+							if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
+								BattleAlliesPlayer[Index]->Execute_GetHit(RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer[Index],
+									BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleAlliesPlayer[Index]),
+									ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, false);
+							}
 					}
 				}
 				//Destroy effects, which CurrentDuration is >= Duration.
@@ -671,24 +612,6 @@ void ABattleManager::PlayerAlliesEffectsDurationLogic(const TArray<uint8>& Passe
 	}
 }
 
-void ABattleManager::ShowExperienceText()
-{
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	PlayerCharacter->GetBattleResultsScreenWidget()->GetExperienceTextBlock()->SetVisibility(ESlateVisibility::Visible);
-}
-
-void ABattleManager::ShowGoldText()
-{
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	PlayerCharacter->GetBattleResultsScreenWidget()->GetGoldTextBlock()->SetVisibility(ESlateVisibility::Visible);
-}
-
-void ABattleManager::SetAmountOfGoldText(int Value)
-{
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	PlayerCharacter->GetBattleResultsScreenWidget()->SetAmountOfGoldTextBlock(FText::FromString(FString::FromInt(Value)));
-}
-
 void ABattleManager::EnableTurnAIController()
 {
 	if (ACombatEnemyNPCAIController* AIController = Cast<ACombatEnemyNPCAIController>(SelectedCombatNPC->GetController()); IsValid(AIController))
@@ -708,8 +631,8 @@ void ABattleManager::SkipAllyTurnActions()
 
 void ABattleManager::ToPlayerTurnPassInTurnChangeFunction()
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) 
-		if (UBattleMenu* BattleMenu = Cast<UBattleMenu>(PlayerCharacter->GetBattleMenuWidget()); IsValid(BattleMenu)){
+	if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+		if (UBattleMenu* BattleMenu = Cast<UBattleMenu>(UIManagerWorldSubsystem->BattleMenuWidget); IsValid(BattleMenu)){
 			if (IsValid(BattleMenu)) {
 				if (!BattleMenu->IsInViewport())
 					BattleMenu->AddToViewport();
@@ -754,9 +677,9 @@ void ABattleManager::ToPlayerTurnPassInTurnChangeFunction()
 						}
 					}
 				}
-				PlayerCharacter->GetSkillBattleMenuWidget()->ResetSkillsScrollBox();
+				UIManagerWorldSubsystem->SkillBattleMenuWidget->ResetSkillsScrollBox();
 				for (TSubclassOf<ASpell> SpellClass : BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->GetAvailableSpells())
-					PlayerCharacter->GetSkillBattleMenuWidget()->AddSkillEntryToSkillsScrollBox(Cast<ASpell>(SpellClass->GetDefaultObject()));
+					UIManagerWorldSubsystem->SkillBattleMenuWidget->AddSkillEntryToSkillsScrollBox(Cast<ASpell>(SpellClass->GetDefaultObject()));
 			}
 	}
 }
@@ -776,7 +699,7 @@ void ABattleManager::PlayerAllyDizzyActions()
 		SumOfTargetingChances += ActorsToTarget[i]->TargetingChance;
 
 	//Get random number from zero to total chance. Then set sum to 0 and gradually add chances to sum again, but check if random number is less or equal than sum. If yes, than
-	//set TargetActor and quit from the loop.
+	//set TargetActor and exit the loop.
 	int16 RandomTargetingChance = FMath::RandRange(0, SumOfTargetingChances);
 	SumOfTargetingChances = 0;
 
@@ -798,21 +721,30 @@ void ABattleManager::PlayerAllyDizzyActions()
 
 void ABattleManager::PlayerDeathLogic()
 {
-	if (CurrentTurnCombatNPCIndex >= 0 && CurrentTurnCombatNPCIndex < BattleEnemies.Num())
-		if (auto* AIController = Cast<ACombatEnemyNPCAIController>(BattleEnemies[CurrentTurnCombatNPCIndex]->GetController()); IsValid(AIController))
-			AIController->GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("Actor's Turn", false);
 	FTimerHandle PlayerDeathLogicTimerHandle{};
-	GetWorld()->GetTimerManager().SetTimer(PlayerDeathLogicTimerHandle, this, &ABattleManager::PlayerDeathLogicOnTimer, 1.f, false);
+	GetWorld()->GetTimerManager().SetTimer(PlayerDeathLogicTimerHandle, this, &ABattleManager::PlayerDeathLogicOnTimer, 1.2f, false);
 }
 
 void ABattleManager::PlayerDeathLogicOnTimer()
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
-		PlayerCharacter->GetBattleMenuWidget()->RemoveFromParent();
-		PlayerCharacter->GetDeathMenuWidget()->AddToViewport();
-		PlayerCharacter->GetAudioManager()->GetDeathMenuBackgroundMusicAudioComponent()->Play(0.0f);
-		PlayerCharacter->GetAudioManager()->GetDeathMenuBackgroundMusicAudioComponent()->SetPaused(false);
-		PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(true);
+	if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem) && IsValid(PlayerCharacter)) {
+		UIManagerWorldSubsystem->BattleMenuWidget->RemoveFromParent();
+		UIManagerWorldSubsystem->BattleMenuWidget->ConditionalBeginDestroy();
+		UIManagerWorldSubsystem->BattleMenuWidget = nullptr;
+		UIManagerWorldSubsystem->SpellBattleMenuWidget->ConditionalBeginDestroy();
+		UIManagerWorldSubsystem->SpellBattleMenuWidget = nullptr;
+		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>(); IsValid(PlayerController))
+			if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+				if (IsValid(RedemptionGameModeBase->GetDeathMenuClass()))
+					UIManagerWorldSubsystem->DeathMenuWidget = CreateWidget<UDeathMenu>(PlayerController, RedemptionGameModeBase->GetDeathMenuClass());
+		if (IsValid(UIManagerWorldSubsystem->DeathMenuWidget))
+			UIManagerWorldSubsystem->DeathMenuWidget->AddToViewport();
+		if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
+			RedemptionGameModeBase->GetAudioManager()->GetDeathMenuBackgroundMusicAudioComponent()->Play(0.0f);
+			RedemptionGameModeBase->GetAudioManager()->GetDeathMenuBackgroundMusicAudioComponent()->SetPaused(false);
+			RedemptionGameModeBase->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents
+				[RedemptionGameModeBase->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(true);
+		}
 		for (int8 i = CombatPlayerCharacter->Effects.Num() - 1; i >= 0; i--) {
 			if (IsValid(CombatPlayerCharacter->Effects[i])) {
 				CombatPlayerCharacter->Effects[i]->ConditionalBeginDestroy();
@@ -824,10 +756,44 @@ void ABattleManager::PlayerDeathLogicOnTimer()
 	}
 }
 
-void ABattleManager::ShowContinueButton()
+void ABattleManager::EndBattle()
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	PlayerCharacter->GetBattleResultsScreenWidget()->GetContinueButton()->SetVisibility(ESlateVisibility::Visible);
+	//Show results screen
+	CurrentTurnCombatNPCIndex = -1;
+	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
+		//Background Music set
+		RedemptionGameModeBase->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents
+			[RedemptionGameModeBase->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->Play(0.0f);
+		RedemptionGameModeBase->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents
+			[RedemptionGameModeBase->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(true);
+		RedemptionGameModeBase->GetAudioManager()->GetDungeonBattleResultsBackgroundMusicAudioComponent()->Play(0.0f);
+		RedemptionGameModeBase->GetAudioManager()->GetDungeonBattleResultsBackgroundMusicAudioComponent()->SetPaused(false);
+		//Widget creation
+		if (auto* const UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+			UIManagerWorldSubsystem->BattleMenuWidget->RemoveFromParent();
+			UIManagerWorldSubsystem->BattleMenuWidget->ConditionalBeginDestroy();
+			UIManagerWorldSubsystem->BattleMenuWidget = nullptr;
+			if (IsValid(RedemptionGameModeBase->GetBattleResultsScreenClass()))
+				UIManagerWorldSubsystem->BattleResultsScreenWidget = CreateWidget<UBattleResultsScreen>(Cast<APlayerController>(PlayerCharacter->GetController()),
+					RedemptionGameModeBase->GetBattleResultsScreenClass());
+			if (IsValid(UIManagerWorldSubsystem->BattleResultsScreenWidget))
+				UIManagerWorldSubsystem->BattleResultsScreenWidget->AddToViewport();
+		}
+	}
+	CanTurnBehindPlayerCameraToTarget = false;
+	CanTurnBehindPlayerCameraToSpellObject = false;
+	CanTurnBehindPlayerCameraToStartPosition = true;
+	if (IsValid(SelectedCombatNPC))
+		SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
+	for (int16 i = CombatPlayerCharacter->Effects.Num() - 1; i >= 0; i--) {
+		if (IsValid(CombatPlayerCharacter->Effects[i])) {
+			CombatPlayerCharacter->Effects[i]->ConditionalBeginDestroy();
+			CombatPlayerCharacter->Effects.RemoveAt(i);
+		}
+	}
+	for (ACombatNPC* CombatNPC : PlayerCharacter->GetAllies())
+		if (IsValid(CombatNPC->GetSmartObject()))
+			CombatNPC->GetSmartObject()->ConditionalBeginDestroy();
 }
 
 void ABattleManager::SetCanTurnBehindPlayerCameraToTarget(const bool Value)

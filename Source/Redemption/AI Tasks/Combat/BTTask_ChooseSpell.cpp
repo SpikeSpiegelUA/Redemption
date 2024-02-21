@@ -5,6 +5,8 @@
 #include "..\Characters\Combat\CombatEnemyNPC.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "..\Characters\Player\PlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 
 UBTTask_ChooseSpell::UBTTask_ChooseSpell(const FObjectInitializer& ObjectInitializer)
 {
@@ -31,21 +33,23 @@ EBTNodeResult::Type UBTTask_ChooseSpell::ExecuteTask(UBehaviorTreeComponent& Own
 		ASpell* SpellDefaultObject = SpellClass->GetDefaultObject<ASpell>();
 		//Get targets for CurrentHP check.
 		TArray<ACombatNPC*> TargetsArray{};
-		if (IsValid(Cast<ACombatEnemyNPC>(CombatNPC))) {
-			if(SpellDefaultObject->GetTypeOfSpell() == ESpellType::RESTORATION || SpellDefaultObject->GetTypeOfSpell() == ESpellType::BUFF)
-				TargetsArray = PlayerCharacter->GetBattleManager()->BattleEnemies;
-			else if(SpellDefaultObject->GetTypeOfSpell() == ESpellType::ASSAULT || SpellDefaultObject->GetTypeOfSpell() == ESpellType::DEBUFF)
-				TargetsArray = PlayerCharacter->GetBattleManager()->BattleAlliesPlayer;
-		}
-		else if (IsValid(Cast<ACombatAllies>(CombatNPC))) {
-			if (SpellDefaultObject->GetTypeOfSpell() == ESpellType::RESTORATION || SpellDefaultObject->GetTypeOfSpell() == ESpellType::BUFF)
-				TargetsArray = PlayerCharacter->GetBattleManager()->BattleAlliesPlayer;
-			else if (SpellDefaultObject->GetTypeOfSpell() == ESpellType::ASSAULT || SpellDefaultObject->GetTypeOfSpell() == ESpellType::DEBUFF)
-				TargetsArray = PlayerCharacter->GetBattleManager()->BattleEnemies;
+		if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
+			if (IsValid(Cast<ACombatEnemyNPC>(CombatNPC))) {
+				if (SpellDefaultObject->GetTypeOfSpell() == ESpellType::RESTORATION || SpellDefaultObject->GetTypeOfSpell() == ESpellType::BUFF)
+					TargetsArray = RedemptionGameModeBase->GetBattleManager()->BattleEnemies;
+				else if (SpellDefaultObject->GetTypeOfSpell() == ESpellType::ASSAULT || SpellDefaultObject->GetTypeOfSpell() == ESpellType::DEBUFF)
+					TargetsArray = RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer;
+			}
+			else if (IsValid(Cast<ACombatAllies>(CombatNPC))) {
+				if (SpellDefaultObject->GetTypeOfSpell() == ESpellType::RESTORATION || SpellDefaultObject->GetTypeOfSpell() == ESpellType::BUFF)
+					TargetsArray = RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer;
+				else if (SpellDefaultObject->GetTypeOfSpell() == ESpellType::ASSAULT || SpellDefaultObject->GetTypeOfSpell() == ESpellType::DEBUFF)
+					TargetsArray = RedemptionGameModeBase->GetBattleManager()->BattleEnemies;
+			}
 		}
 		switch (SpellDefaultObject->GetTypeOfSpell()) {
 			case ESpellType::RESTORATION:
-				for (ACombatNPC* Target : TargetsArray) {
+				/*for (ACombatNPC* Target : TargetsArray) {
 					if (Target->CurrentHP / Target->MaxHP * 100.f <= 50.f && Target->CurrentHP > 0) {
 						if (!RestorationAdded) {
 							AvailableSpellsIndex.Add(ESpellType::RESTORATION);
@@ -54,7 +58,8 @@ EBTNodeResult::Type UBTTask_ChooseSpell::ExecuteTask(UBehaviorTreeComponent& Own
 						}
 						NumberOfDamagedEnemies++;
 					}
-				}
+				}*/
+				AvailableSpellsIndex.AddUnique(ESpellType::RESTORATION);
 				break;
 			case ESpellType::ASSAULT:
 				AvailableSpellsIndex.AddUnique(ESpellType::ASSAULT);
@@ -93,17 +98,19 @@ EBTNodeResult::Type UBTTask_ChooseSpell::ExecuteTask(UBehaviorTreeComponent& Own
 	// If false, then choose random spell from all spells, if true, then end the logic.
 	//Get targets for a number of targets check.
 	TArray<ACombatNPC*> TargetsArray{};
-	if (IsValid(Cast<ACombatEnemyNPC>(CombatNPC))) {
-		if (SpellTypeToUse == ESpellType::RESTORATION || SpellTypeToUse == ESpellType::BUFF)
-			TargetsArray = PlayerCharacter->GetBattleManager()->BattleEnemies;
-		else if (SpellTypeToUse == ESpellType::ASSAULT || SpellTypeToUse == ESpellType::DEBUFF)
-			TargetsArray = PlayerCharacter->GetBattleManager()->BattleAlliesPlayer;
-	}
-	else if (IsValid(Cast<ACombatAllies>(CombatNPC))) {
-		if (SpellTypeToUse == ESpellType::RESTORATION || SpellTypeToUse == ESpellType::BUFF)
-			TargetsArray = PlayerCharacter->GetBattleManager()->BattleAlliesPlayer;
-		else if (SpellTypeToUse == ESpellType::ASSAULT || SpellTypeToUse == ESpellType::DEBUFF)
-			TargetsArray = PlayerCharacter->GetBattleManager()->BattleEnemies;
+	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
+		if (IsValid(Cast<ACombatEnemyNPC>(CombatNPC))) {
+			if (SpellTypeToUse == ESpellType::RESTORATION || SpellTypeToUse == ESpellType::BUFF)
+				TargetsArray = RedemptionGameModeBase->GetBattleManager()->BattleEnemies;
+			else if (SpellTypeToUse == ESpellType::ASSAULT || SpellTypeToUse == ESpellType::DEBUFF)
+				TargetsArray = RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer;
+		}
+		else if (IsValid(Cast<ACombatAllies>(CombatNPC))) {
+			if (SpellTypeToUse == ESpellType::RESTORATION || SpellTypeToUse == ESpellType::BUFF)
+				TargetsArray = RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer;
+			else if (SpellTypeToUse == ESpellType::ASSAULT || SpellTypeToUse == ESpellType::DEBUFF)
+				TargetsArray = RedemptionGameModeBase->GetBattleManager()->BattleEnemies;
+		}
 	}
 	bool SpecialCaseSpellSelected = false;
 	if (NeighborsOrEveryoneRangeSpellsToUse.Num() > 0) {

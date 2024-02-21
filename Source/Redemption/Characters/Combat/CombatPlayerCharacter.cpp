@@ -31,35 +31,48 @@ void ACombatPlayerCharacter::BeginPlay()
 		SetSkill(ECharacterSkills::BUFFSPELLS, PlayerCharacter->GetSkill(ECharacterSkills::BUFFSPELLS));
 		SetSkill(ECharacterSkills::DEFEND, PlayerCharacter->GetSkill(ECharacterSkills::DEFEND));
 		SetSkill(ECharacterSkills::PERSUASION, PlayerCharacter->GetSkill(ECharacterSkills::PERSUASION));
+		SetSkillsProgress(ECharacterSkills::MELEE, PlayerCharacter->GetSkillsProgress(ECharacterSkills::MELEE));
+		SetSkillsProgress(ECharacterSkills::RANGE, PlayerCharacter->GetSkillsProgress(ECharacterSkills::RANGE));
+		SetSkillsProgress(ECharacterSkills::ASSAULTSPELLS, PlayerCharacter->GetSkillsProgress(ECharacterSkills::ASSAULTSPELLS));
+		SetSkillsProgress(ECharacterSkills::DEBUFFSPELLS, PlayerCharacter->GetSkillsProgress(ECharacterSkills::DEBUFFSPELLS));
+		SetSkillsProgress(ECharacterSkills::RESTORATIONSPELLS, PlayerCharacter->GetSkillsProgress(ECharacterSkills::RESTORATIONSPELLS));
+		SetSkillsProgress(ECharacterSkills::BUFFSPELLS, PlayerCharacter->GetSkillsProgress(ECharacterSkills::BUFFSPELLS));
+		SetSkillsProgress(ECharacterSkills::DEFEND, PlayerCharacter->GetSkillsProgress(ECharacterSkills::DEFEND));
+		SetSkillsProgress(ECharacterSkills::PERSUASION, PlayerCharacter->GetSkillsProgress(ECharacterSkills::PERSUASION));
+		CharacterPortrait = PlayerCharacter->CharacterPortrait;
+		CharacterName = FName(*PlayerCharacter->CharacterName);
 		Level = PlayerCharacter->Level;
-		if (IsValid(PlayerCharacter->GetInventoryMenuWidget())) {
-			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee)) {
-				MeleeAttackValue = PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee->GetAttackValue();
-				MeleeWeaponElements = PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee->GetElementsAndTheirPercentagesStructs();
-				MeleePhysicalType = PlayerCharacter->GetInventoryMenuWidget()->EquipedMelee->GetPhysicalType();
+		CurrentExperience = PlayerCharacter->CurrentExperience;
+		if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+			if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget)) {
+				if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->EquipedMelee)) {
+					MeleeAttackValue = UIManagerWorldSubsystem->InventoryMenuWidget->EquipedMelee->GetAttackValue();
+					MeleeWeaponElements = UIManagerWorldSubsystem->InventoryMenuWidget->EquipedMelee->GetElementsAndTheirPercentagesStructs();
+					MeleePhysicalType = UIManagerWorldSubsystem->InventoryMenuWidget->EquipedMelee->GetPhysicalType();
+				}
+				else {
+					MeleeAttackValue = 5;
+					MeleePhysicalType = EPhysicalType::CRUSHING;
+				}
+				if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->EquipedRange)) {
+					RangeAmmo = UIManagerWorldSubsystem->InventoryMenuWidget->EquipedRange->GetAmmo();
+					RangeAttackValue = UIManagerWorldSubsystem->InventoryMenuWidget->EquipedRange->GetAttackValue();
+					RangeWeaponElements = UIManagerWorldSubsystem->InventoryMenuWidget->EquipedRange->GetElementsAndTheirPercentagesStructs();
+					RangePhysicalType = UIManagerWorldSubsystem->InventoryMenuWidget->EquipedRange->GetPhysicalType();
+				}
+				else {
+					RangeAmmo = 0;
+					RangeAttackValue = 0;
+				}
+				if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHead))
+					ArmorValue += UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHead->GetArmorValue();
+				if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->EquipedTorse))
+					ArmorValue += UIManagerWorldSubsystem->InventoryMenuWidget->EquipedTorse->GetArmorValue();
+				if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHand))
+					ArmorValue += UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHand->GetArmorValue();
+				if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->EquipedLowerArmor))
+					ArmorValue += UIManagerWorldSubsystem->InventoryMenuWidget->EquipedLowerArmor->GetArmorValue();
 			}
-			else {
-				MeleeAttackValue = 5;
-				MeleePhysicalType = EPhysicalType::CRUSHING;
-			}
-			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedRange)) {
-				RangeAmmo = PlayerCharacter->GetInventoryMenuWidget()->EquipedRange->GetAmmo();
-				RangeAttackValue = PlayerCharacter->GetInventoryMenuWidget()->EquipedRange->GetAttackValue();
-				RangeWeaponElements = PlayerCharacter->GetInventoryMenuWidget()->EquipedRange->GetElementsAndTheirPercentagesStructs();
-				RangePhysicalType = PlayerCharacter->GetInventoryMenuWidget()->EquipedRange->GetPhysicalType();
-			} 
-			else {
-				RangeAmmo = 0;
-				RangeAttackValue = 0;
-			}
-			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedHead))
-				ArmorValue += PlayerCharacter->GetInventoryMenuWidget()->EquipedHead->GetArmorValue();
-			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse))
-				ArmorValue += PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse->GetArmorValue();
-			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedHand))
-				ArmorValue += PlayerCharacter->GetInventoryMenuWidget()->EquipedHand->GetArmorValue();
-			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor))
-				ArmorValue += PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetArmorValue();
 		}
 		GetElementalResistancesFromEquipedItems();
 		GetPhysicalResistancesFromEquipedItems();
@@ -81,55 +94,55 @@ void ACombatPlayerCharacter::Tick(float DeltaTime)
 
 void ACombatPlayerCharacter::GetElementalResistancesFromEquipedItems()
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter) && IsValid(PlayerCharacter->GetInventoryMenuWidget())) {
-			for (int i = 0; i < ElementalResistances.Num(); i++) {
-				if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedHead))
-					for(int g = 0; g < PlayerCharacter->GetInventoryMenuWidget()->EquipedHead->GetElementsAndTheirPercentagesStructs().Num(); g++)
-						if (PlayerCharacter->GetInventoryMenuWidget()->EquipedHead->GetElementsAndTheirPercentagesStructs()[g].Element == ElementalResistances[i].Element) {
-							ElementalResistances[i].Percent = PlayerCharacter->GetInventoryMenuWidget()->EquipedHead->GetElementsAndTheirPercentagesStructs()[g].Percent + ElementalResistances[i].Percent;
-						}
-				if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse))
-					for (int g = 0; g < PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse->GetElementsAndTheirPercentagesStructs().Num(); g++)
-						if (PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse->GetElementsAndTheirPercentagesStructs()[g].Element == ElementalResistances[i].Element) {
-							ElementalResistances[i].Percent = PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse->GetElementsAndTheirPercentagesStructs()[g].Percent + ElementalResistances[i].Percent;
-						}
-				if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedHand))
-					for (int g = 0; g < PlayerCharacter->GetInventoryMenuWidget()->EquipedHand->GetElementsAndTheirPercentagesStructs().Num(); g++)
-						if (PlayerCharacter->GetInventoryMenuWidget()->EquipedHand->GetElementsAndTheirPercentagesStructs()[g].Element == ElementalResistances[i].Element) {
-							ElementalResistances[i].Percent = PlayerCharacter->GetInventoryMenuWidget()->EquipedHand->GetElementsAndTheirPercentagesStructs()[g].Percent + ElementalResistances[i].Percent;
-						}
-				if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor))
-					for (int g = 0; g < PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetElementsAndTheirPercentagesStructs().Num(); g++)
-						if (PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetElementsAndTheirPercentagesStructs()[g].Element == ElementalResistances[i].Element) {
-							ElementalResistances[i].Percent = PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetElementsAndTheirPercentagesStructs()[g].Percent + ElementalResistances[i].Percent;
-						}
-			}
+	if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem) && IsValid(UIManagerWorldSubsystem->InventoryMenuWidget)) {
+		for (int i = 0; i < ElementalResistances.Num(); i++) {
+			if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHead))
+				for (int g = 0; g < UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHead->GetElementsAndTheirPercentagesStructs().Num(); g++)
+					if (UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHead->GetElementsAndTheirPercentagesStructs()[g].Element == ElementalResistances[i].Element) {
+						ElementalResistances[i].Percent = UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHead->GetElementsAndTheirPercentagesStructs()[g].Percent + ElementalResistances[i].Percent;
+					}
+			if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->EquipedTorse))
+				for (int g = 0; g < UIManagerWorldSubsystem->InventoryMenuWidget->EquipedTorse->GetElementsAndTheirPercentagesStructs().Num(); g++)
+					if (UIManagerWorldSubsystem->InventoryMenuWidget->EquipedTorse->GetElementsAndTheirPercentagesStructs()[g].Element == ElementalResistances[i].Element) {
+						ElementalResistances[i].Percent = UIManagerWorldSubsystem->InventoryMenuWidget->EquipedTorse->GetElementsAndTheirPercentagesStructs()[g].Percent + ElementalResistances[i].Percent;
+					}
+			if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHand))
+				for (int g = 0; g < UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHand->GetElementsAndTheirPercentagesStructs().Num(); g++)
+					if (UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHand->GetElementsAndTheirPercentagesStructs()[g].Element == ElementalResistances[i].Element) {
+						ElementalResistances[i].Percent = UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHand->GetElementsAndTheirPercentagesStructs()[g].Percent + ElementalResistances[i].Percent;
+					}
+			if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->EquipedLowerArmor))
+				for (int g = 0; g < UIManagerWorldSubsystem->InventoryMenuWidget->EquipedLowerArmor->GetElementsAndTheirPercentagesStructs().Num(); g++)
+					if (UIManagerWorldSubsystem->InventoryMenuWidget->EquipedLowerArmor->GetElementsAndTheirPercentagesStructs()[g].Element == ElementalResistances[i].Element) {
+						ElementalResistances[i].Percent = UIManagerWorldSubsystem->InventoryMenuWidget->EquipedLowerArmor->GetElementsAndTheirPercentagesStructs()[g].Percent + ElementalResistances[i].Percent;
+					}
+		}
 	}
 }
 
 void ACombatPlayerCharacter::GetPhysicalResistancesFromEquipedItems()
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter) && IsValid(PlayerCharacter->GetInventoryMenuWidget())) {
+	if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem) && IsValid(UIManagerWorldSubsystem->InventoryMenuWidget)) {
 		for (int i = 0; i < PhysicalResistances.Num(); i++) {
-			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedHead))
-				for (int g = 0; g < PlayerCharacter->GetInventoryMenuWidget()->EquipedHead->GetPhysicalTypesAndTheirPercentagesStructs().Num(); g++)
-					if (PlayerCharacter->GetInventoryMenuWidget()->EquipedHead->GetPhysicalTypesAndTheirPercentagesStructs()[g].PhysicalType == PhysicalResistances[i].PhysicalType) {
-						PhysicalResistances[i].Percent = PlayerCharacter->GetInventoryMenuWidget()->EquipedHead->GetPhysicalTypesAndTheirPercentagesStructs()[g].Percent + PhysicalResistances[i].Percent;
+			if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHead))
+				for (int g = 0; g < UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHead->GetPhysicalTypesAndTheirPercentagesStructs().Num(); g++)
+					if (UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHead->GetPhysicalTypesAndTheirPercentagesStructs()[g].PhysicalType == PhysicalResistances[i].PhysicalType) {
+						PhysicalResistances[i].Percent = UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHead->GetPhysicalTypesAndTheirPercentagesStructs()[g].Percent + PhysicalResistances[i].Percent;
 					}
-			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse))
-				for (int g = 0; g < PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse->GetPhysicalTypesAndTheirPercentagesStructs().Num(); g++)
-					if (PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse->GetPhysicalTypesAndTheirPercentagesStructs()[g].PhysicalType == PhysicalResistances[i].PhysicalType) {
-						PhysicalResistances[i].Percent = PlayerCharacter->GetInventoryMenuWidget()->EquipedTorse->GetPhysicalTypesAndTheirPercentagesStructs()[g].Percent + PhysicalResistances[i].Percent;
+			if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->EquipedTorse))
+				for (int g = 0; g < UIManagerWorldSubsystem->InventoryMenuWidget->EquipedTorse->GetPhysicalTypesAndTheirPercentagesStructs().Num(); g++)
+					if (UIManagerWorldSubsystem->InventoryMenuWidget->EquipedTorse->GetPhysicalTypesAndTheirPercentagesStructs()[g].PhysicalType == PhysicalResistances[i].PhysicalType) {
+						PhysicalResistances[i].Percent = UIManagerWorldSubsystem->InventoryMenuWidget->EquipedTorse->GetPhysicalTypesAndTheirPercentagesStructs()[g].Percent + PhysicalResistances[i].Percent;
 					}
-			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedHand))
-				for (int g = 0; g < PlayerCharacter->GetInventoryMenuWidget()->EquipedHand->GetPhysicalTypesAndTheirPercentagesStructs().Num(); g++)
-					if (PlayerCharacter->GetInventoryMenuWidget()->EquipedHand->GetPhysicalTypesAndTheirPercentagesStructs()[g].PhysicalType == PhysicalResistances[i].PhysicalType) {
-						PhysicalResistances[i].Percent = PlayerCharacter->GetInventoryMenuWidget()->EquipedHand->GetPhysicalTypesAndTheirPercentagesStructs()[g].Percent + PhysicalResistances[i].Percent;
+			if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHand))
+				for (int g = 0; g < UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHand->GetPhysicalTypesAndTheirPercentagesStructs().Num(); g++)
+					if (UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHand->GetPhysicalTypesAndTheirPercentagesStructs()[g].PhysicalType == PhysicalResistances[i].PhysicalType) {
+						PhysicalResistances[i].Percent = UIManagerWorldSubsystem->InventoryMenuWidget->EquipedHand->GetPhysicalTypesAndTheirPercentagesStructs()[g].Percent + PhysicalResistances[i].Percent;
 					}
-			if (IsValid(PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor))
-				for (int g = 0; g < PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetPhysicalTypesAndTheirPercentagesStructs().Num(); g++)
-					if (PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetPhysicalTypesAndTheirPercentagesStructs()[g].PhysicalType == PhysicalResistances[i].PhysicalType) {
-						PhysicalResistances[i].Percent = PlayerCharacter->GetInventoryMenuWidget()->EquipedLowerArmor->GetPhysicalTypesAndTheirPercentagesStructs()[g].Percent + PhysicalResistances[i].Percent;
+			if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->EquipedLowerArmor))
+				for (int g = 0; g < UIManagerWorldSubsystem->InventoryMenuWidget->EquipedLowerArmor->GetPhysicalTypesAndTheirPercentagesStructs().Num(); g++)
+					if (UIManagerWorldSubsystem->InventoryMenuWidget->EquipedLowerArmor->GetPhysicalTypesAndTheirPercentagesStructs()[g].PhysicalType == PhysicalResistances[i].PhysicalType) {
+						PhysicalResistances[i].Percent = UIManagerWorldSubsystem->InventoryMenuWidget->EquipedLowerArmor->GetPhysicalTypesAndTheirPercentagesStructs()[g].Percent + PhysicalResistances[i].Percent;
 					}
 		}
 	}

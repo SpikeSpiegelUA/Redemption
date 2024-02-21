@@ -90,8 +90,8 @@ void URedemptionGameInstance::SaveGame(const uint16 SlotIndex, bool IsOverwritin
 		if (!IsOverwriting) {
 			if (auto* LoadedRedemptionSaveGameForSaveSlots = Cast<URedemptionSaveGameForSaveSlots>
 				(UGameplayStatics::CreateSaveGameObject(URedemptionSaveGameForSaveSlots::StaticClass())); IsValid(LoadedRedemptionSaveGameForSaveSlots)) {
-				if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-					for (UWidget* SaveSlot : PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren())
+				if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+					for (UWidget* SaveSlot : UIManagerWorldSubsystem->SaveLoadGameMenuWidget->GetSaveSlotsScrollBox()->GetAllChildren())
 						if (USaveSlotEntry* SaveSlotEntry = Cast<USaveSlotEntry>(SaveSlot); IsValid(SaveSlotEntry))
 							LoadedRedemptionSaveGameForSaveSlots->SaveSlotsIndexes.Add(SaveSlotEntry->GetSlotIndex());
 				SaveFileIndex++;
@@ -111,8 +111,8 @@ void URedemptionGameInstance::SaveGameAndCreateSlot(const uint16 SlotIndex)
 		SaveSlotEntryWidget->SetSlotIndex(SlotIndex);
 		FString SlotName = "Slot " + FString::FromInt(SlotIndex);
 		SaveSlotEntryWidget->GetNameTextBlock()->SetText(FText::FromString(SlotName));
-		if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-			PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->AddChild(SaveSlotEntryWidget);
+		if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+			UIManagerWorldSubsystem->SaveLoadGameMenuWidget->GetSaveSlotsScrollBox()->AddChild(SaveSlotEntryWidget);
 		SaveGame(SlotIndex, false);
 	}
 }
@@ -125,7 +125,7 @@ void URedemptionGameInstance::CreateSaveSlot(const uint16 SlotIndex)
 		SaveSlotEntryWidget->SetSlotIndex(SlotIndex);
 		FString SlotName = "Slot " + FString::FromInt(SlotIndex);
 		SaveSlotEntryWidget->GetNameTextBlock()->SetText(FText::FromString(SlotName));
-		if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-			PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->AddChild(SaveSlotEntryWidget);
+		if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+			UIManagerWorldSubsystem->SaveLoadGameMenuWidget->GetSaveSlotsScrollBox()->AddChild(SaveSlotEntryWidget);
 	}
 }

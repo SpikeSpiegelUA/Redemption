@@ -18,7 +18,8 @@ EBTNodeResult::Type UBTTask_StartADialogue::ExecuteTask(UBehaviorTreeComponent& 
 	const UBlackboardComponent* MyBlackboard = OwnerComp.GetBlackboardComponent();
 	AAIController* MyController = OwnerComp.GetAIOwner();
 	APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-	if (!IsValid(MyController) || !IsValid(MyBlackboard) || !IsValid(PlayerController))
+	auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
+	if (!IsValid(MyController) || !IsValid(MyBlackboard) || !IsValid(PlayerController) || !IsValid(UIManagerWorldSubsystem))
 		return EBTNodeResult::Failed;
 
 	APlayerCharacter* PlayerCharacter = nullptr;
@@ -28,18 +29,17 @@ EBTNodeResult::Type UBTTask_StartADialogue::ExecuteTask(UBehaviorTreeComponent& 
 	if (!IsValid(PlayerCharacter))
 		return EBTNodeResult::Failed;
 
-	if (!PlayerCharacter->GetDialogueBoxWidget()->IsInViewport()) {
-		PlayerCharacter->GetDialogueBoxWidget()->AddToViewport();
+	if (!UIManagerWorldSubsystem->DialogueBoxWidget->IsInViewport()) {
+		UIManagerWorldSubsystem->DialogueBoxWidget->AddToViewport();
 		PlayerCharacter->IsInDialogue = true;
-		PlayerCharacter->GetForwardRayInfoWidget()->RemoveFromParent();
+		UIManagerWorldSubsystem->ForwardRayInfoWidget->RemoveFromParent();
+		ACharacterInTheWorld* Speaker = Cast<ACharacterInTheWorld>(MyController->GetPawn());
+		UIManagerWorldSubsystem->DialogueBoxWidget->SetSpeakerName(FText::FromName(Speaker->GetCharacterName()));
 
-;		ACharacterInTheWorld* Speaker = Cast<ACharacterInTheWorld>(MyController->GetPawn());
-		PlayerCharacter->GetDialogueBoxWidget()->SetSpeakerName(FText::FromName(Speaker->GetCharacterName()));
-
-		UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(PlayerController, PlayerCharacter->GetDialogueBoxWidget(), EMouseLockMode::DoNotLock);
+		UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(PlayerController, UIManagerWorldSubsystem->DialogueBoxWidget, EMouseLockMode::DoNotLock);
 		
 		OwnerComp.GetBlackboardComponent()->ClearValue(DialogueBoxWidgetKeySelector.SelectedKeyName);
-		OwnerComp.GetBlackboardComponent()->SetValueAsObject(DialogueBoxWidgetKeySelector.SelectedKeyName, PlayerCharacter->GetDialogueBoxWidget());
+		OwnerComp.GetBlackboardComponent()->SetValueAsObject(DialogueBoxWidgetKeySelector.SelectedKeyName, UIManagerWorldSubsystem->DialogueBoxWidget);
 
 		PlayerController->bShowMouseCursor = true;
 		PlayerCharacter->DisableInput(PlayerController);

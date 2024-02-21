@@ -50,6 +50,11 @@ int ACombatEnemyNPC::GetGoldReward() const
 	return GoldReward;
 }
 
+int ACombatEnemyNPC::GetExperienceReward() const
+{
+	return ExperienceReward;
+}
+
 UBehaviorTree* ACombatEnemyNPC::GetDialogueTree()
 {
 	return DialogueTree;

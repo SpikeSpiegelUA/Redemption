@@ -7,6 +7,8 @@
 #include "BehaviorTree/Blackboard/BlackboardKeyType_String.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 UBTTask_AskRepeatedQuestion::UBTTask_AskRepeatedQuestion()
 {
@@ -33,35 +35,38 @@ EBTNodeResult::Type UBTTask_AskRepeatedQuestion::ExecuteTask(UBehaviorTreeCompon
 
 EBTNodeResult::Type UBTTask_AskRepeatedQuestion::PrepareResponses(APlayerController*& PlayerController)
 {
-	APlayerCharacter* PlayerCharacter = nullptr;
-	if (IsValid(GetWorld()))
-		PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+	UUIManagerWorldSubsystem* UIManagerWorldSubsystem = nullptr;
+	const ARedemptionGameModeBase* RedemptionGameModeBase = nullptr;
+	if (IsValid(GetWorld())) {
+		UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
+		RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	}
 
-	if (!IsValid(PlayerCharacter))
+	if (!IsValid(UIManagerWorldSubsystem) || !IsValid(RedemptionGameModeBase))
 		return EBTNodeResult::Failed;
 
-	if (!IsValid(PlayerCharacter->GetDialogueBoxWidget()))
+	if (!IsValid(UIManagerWorldSubsystem->DialogueBoxWidget))
 		return EBTNodeResult::Failed;
 
 
-	PlayerCharacter->GetDialogueBoxWidget()->GetResponseOverlay()->AddChildToOverlay(PlayerCharacter->GetResponsesBox());
-	PlayerCharacter->GetDialogueBoxWidget()->GetContinueButton()->SetVisibility(ESlateVisibility::Hidden);
+	UIManagerWorldSubsystem->DialogueBoxWidget->GetResponseOverlay()->AddChildToOverlay(UIManagerWorldSubsystem->ResponsesBoxWidget);
+	UIManagerWorldSubsystem->DialogueBoxWidget->GetContinueButton()->SetVisibility(ESlateVisibility::Hidden);
 
 	if (!BlackboardComponent->GetValue<UBlackboardKeyType_Bool>("FirstDialoguePassed")) {
-		PlayerCharacter->GetDialogueBoxWidget()->SetDialogueText(NPCQuestion);
+		UIManagerWorldSubsystem->DialogueBoxWidget->SetDialogueText(NPCQuestion);
 		BlackboardComponent->SetValue<UBlackboardKeyType_Bool>("FirstDialoguePassed", true);
 	}
 	else {
-		PlayerCharacter->GetDialogueBoxWidget()->SetDialogueText(NPCRepeatedQuestion);
+		UIManagerWorldSubsystem->DialogueBoxWidget->SetDialogueText(NPCRepeatedQuestion);
 	}
 
-	for (int8 Index = PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
-		PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetChildAt(Index)->RemoveFromParent();
+	for (int8 Index = UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
+		UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->GetChildAt(Index)->RemoveFromParent();
 
 	for (auto Response : PlayerResponses) {
-		UResponseEntry* ResponseEntry = CreateWidget<UResponseEntry>(PlayerController, PlayerCharacter->GetResponseEntryClass());
+		UResponseEntry* ResponseEntry = CreateWidget<UResponseEntry>(PlayerController, RedemptionGameModeBase->GetResponseEntryClass());
 		ResponseEntry->SetResponseText(Response);
-		PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->AddChildToVerticalBox(ResponseEntry);
+		UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->AddChildToVerticalBox(ResponseEntry);
 		ResponseEntry->OnResponseClicked.AddDynamic(this, &UBTTask_AskQuestion::ResponseReceived);
 	}
 

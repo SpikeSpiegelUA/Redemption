@@ -177,7 +177,7 @@ public:
 
 	void ButtonOnHoveredActions(UButton* const HoveredButton, int8 Index);
 	void HideAllCrosshairWidgetComponents() const;
-	void HideAllFloatingHealthWidgetComponents() const;
+	void HideAllHealthManaFloatingHealthWidgetComponents() const;
 	//Turn on target selection and AttackMenuBorder.
 	void OpenActionMenu(const FText& NewAttackTalkInfoActionButtonText);
 	void CreateNotification(const FText& NotificationText);

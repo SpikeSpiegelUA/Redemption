@@ -18,8 +18,6 @@ class REDEMPTION_API UAlliesInfoBars : public UUserWidget
 	GENERATED_BODY()
 
 private:
-	APlayerCharacter* PlayerCharacter;
-
 	UPROPERTY()
 		TArray<UProgressBar*> AlliesHealthBars;
 	UPROPERTY()
@@ -76,11 +74,6 @@ protected:
 
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
-
-	UFUNCTION()
-		float GetHealthPercentage() const;
-	UFUNCTION()
-		float GetManaPercentage() const;
 
 public:
 	UVerticalBox* GetAlly1InfoVerticalBox() const;

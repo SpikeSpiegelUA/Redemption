@@ -26,6 +26,7 @@ public:
 	ACombatEnemyNPC();
 
 	int GetGoldReward() const;
+	int GetExperienceReward() const;
 	void StartADialogue_Implementation() override;
 
 	UBehaviorTree* GetDialogueTree();
@@ -46,6 +47,8 @@ protected:
 	//Battle mode regarding variables.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle")
 		int GoldReward{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Battle")
+		int ExperienceReward{};
 	private:
 	//Combat dialogue possible item ask variables.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = true))

@@ -37,5 +37,5 @@ private:
 	class AGameItem* Item{};
 	EBattleSide TargetBattleSide{};
 	//On overlap with the player or an enemy we need to destroy this object and set timer for turn change
-	void OnOverlapBeginsActions(const class APlayerCharacter* const PlayerCharacter);
+	void OnOverlapBeginsActions();
 };
