@@ -2,6 +2,8 @@
 
 
 #include "PartyMenuGeneralCharacterInfo.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 bool UPartyMenuGeneralCharacterInfo::Initialize()
 {
@@ -49,11 +51,13 @@ void UPartyMenuGeneralCharacterInfo::SetCharacterInfo(const APlayerCharacter* co
 	CharacterPortraitImage->Brush.SetImageSize(FVector2D(120, 100));
 	CharacterNameTextBlock->SetText(FText::FromString(Player->CharacterName));
 	FString StringToSet{};
+	StringToSet.Append("Mana:");
 	StringToSet.AppendInt(Player->CurrentMana);
 	StringToSet.AppendChar('/');
 	StringToSet.AppendInt(Player->MaxMana);
 	CharacterManaTextBlock->SetText(FText::FromString(StringToSet));
 	StringToSet.Empty();
+	StringToSet.Append("HP:");
 	StringToSet.AppendInt(Player->CurrentHP);
 	StringToSet.AppendChar('/');
 	StringToSet.AppendInt(Player->MaxHP);
@@ -67,31 +71,31 @@ void UPartyMenuGeneralCharacterInfo::SetCharacterInfo(const APlayerCharacter* co
 
 void UPartyMenuGeneralCharacterInfo::CharacterNameButtonOnClicked()
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
-		if (IsValid(PlayerCharacter->GetDetailedCharacterInfoMenuClass()))
-			if(APlayerController* PlayerController = Cast<APlayerController>(PlayerCharacter->GetController()); IsValid(PlayerController))
-				PlayerCharacter->SetDetailedCharacterInfoMenuWidget(CreateWidget<UDetailedCharacterInfoMenu>(
-					PlayerController, PlayerCharacter->GetDetailedCharacterInfoMenuClass()));
-		if (IsValid(PlayerCharacter->GetDetailedCharacterInfoMenuWidget())) {
-			PlayerCharacter->GetPartyMenuWidget()->RemoveFromParent();
-			PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->AddToViewport();
-			if (Ally != nullptr) {
-				PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->Ally = Ally;
-				PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->SetCharacterInfoForAlly();
+	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+		if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+			if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+				if (IsValid(RedemptionGameModeBase->GetDetailedCharacterInfoMenuClass()))
+					if (APlayerController* PlayerController = Cast<APlayerController>(PlayerCharacter->GetController()); IsValid(PlayerController))
+						UIManagerWorldSubsystem->DetailedCharacterInfoMenuWidget = CreateWidget<UDetailedCharacterInfoMenu>(
+						PlayerController, RedemptionGameModeBase->GetDetailedCharacterInfoMenuClass());
+				if (IsValid(UIManagerWorldSubsystem->DetailedCharacterInfoMenuWidget)) {
+					UIManagerWorldSubsystem->PartyMenuWidget->RemoveFromParent();
+					UIManagerWorldSubsystem->DetailedCharacterInfoMenuWidget->AddToViewport();
+					if (Ally != nullptr) {
+						UIManagerWorldSubsystem->DetailedCharacterInfoMenuWidget->Ally = Ally;
+						UIManagerWorldSubsystem->DetailedCharacterInfoMenuWidget->SetCharacterInfoForAlly();
+					}
+					else {
+						UIManagerWorldSubsystem->DetailedCharacterInfoMenuWidget->Ally = nullptr;
+						UIManagerWorldSubsystem->DetailedCharacterInfoMenuWidget->SetCharacterInfoForPlayer(PlayerCharacter);
+					}
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+					UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->DetailedCharacterInfoMenuWidget->GetToggleInfoButton();
+					UIManagerWorldSubsystem->PickedButtonIndex = 0;
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+				}
 			}
-			else {
-				PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->Ally = nullptr;
-				PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->SetCharacterInfoForPlayer(PlayerCharacter);
-			}
-			if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
-				if (IsValid(UIManagerWorldSubsystem->PickedButton))
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
-				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->GetToggleInfoButton();
-				UIManagerWorldSubsystem->PickedButtonIndex = 0;
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
-			}
-		}
-	}
 }
 
 void UPartyMenuGeneralCharacterInfo::CharacterNameButtonOnHovered()
@@ -103,8 +107,8 @@ void UPartyMenuGeneralCharacterInfo::CharacterNameButtonOnHovered()
 		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 		UIManagerWorldSubsystem->PickedButtonIndex = 0;
 		if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-			if(IsValid(PlayerCharacter->GetPartyMenuWidget()))
-				PlayerCharacter->GetPartyMenuWidget()->IsSelectingCharacter = true;
+			if(IsValid(UIManagerWorldSubsystem->PartyMenuWidget))
+				UIManagerWorldSubsystem->PartyMenuWidget->IsSelectingCharacter = true;
 	}
 }
 

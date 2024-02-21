@@ -7,6 +7,8 @@
 #include "BehaviorTree/Blackboard/BlackboardKeyType_String.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Redemption/Miscellaneous/InventoryActions.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 UBTTask_AskItem::UBTTask_AskItem(const FObjectInitializer& ObjectInitializer)
 {
@@ -20,14 +22,16 @@ EBTNodeResult::Type UBTTask_AskItem::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
 	ACombatEnemyNPC* CombatEnemyNPC = Cast<ACombatEnemyNPC>(OwnerComp.GetAIOwner()->GetCharacter());
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	if (!IsValid(CombatEnemyNPC) || !IsValid(BlackboardComponent) || !IsValid(PlayerCharacter))
+	URedemptionGameInstance* RedemptionGameInstance = GetWorld()->GetGameInstance<URedemptionGameInstance>();
+	UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
+	if (!IsValid(CombatEnemyNPC) || !IsValid(BlackboardComponent) || !IsValid(PlayerCharacter) || !IsValid(UIManagerWorldSubsystem) || !IsValid(RedemptionGameInstance))
 		return EBTNodeResult::Failed;
 
 	uint8 RandomNumber = FMath::RandRange(0, 100);
 	uint16 ChanceOfSuccess = CombatEnemyNPC->AskMoneyItemSuccessChance + (PlayerCharacter->GetStat(ECharacterStats::LUCK) - CombatEnemyNPC->GetStat(ECharacterStats::LUCK)) * 2 +
 		(CombatEnemyNPC->MaxHP - CombatEnemyNPC->CurrentHP) / CombatEnemyNPC->MaxHP * 10;
 
-	PlayerCharacter->GetDialogueBoxWidget()->GetContinueButton()->SetVisibility(ESlateVisibility::Visible);
+	UIManagerWorldSubsystem->DialogueBoxWidget->GetContinueButton()->SetVisibility(ESlateVisibility::Visible);
 
 	if (RandomNumber < ChanceOfSuccess) {
 		BlackboardComponent->SetValueAsBool("PassedDialogueCheck", true);
@@ -38,19 +42,23 @@ EBTNodeResult::Type UBTTask_AskItem::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 			StringToSet.Append(CombatEnemyNPC->GetPossibleAskItems()[RandomItem]->GetDefaultObject<AGameItem>()->GetItemName().ToString());
 			StringToSet.Append(")");
 			AGameItem* GameItem = NewObject<AGameItem>(this, CombatEnemyNPC->GetPossibleAskItems()[RandomItem]);
-			PlayerCharacter->GetGameInstance()->InstanceItemsInTheInventory.Add(CombatEnemyNPC->GetPossibleAskItems()[RandomItem]);
+			RedemptionGameInstance->InstanceItemsInTheInventory.Add(CombatEnemyNPC->GetPossibleAskItems()[RandomItem]);
 			if (IsValid(GameItem)) {
 				//Get ScrollBox corresponding to the item's type
-				UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(PlayerCharacter->GetInventoryMenuWidget(), GameItem);
+				UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(UIManagerWorldSubsystem->InventoryMenuWidget, GameItem);
 				//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
 				InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, GameItem);
 				CombatEnemyNPC->AskMoneyItemSuccessChance -= 10;
 			}
+			if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
+				RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->AddSkillsProgress(ECharacterSkills::PERSUASION, 3);
+				RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpPersuasion, true);
+			}
 		}
-		PlayerCharacter->GetDialogueBoxWidget()->SetDialogueText(FText::FromString(StringToSet));
+		UIManagerWorldSubsystem->DialogueBoxWidget->SetDialogueText(FText::FromString(StringToSet));
 	}
 	else {
-		PlayerCharacter->GetDialogueBoxWidget()->SetDialogueText(NPCRefuseText);
+		UIManagerWorldSubsystem->DialogueBoxWidget->SetDialogueText(NPCRefuseText);
 		BlackboardComponent->SetValueAsBool("PassedDialogueCheck", false);
 	}
 

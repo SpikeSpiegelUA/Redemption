@@ -11,6 +11,8 @@
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
 #include "Redemption/Miscellaneous/SkillsSpellsAndEffectsActions.h"
 #include "Redemption/Miscellaneous/ElementsActions.h"
+#include "Kismet/GameplayStatics.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 
 UBTTask_GetTarget::UBTTask_GetTarget(const FObjectInitializer& ObjectInitializer)
 {
@@ -36,8 +38,10 @@ EBTNodeResult::Type UBTTask_GetTarget::ExecuteTask(UBehaviorTreeComponent& Owner
 	if(!IsValid(PlayerCharacter))
 		return EBTNodeResult::Failed;
 	
-	ABattleManager* BattleManager = PlayerCharacter->GetBattleManager();
-	if(!IsValid(BattleManager))
+	ABattleManager* BattleManager{};
+	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+		BattleManager = RedemptionGameModeBase->GetBattleManager();
+	else
 		return EBTNodeResult::Failed;
 
 	TArray<ACombatNPC*> ActorsToTarget{};

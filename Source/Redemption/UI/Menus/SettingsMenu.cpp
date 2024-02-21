@@ -8,6 +8,7 @@
 #include "..\UI\Menus\PauseMenu.h"
 #include "..\GameInstance\RedemptionGameInstance.h"
 #include "..\Characters\Player\PlayerCharacter.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 
 bool USettingsMenu::Initialize()
 {
@@ -86,27 +87,38 @@ void USettingsMenu::BackgroundMusicSliderOnValueChanged(float Value)
 
 void USettingsMenu::BackButtonOnClicked()
 {
-	if(APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-		if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
-			this->RemoveFromParent();
-			FString MapName = GetWorld()->GetMapName();
-			UMainMenu* MainMenuWidget = nullptr;
-			UPauseMenu* PauseMenuWidget = nullptr;
-			if (MapName == "UEDPIE_0_MainMenu") {
-				if (IsValid(PlayerCharacter->GetMainMenuWidget()))
-					PlayerCharacter->GetMainMenuWidget()->AddToViewport();
-				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetMainMenuWidget()->GetNewGameButton();
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-				UIManagerWorldSubsystem->PickedButtonIndex = 0;
-			}
-			else if (MapName == "UEDPIE_0_Town" || MapName == "UEDPIE_0_Dungeon") {
-				if (IsValid(PlayerCharacter->GetPauseMenuWidget()))
-					PlayerCharacter->GetPauseMenuWidget()->AddToViewport();
-				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetPauseMenuWidget()->GetResumeButton();
+	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+		this->RemoveFromParent();
+		this->ConditionalBeginDestroy();
+		UIManagerWorldSubsystem->SettingsMenuWidget = nullptr;
+		FString MapName = GetWorld()->GetMapName();
+		UMainMenu* MainMenuWidget = nullptr;
+		UPauseMenu* PauseMenuWidget = nullptr;
+		if (MapName == "UEDPIE_0_MainMenu") {
+			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>(); IsValid(PlayerController))
+				if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+					if (IsValid(RedemptionGameModeBase->GetMainMenuClass()))
+						UIManagerWorldSubsystem->MainMenuWidget = CreateWidget<UMainMenu>(PlayerController, RedemptionGameModeBase->GetMainMenuClass());
+			if (IsValid(UIManagerWorldSubsystem->MainMenuWidget)) {
+				UIManagerWorldSubsystem->MainMenuWidget->AddToViewport();
+				UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->MainMenuWidget->GetNewGameButton();
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 				UIManagerWorldSubsystem->PickedButtonIndex = 0;
 			}
 		}
+		else if (MapName == "UEDPIE_0_Town" || MapName == "UEDPIE_0_Dungeon") {
+			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>(); IsValid(PlayerController))
+				if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+					if (IsValid(RedemptionGameModeBase->GetPauseMenuClass()))
+						UIManagerWorldSubsystem->PauseMenuWidget = CreateWidget<UPauseMenu>(PlayerController, RedemptionGameModeBase->GetPauseMenuClass());
+			if (IsValid(UIManagerWorldSubsystem->PauseMenuWidget)) {
+				UIManagerWorldSubsystem->PauseMenuWidget->AddToViewport();
+				UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PauseMenuWidget->GetResumeButton();
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			}
+		}
+	}
 }
 
 UButton* USettingsMenu::GetBackButton() const

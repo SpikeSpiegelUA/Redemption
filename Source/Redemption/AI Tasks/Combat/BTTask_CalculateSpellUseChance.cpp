@@ -20,7 +20,7 @@ EBTNodeResult::Type UBTTask_CalculateSpellUseChance::ExecuteTask(UBehaviorTreeCo
 	if (!IsValid(CombatEnemyNPC))
 		return EBTNodeResult::Failed;
 
-	int8 UseChance = 80;
+	int8 UseChance = 60;
 
 	if (!IsValid(CombatEnemyNPC->SpellToUse)) {
 		UseChance = -1;
@@ -29,8 +29,6 @@ EBTNodeResult::Type UBTTask_CalculateSpellUseChance::ExecuteTask(UBehaviorTreeCo
 		if (CombatEnemyNPC->CurrentMana < CombatEnemyNPC->SpellToUse->GetCost()) {
 			UseChance = -1;
 		}
-		else if (CombatEnemyNPC->SpellToUse->GetTypeOfSpell() == ESpellType::RESTORATION || CombatEnemyNPC->SpellToUse->GetTypeOfSpell() == ESpellType::BUFF)
-			UseChance = 100;
 	}
 
 	uint8 RandomChance = FMath::RandRange(0, 100);

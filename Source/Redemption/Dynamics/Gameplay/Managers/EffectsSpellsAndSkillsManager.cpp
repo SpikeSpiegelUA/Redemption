@@ -2,6 +2,8 @@
 
 
 #include "..\Dynamics\Gameplay\Managers\EffectsSpellsAndSkillsManager.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AEffectsSpellsAndSkillsManager::AEffectsSpellsAndSkillsManager()
@@ -15,7 +17,8 @@ AEffectsSpellsAndSkillsManager::AEffectsSpellsAndSkillsManager()
 void AEffectsSpellsAndSkillsManager::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	if (auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+		RedemptionGameModeBase->SetEffectsSpellsAndSkillsManager(this);
 }
 
 // Called every frame

@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "..\UI\Miscellaneous\SaveSlotEntry.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 
 bool UPauseMenu::Initialize()
 {
@@ -35,6 +36,7 @@ bool UPauseMenu::Initialize()
 	}
 	if (IsValid(GetWorld()))
 		UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
+	verify(UIManagerWorldSubsystem);
 	if (!bSuccess) return false;
 	return bSuccess;
 }
@@ -49,6 +51,8 @@ void UPauseMenu::ResumeButtonOnClicked()
 	if(APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()); IsValid(PlayerController))
 		if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(PlayerController->GetCharacter()); IsValid(PlayerCharacter)) {
 			this->RemoveFromParent();
+			this->ConditionalBeginDestroy();
+			UIManagerWorldSubsystem->PauseMenuWidget = nullptr;
 			PlayerController->bShowMouseCursor = false;
 			PlayerController->bEnableClickEvents = false;
 			PlayerController->bEnableMouseOverEvents = false;
@@ -87,10 +91,15 @@ void UPauseMenu::LoadButtonOnHovered()
 
 void UPauseMenu::SettingsButtonOnClicked()
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	this->RemoveFromParent();
-	if (IsValid(PlayerCharacter))
-		PlayerCharacter->GetSettingsMenuWidget()->AddToViewport();
+	this->ConditionalBeginDestroy();
+	UIManagerWorldSubsystem->PauseMenuWidget = nullptr;
+	if(APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()); IsValid(PlayerController))
+		if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+			if (IsValid(RedemptionGameModeBase->GetSettingsMenuClass()) && IsValid(PlayerController))
+				UIManagerWorldSubsystem->SettingsMenuWidget = CreateWidget<USettingsMenu>(PlayerController, RedemptionGameModeBase->GetSettingsMenuClass());
+	if (IsValid(UIManagerWorldSubsystem) && IsValid(UIManagerWorldSubsystem->SettingsMenuWidget))
+		UIManagerWorldSubsystem->SettingsMenuWidget->AddToViewport();
 	SettingsButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 }
 
@@ -131,22 +140,24 @@ void UPauseMenu::ButtonOnHoveredActions(UButton* const PickedButton)
 
 void UPauseMenu::OpenSaveLoadMenuActions(const FString& Mode)
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)){
+	if (IsValid(UIManagerWorldSubsystem->SaveLoadGameMenuWidget)) {
+		UIManagerWorldSubsystem->SaveLoadGameMenuWidget->AddToViewport();
+		this->RemoveFromParent();
+		this->ConditionalBeginDestroy();
+		UIManagerWorldSubsystem->PauseMenuWidget = nullptr;
 		if (IsValid(UIManagerWorldSubsystem->PickedButton))
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
-		if (PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren().Num() > 0)
-			UIManagerWorldSubsystem->PickedButton = Cast<USaveSlotEntry>(PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren()[0])->GetSlotButton();
-		else 
-			UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveLoadButtonWithNeighbors();
+		if (UIManagerWorldSubsystem->SaveLoadGameMenuWidget->GetSaveSlotsScrollBox()->GetAllChildren().Num() > 0)
+			UIManagerWorldSubsystem->PickedButton = Cast<USaveSlotEntry>(UIManagerWorldSubsystem->SaveLoadGameMenuWidget->GetSaveSlotsScrollBox()->GetAllChildren()[0])->GetSlotButton();
+		else
+			UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->SaveLoadGameMenuWidget->GetSaveLoadButtonWithNeighbors();
 		UIManagerWorldSubsystem->PickedButtonIndex = 0;
 		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
-		this->RemoveFromParent();
-		PlayerCharacter->GetSaveLoadGameMenuWidget()->AddToViewport();
 		if (Mode == "Save")
-			PlayerCharacter->GetSaveLoadGameMenuWidget()->ToSaveTransition();
-		else if(Mode == "Load")
-			PlayerCharacter->GetSaveLoadGameMenuWidget()->ToLoadTransition();
-		else if(IsValid(GEngine))
+			UIManagerWorldSubsystem->SaveLoadGameMenuWidget->ToSaveTransition();
+		else if (Mode == "Load")
+			UIManagerWorldSubsystem->SaveLoadGameMenuWidget->ToLoadTransition();
+		else if (IsValid(GEngine))
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Mode parameter in OpenSaveLoadMenuActions method in UPauseMenu class has an invalid value!!!"));
 	}
 }

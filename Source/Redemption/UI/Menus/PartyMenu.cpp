@@ -5,6 +5,8 @@
 #include "Components/HorizontalBoxSlot.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Redemption/Characters/Player/PlayerCharacter.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 bool UPartyMenu::Initialize()
 {
@@ -43,15 +45,22 @@ void UPartyMenu::UpdateCharacterInfo(const TArray<ACombatAllyNPC*>& Allies)
 
 void UPartyMenu::BackButtonOnClicked()
 {
-	this->RemoveFromParent();
-	this->ConditionalBeginDestroy();
 	if (auto* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
-		PlayerCharacter->GetPlayerMenuWidget()->AddToViewport();
 		if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
-			if (IsValid(UIManagerWorldSubsystem->PickedButton))
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
-			UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetPlayerMenuWidget()->GetInventoryButton();
-			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+			this->RemoveFromParent();
+			this->ConditionalBeginDestroy();
+			UIManagerWorldSubsystem->PartyMenuWidget = nullptr;
+			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>(); IsValid(PlayerController))
+				if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+					if (IsValid(RedemptionGameModeBase->GetPlayerMenuClass()))
+						UIManagerWorldSubsystem->PlayerMenuWidget = CreateWidget<UPlayerMenu>(PlayerController, RedemptionGameModeBase->GetPlayerMenuClass());
+			if (IsValid(UIManagerWorldSubsystem->PlayerMenuWidget)) {
+				UIManagerWorldSubsystem->PlayerMenuWidget->AddToViewport();
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+				UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PlayerMenuWidget->GetInventoryButton();
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+			}
 		}
 	}
 }

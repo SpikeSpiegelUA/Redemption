@@ -43,6 +43,11 @@ void ARedemptionGameModeBase::BeginPlay()
 	GetWorld()->GetTimerManager().SetTimer(SpawnSavedObjectsAndSaveSlotsTimerHandle, this, &ARedemptionGameModeBase::SpawnSavedObjectsAndSaveSlots, 0.0000001f, false);
 }
 
+void ARedemptionGameModeBase::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);	
+}
+
 void ARedemptionGameModeBase::SpawnSavedObjectsAndSaveSlots()
 {
 	if (URedemptionGameInstance* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance)) {
@@ -86,7 +91,182 @@ void ARedemptionGameModeBase::SpawnSavedObjectsAndSaveSlots()
 	}
 }
 
-void ARedemptionGameModeBase::Tick(float DeltaTime)
+ABattleManager* ARedemptionGameModeBase::GetBattleManager() const
 {
-	Super::Tick(DeltaTime);	
+	return BattleManager;
+}
+
+AGameManager* ARedemptionGameModeBase::GetGameManager() const
+{
+	return GameManager;
+}
+
+AAudioManager* ARedemptionGameModeBase::GetAudioManager() const
+{
+	return AudioManager;
+}
+
+AParticlesManager* ARedemptionGameModeBase::GetParticlesManager() const
+{
+	return ParticlesManager;
+}
+
+ALevelingUpManager* ARedemptionGameModeBase::GetLevelingUpManager() const
+{
+	return LevelingUpManager;
+}
+
+AEffectsSpellsAndSkillsManager* ARedemptionGameModeBase::GetEffectsSpellsAndSkillsManager() const
+{
+	return EffectsManager;
+}
+
+TSubclassOf<class UAlliesInfoBars> ARedemptionGameModeBase::GetAlliesInfoBarsClass() const
+{
+	return AlliesInfoBarsClass;
+}
+
+TSubclassOf<class UForwardRayInfo> ARedemptionGameModeBase::GetForwardRayInfoClass() const
+{
+	return ForwardRayInfoClass;
+}
+
+TSubclassOf<class ULoadingScreen> ARedemptionGameModeBase::GetLoadingScreenClass() const
+{
+	return LoadingScreenClass;
+}
+
+TSubclassOf<class UPlayerMenu> ARedemptionGameModeBase::GetPlayerMenuClass() const
+{
+	return PlayerMenuClass;
+}
+
+TSubclassOf<class UInventoryScrollBoxEntryWidget> ARedemptionGameModeBase::GetInventoryScrollBoxEntryClass() const
+{
+	return InventoryScrollBoxEntryClass;
+}
+
+TSubclassOf<class UInventoryMenu> ARedemptionGameModeBase::GetInventoryMenuClass() const
+{
+	return InventoryMenuClass;
+}
+
+TSubclassOf<class UPauseMenu> ARedemptionGameModeBase::GetPauseMenuClass() const
+{
+	return PauseMenuClass;
+}
+
+TSubclassOf<class UBattleMenu> ARedemptionGameModeBase::GetBattleMenuClass() const
+{
+	return BattleMenuClass;
+}
+
+TSubclassOf<class UBattleResultsScreen> ARedemptionGameModeBase::GetBattleResultsScreenClass() const
+{
+	return BattleResultsScreenClass;
+}
+
+TSubclassOf<class UDialogueBox> ARedemptionGameModeBase::GetDialogueBoxClass() const
+{
+	return DialogueBoxClass;
+}
+
+TSubclassOf<class UResponsesBox> ARedemptionGameModeBase::GetResponsesBoxClass() const
+{
+	return ResponsesBoxClass;
+}
+
+TSubclassOf<class UResponseEntry> ARedemptionGameModeBase::GetResponseEntryClass() const
+{
+	return ResponseEntryClass;
+}
+
+TSubclassOf<class UNotification> ARedemptionGameModeBase::GetNotificationClass() const
+{
+	return NotificationClass;
+}
+
+TSubclassOf<class UDeathMenu> ARedemptionGameModeBase::GetDeathMenuClass() const
+{
+	return DeathMenuClass;
+}
+
+TSubclassOf<class USpellBattleMenu> ARedemptionGameModeBase::GetSpellBattleMenuClass() const
+{
+	return SpellBattleMenuClass;
+}
+
+TSubclassOf<class USettingsMenu> ARedemptionGameModeBase::GetSettingsMenuClass() const
+{
+	return SettingsMenuClass;
+}
+
+TSubclassOf<class UMainMenu> ARedemptionGameModeBase::GetMainMenuClass() const
+{
+	return MainMenuClass;
+}
+
+TSubclassOf<class ULearnedSpellsJournalMenu> ARedemptionGameModeBase::GetLearnedSpellsJournalMenuClass() const
+{
+	return LearnedSpellsJournalMenuClass;
+}
+
+TSubclassOf<class USkillBattleMenu> ARedemptionGameModeBase::GetSkillBattleMenuClass() const
+{
+	return SkillBattleMenuClass;
+}
+
+TSubclassOf<class USaveLoadGameMenu> ARedemptionGameModeBase::GetSaveLoadGameMenuClass() const
+{
+	return SaveLoadGameMenuClass;
+}
+
+TSubclassOf<class USpellInfo> ARedemptionGameModeBase::GetSpellInfoClass() const
+{
+	return SpellInfoClass;
+}
+
+TSubclassOf<class UCombatCharacterInfoMenu> ARedemptionGameModeBase::GetCombatCharacterInfoMenuClass() const
+{
+	return CombatCharacterInfoMenuClass;
+}
+
+TSubclassOf<class UPartyMenu> ARedemptionGameModeBase::GetPartyMenuClass() const
+{
+	return PartyMenuClass;
+}
+
+TSubclassOf<class UDetailedCharacterInfoMenu> ARedemptionGameModeBase::GetDetailedCharacterInfoMenuClass() const
+{
+	return DetailedCharacterInfoMenuClass;
+}
+
+void ARedemptionGameModeBase::SetBattleManager(const ABattleManager* const NewBattleManager)
+{
+	BattleManager = const_cast<ABattleManager*>(NewBattleManager);
+}
+
+void ARedemptionGameModeBase::SetGameManager(const AGameManager* const NewGameManager)
+{
+	GameManager = const_cast<AGameManager*>(NewGameManager);
+}
+
+void ARedemptionGameModeBase::SetAudioManager(const AAudioManager* const NewAudioManager)
+{
+	AudioManager = const_cast<AAudioManager*>(NewAudioManager);
+}
+
+void ARedemptionGameModeBase::SetParticlesManager(const AParticlesManager* const NewParticlesManager)
+{
+	ParticlesManager = const_cast<AParticlesManager*>(NewParticlesManager);
+}
+
+void ARedemptionGameModeBase::SetLevelingUpManager(const ALevelingUpManager* const NewLevelingUpManager)
+{
+	LevelingUpManager = const_cast<ALevelingUpManager*>(NewLevelingUpManager);
+}
+
+void ARedemptionGameModeBase::SetEffectsSpellsAndSkillsManager(const AEffectsSpellsAndSkillsManager* const NewEffectsSpellsAndSkillsManager)
+{
+	EffectsManager = const_cast<AEffectsSpellsAndSkillsManager*>(NewEffectsSpellsAndSkillsManager);
 }

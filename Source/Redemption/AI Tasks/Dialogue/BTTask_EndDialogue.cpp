@@ -28,10 +28,11 @@ EBTNodeResult::Type UBTTask_EndDialogue::ExecuteTask(UBehaviorTreeComponent& Own
 	if (!IsValid(DialogueBoxWidget))
 		return EBTNodeResult::Failed;
 
+	UUIManagerWorldSubsystem* const UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
 	APlayerCharacter* PlayerCharacter = nullptr;
 	if (GetWorld())
 		PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	if (!IsValid(PlayerCharacter))
+	if (!IsValid(PlayerCharacter) || !IsValid(UIManagerWorldSubsystem))
 		return EBTNodeResult::Failed;
 
 	DialogueBoxWidget->RemoveFromParent();
@@ -46,8 +47,14 @@ EBTNodeResult::Type UBTTask_EndDialogue::ExecuteTask(UBehaviorTreeComponent& Own
 	PlayerController->bShowMouseCursor = false;
 	PlayerCharacter->EnableInput(PlayerController);
 	//PlayerController->ActivateTouchInterface(PlayerCharacter->GetStandardTouchInterface());
-	for (int8 Index = PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
-		PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetChildAt(Index)->RemoveFromParent();
+
+	for (int8 Index = UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
+		UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->GetChildAt(Index)->RemoveFromParent();
+
+	UIManagerWorldSubsystem->ResponsesBoxWidget->ConditionalBeginDestroy();
+	UIManagerWorldSubsystem->ResponsesBoxWidget = nullptr;
+	UIManagerWorldSubsystem->DialogueBoxWidget->ConditionalBeginDestroy();
+	UIManagerWorldSubsystem->DialogueBoxWidget = nullptr;
 
 	return EBTNodeResult::Succeeded;
 }

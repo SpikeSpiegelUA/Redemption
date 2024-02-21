@@ -24,8 +24,8 @@ void USelectedElementEntryWidget::NativeConstruct()
 void USelectedElementEntryWidget::MainButtonOnClicked()
 {
 	//Delete this widget and decrease selected elements count on click
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) 
-		if (USpellBattleMenu* SpellBattleMenu = PlayerCharacter->GetSpellBattleMenuWidget(); IsValid(PlayerCharacter)) {
+	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+		if (USpellBattleMenu* SpellBattleMenu = UIManagerWorldSubsystem->SpellBattleMenuWidget; IsValid(UIManagerWorldSubsystem)) {
 			for (int8 Index = SpellBattleMenu->GetSelectedElementsHorizontalBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
 				if (USelectedElementEntryWidget* SelectedElementEntryWidget = Cast<USelectedElementEntryWidget>(SpellBattleMenu->GetSelectedElementsHorizontalBox()->GetAllChildren()[Index]); IsValid(SelectedElementEntryWidget))
 					if (SpellBattleMenu->GetSelectedElementsHorizontalBox()->GetAllChildren()[Index] == this) {
@@ -35,29 +35,26 @@ void USelectedElementEntryWidget::MainButtonOnClicked()
 							SpellBattleMenu->GetSelectedElementsHorizontalBox()->GetChildAt(Index)->RemoveFromParent();
 						SpellBattleMenu->SetCreatedSpell(nullptr);
 					}
-			if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = PlayerCharacter->GetUIManagerWorldSubsystem(); IsValid(UIManagerWorldSubsystem)) {
-				if (IsValid(UIManagerWorldSubsystem->PickedButton))
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
-				UIManagerWorldSubsystem->PickedButton = SpellBattleMenu->GetWaterElementButton();
-				SpellBattleMenu->CanUseKeyboardButtonSelection = true;
-				UIManagerWorldSubsystem->PickedButtonIndex = 0;
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
-			}
+			if (IsValid(UIManagerWorldSubsystem->PickedButton))
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+			UIManagerWorldSubsystem->PickedButton = SpellBattleMenu->GetWaterElementButton();
+			SpellBattleMenu->CanUseKeyboardButtonSelection = true;
+			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
 		}
 
 }
 
 void USelectedElementEntryWidget::MainButtonOnHovered()
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-		if (USpellBattleMenu* SpellBattleMenu = PlayerCharacter->GetSpellBattleMenuWidget(); IsValid(PlayerCharacter))
-			if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = Cast<UUIManagerWorldSubsystem>(PlayerCharacter->GetUIManagerWorldSubsystem()); IsValid(UIManagerWorldSubsystem)) {
-				if (IsValid(UIManagerWorldSubsystem->PickedButton))
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
-				UIManagerWorldSubsystem->PickedButton = MainButton;
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-				SpellBattleMenu->CanUseKeyboardButtonSelection = false;
-			}
+	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+		if (USpellBattleMenu* SpellBattleMenu = UIManagerWorldSubsystem->SpellBattleMenuWidget; IsValid(UIManagerWorldSubsystem)){
+			if (IsValid(UIManagerWorldSubsystem->PickedButton))
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
+			UIManagerWorldSubsystem->PickedButton = MainButton;
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+			SpellBattleMenu->CanUseKeyboardButtonSelection = false;
+		}
 }
 
 void USelectedElementEntryWidget::SetElement(ESpellElements NewElement)

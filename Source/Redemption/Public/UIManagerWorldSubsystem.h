@@ -26,4 +26,50 @@ public:
 
 	//Index of the selected button in array of other elements(usually buttons. For example children on a horizontal box
 	int8 PickedButtonIndex = 0;
+
+	//The widget instances
+	UPROPERTY()
+	class UForwardRayInfo* ForwardRayInfoWidget{};
+	UPROPERTY()
+	class UPlayerMenu* PlayerMenuWidget{};
+	UPROPERTY()
+	class UInventoryScrollBoxEntryWidget* InventoryScrollBoxEntryWidget{};
+	UPROPERTY()
+	class UInventoryMenu* InventoryMenuWidget{};
+	UPROPERTY()
+	class UPauseMenu* PauseMenuWidget{};
+	UPROPERTY()
+	class UBattleMenu* BattleMenuWidget{};
+	UPROPERTY()
+	class UBattleResultsScreen* BattleResultsScreenWidget{};
+	UPROPERTY()
+	class UAlliesInfoBars* AlliesInfoBarsWidget{};
+	UPROPERTY()
+	class UDialogueBox* DialogueBoxWidget{};
+	UPROPERTY()
+	class UResponsesBox* ResponsesBoxWidget{};
+	UPROPERTY()
+	class UNotification* NotificationWidget{};
+	UPROPERTY()
+	class UDeathMenu* DeathMenuWidget{};
+	UPROPERTY()
+	class USpellBattleMenu* SpellBattleMenuWidget{};
+	UPROPERTY()
+	class USettingsMenu* SettingsMenuWidget{};
+	UPROPERTY()
+	class UMainMenu* MainMenuWidget{};
+	UPROPERTY()
+	class ULearnedSpellsJournalMenu* LearnedSpellsJournalMenuWidget{};
+	UPROPERTY()
+	class USkillBattleMenu* SkillBattleMenuWidget{};
+	UPROPERTY()
+	class USaveLoadGameMenu* SaveLoadGameMenuWidget{};
+	UPROPERTY()
+	class USpellInfo* SpellInfoWidget{};
+	UPROPERTY()
+	class UCombatCharacterInfoMenu* CombatCharacterInfoMenuWidget{};
+	UPROPERTY()
+	class UPartyMenu* PartyMenuWidget{};
+	UPROPERTY()
+	class UDetailedCharacterInfoMenu* DetailedCharacterInfoMenuWidget{};
 };

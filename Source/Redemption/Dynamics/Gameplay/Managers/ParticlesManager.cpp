@@ -2,6 +2,8 @@
 
 
 #include "ParticlesManager.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AParticlesManager::AParticlesManager()
@@ -15,7 +17,8 @@ AParticlesManager::AParticlesManager()
 void AParticlesManager::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	if (auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+		RedemptionGameModeBase->SetParticlesManager(this);
 }
 
 // Called every frame

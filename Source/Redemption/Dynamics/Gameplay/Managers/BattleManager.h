@@ -45,10 +45,8 @@ public:
 	void SetCanTurnBehindPlayerCameraToTarget(const bool Value);
 	void SetCanTurnBehindPlayerCameraToStartPosition(const bool Value);
 	void SetCanTurnBehindPlayerCameraToSpellObject(const bool Value);
-	//void SetActorNumberOfTheCurrentTurn(uint8 Value);
 	void SetBehindPlayerCameraLocation(FVector& NewLocation);
 
-	//uint8 GetActorNumberOfTheCurrentTurn() const;
 	ACameraActor* GetBehindPlayerCamera() const;
 	FTimerHandle GetPlayerTurnControllerTimerHandle() const;
 	TSubclassOf<ACombatFloatingInformationActor> GetCombatFloatingInformationActorClass() const;
@@ -57,6 +55,8 @@ public:
 	//Depending on the range sometimes we need to set visible several crosshairs.
 	//Direction - either "Left" or "Right".
 	void SelectNewTargetCrosshairLogic(const TArray<ACombatNPC*>& TargetsForSelection, int8 NewIndex, int8 CurrentIndex, const std::string_view Direction);
+	//Shows or hides mana/health bars and crosshair components. Used exclusively in SelectNewTargetCrosshairLogic.
+	void SelectNewTargetCrosshairActions(const TArray<ACombatNPC*>& TargetsForSelection, int8 Index, const FString& TypeOfBar, const bool WhetherToShow);
 
 	//Function, that controls whether player's turn continues or passes to enemies
 	UFUNCTION()
@@ -87,31 +87,17 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Classes", meta = (AllowPrivateAccess = true))
 		TSubclassOf<ACombatFloatingInformationActor> CombatFloatingInformationActorClass {};
+	UPROPERTY()
+		class APlayerCharacter* PlayerCharacter{};
 
 	bool CanTurnBehindPlayerCameraToTarget = false;
 	bool CanTurnBehindPlayerCameraToStartPosition = false;
 	bool CanTurnBehindPlayerCameraToSpellObject = false;
 
-	//Number of an enemy, who has a turn. Assign -1 value when transitioning to player's turn to prevent bugs
-	//int ActorNumberOfTheCurrentTurn = -1;
-
 	//Timer Handles
-	FTimerHandle ShowExperienceTextTimerHandle{};
-	FTimerHandle ShowContinueButtonTimerHandle{};
-	FTimerHandle ShowGoldTextTimerHandle{};
-	FTimerHandle SetExperienceLevelUpStackTimerHandle{};
-	FTimerHandle SetAmountOfGoldTextTimerHandle{};
 	FTimerHandle PlayerTurnControllerTimerHandle{};
 
 	//Timer Functions
-	UFUNCTION()
-	void ShowExperienceText();
-	UFUNCTION()
-	void ShowGoldText();
-	UFUNCTION()
-	void ShowContinueButton();
-	UFUNCTION()
-	void SetAmountOfGoldText(int Value);
 	UFUNCTION()
 	void EnableTurnAIController();
 	UFUNCTION()
@@ -128,4 +114,6 @@ private:
 	//Use this in PlayerDeathLogic with TimerHandle.
 	UFUNCTION()
 	void PlayerDeathLogicOnTimer();
+
+	void EndBattle();
 };

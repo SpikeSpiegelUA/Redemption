@@ -23,63 +23,62 @@ void ULearnedSpellEntryWidget::NativeConstruct()
 
 void ULearnedSpellEntryWidget::MainButtonOnClicked()
 {
-    if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-        if (IsValid(PlayerCharacter->GetSpellBattleMenuWidget()) && IsValid(PlayerCharacter->GetSkillBattleMenuWidget()) && PlayerCharacter->GetSpellInfoWidget()) {
-            if(!PlayerCharacter->GetSpellInfoWidget()->IsInViewport())
-                PlayerCharacter->GetSpellInfoWidget()->AddToViewport();
-            if (PlayerCharacter->GetLearnedSpellsJournalMenu()->IsInViewport()) {
-                PlayerCharacter->GetSpellInfoWidget()->SetPositionInViewport(FVector2D(300, 60));
-                if (IsValid(PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton))
-                    PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
-                PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton = MainButton;
+    if (const auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+        if (IsValid(UIManagerWorldSubsystem->SpellBattleMenuWidget) && IsValid(UIManagerWorldSubsystem->SkillBattleMenuWidget) && UIManagerWorldSubsystem->SpellInfoWidget) {
+            if(!UIManagerWorldSubsystem->SpellInfoWidget->IsInViewport())
+                UIManagerWorldSubsystem->SpellInfoWidget->AddToViewport();
+            if (UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->IsInViewport()) {
+                UIManagerWorldSubsystem->SpellInfoWidget->SetPositionInViewport(FVector2D(300, 60));
+                if (IsValid(UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->SelectedSpellButton))
+                    UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->SelectedSpellButton->SetBackgroundColor(FLinearColor(0.3f, 0.3f, 0.3f, 1.f));
+                UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->SelectedSpellButton = MainButton;
             }
-            else if (PlayerCharacter->GetSkillBattleMenuWidget()->IsInViewport()) {
-                PlayerCharacter->GetSpellInfoWidget()->SetPositionInViewport(FVector2D(850, 79));
-                if (IsValid(PlayerCharacter->GetSkillBattleMenuWidget()->SelectedSkillButton))
-                    PlayerCharacter->GetSkillBattleMenuWidget()->SelectedSkillButton->SetBackgroundColor(FLinearColor(0.6, 0.6, 0.6, 1));
-                PlayerCharacter->GetSkillBattleMenuWidget()->SelectedSkillButton = MainButton;
+            else if (UIManagerWorldSubsystem->SkillBattleMenuWidget->IsInViewport()) {
+                UIManagerWorldSubsystem->SpellInfoWidget->SetPositionInViewport(FVector2D(850, 79));
+                if (IsValid(UIManagerWorldSubsystem->SkillBattleMenuWidget->SelectedSkillButton))
+                    UIManagerWorldSubsystem->SkillBattleMenuWidget->SelectedSkillButton->SetBackgroundColor(FLinearColor(0.6f, 0.6f, 0.6f, 1.f));
+                UIManagerWorldSubsystem->SkillBattleMenuWidget->SelectedSkillButton = MainButton;
             }
-            PlayerCharacter->GetSpellBattleMenuWidget()->SetCreatedSpell(EntrySpell);
-            PlayerCharacter->GetSpellInfoWidget()->SetSpellInfo(EntrySpell);
-            MainButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+            UIManagerWorldSubsystem->SpellBattleMenuWidget->SetCreatedSpell(EntrySpell);
+            UIManagerWorldSubsystem->SpellInfoWidget->SetSpellInfo(EntrySpell);
+            MainButton->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
         }
 }
 
 void ULearnedSpellEntryWidget::MainButtonOnHovered()
 {
-    if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
-        if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter())) {
-            if (PlayerCharacter->GetLearnedSpellsJournalMenu()->IsInViewport()) {
-                if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
-                    if (PlayerCharacter->GetLearnedSpellsJournalMenu()->SelectedSpellButton == UIManagerWorldSubsystem->PickedButton)
-                        UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-                    else
-                        UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
-                }
-                PlayerCharacter->GetLearnedSpellsJournalMenu()->CanUseKeyboardButtonSelection = true;
-                for (uint8 Index = 0; Index < PlayerCharacter->GetLearnedSpellsJournalMenu()->GetMainScrollBox()->GetAllChildren().Num(); Index++)
-                    if (PlayerCharacter->GetLearnedSpellsJournalMenu()->GetMainScrollBox()->GetAllChildren()[Index] == this) {
-                        UIManagerWorldSubsystem->PickedButtonIndex = Index;
-                        break;
-                    }
+    if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+        if (UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->IsInViewport()) {
+            if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+                if (UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->SelectedSpellButton == UIManagerWorldSubsystem->PickedButton)
+                    UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+                else
+                    UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 1));
             }
-            else if (PlayerCharacter->GetSkillBattleMenuWidget()->IsInViewport()) {
-                if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
-                    if (PlayerCharacter->GetSkillBattleMenuWidget()->SelectedSkillButton == UIManagerWorldSubsystem->PickedButton)
-                        UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
-                    else
-                        UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.6, 0.6, 0.6, 1));
+            UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->CanUseKeyboardButtonSelection = true;
+            for (uint8 Index = 0; Index < UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->GetMainScrollBox()->GetAllChildren().Num(); Index++)
+                if (UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->GetMainScrollBox()->GetAllChildren()[Index] == this) {
+                    UIManagerWorldSubsystem->PickedButtonIndex = Index;
+                    break;
                 }
-                PlayerCharacter->GetSkillBattleMenuWidget()->CanUseKeyboardButtonSelection = true;
-                for (uint8 Index = 0; Index < PlayerCharacter->GetSkillBattleMenuWidget()->GetSkillsScrollBox()->GetAllChildren().Num(); Index++)
-                    if (PlayerCharacter->GetSkillBattleMenuWidget()->GetSkillsScrollBox()->GetAllChildren()[Index] == this) {
-                        UIManagerWorldSubsystem->PickedButtonIndex = Index;
-                        break;
-                    }
-            }
-            UIManagerWorldSubsystem->PickedButton = MainButton;
-            UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
         }
+        else if (UIManagerWorldSubsystem->SkillBattleMenuWidget->IsInViewport()) {
+            if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+                if (UIManagerWorldSubsystem->SkillBattleMenuWidget->SelectedSkillButton == UIManagerWorldSubsystem->PickedButton)
+                    UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0, 1, 0, 1));
+                else
+                    UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.6, 0.6, 0.6, 1));
+            }
+            UIManagerWorldSubsystem->SkillBattleMenuWidget->CanUseKeyboardButtonSelection = true;
+            for (uint8 Index = 0; Index < UIManagerWorldSubsystem->SkillBattleMenuWidget->GetSkillsScrollBox()->GetAllChildren().Num(); Index++)
+                if (UIManagerWorldSubsystem->SkillBattleMenuWidget->GetSkillsScrollBox()->GetAllChildren()[Index] == this) {
+                    UIManagerWorldSubsystem->PickedButtonIndex = Index;
+                    break;
+                }
+        }
+        UIManagerWorldSubsystem->PickedButton = MainButton;
+        UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+    }
 }
 
 void ULearnedSpellEntryWidget::SetSpellTypeImage(const UTexture* const ImageTexture)

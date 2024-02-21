@@ -5,6 +5,8 @@
 #include "Blueprint/UserWidget.h"
 #include "Engine/World.h"
 #include "..\Characters\Player\PlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
+#include "RedemptionGameModeBase.h"
 
 void InventoryActions::IfItemAlreadyIsInInventory(UWorld* const World, UScrollBox* ItemScrollBox, const AGameItem* const Item)
 {
@@ -20,11 +22,9 @@ void InventoryActions::IfItemAlreadyIsInInventory(UWorld* const World, UScrollBo
 			}
 	}
 	if (!IsInInventory) {
-		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(World->GetFirstPlayerController()->GetCharacter());
 		UInventoryScrollBoxEntryWidget* InventoryScrollBoxEntryWidget = nullptr;
-		if (IsValid(PlayerCharacter))
-			if (IsValid(PlayerCharacter))
-				InventoryScrollBoxEntryWidget = CreateWidget<UInventoryScrollBoxEntryWidget>(World, PlayerCharacter->GetInventoryScrollBoxEntryClass());
+		if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(World)); IsValid(RedemptionGameModeBase))
+			InventoryScrollBoxEntryWidget = CreateWidget<UInventoryScrollBoxEntryWidget>(World, RedemptionGameModeBase->GetInventoryScrollBoxEntryClass());
 		if (IsValid(InventoryScrollBoxEntryWidget)) {
 			InventoryScrollBoxEntryWidget->GetMainTextBlock()->SetText(FText::FromName(Item->GetItemName()));
 			InventoryScrollBoxEntryWidget->SetItem(const_cast<AGameItem*>(Item));

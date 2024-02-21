@@ -5,6 +5,8 @@
 #include "..\Miscellaneous\SkillsSpellsAndEffectsActions.h"
 #include "..\Characters\Player\PlayerCharacter.h"
 #include "..\Miscellaneous\ElementsActions.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 ACombatNPC::ACombatNPC()
 {
@@ -71,8 +73,8 @@ void ACombatNPC::Tick(float DeltaTime)
 
 bool ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements, const ESpellType BuffOrDebuff)
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-		if (ABattleManager* BattleManager = PlayerCharacter->GetBattleManager(); IsValid(BattleManager)) {
+	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+ 		if (ABattleManager* BattleManager = RedemptionGameModeBase->GetBattleManager(); IsValid(BattleManager)) {
 			ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(),
 				GetActorLocation(), GetActorRotation());
 			FString TextForCombatFloatingInformationActor = FString();
@@ -107,8 +109,8 @@ bool ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffec
 
 bool ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, const EPhysicalType ContainedPhysicalType, bool ForcedMiss)
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-		if (ABattleManager* BattleManager = PlayerCharacter->GetBattleManager(); IsValid(BattleManager)) {
+	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+		if (ABattleManager* BattleManager = RedemptionGameModeBase->GetBattleManager(); IsValid(BattleManager)) {
 			ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), GetActorLocation(), GetActorRotation());
 			FString TextForCombatFloatingInformationActor = FString();
 			uint8 EvasionRandomNumber = FMath::RandRange(0, 100);
@@ -137,8 +139,11 @@ bool ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementA
 				}
 				if (IsValid(FloatingHealthBarWidget))
 					FloatingHealthBarWidget->HP = CurrentHP;
-				TextForCombatFloatingInformationActor.Append("-");
-				TextForCombatFloatingInformationActor.AppendInt(ValueOfAttackWithResistances - ValueOfArmor / 10);
+				if((ValueOfAttackWithResistances - ValueOfArmor / 10) < 0)
+					TextForCombatFloatingInformationActor.Append("+");
+				else
+					TextForCombatFloatingInformationActor.Append("-");
+				TextForCombatFloatingInformationActor.AppendInt(FMath::Abs(ValueOfAttackWithResistances - ValueOfArmor / 10));
 				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 				UCombatCharacterAnimInstance* AnimInstance = Cast<UCombatCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 				if (IsValid(AnimInstance)) {

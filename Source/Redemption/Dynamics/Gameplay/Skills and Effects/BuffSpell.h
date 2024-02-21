@@ -16,7 +16,7 @@ class REDEMPTION_API ABuffSpell : public ASpellWithSpellObject
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information", meta = (AllowPrivateAccess = true))
 		EBuffDebuffType TypeOfBuff {};
 public:
 	EBuffDebuffType GetTypeOfBuff() const;

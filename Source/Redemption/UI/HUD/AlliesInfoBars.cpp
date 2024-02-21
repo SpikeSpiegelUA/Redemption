@@ -35,25 +35,6 @@ bool UAlliesInfoBars::Initialize()
 void UAlliesInfoBars::NativeConstruct()
 {
 	Super::NativeConstruct();
-	if(IsValid(GetWorld()))
-		PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-}
-
-float UAlliesInfoBars::GetHealthPercentage() const
-{
-	if (IsValid(PlayerCharacter)) {
-		return PlayerCharacter->CurrentHP / PlayerCharacter->MaxHP;
-	}
-	else
-		return 0;
-}
-
-float UAlliesInfoBars::GetManaPercentage() const
-{
-	if (IsValid(PlayerCharacter))
-		return PlayerCharacter->CurrentMana / PlayerCharacter->MaxMana;
-	else
-		return 0;
 }
 
 UVerticalBox* UAlliesInfoBars::GetAlly1InfoVerticalBox() const

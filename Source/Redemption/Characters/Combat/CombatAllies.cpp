@@ -9,6 +9,8 @@
 #include "..\Miscellaneous\SkillsSpellsAndEffectsActions.h"
 #include "..\Miscellaneous\ElementsActions.h"
 #include "..\UI\HUD\FloatingManaBarWidget.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 ACombatAllies::ACombatAllies()
 {
@@ -16,6 +18,8 @@ ACombatAllies::ACombatAllies()
 	FloatingManaBarComponentWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Mana Bar"));
 	FloatingManaBarComponentWidget->SetWidgetSpace(EWidgetSpace::Screen);
 	FloatingManaBarComponentWidget->SetupAttachment(RootComponent);
+
+	InitializeSkillsProgress();
 }
 
 void ACombatAllies::BeginPlay()
@@ -39,9 +43,10 @@ void ACombatAllies::StartMovingToEnemy()
 	IsMovingToAttackEnemy = true;
 	ACombatAlliesAIController* CombatAlliesAIController = Cast<ACombatAlliesAIController>(GetController());
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-		if (ABattleManager* BattleManager = Cast<ABattleManager>(PlayerCharacter->GetBattleManager()); IsValid(BattleManager)) 
-			if (IsValid(CombatAlliesAIController) && IsValid(BattleManager)) 
-				CombatAlliesAIController->MoveToActor(Target, 85.f);
+		if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+			if (ABattleManager* BattleManager = Cast<ABattleManager>(RedemptionGameModeBase->GetBattleManager()); IsValid(BattleManager))
+				if (IsValid(CombatAlliesAIController) && IsValid(BattleManager)) 
+					CombatAlliesAIController->MoveToActor(Target, 85.f);
 }
 
 void ACombatAllies::StartMovingToStartLocation()
@@ -51,6 +56,73 @@ void ACombatAllies::StartMovingToStartLocation()
 	if (IsValid(CombatAlliesAIController))
 		CombatAlliesAIController->MoveToActor(StartLocation);
 	
+}
+
+void ACombatAllies::ResetSkillsLeveledUp()
+{
+	SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpMelee, false);
+	SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpRange, false);
+	SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpAssaultSpells, false);
+	SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpDebuffSpells, false);
+	SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpRestorationSpells, false);
+	SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpBuffSpells, false);
+	SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpDefend, false);
+	SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpPersuasion, false);
+}
+
+void ACombatAllies::InitializeSkillsProgress()
+{
+	SkillsProgressMap.Add(ECharacterSkills::MELEE, 0);
+	SkillsProgressMap.Add(ECharacterSkills::RANGE, 0);
+	SkillsProgressMap.Add(ECharacterSkills::ASSAULTSPELLS, 0);
+	SkillsProgressMap.Add(ECharacterSkills::DEBUFFSPELLS, 0);
+	SkillsProgressMap.Add(ECharacterSkills::RESTORATIONSPELLS, 0);
+	SkillsProgressMap.Add(ECharacterSkills::BUFFSPELLS, 0);
+	SkillsProgressMap.Add(ECharacterSkills::DEFEND, 0);
+	SkillsProgressMap.Add(ECharacterSkills::PERSUASION, 0);
+}
+
+const int16 ACombatAllies::GetSkillsProgress(const ECharacterSkills SkillToGet) const
+{
+	return *SkillsProgressMap.Find(SkillToGet);
+}
+
+void ACombatAllies::SetSkillsProgress(const ECharacterSkills SkillToGet, const int16 NewValue)
+{
+	SkillsProgressMap.Emplace(SkillToGet, NewValue);
+}
+
+void ACombatAllies::SetSkillsLeveledUp(const ESkillsLeveledUp SkillToSet, const bool Value)
+{
+	if (Value)
+		BitmapsActions::SetBit(SkillsLeveledUpBitmaskCode, static_cast<int32>(SkillToSet));
+	else
+		BitmapsActions::ClearBit(SkillsLeveledUpBitmaskCode, static_cast<int32>(SkillToSet));
+}
+
+void ACombatAllies::AddSkillsProgress(ECharacterSkills SkillToAddTo, const int16 ValueToAdd)
+{
+	SkillsProgressMap.Emplace(SkillToAddTo, *SkillsProgressMap.Find(SkillToAddTo) + ValueToAdd);
+}
+
+void ACombatAllies::AddSkills(const ECharacterSkills SkillToAddTo, const int16 ValueToAdd)
+{
+	SkillsMap.Emplace(SkillToAddTo, *SkillsMap.Find(SkillToAddTo) + ValueToAdd);
+}
+
+const TMap<ECharacterSkills, int>& ACombatAllies::GetSkillsMap() const
+{
+	return SkillsMap;
+}
+
+const TMap<ECharacterSkills, int>& ACombatAllies::GetSkillsProgressMap() const
+{
+	return SkillsProgressMap;
+}
+
+const bool ACombatAllies::GetSkillsLeveledUp(const ESkillsLeveledUp SkillToGet) const
+{
+	return BitmapsActions::TestBit(SkillsLeveledUpBitmaskCode, static_cast<int32>(SkillToGet));
 }
 
 const UTexture* ACombatAllies::GetCharacterPortrait() const

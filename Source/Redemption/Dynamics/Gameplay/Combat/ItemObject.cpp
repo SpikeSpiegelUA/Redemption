@@ -10,7 +10,8 @@
 #include "Redemption/Dynamics/Gameplay/Skills and Effects/TurnStartDamageEffect.h"
 #include "Redemption/Miscellaneous/ElementsActions.h"
 #include "..\Miscellaneous\InventoryActions.h"
-#include <NiagaraFunctionLibrary.h>
+#include "NiagaraFunctionLibrary.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 // Sets default values
 AItemObject::AItemObject()
 {
@@ -52,27 +53,27 @@ void AItemObject::Tick(float DeltaTime)
 
 void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
 		if (ACombatEnemyNPC* CombatEnemyNPC = Cast<ACombatEnemyNPC>(OtherActor); IsValid(CombatEnemyNPC) && IsValid(Item)) {
 			//Cast for each type of spell.
 			//Need to create an Array of actors that were hit.
-			for (ACombatNPC* CombatTarget : InventoryActions::GetTargets(PlayerCharacter->GetBattleManager(), TargetBattleSide, Item->GetItemRange())) {
+			for (ACombatNPC* CombatTarget : InventoryActions::GetTargets(RedemptionGameModeBase->GetBattleManager(), TargetBattleSide, Item->GetItemRange())) {
 				if (AAssaultItem* AssaultItem = Cast<AAssaultItem>(Item); IsValid(AssaultItem)) {
 					//Logic for special effects of the spell(frozen, burn...).
 					if (CombatTarget->Execute_GetHit(CombatTarget, AssaultItem->GetAttackValue(), AssaultItem->GetElementsAndTheirPercentagesStructs(), EPhysicalType::NONE, false)) {
 						if (AssaultItem->GetEffectsAndTheirChances().Num() > 0) {
 							for (uint8 Index = 0; Index < AssaultItem->GetEffectsAndTheirChances().Num(); Index++) {
 								int8 Chance = FMath::RandRange(0, 100);
-								ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(PlayerCharacter->GetBattleManager()->GetCombatFloatingInformationActorClass(), CombatTarget->GetActorLocation(), GetActorRotation());
+								ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(RedemptionGameModeBase->GetBattleManager()->GetCombatFloatingInformationActorClass(), CombatTarget->GetActorLocation(), GetActorRotation());
 								FString TextForCombatFloatingInformationActor = FString();
 								if (AssaultItem->GetEffectsAndTheirChances()[Index].Chance >= Chance) {
 									if (IsValid(Cast<ATurnStartDamageEffect>(AssaultItem->GetEffectsAndTheirChances()[Index].Effect->GetDefaultObject()))) {
 										if (auto* TurnStartDamageEffect = NewObject<ATurnStartDamageEffect>(this, AssaultItem->GetEffectsAndTheirChances()[Index].Effect); IsValid(TurnStartDamageEffect)) {
 											CombatTarget->Effects.Add(TurnStartDamageEffect);
 											if (ElementsActions::FindSpellsMainElement(TurnStartDamageEffect->GetSpellElements()) == ESpellElements::FIRE) {
-												if (IsValid(PlayerCharacter->GetParticlesManager()) && IsValid(PlayerCharacter->GetParticlesManager()->GetFlamesEmitter()))
+												if (IsValid(RedemptionGameModeBase->GetParticlesManager()) && IsValid(RedemptionGameModeBase->GetParticlesManager()->GetFlamesEmitter()))
 													if(CombatTarget->CurrentHP > 0)
-														CombatTarget->FlamesEmitterComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(PlayerCharacter->GetParticlesManager()->GetFlamesEmitter(),
+														CombatTarget->FlamesEmitterComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(RedemptionGameModeBase->GetParticlesManager()->GetFlamesEmitter(),
 															CombatTarget->GetRootComponent(), NAME_None, FVector(0, 0, 45), FRotator(0, 0, 0), EAttachLocation::SnapToTarget, false, true, ENCPoolMethod::None, true);
 												//If Fire elements, then remove frozen effect.
 												for (AEffect* Effect : CombatTarget->Effects)
@@ -102,9 +103,9 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 																}
 												}
 												else if (Effect->GetEffectType() == EEffectType::DIZZINESS) {
-													if (IsValid(PlayerCharacter->GetParticlesManager()) && IsValid(PlayerCharacter->GetParticlesManager()->GetDizzyEmitter()))
+													if (IsValid(RedemptionGameModeBase->GetParticlesManager()) && IsValid(RedemptionGameModeBase->GetParticlesManager()->GetDizzyEmitter()))
 														if(CombatTarget->CurrentHP > 0)
-															CombatTarget->DizzyEmitterComponent = UGameplayStatics::SpawnEmitterAttached(PlayerCharacter->GetParticlesManager()->GetDizzyEmitter(), CombatTarget->GetRootComponent(), NAME_None,
+															CombatTarget->DizzyEmitterComponent = UGameplayStatics::SpawnEmitterAttached(RedemptionGameModeBase->GetParticlesManager()->GetDizzyEmitter(), CombatTarget->GetRootComponent(), NAME_None,
 																FVector(0, 0, 110), FRotator(0, 0, 0), FVector(1, 1, 1), EAttachLocation::SnapToTarget, false, EPSCPoolMethod::AutoRelease);
 												}
 											}
@@ -120,7 +121,7 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 							}
 						}
 					}
-					OnOverlapBeginsActions(PlayerCharacter);
+					OnOverlapBeginsActions();
 				}
 				else if (ADebuffItem* DebuffItem = Cast<ADebuffItem>(Item); IsValid(DebuffItem)) {
 					TArray<AEffect*> EffectsArray;
@@ -129,19 +130,22 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 						EffectsArray.Add(NewEffect);
 					}
 					CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, DebuffItem->GetElementsAndTheirPercentagesStructs(), ESpellType::DEBUFF);
-					OnOverlapBeginsActions(PlayerCharacter);
+					OnOverlapBeginsActions();
 				}
 			}
 		}
 	}
 }
 
-void AItemObject::OnOverlapBeginsActions(const APlayerCharacter* const PlayerCharacter)
+void AItemObject::OnOverlapBeginsActions()
 {
-	PlayerCharacter->GetInventoryMenuWidget()->SetPickedItem(nullptr);
-	PlayerCharacter->GetBattleMenuWidget()->IsAttackingWithItem = false;
-	PlayerCharacter->GetBattleManager()->SetTimerForPlayerTurnController();
-	this->Destroy();
+	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+		RedemptionGameModeBase->GetBattleManager()->SetTimerForPlayerTurnController();
+	if (const auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+		UIManagerWorldSubsystem->InventoryMenuWidget->SetPickedItem(nullptr);
+		UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithItem = false;
+	}
+		this->Destroy();
 }
 
 void AItemObject::SetItem(AGameItem* NewItem)

@@ -5,6 +5,8 @@
 #include "Redemption/Characters/Player/PlayerCharacter.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 UBTTask_BackToTalkTargetSelection::UBTTask_BackToTalkTargetSelection(const FObjectInitializer& ObjectInitializer)
 {
@@ -15,14 +17,23 @@ UBTTask_BackToTalkTargetSelection::UBTTask_BackToTalkTargetSelection(const FObje
 EBTNodeResult::Type UBTTask_BackToTalkTargetSelection::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	if (!IsValid(PlayerCharacter))
+	UUIManagerWorldSubsystem* const  UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
+	if (!IsValid(PlayerCharacter) || !IsValid(UIManagerWorldSubsystem))
 		return EBTNodeResult::Failed;
 
-	UBattleMenu* const BattleMenuWidget = PlayerCharacter->GetBattleMenuWidget();
-	ABattleManager* const BattleManager = PlayerCharacter->GetBattleManager();
-	UUIManagerWorldSubsystem* const UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
-	PlayerCharacter->GetAlliesInfoBarsWidget()->AddToViewport();
-	PlayerCharacter->GetDialogueBoxWidget()->RemoveFromParent();
+	UBattleMenu* const BattleMenuWidget = UIManagerWorldSubsystem->BattleMenuWidget;
+	ABattleManager* BattleManager{};
+	AAudioManager* AudioManager{};
+	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
+		BattleManager = RedemptionGameModeBase->GetBattleManager();
+		AudioManager = RedemptionGameModeBase->GetAudioManager();
+	}
+
+	if (!IsValid(AudioManager) || !IsValid(BattleManager) || !IsValid(BattleMenuWidget))
+		return EBTNodeResult::Failed;
+
+	UIManagerWorldSubsystem->AlliesInfoBarsWidget->AddToViewport();
+	UIManagerWorldSubsystem->DialogueBoxWidget->RemoveFromParent();
 	//Remove menu render and turn on target selection
 	if (IsValid(BattleManager->SelectedCombatNPC)) {
 		BattleManager->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
@@ -38,11 +49,11 @@ EBTNodeResult::Type UBTTask_BackToTalkTargetSelection::ExecuteTask(UBehaviorTree
 	BattleManager->SetCanTurnBehindPlayerCameraToTarget(true);
 	BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
 	PlayerCharacter->IsInDialogue = false;
-	PlayerCharacter->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[PlayerCharacter->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(false);
-	PlayerCharacter->GetAudioManager()->GetDungeonTalkBackgroundMusicAudioComponent_Daat()->SetPaused(true);
+	AudioManager->DungeonCombatBackgroundMusicAudioComponents[AudioManager->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(false);
+	AudioManager->GetDungeonTalkBackgroundMusicAudioComponent_Daat()->SetPaused(true);
 
-	for (int8 Index = PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetAllChildren().Num() - 1; Index >= 0; Index--) 
-		PlayerCharacter->GetResponsesBox()->GetResponseVerticalBox()->GetChildAt(Index)->RemoveFromParent();
+	for (int8 Index = UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
+		UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->GetChildAt(Index)->RemoveFromParent();
 
 	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("IsInDialogue", false);
 	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("FirstDialoguePassed", false);

@@ -13,6 +13,7 @@
 #include "UIManagerWorldSubsystem.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "..\UI\Miscellaneous\SaveSlotEntry.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 bool UMainMenu::Initialize()
 {
 	const bool bSuccess = Super::Initialize();
@@ -73,30 +74,38 @@ void UMainMenu::NewGameButtonOnClicked()
 
 void UMainMenu::LoadGameButtonOnClicked()
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) 
-		if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+		if (IsValid(UIManagerWorldSubsystem->SaveLoadGameMenuWidget)) {
 			if (IsValid(UIManagerWorldSubsystem->PickedButton))
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FColor::FromHex("8C8C8CFF"));
-			if (PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren().Num() > 0)
-				UIManagerWorldSubsystem->PickedButton = Cast<USaveSlotEntry>(PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren()[0])->GetSlotButton();
+			if (UIManagerWorldSubsystem->SaveLoadGameMenuWidget->GetSaveSlotsScrollBox()->GetAllChildren().Num() > 0)
+				UIManagerWorldSubsystem->PickedButton = Cast<USaveSlotEntry>(UIManagerWorldSubsystem->SaveLoadGameMenuWidget->GetSaveSlotsScrollBox()->GetAllChildren()[0])->GetSlotButton();
 			else
-				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveLoadButtonWithNeighbors();
+				UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->SaveLoadGameMenuWidget->GetSaveLoadButtonWithNeighbors();
 			UIManagerWorldSubsystem->PickedButtonIndex = 0;
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 			this->RemoveFromParent();
-			PlayerCharacter->GetSaveLoadGameMenuWidget()->AddToViewport();
-			PlayerCharacter->GetSaveLoadGameMenuWidget()->ToLoadTransition();
+			this->ConditionalBeginDestroy();
+			UIManagerWorldSubsystem->MainMenuWidget = nullptr;
+			UIManagerWorldSubsystem->SaveLoadGameMenuWidget->AddToViewport();
+			UIManagerWorldSubsystem->SaveLoadGameMenuWidget->ToLoadTransition();
 		}
+	}
 }
 
 void UMainMenu::SettingsButtonOnClicked()
 {
-	if(APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)){
-	this->RemoveFromParent();
-		if(IsValid(PlayerCharacter->GetSettingsMenuWidget()))
-			PlayerCharacter->GetSettingsMenuWidget()->AddToViewport();
-		if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
-			if(IsValid(UIManagerWorldSubsystem->PickedButton))
+	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+		this->RemoveFromParent();
+		this->ConditionalBeginDestroy();
+		UIManagerWorldSubsystem->MainMenuWidget = nullptr;
+		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>(); IsValid(PlayerController))
+			if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+				if (IsValid(RedemptionGameModeBase->GetSettingsMenuClass()))
+					UIManagerWorldSubsystem->SettingsMenuWidget = CreateWidget<USettingsMenu>(PlayerController, RedemptionGameModeBase->GetSettingsMenuClass());
+		if (IsValid(UIManagerWorldSubsystem->SettingsMenuWidget)) {
+			UIManagerWorldSubsystem->SettingsMenuWidget->AddToViewport();
+			if (IsValid(UIManagerWorldSubsystem->PickedButton))
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FColor::FromHex("8C8C8CFF"));
 			UIManagerWorldSubsystem->PickedButton = nullptr;
 		}

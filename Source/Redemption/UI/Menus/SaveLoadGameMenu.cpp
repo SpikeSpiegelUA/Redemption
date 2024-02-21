@@ -57,26 +57,35 @@ void USaveLoadGameMenu::BackButtonWithNeighborsOnClicked()
 {
 	FString MapName = GetWorld()->GetMapName();
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
-		if (MapName == "UEDPIE_0_MainMenu") {
+		if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
 			this->RemoveFromParent();
-			PlayerCharacter->GetMainMenuWidget()->AddToViewport();
-			if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
-				if (IsValid(UIManagerWorldSubsystem->PickedButton))
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetMainMenuWidget()->GetNewGameButton();
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			if (MapName == "UEDPIE_0_MainMenu") {
+				if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>(); IsValid(PlayerController))
+					if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+						if (IsValid(RedemptionGameModeBase->GetMainMenuClass()))
+							UIManagerWorldSubsystem->MainMenuWidget = CreateWidget<UMainMenu>(PlayerController, RedemptionGameModeBase->GetMainMenuClass());
+				if (IsValid(UIManagerWorldSubsystem->MainMenuWidget)) {
+					UIManagerWorldSubsystem->MainMenuWidget->AddToViewport();
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+					UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->MainMenuWidget->GetNewGameButton();
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+					UIManagerWorldSubsystem->PickedButtonIndex = 0;
+				}
 			}
-		}
-		else if (MapName == "UEDPIE_0_Dungeon" || MapName == "UEDPIE_0_Town") {
-			this->RemoveFromParent();
-			PlayerCharacter->GetPauseMenuWidget()->AddToViewport();
-			if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
-				if (IsValid(UIManagerWorldSubsystem->PickedButton))
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetPauseMenuWidget()->GetResumeButton();
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			else if (MapName == "UEDPIE_0_Dungeon" || MapName == "UEDPIE_0_Town") {
+				if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>(); IsValid(PlayerController))
+					if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+						if (IsValid(RedemptionGameModeBase->GetPauseMenuClass()))
+							UIManagerWorldSubsystem->PauseMenuWidget = CreateWidget<UPauseMenu>(PlayerController, RedemptionGameModeBase->GetPauseMenuClass());
+				if (IsValid(UIManagerWorldSubsystem->PauseMenuWidget)) {
+					UIManagerWorldSubsystem->PauseMenuWidget->AddToViewport();
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+					UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PauseMenuWidget->GetResumeButton();
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+					UIManagerWorldSubsystem->PickedButtonIndex = 0;
+				}
 			}
 		}
 		if (URedemptionGameInstance* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance))
@@ -91,33 +100,31 @@ void USaveLoadGameMenu::DeleteButtonWithNeighborsOnClicked()
 {
 	if (DeleteHasBeenClicked) {
 		if (URedemptionGameInstance* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance))
-			if (UGameplayStatics::DoesSaveGameExist(RedemptionGameInstance->SaveFileName, 0)) {
-				URedemptionSaveGame* RedemptionSaveGame = Cast<URedemptionSaveGame>(UGameplayStatics::LoadGameFromSlot(RedemptionGameInstance->SaveFileName, 0));
-				if (IsValid(RedemptionSaveGame)) {
-					//Delete save and corresponding save slot.
-					if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+			if (UGameplayStatics::DoesSaveGameExist(RedemptionGameInstance->SaveFileName, 0))
+				if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+					URedemptionSaveGame* RedemptionSaveGame = Cast<URedemptionSaveGame>(UGameplayStatics::LoadGameFromSlot(RedemptionGameInstance->SaveFileName, 0));
+					if (IsValid(RedemptionSaveGame)) {
+						//Delete save and corresponding save slot.
 						uint16 SaveSlotIndex = RedemptionSaveGame->SaveIndex;
-						for (int8 Index = PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
-							if (USaveSlotEntry* SaveSlotEntry = Cast<USaveSlotEntry>(PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren()[Index]); 
-								IsValid(SaveSlotEntry) && IsValid(PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren()[Index]))
+						for (int8 Index = UIManagerWorldSubsystem->SaveLoadGameMenuWidget->GetSaveSlotsScrollBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
+							if (USaveSlotEntry* SaveSlotEntry = Cast<USaveSlotEntry>(UIManagerWorldSubsystem->SaveLoadGameMenuWidget->GetSaveSlotsScrollBox()->GetAllChildren()[Index]);
+								IsValid(SaveSlotEntry) && IsValid(UIManagerWorldSubsystem->SaveLoadGameMenuWidget->GetSaveSlotsScrollBox()->GetAllChildren()[Index]))
 								if (SaveSlotEntry->GetSlotIndex() == SaveSlotIndex)
-									PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetChildAt(Index)->RemoveFromParent();
-					}
-					UGameplayStatics::DeleteGameInSlot(RedemptionGameInstance->SaveFileName, 0);
-					//Save system file save.
-					if (auto* LoadedRedemptionSaveGameForSaveSlots = Cast<URedemptionSaveGameForSaveSlots>
-						(UGameplayStatics::CreateSaveGameObject(URedemptionSaveGameForSaveSlots::StaticClass())); IsValid(LoadedRedemptionSaveGameForSaveSlots)) {
-						if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-							for (UWidget* SaveSlot : PlayerCharacter->GetSaveLoadGameMenuWidget()->GetSaveSlotsScrollBox()->GetAllChildren())
+									UIManagerWorldSubsystem->SaveLoadGameMenuWidget->GetSaveSlotsScrollBox()->GetChildAt(Index)->RemoveFromParent();
+						UGameplayStatics::DeleteGameInSlot(RedemptionGameInstance->SaveFileName, 0);
+						//Save system file save.
+						if (auto* LoadedRedemptionSaveGameForSaveSlots = Cast<URedemptionSaveGameForSaveSlots>
+							(UGameplayStatics::CreateSaveGameObject(URedemptionSaveGameForSaveSlots::StaticClass())); IsValid(LoadedRedemptionSaveGameForSaveSlots)) {
+							for (UWidget* SaveSlot : UIManagerWorldSubsystem->SaveLoadGameMenuWidget->GetSaveSlotsScrollBox()->GetAllChildren())
 								if (USaveSlotEntry* SaveSlotEntry = Cast<USaveSlotEntry>(SaveSlot); IsValid(SaveSlotEntry))
-									LoadedRedemptionSaveGameForSaveSlots->SaveSlotsIndexes.Add(SaveSlotEntry->GetSlotIndex());
-						LoadedRedemptionSaveGameForSaveSlots->SaveFileIndex = RedemptionGameInstance->SaveFileIndex;
-						UGameplayStatics::SaveGameToSlot(LoadedRedemptionSaveGameForSaveSlots, "System save", 0);
+										LoadedRedemptionSaveGameForSaveSlots->SaveSlotsIndexes.Add(SaveSlotEntry->GetSlotIndex());
+							LoadedRedemptionSaveGameForSaveSlots->SaveFileIndex = RedemptionGameInstance->SaveFileIndex;
+							UGameplayStatics::SaveGameToSlot(LoadedRedemptionSaveGameForSaveSlots, "System save", 0);
+						}
+						NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
+						DeleteHasBeenClicked = false;
 					}
-					NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
-					DeleteHasBeenClicked = false;
 				}
-			}
 	}
 	else {
 		NotificationBorder->SetVisibility(ESlateVisibility::Visible);

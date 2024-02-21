@@ -9,17 +9,14 @@ UCLASS()
 class REDEMPTION_API ACombatAllyNPC : public ACombatAllies, public ISavableObjectInterface
 {
 	GENERATED_BODY()
-private:
-	void LoadObjectFromGameInstance_Implementation(const URedemptionGameInstance* const GameInstance) override;
 public:
 	// Sets default values for this pawn's properties
 	ACombatAllyNPC();
-
-	UPROPERTY(EditAnywhere, SaveGame)
-		float TestVariable = 56.f;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	void LoadObjectFromGameInstance_Implementation(const URedemptionGameInstance* const GameInstance) override;
 
 public:
 	// Called every frame

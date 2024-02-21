@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "..\Miscellaneous\BattleActions.h"
+#include "BattleActions.h"
 #include "Redemption/Dynamics/Gameplay/Skills and Effects/EffectWithPlainModifier.h"
 
 int BattleActions::CalculateAttackValueAfterEffects(int AttackValue, const ACombatNPC* const CombatNPC)

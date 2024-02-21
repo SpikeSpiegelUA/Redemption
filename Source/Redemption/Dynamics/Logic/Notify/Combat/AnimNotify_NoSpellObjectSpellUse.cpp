@@ -8,23 +8,24 @@
 #include "Kismet/GameplayStatics.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\PresetBuffSpell.h"
 #include "..\UI\HUD\FloatingManaBarWidget.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 
 void UAnimNotify_NoSpellObjectSpellUse::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
 	ACombatNPC* Owner = Cast<ACombatNPC>(MeshComp->GetOwner());
-	APlayerCharacter* PlayerCharacter{};
+	const ARedemptionGameModeBase* RedemptionGameModeBase{};
 	if(IsValid(MeshComp->GetWorld()) && IsValid(MeshComp->GetWorld()->GetFirstPlayerController()))
-		PlayerCharacter = Cast<APlayerCharacter>(MeshComp->GetWorld()->GetFirstPlayerController()->GetCharacter());
+		RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(MeshComp->GetWorld()));
 
-	if (!IsValid(Owner) || !IsValid(PlayerCharacter))
+	if (!IsValid(Owner) || !IsValid(RedemptionGameModeBase))
 		return;
 
 	//Get Target actors, depending on a caster battle side and a spell's range, and run the logic on each target.
 	TArray<ACombatNPC*> TargetsArray{};
 	if (IsValid(Cast<ACombatAllies>(Owner)))
-		TargetsArray = SkillsSpellsAndEffectsActions::GetTargetsForAllies(PlayerCharacter->GetBattleManager(), Owner->SpellToUse->GetSpellRange(), Owner->SpellToUse->GetTypeOfSpell());
+		TargetsArray = SkillsSpellsAndEffectsActions::GetTargetsForAllies(RedemptionGameModeBase->GetBattleManager(), Owner->SpellToUse->GetSpellRange(), Owner->SpellToUse->GetTypeOfSpell());
 	else if (IsValid(Cast<ACombatEnemyNPC>(Owner)))
-		TargetsArray = SkillsSpellsAndEffectsActions::GetTargetsForEnemies(PlayerCharacter->GetBattleManager(), Owner->Target, Owner->SpellToUse->GetSpellRange(), Owner->SpellToUse->GetTypeOfSpell());
+		TargetsArray = SkillsSpellsAndEffectsActions::GetTargetsForEnemies(RedemptionGameModeBase->GetBattleManager(), Owner->Target, Owner->SpellToUse->GetSpellRange(), Owner->SpellToUse->GetTypeOfSpell());
 
 	if (ARestorationSpell* SpellToUse = Cast<ARestorationSpell>(Owner->SpellToUse); IsValid(SpellToUse)) {
 		bool SpellHasBeenUsed = false;
@@ -34,7 +35,7 @@ void UAnimNotify_NoSpellObjectSpellUse::Notify(USkeletalMeshComponent* MeshComp,
 					UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 				UseTarget->CurrentHP += AmountToHeal;
 				ACombatFloatingInformationActor* CombatFloatingInformationActor = MeshComp->GetWorld()->
-					SpawnActor<ACombatFloatingInformationActor>(PlayerCharacter->GetBattleManager()->GetCombatFloatingInformationActorClass(),
+					SpawnActor<ACombatFloatingInformationActor>(RedemptionGameModeBase->GetBattleManager()->GetCombatFloatingInformationActorClass(),
 						UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
 				FString TextForCombatFloatingInformationActor = FString();
 				TextForCombatFloatingInformationActor.Append("+");
@@ -50,7 +51,7 @@ void UAnimNotify_NoSpellObjectSpellUse::Notify(USkeletalMeshComponent* MeshComp,
 					UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 				UseTarget->CurrentMana += AmountToRestore;
 				ACombatFloatingInformationActor* CombatFloatingInformationActor = MeshComp->GetWorld()->
-					SpawnActor<ACombatFloatingInformationActor>(PlayerCharacter->GetBattleManager()->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
+					SpawnActor<ACombatFloatingInformationActor>(RedemptionGameModeBase->GetBattleManager()->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
 				FString TextForCombatFloatingInformationActor = FString();
 				TextForCombatFloatingInformationActor.Append("+");
 				TextForCombatFloatingInformationActor.AppendInt(AmountToRestore);
@@ -62,7 +63,7 @@ void UAnimNotify_NoSpellObjectSpellUse::Notify(USkeletalMeshComponent* MeshComp,
 					UseTarget->CurrentMana = UseTarget->MaxMana;
 			}
 		}
-		UGameplayStatics::PlaySound2D(MeshComp->GetWorld(), PlayerCharacter->GetAudioManager()->GetUseHealOrBuffSoundCue());
+		UGameplayStatics::PlaySound2D(MeshComp->GetWorld(), RedemptionGameModeBase->GetAudioManager()->GetUseHealOrBuffSoundCue());
 		if (SpellToUse->GetSpellCostType() == ESpellCostType::MANA) {
 			Owner->CurrentMana -= SpellToUse->GetCost();
 			if (Owner->CurrentMana < 0)
@@ -85,7 +86,7 @@ void UAnimNotify_NoSpellObjectSpellUse::Notify(USkeletalMeshComponent* MeshComp,
 				TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, CreatedEffectsFromClasses, ElementsActions::FindContainedElements(PresetBuffSpellToUse->GetSpellElements()), PresetBuffSpellToUse->GetTypeOfSpell());
 			}
 		}
-		UGameplayStatics::PlaySound2D(MeshComp->GetWorld(), PlayerCharacter->GetAudioManager()->GetUseHealOrBuffSoundCue());
+		UGameplayStatics::PlaySound2D(MeshComp->GetWorld(), RedemptionGameModeBase->GetAudioManager()->GetUseHealOrBuffSoundCue());
 		if (PresetBuffSpellToUse->GetSpellCostType() == ESpellCostType::MANA) {
 			Owner->CurrentMana -= PresetBuffSpellToUse->GetCost();
 			if (Owner->CurrentMana < 0)

@@ -23,6 +23,20 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
+	void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UBoxComponent* BoxComponent{};
+
+	class ASpell* Spell{};
+	EBattleSide TargetBattleSide{};
+	ACombatNPC* Target{};
+	ACombatNPC* Attacker{};
+
+	//On overlap with the player or an enemy we need to destroy this object and set timer for turn change
+	void OnOverlapBeginsActions();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -30,17 +44,5 @@ public:
 	void SetSpell(const class ASpell* const NewSpell);
 	void SetTargetBattleSide(const EBattleSide NewTargetBattleSide);
 	void SetTarget(ACombatNPC* const NewTarget);
-private:
-	UFUNCTION()
-		void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		UBoxComponent* BoxComponent{};
-
-	class ASpell* Spell{};
-	EBattleSide TargetBattleSide{};
-	ACombatNPC* Target{};
-
-	//On overlap with the player or an enemy we need to destroy this object and set timer for turn change
-	void OnOverlapBeginsActions(const class APlayerCharacter* const PlayerCharacter);
+	void SetAttacker(const ACombatNPC* const NewAttacker);
 };

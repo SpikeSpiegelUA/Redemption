@@ -6,6 +6,7 @@
 #include "..\Characters\Player\PlayerCharacter.h"
 #include "..\GameInstance\RedemptionGameInstance.h"
 #include "Components/AudioComponent.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 
 // Sets default values
 AAudioManager::AAudioManager()
@@ -18,6 +19,8 @@ AAudioManager::AAudioManager()
 void AAudioManager::BeginPlay()
 {
 	Super::BeginPlay();
+	if (auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+		RedemptionGameModeBase->SetAudioManager(this);
 	if (IsValid(GetWorld())) {
 		//Create audio components from cues and pause them all
 		if (IsValid(DungeonBattleResultsBackgroundMusicSoundCue))

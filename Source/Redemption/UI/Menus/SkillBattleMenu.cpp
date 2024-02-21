@@ -3,6 +3,8 @@
 #include "..\Characters\Player\PlayerCharacter.h"
 #include "..\Miscellaneous\ElementsActions.h"
 #include "..\UI\HUD\FloatingManaBarWidget.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 bool USkillBattleMenu::Initialize()
 {
@@ -40,42 +42,41 @@ void USkillBattleMenu::NativeConstruct()
 
 void USkillBattleMenu::UseButtonWithNeighborsOnClicked()
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-		PlayerCharacter->GetSpellBattleMenuWidget()->UseSpell();
+	if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+		UIManagerWorldSubsystem->SpellBattleMenuWidget->UseSpell();
 }
 
 void USkillBattleMenu::BackButtonWithNeighborsOnClicked()
 {
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
 		this->RemoveFromParent();
 		if (!IsOpenedFromDetailedCharacterInfo) {
-			PlayerCharacter->GetBattleMenuWidget()->AddToViewport();
-			PlayerCharacter->GetBattleMenuWidget()->GetMenuBorder()->SetVisibility(ESlateVisibility::Visible);
-			PlayerCharacter->GetSpellInfoWidget()->RemoveFromParent();
-			PlayerCharacter->GetBattleMenuWidget()->IsChoosingSkill = false;
-			PlayerCharacter->GetBattleManager()->IsSelectingAllyAsTarget = false;
-			PlayerCharacter->GetBattleMenuWidget()->IsChoosingAction = true;
-			PlayerCharacter->GetSpellBattleMenuWidget()->SetCreatedSpell(nullptr);
+			UIManagerWorldSubsystem->BattleMenuWidget->AddToViewport();
+			UIManagerWorldSubsystem->BattleMenuWidget->GetMenuBorder()->SetVisibility(ESlateVisibility::Visible);
+			UIManagerWorldSubsystem->SpellInfoWidget->RemoveFromParent();
+			UIManagerWorldSubsystem->BattleMenuWidget->IsChoosingSkill = false;
+			UIManagerWorldSubsystem->BattleMenuWidget->IsChoosingAction = true;
+			UIManagerWorldSubsystem->SpellBattleMenuWidget->SetCreatedSpell(nullptr);
 			HideNotificationAndClearItsTimer();
+			if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+				RedemptionGameModeBase->GetBattleManager()->IsSelectingAllyAsTarget = false;
 		}
 		else {
-			PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->AddToViewport();
+			UIManagerWorldSubsystem->DetailedCharacterInfoMenuWidget->AddToViewport();
 			UseButtonWithNeighbors->SetVisibility(ESlateVisibility::Visible);
-			PlayerCharacter->GetSpellInfoWidget()->RemoveFromParent();
+			UIManagerWorldSubsystem->SpellInfoWidget->RemoveFromParent();
 		}
-		if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
-			if (IsValid(UIManagerWorldSubsystem->PickedButton))
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.6f, 0.6f, 0.6f, 1.f));
-			if (IsOpenedFromDetailedCharacterInfo) {
-				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetDetailedCharacterInfoMenuWidget()->GetToggleInfoButton();
-				IsOpenedFromDetailedCharacterInfo = false;
-			}
-			else
-				UIManagerWorldSubsystem->PickedButton = PlayerCharacter->GetBattleMenuWidget()->GetAttackButton();
-			if(UIManagerWorldSubsystem->PickedButton)
-				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
-			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+		if (IsValid(UIManagerWorldSubsystem->PickedButton))
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.6f, 0.6f, 0.6f, 1.f));
+		if (IsOpenedFromDetailedCharacterInfo) {
+			UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->DetailedCharacterInfoMenuWidget->GetToggleInfoButton();
+			IsOpenedFromDetailedCharacterInfo = false;
 		}
+		else
+			UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->BattleMenuWidget->GetAttackButton();
+		if (UIManagerWorldSubsystem->PickedButton)
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+		UIManagerWorldSubsystem->PickedButtonIndex = 0;
 	}
 }
 
@@ -142,9 +143,9 @@ void USkillBattleMenu::AddSkillEntryToSkillsScrollBox(const class ASpell* const 
 {
 	if(IsValid(LearnedSpellEntryClass))
 		LearnedSpellEntryWidget = CreateWidget<ULearnedSpellEntryWidget>(GetWorld(), LearnedSpellEntryClass);
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter) && IsValid(LearnedSpellEntryWidget)) {
-		LearnedSpellEntryWidget->SetSpellTypeImage(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetSpellTypeImageTexture(SpellToAdd->GetTypeOfSpell()));
-		LearnedSpellEntryWidget->SetSpellMainElementImage(PlayerCharacter->GetEffectsSpellsAndSkillsManager()->GetMainSpellElementImageTexture(ElementsActions::FindSpellsMainElement(SpellToAdd->GetSpellElements())));
+	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase) && IsValid(LearnedSpellEntryWidget)){
+		LearnedSpellEntryWidget->SetSpellTypeImage(RedemptionGameModeBase->GetEffectsSpellsAndSkillsManager()->GetSpellTypeImageTexture(SpellToAdd->GetTypeOfSpell()));
+		LearnedSpellEntryWidget->SetSpellMainElementImage(RedemptionGameModeBase->GetEffectsSpellsAndSkillsManager()->GetMainSpellElementImageTexture(ElementsActions::FindSpellsMainElement(SpellToAdd->GetSpellElements())));
 		LearnedSpellEntryWidget->SetSpellNameText(SpellToAdd->GetSpellName());
 		LearnedSpellEntryWidget->EntrySpell = const_cast<ASpell*>(SpellToAdd);
 		SkillsScrollBox->AddChild(LearnedSpellEntryWidget);
