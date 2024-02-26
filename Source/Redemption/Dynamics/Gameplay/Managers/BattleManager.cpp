@@ -227,7 +227,9 @@ void ABattleManager::TurnChange()
 							if(const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 								BattleEnemies[NextActor]->Execute_GetHit(RedemptionGameModeBase->GetBattleManager()->BattleEnemies[NextActor],
 									BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleEnemies[NextActor]),
-									ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, false);
+									ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, 
+									TurnStartDamageEffect->GetNPCOwner()->GetSkill(ECharacterSkills::ASSAULTSPELLS),
+									TurnStartDamageEffect->GetNPCOwner()->GetStat(ECharacterStats::INTELLIGENCE), false);
 							GotHit = true;
 						}
 					}
@@ -345,6 +347,16 @@ void ABattleManager::TurnChange()
 						if (IsValid(CombatAlliesAnimInstance))
 							if (CombatAlliesAnimInstance->GetCombatAlliesIsBlocking())
 								CombatAlliesAnimInstance->ToggleCombatAlliesIsBlocking(false);
+						if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex] == CombatPlayerCharacter) {
+							BattleMenu->GetItemButton()->SetVisibility(ESlateVisibility::Visible);
+							BattleMenu->GetTalkButton()->SetVisibility(ESlateVisibility::Visible);
+							BattleMenu->GetSpellButton()->SetVisibility(ESlateVisibility::Visible);
+						}
+						else {
+							BattleMenu->GetItemButton()->SetVisibility(ESlateVisibility::Collapsed);
+							BattleMenu->GetTalkButton()->SetVisibility(ESlateVisibility::Collapsed);
+							BattleMenu->GetSpellButton()->SetVisibility(ESlateVisibility::Collapsed);
+						}
 					}
 					//If the next actor has a TurnStartDamage effect, then use get hit and delay AI activation by 2 seconds.
 					bool GotHit = false;
@@ -355,7 +367,9 @@ void ABattleManager::TurnChange()
 								if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
 									BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Execute_GetHit(RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer[CurrentTurnCombatNPCIndex],
 										BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleAlliesPlayer[CurrentTurnCombatNPCIndex]),
-										ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, false);
+										ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, 
+										TurnStartDamageEffect->GetNPCOwner()->GetSkill(ECharacterSkills::ASSAULTSPELLS),
+										TurnStartDamageEffect->GetNPCOwner()->GetStat(ECharacterStats::INTELLIGENCE), false);
 									GotHit = true;
 								}
 						}
@@ -482,6 +496,16 @@ void ABattleManager::PlayerTurnController()
 					if (IsValid(CombatAlliesAnimInstance))
 						if (CombatAlliesAnimInstance->GetCombatAlliesIsBlocking())
 							CombatAlliesAnimInstance->ToggleCombatAlliesIsBlocking(false);
+					if (BattleAlliesPlayer[CurrentTurnCombatNPCIndex] == CombatPlayerCharacter) {
+						BattleMenu->GetItemButton()->SetVisibility(ESlateVisibility::Visible);
+						BattleMenu->GetTalkButton()->SetVisibility(ESlateVisibility::Visible);
+						BattleMenu->GetSpellButton()->SetVisibility(ESlateVisibility::Visible);
+					}
+					else {
+						BattleMenu->GetItemButton()->SetVisibility(ESlateVisibility::Collapsed);
+						BattleMenu->GetTalkButton()->SetVisibility(ESlateVisibility::Collapsed);
+						BattleMenu->GetSpellButton()->SetVisibility(ESlateVisibility::Collapsed);
+					}
 					//If the next actor has a TurnStartDamage effect, then use get hit and delay AI activation by 2 seconds.
 					bool GotHit = false;
 					bool IsDizzy = false;
@@ -491,7 +515,9 @@ void ABattleManager::PlayerTurnController()
 								if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
 									BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Execute_GetHit(RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer[CurrentTurnCombatNPCIndex],
 										BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleAlliesPlayer[CurrentTurnCombatNPCIndex]),
-										ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, false);
+										ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, 
+										TurnStartDamageEffect->GetNPCOwner()->GetSkill(ECharacterSkills::ASSAULTSPELLS), 
+										TurnStartDamageEffect->GetNPCOwner()->GetStat(ECharacterStats::INTELLIGENCE), false);
 									GotHit = true;
 								}
 						}
@@ -583,7 +609,9 @@ void ABattleManager::PlayerAlliesEffectsDurationLogic(const TArray<uint8>& Passe
 							if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
 								BattleAlliesPlayer[Index]->Execute_GetHit(RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer[Index],
 									BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleAlliesPlayer[Index]),
-									ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, false);
+									ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, 
+									TurnStartDamageEffect->GetNPCOwner()->GetSkill(ECharacterSkills::ASSAULTSPELLS), 
+									TurnStartDamageEffect->GetNPCOwner()->GetStat(ECharacterStats::INTELLIGENCE), false);
 							}
 					}
 				}

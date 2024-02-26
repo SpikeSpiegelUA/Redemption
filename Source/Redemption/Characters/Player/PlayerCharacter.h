@@ -218,13 +218,13 @@ public:
 #pragma endregion
 	//Battle mode regarding variables
 	UPROPERTY(EditAnywhere, Category = "Combat", SaveGame)
-		float CurrentHP = 100;
+		float CurrentHP = 110;
 	UPROPERTY(EditAnywhere, Category = "Combat", SaveGame)
-		float MaxHP = 100;
+		float MaxHP = 110;
 	UPROPERTY(EditAnywhere, Category = "Combat", SaveGame)
-		float CurrentMana = 100;
+		float CurrentMana = 110;
 	UPROPERTY(EditAnywhere, Category = "Combat", SaveGame)
-		float MaxMana = 100;
+		float MaxMana = 110;
 	UPROPERTY(EditAnywhere, Category = "Combat", SaveGame)
 		int EvasionChance = 5;
 	UPROPERTY(EditAnywhere, Category = "Combat", SaveGame)

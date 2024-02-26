@@ -41,19 +41,14 @@ void ACombatAllies::Tick(float DeltaTime)
 void ACombatAllies::StartMovingToEnemy()
 {
 	IsMovingToAttackEnemy = true;
-	ACombatAlliesAIController* CombatAlliesAIController = Cast<ACombatAlliesAIController>(GetController());
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-		if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
-			if (ABattleManager* BattleManager = Cast<ABattleManager>(RedemptionGameModeBase->GetBattleManager()); IsValid(BattleManager))
-				if (IsValid(CombatAlliesAIController) && IsValid(BattleManager)) 
-					CombatAlliesAIController->MoveToActor(Target, 85.f);
+	if (ACombatAlliesAIController* CombatAllyAIController = Cast<ACombatAlliesAIController>(GetController()); IsValid(CombatAllyAIController))
+		CombatAllyAIController->MoveToActor(Target, 85.f);
 }
 
 void ACombatAllies::StartMovingToStartLocation()
 {
 	IsMovingToStartPosition = true;
-	ACombatAlliesAIController* CombatAlliesAIController = Cast<ACombatAlliesAIController>(GetController());
-	if (IsValid(CombatAlliesAIController))
+	if(ACombatAlliesAIController* CombatAlliesAIController = Cast<ACombatAlliesAIController>(GetController()); IsValid(CombatAlliesAIController))
 		CombatAlliesAIController->MoveToActor(StartLocation);
 	
 }

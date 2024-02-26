@@ -9,14 +9,27 @@
 #include "Components/Button.h"
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components/ScrollBoxSlot.h"
 
 bool UBattleResultsScreen::Initialize()
 {
 	const bool bSuccess = Super::Initialize();
-	if (IsValid(ContinueButton))
+	if (IsValid(ContinueButton)) {
 		ContinueButton->OnClicked.AddDynamic(this, &UBattleResultsScreen::ContinueButtonOnClicked);
-	if (!bSuccess) return false;
-	return bSuccess;
+		ContinueButton->OnHovered.AddDynamic(this, &UBattleResultsScreen::ContinueButtonOnHovered);
+
+		if (IsValid(PreviousCharacterButton)) {
+			PreviousCharacterButton->OnClicked.AddDynamic(this, &UBattleResultsScreen::PreviousCharacterButtonOnClicked);
+			PreviousCharacterButton->OnHovered.AddDynamic(this, &UBattleResultsScreen::PreviousCharacterButtonOnHovered);
+		}
+		if (IsValid(NextCharacterButton)) {
+			NextCharacterButton->OnClicked.AddDynamic(this, &UBattleResultsScreen::NextCharacterButtonOnClicked);
+			NextCharacterButton->OnHovered.AddDynamic(this, &UBattleResultsScreen::NextCharacterButtonOnHovered);
+		}
+	}
+		if (!bSuccess) return false;
+		return bSuccess;
 }
 
 void UBattleResultsScreen::NativeConstruct()
@@ -37,27 +50,49 @@ void UBattleResultsScreen::ContinueButtonOnClicked()
 
 void UBattleResultsScreen::NextCharacterButtonOnClicked()
 {
-
+	if (auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
+		if (RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer.Num() > 1) {
+			if (CurrentCharacterIndex + 1 < RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer.Num()) {
+				SetCharacterInfo(Cast<ACombatAllies>(RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer[CurrentCharacterIndex + 1]));
+				CurrentCharacterIndex += 1;
+			}
+			else {
+				SetCharacterInfo(Cast<ACombatAllies>(RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer[0]));
+				CurrentCharacterIndex = 0;
+			}
+		}
+	}
 }
 
 void UBattleResultsScreen::PreviousCharacterButtonOnClicked()
 {
-
+	if (auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
+		if (RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer.Num() > 1) {
+			if (CurrentCharacterIndex - 1 >= 0) {
+				SetCharacterInfo(Cast<ACombatAllies>(RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer[CurrentCharacterIndex - 1]));
+				CurrentCharacterIndex -= 1;
+			}
+			else {
+				SetCharacterInfo(Cast<ACombatAllies>(RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer[RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer.Num() - 1]));
+				CurrentCharacterIndex = RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer.Num() - 1;
+			}
+		}
+	}
 }
 
 void UBattleResultsScreen::ContinueButtonOnHovered()
 {
-
+	ButtonOnHoveredActions(ContinueButton, 0);
 }
 
 void UBattleResultsScreen::NextCharacterButtonOnHovered()
 {
-
+	ButtonOnHoveredActions(NextCharacterButton, 0);
 }
 
 void UBattleResultsScreen::PreviousCharacterButtonOnHovered()
 {
-
+	ButtonOnHoveredActions(PreviousCharacterButton, 0);
 }
 
 void UBattleResultsScreen::OnWidgetShowActions()
@@ -75,9 +110,16 @@ void UBattleResultsScreen::OnWidgetShowActions()
 				if (ACombatAllies* CombatAllies = Cast<ACombatAllies>(CombatNPC); IsValid(CombatAllies))
 					CombatAllies->CurrentExperience += TotalExperienceReward / RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer.Num();
 		}
+		TotalGoldReward += FMath::RandRange(0, PlayerCharacter->GetStat(ECharacterStats::LUCK) * 10);
 		PlayerCharacter->Gold += TotalGoldReward;
-		if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
-			SetCharacterInfo(RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter);
+		if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
+			for(uint8 Index = 0; Index < RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer.Num(); Index++)
+				if (RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer[Index] == RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter) {
+					CurrentCharacterIndex = Index;
+					SetCharacterInfo(Cast<ACombatAllies>(RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer[Index]));
+					break;
+				}
+		}
 		//Set Gold text.
 		FString StringToSet = "Gold: ";
 		StringToSet.AppendInt(PlayerCharacter->Gold);
@@ -128,6 +170,7 @@ void UBattleResultsScreen::SetCharacterInfo(ACombatAllies* const CombatAllyToSet
 			CharacterSkills.Add(ECharacterSkills::DEFEND);
 		if (CombatAllyToSetInfo->GetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpPersuasion))
 			CharacterSkills.Add(ECharacterSkills::PERSUASION);
+		CharacterLevelingUpWidget->ClearLevelingUpScrollBox();
 		for (ECharacterSkills CharacterSkill : CharacterSkills) {
 			uint8 TotalCharacterSkillsLevelUp = 0;
 			while (CombatAllyToSetInfo->GetSkillsProgress(CharacterSkill) >= 100 && CombatAllyToSetInfo->GetSkill(CharacterSkill) < 100) {
@@ -149,10 +192,22 @@ void UBattleResultsScreen::SetCharacterInfo(ACombatAllies* const CombatAllyToSet
 					LevelingUpEntryWidget->SetSkillLevelingUpTextBlockText(FText::FromString(WidgetStringToSet));
 					LevelingUpEntryWidget->SetNextLevelProgressBarPercent(CombatAllyToSetInfo->GetSkillsProgress(CharacterSkill));
 					CharacterLevelingUpWidget->AddLevelingUpWidgetToLevelingUpScrollBox(LevelingUpEntryWidget);
-					LevelingUpEntryWidget->AddToViewport();
+					if(auto* LevelingUpEntryWidgetScrollBoxSlot = UWidgetLayoutLibrary::SlotAsScrollBoxSlot(LevelingUpEntryWidget); IsValid(LevelingUpEntryWidgetScrollBoxSlot))
+						LevelingUpEntryWidgetScrollBoxSlot->SetPadding(FMargin(0.f, 25.f, 0.f, 0.f));
 				}
 			}
 		}
+	}
+}
+
+void UBattleResultsScreen::ButtonOnHoveredActions(UButton* const HoveredButton, const int8 Index)
+{
+	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+		if (IsValid(UIManagerWorldSubsystem->PickedButton))
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3f, 0.3f, 0.3f, 1.f));
+		UIManagerWorldSubsystem->PickedButton = HoveredButton;
+		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+		UIManagerWorldSubsystem->PickedButtonIndex = Index;
 	}
 }
 

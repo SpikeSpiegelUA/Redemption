@@ -31,8 +31,9 @@ void UAnimNotify_NoSpellObjectSpellUse::Notify(USkeletalMeshComponent* MeshComp,
 		bool SpellHasBeenUsed = false;
 		for (ACombatNPC* UseTarget : TargetsArray) {
 			if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::HEALTH && UseTarget->CurrentHP < UseTarget->MaxHP && UseTarget->CurrentHP > 0) {
-				int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(UseTarget->MaxHP * SpellToUse->GetRestorationValuePercent() / 100,
-					UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
+				int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(UseTarget->MaxHP * SpellToUse->GetRestorationValuePercent() / 100,
+					UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()), 
+					Owner->GetSkill(ECharacterSkills::RESTORATIONSPELLS), Owner->GetStat(ECharacterStats::INTELLIGENCE));
 				UseTarget->CurrentHP += AmountToHeal;
 				ACombatFloatingInformationActor* CombatFloatingInformationActor = MeshComp->GetWorld()->
 					SpawnActor<ACombatFloatingInformationActor>(RedemptionGameModeBase->GetBattleManager()->GetCombatFloatingInformationActorClass(),
@@ -47,8 +48,9 @@ void UAnimNotify_NoSpellObjectSpellUse::Notify(USkeletalMeshComponent* MeshComp,
 					UseTarget->CurrentHP = UseTarget->MaxHP;
 			}
 			else if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::MANA && UseTarget->CurrentMana < UseTarget->MaxMana && UseTarget->CurrentHP > 0) {
-				int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(UseTarget->MaxMana * SpellToUse->GetRestorationValuePercent() / 100,
-					UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
+				int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(UseTarget->MaxMana * SpellToUse->GetRestorationValuePercent() / 100,
+					UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()), 
+					Owner->GetSkill(ECharacterSkills::RESTORATIONSPELLS), Owner->GetStat(ECharacterStats::INTELLIGENCE));
 				UseTarget->CurrentMana += AmountToRestore;
 				ACombatFloatingInformationActor* CombatFloatingInformationActor = MeshComp->GetWorld()->
 					SpawnActor<ACombatFloatingInformationActor>(RedemptionGameModeBase->GetBattleManager()->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
@@ -83,7 +85,8 @@ void UAnimNotify_NoSpellObjectSpellUse::Notify(USkeletalMeshComponent* MeshComp,
 					AEffect* NewEffect = NewObject<AEffect>(this, EffectClass);
 					CreatedEffectsFromClasses.Add(NewEffect);
 				}
-				TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, CreatedEffectsFromClasses, ElementsActions::FindContainedElements(PresetBuffSpellToUse->GetSpellElements()), PresetBuffSpellToUse->GetTypeOfSpell());
+				TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, CreatedEffectsFromClasses, ElementsActions::FindContainedElements(PresetBuffSpellToUse->GetSpellElements()), 
+					Owner->GetSkill(ECharacterSkills::BUFFSPELLS), Owner->GetStat(ECharacterStats::INTELLIGENCE), PresetBuffSpellToUse->GetTypeOfSpell());
 			}
 		}
 		UGameplayStatics::PlaySound2D(MeshComp->GetWorld(), RedemptionGameModeBase->GetAudioManager()->GetUseHealOrBuffSoundCue());

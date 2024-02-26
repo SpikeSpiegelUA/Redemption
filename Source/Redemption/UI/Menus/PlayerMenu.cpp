@@ -88,6 +88,7 @@ void UPlayerMenu::PartyButtonOnClicked()
 				if (IsValid(UIManagerWorldSubsystem->PartyMenuWidget)) {
 					UIManagerWorldSubsystem->PartyMenuWidget->AddToViewport();
 					UIManagerWorldSubsystem->PartyMenuWidget->UpdateCharacterInfo(PlayerCharacter->GetAllies());
+					UIManagerWorldSubsystem->PartyMenuWidget->SelectedGeneralCharacterInfoIndex = 0;
 					PartyButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 					if (auto* GeneralCharacterInfoWidget = Cast<UPartyMenuGeneralCharacterInfo>
 						(UIManagerWorldSubsystem->PartyMenuWidget->GetCharactersHorizontalBox()->GetChildAt(0)); IsValid(GeneralCharacterInfoWidget)) {

@@ -22,8 +22,9 @@ int SkillsSpellsAndEffectsActions::GetValueAfterEffects(int ValueBeforeEffects, 
 	return ValueAfterEffects;
 }
 
-int SkillsSpellsAndEffectsActions::GetAttackValueAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements, 
-	const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements, EPhysicalType AttackerPhysicalType, const TArray<FPhysicalTypeAndItsPercentageStruct> ReceiverPhysicalResistances)
+int SkillsSpellsAndEffectsActions::GetAttackValueAfterResistancesSkillsAndStats(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements, 
+	const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements, EPhysicalType AttackerPhysicalType, const TArray<FPhysicalTypeAndItsPercentageStruct> ReceiverPhysicalResistances,
+	int AttackerSkillValue, int AttackerStatValue)
 {
 	TArray<FElementAndItsPercentageStruct> TemporaryReceiverContainedElements{};
 	for (FElementAndItsPercentageStruct ReceiverElementPercent : ReceiverContainedElements) {
@@ -43,7 +44,7 @@ int SkillsSpellsAndEffectsActions::GetAttackValueAfterResistances(int ValueBefor
 				TemporaryReceiverContainedElements.Add(NewElementPercent);
 			}
 	}
-	int ValueOfAttackWithResistances = ValueBeforeResistances;
+	int ValueOfAttackWithResistances = ValueBeforeResistances + FMath::Floor(static_cast<double>(AttackerSkillValue) / 4.0) + AttackerStatValue * 2;
 	if (TemporaryReceiverContainedElements.Num() == 0)
 		TemporaryReceiverContainedElements = ReceiverContainedElements;
 	for (FElementAndItsPercentageStruct AttackerElementPercent : AttackerContainedElements)
@@ -107,7 +108,9 @@ int SkillsSpellsAndEffectsActions::GetAttackValueAfterResistances(int ValueBefor
 	return ValueOfAttackWithResistances;
 }
 
-int SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements, const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements)
+int SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(int ValueBeforeResistances, const TArray<AEffect*>& Effects, 
+	const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements, const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements,
+	int AttackerSkillValue, int AttackerStatValue)
 {
 	TArray<FElementAndItsPercentageStruct> TemporaryReceiverContainedElements{};
 	for (FElementAndItsPercentageStruct ReceiverElementPercent : ReceiverContainedElements) {
@@ -127,7 +130,7 @@ int SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(int Value
 				TemporaryReceiverContainedElements.Add(NewElementPercent);
 			}
 	}
-	int ValueOfAttackWithResistances = ValueBeforeResistances;
+	int ValueOfAttackWithResistances = ValueBeforeResistances + FMath::Floor(static_cast<double>(AttackerSkillValue) / 5.0) + AttackerStatValue * 2;
 	if (TemporaryReceiverContainedElements.Num() == 0)
 		TemporaryReceiverContainedElements = ReceiverContainedElements;
 	for (FElementAndItsPercentageStruct AttackerElementPercent : AttackerContainedElements)
@@ -150,7 +153,9 @@ int SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(int Value
 	return ValueOfAttackWithResistances;
 }
 
-int SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements, const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements)
+int SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistancesSkillsAndStats(int ValueBeforeResistances, const TArray<AEffect*>& Effects, 
+	const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements, const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements, 
+	int DefenderStatValue, int AttackerSkillValue, int AttackerStatValue)
 {
 	TArray<FElementAndItsPercentageStruct> TemporaryReceiverContainedElements{};
 	for (FElementAndItsPercentageStruct ReceiverElementPercent : ReceiverContainedElements) {
@@ -174,7 +179,7 @@ int SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(
 				TemporaryReceiverContainedElements.Add(NewElementPercent);
 			}
 	}
-	int EvasionChanceWithResistances = ValueBeforeResistances;
+	int EvasionChanceWithResistances = ValueBeforeResistances + DefenderStatValue * 2 - FMath::Floor(static_cast<double>(AttackerSkillValue) / 4.0) - AttackerStatValue * 2;
 	if (TemporaryReceiverContainedElements.Num() == 0)
 		TemporaryReceiverContainedElements = ReceiverContainedElements;
 	for (FElementAndItsPercentageStruct AttackerElementPercent : AttackerContainedElements) 

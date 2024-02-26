@@ -32,7 +32,7 @@ protected:
 	class ASpell* Spell{};
 	EBattleSide TargetBattleSide{};
 	ACombatNPC* Target{};
-	ACombatNPC* Attacker{};
+	ACombatNPC* NPCOwner{};
 
 	//On overlap with the player or an enemy we need to destroy this object and set timer for turn change
 	void OnOverlapBeginsActions();
@@ -44,5 +44,5 @@ public:
 	void SetSpell(const class ASpell* const NewSpell);
 	void SetTargetBattleSide(const EBattleSide NewTargetBattleSide);
 	void SetTarget(ACombatNPC* const NewTarget);
-	void SetAttacker(const ACombatNPC* const NewAttacker);
+	void SetNPCOwner(const ACombatNPC* const NewNPCOwner);
 };

@@ -72,7 +72,7 @@ void UPartyMenu::BackButtonOnHovered()
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 		UIManagerWorldSubsystem->PickedButton = BackButton;
 		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
-		UIManagerWorldSubsystem->PickedButtonIndex = 0;
+		UIManagerWorldSubsystem->PickedButtonIndex = 2;
 		IsSelectingCharacter = false;
 	}
 }

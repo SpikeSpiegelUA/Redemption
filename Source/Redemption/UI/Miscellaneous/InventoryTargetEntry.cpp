@@ -7,6 +7,8 @@
 #include "Redemption/Miscellaneous/InventoryActions.h"
 #include "Kismet/GameplayStatics.h"
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
+
 bool UInventoryTargetEntry::Initialize()
 {
     const bool bSuccess = Super::Initialize();
@@ -32,7 +34,7 @@ void UInventoryTargetEntry::NameButtonOnClicked()
     if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter())) {
         //Find Item's widget in inventory
         if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
-            if (UInventoryMenu* InventoryMenuWidget = UIManagerWorldSubsystem->InventoryMenuWidget; IsValid(InventoryMenuWidget)) {
+            if (UInventoryMenu* InventoryMenuWidget = UIManagerWorldSubsystem->InventoryMenuWidget; IsValid(InventoryMenuWidget) && IsValid(InventoryMenuWidget->GetPickedItem())) {
                 URedemptionGameInstance* GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
                 UInventoryScrollBoxEntryWidget* EntryWidget = InventoryActions::FindItemInventoryEntryWidget(InventoryMenuWidget->GetPickedItem(), InventoryMenuWidget->GetInventoryScrollBox());
                 if (ARestorationItem* RestorationItem = Cast<ARestorationItem>(InventoryMenuWidget->GetPickedItem()); IsValid(RestorationItem)) {
@@ -75,6 +77,10 @@ void UInventoryTargetEntry::NameButtonOnClicked()
                     }
                     if (ItemHasBeenUsed) {
                         InventoryActions::RemoveItemFromGameInstance(GameInstance, InventoryMenuWidget->GetPickedItem());
+                        if (EntryWidget->AmountOfItems <= 1) {
+                            InventoryMenuWidget->SetPickedItem(nullptr);
+                            InventoryMenuWidget->HideTargetsMenu();
+                        }
                         InventoryActions::ItemAmountInInventoryLogic(EntryWidget, InventoryMenuWidget->GetInventoryScrollBox(), InventoryMenuWidget->GetPickedItem());
                         if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
                             UGameplayStatics::PlaySound2D(GetWorld(), RedemptionGameModeBase->GetAudioManager()->GetUseHealOrBuffSoundCue());

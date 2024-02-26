@@ -35,6 +35,7 @@ public:
 	void SetCharacterNameTextBlockText(const FText& TextToSet);
 	void SetCharacterLevelTextBlockText(const FText& TextToSet);
 	void AddLevelingUpWidgetToLevelingUpScrollBox(ULevelingUpEntry* const WidgetToAdd);
+	void ClearLevelingUpScrollBox();
 	void SetNextLevelProgressBarValue(const float Value);
 
 	UProgressBar* GetNextLevelProgressBar() const;

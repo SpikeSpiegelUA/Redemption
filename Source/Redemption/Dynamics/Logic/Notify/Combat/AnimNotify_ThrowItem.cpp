@@ -13,6 +13,7 @@ void UAnimNotify_ThrowItem::SpawnItemObject(const AGameItemWithItemObject* const
 	FActorSpawnParameters ActorSpawnParemeters;
 	AItemObject* SpawnedItemObject = MeshComp->GetWorld()->SpawnActor<AItemObject>(GameItemWithItemObject->GetItemObjectClass(), SpawnTransform, ActorSpawnParemeters);
 	SpawnedItemObject->SetItem(const_cast<AGameItemWithItemObject*>(GameItemWithItemObject));
+	SpawnedItemObject->SetNPCOwner(CombatNPC);
 	SpawnedItemObject->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(SpawnedItemObject->GetActorLocation(), CombatNPC->Target->GetActorLocation()));
 	if (IsValid(Cast<ACombatAllies>(MeshComp->GetOwner())))
 		SpawnedItemObject->SetTargetBattleSide(EBattleSide::ENEMIES);

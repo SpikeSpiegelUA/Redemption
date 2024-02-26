@@ -20,7 +20,7 @@ EBTNodeResult::Type UBTTask_CalculateSpellUseChance::ExecuteTask(UBehaviorTreeCo
 	if (!IsValid(CombatEnemyNPC))
 		return EBTNodeResult::Failed;
 
-	int8 UseChance = 60;
+	int8 UseChance = 70;
 
 	if (!IsValid(CombatEnemyNPC->SpellToUse)) {
 		UseChance = -1;

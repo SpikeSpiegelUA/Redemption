@@ -16,12 +16,13 @@
 
 namespace SkillsSpellsAndEffectsActions {
 	int GetValueAfterEffects(int ValueBeforeEffects, const TArray<AEffect*>& Effects, EEffectArea EffectArea);
-	int GetAttackValueAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
-		const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements, EPhysicalType AttackerPhysicalType, const TArray<FPhysicalTypeAndItsPercentageStruct> ReceiverPhysicalResistances);
-	int GetRestorationValueAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
-		const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements);
-	int GetBuffOrDebuffEvasionChanceAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
-		const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements);
+	int GetAttackValueAfterResistancesSkillsAndStats(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
+		const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements, EPhysicalType AttackerPhysicalType, const TArray<FPhysicalTypeAndItsPercentageStruct> ReceiverPhysicalResistances,
+		int AttackerSkillValue, int AttackerStatValue);
+	int GetRestorationValueAfterResistancesSkillsAndStats(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
+		const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements, int AttackerSkillValue, int AttackerStatValue);
+	int GetBuffOrDebuffEvasionChanceAfterResistancesSkillsAndStats(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
+		const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements, int DefenderStatValue, int AttackerSkillValue, int AttackerStatValue);
 	//In EEffectArea we have different resistance to elements, so we get element corresponding to the area passed by value.
 	ESpellElements GetSpellElementCorrespondingToEffectArea(const EEffectArea EffectArea);
 	//In EEffectArea we have different resistance to physical types, so we get physical type corresponding to the area passed by value.

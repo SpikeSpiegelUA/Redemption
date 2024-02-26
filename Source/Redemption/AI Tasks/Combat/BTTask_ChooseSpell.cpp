@@ -49,7 +49,7 @@ EBTNodeResult::Type UBTTask_ChooseSpell::ExecuteTask(UBehaviorTreeComponent& Own
 		}
 		switch (SpellDefaultObject->GetTypeOfSpell()) {
 			case ESpellType::RESTORATION:
-				/*for (ACombatNPC* Target : TargetsArray) {
+				for (ACombatNPC* Target : TargetsArray) {
 					if (Target->CurrentHP / Target->MaxHP * 100.f <= 50.f && Target->CurrentHP > 0) {
 						if (!RestorationAdded) {
 							AvailableSpellsIndex.Add(ESpellType::RESTORATION);
@@ -58,8 +58,7 @@ EBTNodeResult::Type UBTTask_ChooseSpell::ExecuteTask(UBehaviorTreeComponent& Own
 						}
 						NumberOfDamagedEnemies++;
 					}
-				}*/
-				AvailableSpellsIndex.AddUnique(ESpellType::RESTORATION);
+				}
 				break;
 			case ESpellType::ASSAULT:
 				AvailableSpellsIndex.AddUnique(ESpellType::ASSAULT);
@@ -118,9 +117,6 @@ EBTNodeResult::Type UBTTask_ChooseSpell::ExecuteTask(UBehaviorTreeComponent& Own
 			CombatNPC->SpellToUse = NeighborsOrEveryoneRangeSpellsToUse[FMath::RandRange(0, NeighborsOrEveryoneRangeSpellsToUse.Num() - 1)];
 			SpecialCaseSpellSelected = true;
 		}
-		else if (SpellTypeToUse == ESpellType::ASSAULT) {
-			//if()
-		}
 	}
 	if (!SpecialCaseSpellSelected) {
 		TArray<ASpell*> AllRangesSpells{};
@@ -133,6 +129,8 @@ EBTNodeResult::Type UBTTask_ChooseSpell::ExecuteTask(UBehaviorTreeComponent& Own
 		else
 			CombatNPC->SpellToUse = nullptr;
 	}
+	if(IsValid(CombatNPC->SpellToUse))
+		UE_LOG(LogTemp, Warning, TEXT("The Spell's name is %s"), *CombatNPC->SpellToUse->GetSpellName().ToString());
 	return EBTNodeResult::Succeeded;
 }
 

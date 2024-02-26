@@ -64,7 +64,7 @@ public:
 	ACombatNPC();
 	virtual void Tick(float DeltaTime) override;
 
-	UFloatingHealthBarWidget* GetFloatingHealthBarWidget() const;
+	class UFloatingHealthBarWidget* GetFloatingHealthBarWidget() const;
 	UWidgetComponent* GetCrosshairWidgetComponent() const;
 	TArray<FElementAndItsPercentageStruct> GetElementalResistances() const;
 	TArray<FPhysicalTypeAndItsPercentageStruct> GetPhysicalResistances() const;
@@ -124,9 +124,9 @@ public:
 		float GetManaPercentage();
 
 	//Function to call, when a NPC got hit. Parameters for a standard attack.
-	bool GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, const EPhysicalType ContainedPhysicalType, bool ForcedMiss = false) override;
+	bool GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, const EPhysicalType ContainedPhysicalType,int ValueOfSkill, int ValueOfStat, bool ForcedMiss = false) override;
 	//Function to call, when a NPC got hit. Parameters for a buff/debuff attack.
-	bool GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements, const ESpellType BuffOrDebuff) override;
+	bool GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements, int ValueOfSkill, int ValueOfStat, const ESpellType BuffOrDebuff) override;
 protected:
 
 	virtual void BeginPlay() override;
@@ -167,7 +167,7 @@ protected:
 		TArray<FElementAndItsPercentageStruct> RangeWeaponElements {};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
-		UFloatingHealthBarWidget* FloatingHealthBarWidget {};
+		class UFloatingHealthBarWidget* FloatingHealthBarWidget {};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 		UWidgetComponent* FloatingHealthBarWidgetComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")

@@ -64,9 +64,10 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 				if (CombatTarget->CurrentHP > 0) {
 					if (AAssaultSpell* AssaultSpell = Cast<AAssaultSpell>(Spell); IsValid(AssaultSpell)) {
 						//Logic for special effects of the spell(frozen, burn...).
-						if (CombatTarget->Execute_GetHit(CombatTarget, AssaultSpell->GetAttackValue(), ElementsActions::FindContainedElements(AssaultSpell->GetSpellElements()), EPhysicalType::NONE, false)) {
-							if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(Attacker);IsValid(CombatAllies)) {
-								CombatAllies->AddSkillsProgress(ECharacterSkills::ASSAULTSPELLS, 3);
+						if (CombatTarget->Execute_GetHit(CombatTarget, AssaultSpell->GetAttackValue(), ElementsActions::FindContainedElements(AssaultSpell->GetSpellElements()), 
+							EPhysicalType::NONE, NPCOwner->GetSkill(ECharacterSkills::ASSAULTSPELLS), NPCOwner->GetStat(ECharacterStats::INTELLIGENCE), false)) {
+							if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(NPCOwner);IsValid(CombatAllies)) {
+								CombatAllies->AddSkillsProgress(ECharacterSkills::ASSAULTSPELLS, 50);
 								CombatAllies->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpAssaultSpells, true);
 							}
 							if (AssaultSpell->GetEffectsAndTheirChances().Num() > 0) {
@@ -78,6 +79,7 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 										if (IsValid(Cast<ATurnStartDamageEffect>(AssaultSpell->GetEffectsAndTheirChances()[Index].Effect->GetDefaultObject()))) {
 											if (auto* TurnStartDamageEffect = NewObject<ATurnStartDamageEffect>(this, AssaultSpell->GetEffectsAndTheirChances()[Index].Effect); IsValid(TurnStartDamageEffect)) {
 												//Check if Effects array already has this TurnStartDamageEffect. If yes, then add damage and update duration of an existent, if no, then add new effect.
+												TurnStartDamageEffect->InitializeObject(NPCOwner);
 												bool EffectAlreadyIsInArray = false;
 												for (AEffect* Effect : CombatTarget->Effects)
 													if (Effect->GetEffectName().EqualTo(TurnStartDamageEffect->GetEffectName())) {
@@ -156,9 +158,10 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 							AEffect* NewEffect = NewObject<AEffect>(this, EffectClass);
 							EffectsArray.Add(NewEffect);
 						}
-						bool GotHit = CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, ElementsActions::FindContainedElements(PresetDebuffSpell->GetSpellElements()), PresetDebuffSpell->GetTypeOfSpell());
-						if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(Attacker); GotHit && IsValid(CombatAllies)) {
-							CombatAllies->AddSkillsProgress(ECharacterSkills::DEBUFFSPELLS, 3);
+						bool GotHit = CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, ElementsActions::FindContainedElements(PresetDebuffSpell->GetSpellElements()), 
+							NPCOwner->GetSkill(ECharacterSkills::DEBUFFSPELLS), NPCOwner->GetStat(ECharacterStats::INTELLIGENCE), PresetDebuffSpell->GetTypeOfSpell());
+						if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(NPCOwner); GotHit && IsValid(CombatAllies)) {
+							CombatAllies->AddSkillsProgress(ECharacterSkills::DEBUFFSPELLS, 50);
 							CombatAllies->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpDebuffSpells, true);
 						}
 						OnOverlapBeginsActions();
@@ -170,9 +173,10 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 							NewEffect->CopyEffect(Effect);
 							EffectsArray.Add(NewEffect);
 						}
-						bool GotHit = CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, ElementsActions::FindContainedElements(CreatedDebuffSpell->GetSpellElements()), CreatedDebuffSpell->GetTypeOfSpell());
-						if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(Attacker); GotHit && IsValid(CombatAllies)) {
-							CombatAllies->AddSkillsProgress(ECharacterSkills::DEBUFFSPELLS, 3);
+						bool GotHit = CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, ElementsActions::FindContainedElements(CreatedDebuffSpell->GetSpellElements()), 
+							NPCOwner->GetSkill(ECharacterSkills::DEBUFFSPELLS), NPCOwner->GetStat(ECharacterStats::INTELLIGENCE), CreatedDebuffSpell->GetTypeOfSpell());
+						if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(NPCOwner); GotHit && IsValid(CombatAllies)) {
+							CombatAllies->AddSkillsProgress(ECharacterSkills::DEBUFFSPELLS, 50);
 							CombatAllies->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpDebuffSpells, true);
 						}
 						OnOverlapBeginsActions();
@@ -211,7 +215,7 @@ void ASpellObject::SetTarget(ACombatNPC* const NewTarget)
 	Target = NewTarget;
 }
 
-void ASpellObject::SetAttacker(const ACombatNPC* const NewAttacker)
+void ASpellObject::SetNPCOwner(const ACombatNPC* const NewAttacker)
 {
-	Attacker = const_cast<ACombatNPC*>(NewAttacker);
+	NPCOwner = const_cast<ACombatNPC*>(NewAttacker);
 }

@@ -681,8 +681,7 @@ void UInventoryMenu::UseButtonOnClicked()
 				if (InventoryScrollBox->GetVisibility() == ESlateVisibility::Visible && SelectedItemButtonIndex >= 0
 					&& SelectedItemButtonIndex < InventoryScrollBox->GetAllChildren().Num())
 					if (auto* InventoryEntryWidget = Cast<UInventoryScrollBoxEntryWidget>(InventoryScrollBox->GetChildAt(SelectedItemButtonIndex)); IsValid(InventoryEntryWidget))
-						if(InventoryEntryWidget->GetMainButton()->BackgroundColor != FLinearColor(0.f, 0.f, 1.f, 1.f))
-							InventoryEntryWidget->GetMainButton()->SetBackgroundColor(FLinearColor(0.f, 0.f, 0.f, 0.f));
+						InventoryEntryWidget->GetMainButton()->SetBackgroundColor(FLinearColor(0.f, 0.f, 0.f, 0.f));
 				if (IsValid(UIManagerWorldSubsystem->PickedButton))
 					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.f, 0.f, 1.f, 1.f));
 				for (uint8 Index = 0; Index < InventoryScrollBox->GetAllChildren().Num(); Index++)

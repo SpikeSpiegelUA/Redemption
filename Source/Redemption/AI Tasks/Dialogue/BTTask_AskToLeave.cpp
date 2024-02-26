@@ -27,7 +27,8 @@ EBTNodeResult::Type UBTTask_AskToLeave::ExecuteTask(UBehaviorTreeComponent& Owne
 
 	uint8 RandomNumber = FMath::RandRange(0, 100);
 	uint16 ChanceOfSuccess = CombatEnemyNPC->AskToLeaveSuccessChance + (PlayerCharacter->GetStat(ECharacterStats::LUCK) - CombatEnemyNPC->GetStat(ECharacterStats::LUCK)) * 2 +
-		(CombatEnemyNPC->MaxHP - CombatEnemyNPC->CurrentHP) / CombatEnemyNPC->MaxHP * 10;
+		(CombatEnemyNPC->MaxHP - CombatEnemyNPC->CurrentHP) / CombatEnemyNPC->MaxHP * 10 + PlayerCharacter->GetStat(ECharacterStats::CHARISMA) / 2 +
+		PlayerCharacter->GetSkill(ECharacterSkills::PERSUASION) / 10;
 
 	UIManagerWorldSubsystem->DialogueBoxWidget->GetContinueButton()->SetVisibility(ESlateVisibility::Visible);
 
@@ -35,7 +36,7 @@ EBTNodeResult::Type UBTTask_AskToLeave::ExecuteTask(UBehaviorTreeComponent& Owne
 		BlackboardComponent->SetValueAsBool("PassedDialogueCheck", true);
 		UIManagerWorldSubsystem->DialogueBoxWidget->SetDialogueText(NPCAgreeText);
 		if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
-			RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->AddSkillsProgress(ECharacterSkills::PERSUASION, 3);
+			RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->AddSkillsProgress(ECharacterSkills::PERSUASION, 100);
 			RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpPersuasion, true);
 		}
 	}
