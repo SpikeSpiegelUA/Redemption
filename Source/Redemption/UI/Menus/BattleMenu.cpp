@@ -271,6 +271,7 @@ void UBattleMenu::DefendButtonOnClicked()
 					EffectsList = EffectsManager->GetEffectsDataTable()->FindRow<FEffectsList>(FName(TEXT("DefendEffect")), ContextString, true);
 				if (EffectsList) {
 					AEffect* NewEffect = NewObject<AEffect>(this, EffectsList->EffectClass);
+					NewEffect->SetEffectStat(NewEffect->GetEffectStat() + FMath::Floor(static_cast<double>(CurrentTurnAllyPlayer->GetSkill(ECharacterSkills::DEFEND)) / 50.0));
 					CurrentTurnAllyPlayer->Effects.Add(NewEffect);
 				}
 				FTimerHandle PlayerTurnControllerTimerHandle{};
@@ -280,7 +281,7 @@ void UBattleMenu::DefendButtonOnClicked()
 					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FColor(1, 1, 1, 1));
 				DefendButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 				if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(CurrentTurnAllyPlayer); IsValid(CombatAllies)) {
-					CombatAllies->AddSkillsProgress(ECharacterSkills::DEFEND, 3);
+					CombatAllies->AddSkillsProgress(ECharacterSkills::DEFEND, 50);
 					CombatAllies->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpDefend, true);
 				}
 			}
@@ -323,6 +324,7 @@ void UBattleMenu::AttackMenuBackButtonOnClicked()
 				if (UCanvasPanelSlot* CenterMarkCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(RangeCrosshair); IsValid(CenterMarkCanvasSlot))
 					CenterMarkCanvasSlot->SetPosition(FVector2D(-52.0, -12.0));
 				RangeCrosshair->SetVisibility(ESlateVisibility::Hidden);
+				MoveCounter = 0;
 			}
 			//If attacking with item, back to item menu, otherwise back to main menu
 			UInventoryMenu* Inventory = UIManagerWorldSubsystem->InventoryMenuWidget;
@@ -417,8 +419,8 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 				uint8 UsageCount = 0;
 				for (ACombatNPC* UseTarget : UseTargets) {
 					if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH && UseTarget->CurrentHP < UseTarget->MaxHP) {
-						int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(UseTarget->MaxHP * RestorationItem->GetRestorationValuePercent() / 100,
-							UseTarget->Effects, UseTarget->GetElementalResistances(), RestorationItem->GetElementsAndTheirPercentagesStructs());
+						int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(UseTarget->MaxHP * RestorationItem->GetRestorationValuePercent() / 100,
+							UseTarget->Effects, UseTarget->GetElementalResistances(), RestorationItem->GetElementsAndTheirPercentagesStructs(), 0, 0);
 						UseTarget->CurrentHP += AmountToHeal;
 						ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
 						FString TextForCombatFloatingInformationActor = FString();
@@ -432,8 +434,8 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 						UsageCount++;
 					}
 					else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA && UseTarget->CurrentMana < UseTarget->MaxMana) {
-						int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(UseTarget->MaxMana * RestorationItem->GetRestorationValuePercent() / 100,
-							UseTarget->Effects, UseTarget->GetElementalResistances(), RestorationItem->GetElementsAndTheirPercentagesStructs());
+						int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(UseTarget->MaxMana * RestorationItem->GetRestorationValuePercent() / 100,
+							UseTarget->Effects, UseTarget->GetElementalResistances(), RestorationItem->GetElementsAndTheirPercentagesStructs(), 0, 0);
 						UseTarget->CurrentMana += AmountToRestore;
 						ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
 						FString TextForCombatFloatingInformationActor = FString();
@@ -543,11 +545,15 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 				CurrentTurnAlliesNPC->Target = SelectedCombatNPC;
 				bool GotHit = false;
 				if ((RangeCrosshairCanvasSlot->GetPosition() - TargetForCenterMark).Length() <= 90.0)
-					GotHit = SelectedCombatNPC->Execute_GetHit(SelectedCombatNPC, CurrentTurnAlliesNPC->GetRangeAttackValue(), CurrentTurnAlliesNPC->GetRangeWeaponElements(), CurrentTurnAlliesNPC->GetRangePhysicalType(), false);
+					GotHit = SelectedCombatNPC->Execute_GetHit(SelectedCombatNPC, CurrentTurnAlliesNPC->GetRangeAttackValue(), 
+						CurrentTurnAlliesNPC->GetRangeWeaponElements(), CurrentTurnAlliesNPC->GetRangePhysicalType(), 
+						CurrentTurnAlliesNPC->GetSkill(ECharacterSkills::RANGE), CurrentTurnAlliesNPC->GetStat(ECharacterStats::AGILITY), false);
 				else
-					GotHit = SelectedCombatNPC->Execute_GetHit(SelectedCombatNPC, CurrentTurnAlliesNPC->GetRangeAttackValue(), CurrentTurnAlliesNPC->GetRangeWeaponElements(), CurrentTurnAlliesNPC->GetRangePhysicalType(), true);
+					GotHit = SelectedCombatNPC->Execute_GetHit(SelectedCombatNPC, CurrentTurnAlliesNPC->GetRangeAttackValue(), 
+						CurrentTurnAlliesNPC->GetRangeWeaponElements(), CurrentTurnAlliesNPC->GetRangePhysicalType(), 
+						CurrentTurnAlliesNPC->GetSkill(ECharacterSkills::RANGE), CurrentTurnAlliesNPC->GetStat(ECharacterStats::AGILITY), true);
 				if (GotHit) {
-					CurrentTurnAlliesNPC->AddSkillsProgress(ECharacterSkills::RANGE, 3);
+					CurrentTurnAlliesNPC->AddSkillsProgress(ECharacterSkills::RANGE, 50);
 					CurrentTurnAlliesNPC->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpRange, true);
 				}
 				CurrentTurnAlliesNPC->GetRangeAmmo();
@@ -560,6 +566,7 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 				}
 				CurrentTurnAlliesNPC->SetRangeAmmo(CurrentTurnAlliesNPC->GetRangeAmmo() - 1);
 				IsAttackingWithRange = false;
+				MoveCounter = 0;
 				RangeCrosshairCanvasSlot->SetPosition(FVector2D(-52.0, -12.0));
 				RangeCrosshair->SetVisibility(ESlateVisibility::Hidden);
 			}
@@ -632,7 +639,7 @@ bool UBattleMenu::AssaultSpellUse(class UBattleMenu* const BattleMenu, class ACo
 		if (CurrentTurnNPC->CurrentMana < 0)
 			CurrentTurnNPC->CurrentMana = 0;
 	}
-	else {
+	else if(CurrentTurnNPC->SpellToUse->GetSpellCostType() == ESpellCostType::HEALTH){
 		CurrentTurnNPC->CurrentHP -= CurrentTurnNPC->SpellToUse->GetCost();
 		if (CurrentTurnNPC->CurrentHP < 0)
 			CurrentTurnNPC->CurrentHP = 0;
@@ -656,8 +663,9 @@ bool UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 	uint8 UsageCount = 0;
 	for (ACombatNPC* UseTarget : UseTargets) {
 		if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::HEALTH && UseTarget->CurrentHP < UseTarget->MaxHP && UseTarget->CurrentHP > 0) {
-			int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(UseTarget->MaxHP * SpellToUse->GetRestorationValuePercent() / 100,
-				UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
+			int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(UseTarget->MaxHP * SpellToUse->GetRestorationValuePercent() / 100,
+				UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()),
+				CurrentTurnNPC->GetSkill(ECharacterSkills::RESTORATIONSPELLS), CurrentTurnNPC->GetStat(ECharacterStats::INTELLIGENCE));
 			UseTarget->CurrentHP += AmountToHeal;
 			ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->
 				SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
@@ -672,8 +680,9 @@ bool UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 			UsageCount++;
 		}
 		else if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::MANA && UseTarget->CurrentMana < UseTarget->MaxMana && UseTarget->CurrentHP > 0) {
-			int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(UseTarget->MaxMana * SpellToUse->GetRestorationValuePercent() / 100,
-				UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
+			int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(UseTarget->MaxMana * SpellToUse->GetRestorationValuePercent() / 100,
+				UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()),
+				CurrentTurnNPC->GetSkill(ECharacterSkills::RESTORATIONSPELLS), CurrentTurnNPC->GetStat(ECharacterStats::INTELLIGENCE));
 			UseTarget->CurrentMana += AmountToRestore;
 			ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->
 				SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
@@ -721,7 +730,7 @@ bool UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 		}
 		UIManagerWorldSubsystem->SpellBattleMenuWidget->Reset(true);
 		if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(CurrentTurnNPC); IsValid(CombatAllies)) {
-			CombatAllies->AddSkillsProgress(ECharacterSkills::RESTORATIONSPELLS, 3);
+			CombatAllies->AddSkillsProgress(ECharacterSkills::RESTORATIONSPELLS, 50);
 			CombatAllies->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpRestorationSpells, true);
 		}
 		return true;
@@ -731,8 +740,11 @@ bool UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 }
 bool UBattleMenu::BuffSpellUse(const class ACreatedBuffSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC)
 {
+	ACombatAllies* CurrentTurnAlliesNPC{};
+	if (IsValid(BattleManager))
+		CurrentTurnAlliesNPC = Cast<ACombatAllies>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnCombatNPCIndex]);
 	for (ACombatNPC* TargetActor : SkillsSpellsAndEffectsActions::GetTargetsForAllies(BattleManager, SpellToUse->GetSpellRange(), SpellToUse->GetTypeOfSpell())) {
-		if (TargetActor->CurrentHP > 0) {
+		if (TargetActor->CurrentHP > 0 && IsValid(CurrentTurnAlliesNPC)) {
 			TArray<AEffect*> CreatedEffectsFromEffects{};
 			for (AEffect* Effect : SpellToUse->GetEffects()) {
 				AEffect* NewEffect = NewObject<AEffect>(this);
@@ -740,9 +752,10 @@ bool UBattleMenu::BuffSpellUse(const class ACreatedBuffSpell* const SpellToUse, 
 				CreatedEffectsFromEffects.Add(NewEffect);
 			}
 			if(TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, CreatedEffectsFromEffects, 
-				ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()), SpellToUse->GetTypeOfSpell()))
+				ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()), CurrentTurnAlliesNPC->GetSkill(ECharacterSkills::BUFFSPELLS), 
+				CurrentTurnAlliesNPC->GetStat(ECharacterStats::INTELLIGENCE), SpellToUse->GetTypeOfSpell()))
 					if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(CurrentTurnNPC); IsValid(CombatAllies)) {
-						CombatAllies->AddSkillsProgress(ECharacterSkills::BUFFSPELLS, 3);
+						CombatAllies->AddSkillsProgress(ECharacterSkills::BUFFSPELLS, 50);
 						CombatAllies->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpBuffSpells, true);
 					}
 		}
@@ -768,14 +781,18 @@ bool UBattleMenu::BuffSpellUse(const class ACreatedBuffSpell* const SpellToUse, 
 
 bool UBattleMenu::BuffSpellUse(const class APresetBuffSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC)
 {
+	ACombatAllies* CurrentTurnAlliesNPC{};
+	if (IsValid(BattleManager))
+		CurrentTurnAlliesNPC = Cast<ACombatAllies>(BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnCombatNPCIndex]);
 	for (ACombatNPC* TargetActor : SkillsSpellsAndEffectsActions::GetTargetsForAllies(BattleManager, SpellToUse->GetSpellRange(), SpellToUse->GetTypeOfSpell())) {
-		if (TargetActor->CurrentHP > 0) {
+		if (TargetActor->CurrentHP > 0 && IsValid(CurrentTurnAlliesNPC)) {
 			TArray<AEffect*> CreatedEffectsFromClasses{};
 			for (TSubclassOf<AEffect> EffectClass : SpellToUse->GetEffectsClasses()) {
 				AEffect* NewEffect = NewObject<AEffect>(this, EffectClass);
 				CreatedEffectsFromClasses.Add(NewEffect);
 			}
-			TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, CreatedEffectsFromClasses, ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()), SpellToUse->GetTypeOfSpell());
+			TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, CreatedEffectsFromClasses, ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()), 
+				CurrentTurnAlliesNPC->GetSkill(ECharacterSkills::BUFFSPELLS), CurrentTurnAlliesNPC->GetStat(ECharacterStats::INTELLIGENCE), SpellToUse->GetTypeOfSpell());
 		}
 	}
 	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
@@ -804,7 +821,7 @@ bool UBattleMenu::DebuffSpellUse(class UBattleMenu* const BattleMenu, class ACom
 		if (CurrentTurnNPC->CurrentMana < 0)
 			CurrentTurnNPC->CurrentMana = 0;
 	}
-	else {
+	else if (CurrentTurnNPC->SpellToUse->GetSpellCostType() == ESpellCostType::HEALTH) {
 		CurrentTurnNPC->CurrentHP -= CurrentTurnNPC->SpellToUse->GetCost();
 		if (CurrentTurnNPC->CurrentHP < 0)
 			CurrentTurnNPC->CurrentHP = 0;
@@ -1093,6 +1110,11 @@ UButton* UBattleMenu::GetItemButton() const
 UButton* UBattleMenu::GetSpellButton() const
 {
 	return SpellButton;
+}
+
+UButton* UBattleMenu::GetTalkButton() const
+{
+	return TalkButton;
 }
 
 UButton* UBattleMenu::GetAttackMenuBackButton() const

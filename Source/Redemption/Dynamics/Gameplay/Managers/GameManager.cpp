@@ -81,11 +81,20 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 							BattleManager->BattleEnemies.Add(SpawnedEnemy);
 						}
 					}
-					//Create allies and combat player character
+					//Shuffle Allies and create combat player character
+					//But firstly enable gravity for Allies. Yeah, I spent quite a lot of time on this, idiot.
 					TArray<ACombatAllies*> ShuffledCombatAllies{};
+					ACombatPlayerCharacter* CombatPlayerCharacter = GetWorld()->SpawnActor<ACombatPlayerCharacter>(CombatPlayerCharacterClass);
+					CombatPlayerCharacter->SetActorLocation(AlliesPlayerBattleSpawns[3]->GetActorLocation());
+					CombatPlayerCharacter->SetActorRotation(FRotator(0, 180, 0));
+					CombatPlayerCharacter->SetStartLocation(AlliesPlayerBattleSpawns[3]);
+					CombatPlayerCharacter->SetStartRotation(CombatPlayerCharacter->GetActorRotation());
+					BattleManager->BattleAlliesPlayer.Add(CombatPlayerCharacter);
+					BattleManager->CombatPlayerCharacter = CombatPlayerCharacter;
 					for (ACombatAllyNPC* CombatAllyNPC : PlayerCharacter->GetAllies())
 						ShuffledCombatAllies.Add(CombatAllyNPC);
 					ArrayActions::ShuffleArray(ShuffledCombatAllies);
+					PlayerCharacter->GetAllies().Empty();
 					for (ACombatAllies* CombatAllies : ShuffledCombatAllies)
 						PlayerCharacter->GetAllies().Add(Cast<ACombatAllyNPC>(CombatAllies));
 					for (uint8 i = 0; i < PlayerCharacter->GetAllies().Num() && i < 4; i++) {
@@ -107,13 +116,7 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 							}
 						}
 					}
-					ACombatPlayerCharacter* CombatPlayerCharacter = GetWorld()->SpawnActor<ACombatPlayerCharacter>(CombatPlayerCharacterClass);
-					CombatPlayerCharacter->SetActorLocation(AlliesPlayerBattleSpawns[3]->GetActorLocation());
-					CombatPlayerCharacter->SetActorRotation(FRotator(0, 180, 0));
-					CombatPlayerCharacter->SetStartLocation(AlliesPlayerBattleSpawns[3]);
-					CombatPlayerCharacter->SetStartRotation(CombatPlayerCharacter->GetActorRotation());
-					BattleManager->BattleAlliesPlayer.Add(CombatPlayerCharacter);
-					BattleManager->CombatPlayerCharacter = CombatPlayerCharacter;
+					//Player Character Index.
 					BattleManager->AlliesPlayerTurnQueue.Add(BattleManager->BattleAlliesPlayer.Num() - 1);
 					UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesHealthBars()[0]->PercentDelegate.Clear();
 					UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesManaBars()[0]->PercentDelegate.Clear();
@@ -129,7 +132,16 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 					BattleManager->SetBehindPlayerCameraLocation(Cast<ACombatStartLocation>(BattleManager->BattleAlliesPlayer[BattleManager->AlliesPlayerTurnQueue[0]]->GetStartLocation())->CombatCameraLocation);
 					PlayerCharacter->SetCanInput(false);
 					PlayerCharacter->SetActorLocation(FVector(1350, 5610, -960));
-					UIManagerWorldSubsystem->AlliesInfoBarsWidget->AddToViewport();
+					if (BattleManager->BattleAlliesPlayer[BattleManager->AlliesPlayerTurnQueue[0]] == CombatPlayerCharacter) {
+						UIManagerWorldSubsystem->BattleMenuWidget->GetItemButton()->SetVisibility(ESlateVisibility::Visible);
+						UIManagerWorldSubsystem->BattleMenuWidget->GetTalkButton()->SetVisibility(ESlateVisibility::Visible);
+						UIManagerWorldSubsystem->BattleMenuWidget->GetSpellButton()->SetVisibility(ESlateVisibility::Visible);
+					}
+					else {
+						UIManagerWorldSubsystem->BattleMenuWidget->GetItemButton()->SetVisibility(ESlateVisibility::Collapsed);
+						UIManagerWorldSubsystem->BattleMenuWidget->GetTalkButton()->SetVisibility(ESlateVisibility::Collapsed);
+						UIManagerWorldSubsystem->BattleMenuWidget->GetSpellButton()->SetVisibility(ESlateVisibility::Collapsed);
+					}
 					UIManagerWorldSubsystem->SkillBattleMenuWidget->ResetSkillsScrollBox();
 					for (TSubclassOf<ASpell> SpellClass : BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnCombatNPCIndex]->GetAvailableSpells())
 						UIManagerWorldSubsystem->SkillBattleMenuWidget->AddSkillEntryToSkillsScrollBox(Cast<ASpell>(SpellClass->GetDefaultObject()));
@@ -200,6 +212,7 @@ void AGameManager::EndBattle()
 						CombatAllies->ResetSkillsLeveledUp();
 						CombatAllies->SetActorLocation(FVector(-500.0, -500.0, -500.0));
 						BattleManager->BattleAlliesPlayer.RemoveAt(i);
+						CombatAllies->GetCapsuleComponent()->SetEnableGravity(false);
 					}
 				}
 				BattleManager->BattleEnemies.Empty();

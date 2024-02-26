@@ -31,15 +31,17 @@ void UInventoryScrollBoxEntryWidget::NativeConstruct()
 
 void UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnClicked()
 {
-	if(const auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem) 
-		&& IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->GetPickedItem())) {
-		if (IsValid(Cast<AEquipmentItem>(Item)))
-			UIManagerWorldSubsystem->InventoryMenuWidget->EquipButtonOnClicked();
-		else {
-			if (UIManagerWorldSubsystem->InventoryMenuWidget->GetBattleMenuButtonsForItemsBorder()->GetVisibility() == ESlateVisibility::Visible)
-				UIManagerWorldSubsystem->InventoryMenuWidget->BattleMenuItemsUseButtonOnClicked();
-			else
-				UIManagerWorldSubsystem->InventoryMenuWidget->UseButtonOnClicked();
+	if(const auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+		UIManagerWorldSubsystem->InventoryMenuWidget->SetPickedItem(Item);
+		if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->GetPickedItem())) {
+			if (IsValid(Cast<AEquipmentItem>(Item)))
+				UIManagerWorldSubsystem->InventoryMenuWidget->EquipButtonOnClicked();
+			else {
+				if (UIManagerWorldSubsystem->InventoryMenuWidget->GetBattleMenuButtonsForItemsBorder()->GetVisibility() == ESlateVisibility::Visible)
+					UIManagerWorldSubsystem->InventoryMenuWidget->BattleMenuItemsUseButtonOnClicked();
+				else
+					UIManagerWorldSubsystem->InventoryMenuWidget->UseButtonOnClicked();
+			}
 		}
 	}
 }
@@ -51,7 +53,6 @@ void UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnHovered()
 		UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
 	if (IsValid(UIManagerWorldSubsystem) && IsValid(Item)) {
 		if (UInventoryMenu* InventoryMenu = UIManagerWorldSubsystem->InventoryMenuWidget; IsValid(InventoryMenu)) {
-			InventoryMenu->SetPickedItem(Item);
 			InventoryMenu->GetItemInfoBorder()->SetVisibility(ESlateVisibility::Visible);
 			InventoryMenu->SetItemInfo(Item);
 			MainButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));

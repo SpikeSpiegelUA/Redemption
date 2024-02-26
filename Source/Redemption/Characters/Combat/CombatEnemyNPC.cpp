@@ -31,6 +31,7 @@ void ACombatEnemyNPC::BeginPlay()
 {
 	Super::BeginPlay();
 }
+
 // Called every frame
 void ACombatEnemyNPC::Tick(float DeltaTime)
 {

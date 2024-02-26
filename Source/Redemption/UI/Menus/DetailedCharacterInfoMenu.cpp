@@ -566,6 +566,7 @@ void UDetailedCharacterInfoMenu::BackButtonOnClicked()
 			UIManagerWorldSubsystem->PickedButton = GeneralCharacterInfoWidget->GetCharacterNameButton();
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			UIManagerWorldSubsystem->PartyMenuWidget->SelectedGeneralCharacterInfoIndex = 0;
 		}
 	}
 	if (MoreInfoShowed) {

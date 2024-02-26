@@ -60,7 +60,8 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 			for (ACombatNPC* CombatTarget : InventoryActions::GetTargets(RedemptionGameModeBase->GetBattleManager(), TargetBattleSide, Item->GetItemRange())) {
 				if (AAssaultItem* AssaultItem = Cast<AAssaultItem>(Item); IsValid(AssaultItem)) {
 					//Logic for special effects of the spell(frozen, burn...).
-					if (CombatTarget->Execute_GetHit(CombatTarget, AssaultItem->GetAttackValue(), AssaultItem->GetElementsAndTheirPercentagesStructs(), EPhysicalType::NONE, false)) {
+					if (CombatTarget->Execute_GetHit(CombatTarget, AssaultItem->GetAttackValue(), AssaultItem->GetElementsAndTheirPercentagesStructs(), 
+						EPhysicalType::NONE, 1, 0, false)) {
 						if (AssaultItem->GetEffectsAndTheirChances().Num() > 0) {
 							for (uint8 Index = 0; Index < AssaultItem->GetEffectsAndTheirChances().Num(); Index++) {
 								int8 Chance = FMath::RandRange(0, 100);
@@ -69,6 +70,7 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 								if (AssaultItem->GetEffectsAndTheirChances()[Index].Chance >= Chance) {
 									if (IsValid(Cast<ATurnStartDamageEffect>(AssaultItem->GetEffectsAndTheirChances()[Index].Effect->GetDefaultObject()))) {
 										if (auto* TurnStartDamageEffect = NewObject<ATurnStartDamageEffect>(this, AssaultItem->GetEffectsAndTheirChances()[Index].Effect); IsValid(TurnStartDamageEffect)) {
+											TurnStartDamageEffect->InitializeObject(NPCOwner);
 											CombatTarget->Effects.Add(TurnStartDamageEffect);
 											if (ElementsActions::FindSpellsMainElement(TurnStartDamageEffect->GetSpellElements()) == ESpellElements::FIRE) {
 												if (IsValid(RedemptionGameModeBase->GetParticlesManager()) && IsValid(RedemptionGameModeBase->GetParticlesManager()->GetFlamesEmitter()))
@@ -129,7 +131,7 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 						AEffect* NewEffect = NewObject<AEffect>(this, EffectClass);
 						EffectsArray.Add(NewEffect);
 					}
-					CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, DebuffItem->GetElementsAndTheirPercentagesStructs(), ESpellType::DEBUFF);
+					CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, DebuffItem->GetElementsAndTheirPercentagesStructs(), 0, 0, ESpellType::DEBUFF);
 					OnOverlapBeginsActions();
 				}
 			}
@@ -151,6 +153,11 @@ void AItemObject::OnOverlapBeginsActions()
 void AItemObject::SetItem(AGameItem* NewItem)
 {
 	Item = NewItem;
+}
+
+void AItemObject::SetNPCOwner(const ACombatNPC* const NewNPCOwner)
+{
+	NPCOwner = const_cast<ACombatNPC*>(NewNPCOwner);
 }
 
 void AItemObject::SetTargetBattleSide(const EBattleSide NewUserBattleSide)

@@ -21,6 +21,18 @@ void UAnimNotify_MagicAttackMiddle::Notify(USkeletalMeshComponent* MeshComp, UAn
 						BattleManager->SetCanTurnBehindPlayerCameraToTarget(false);
 						BattleManager->SetCanTurnBehindPlayerCameraToSpellObject(true);
 						BattleManager->CurrentlyUsedSpellObject = SpawnSpellObject(SpellWithSpellObject, MeshComp, CombatNPC);
+						if (IsValid(Cast<ACombatEnemyNPC>(CombatNPC))) {
+							if (CombatNPC->SpellToUse->GetSpellCostType() == ESpellCostType::MANA) {
+								CombatNPC->CurrentMana -= CombatNPC->SpellToUse->GetCost();
+								if (CombatNPC->CurrentMana < 0)
+									CombatNPC->CurrentMana = 0;
+							}
+							else if (CombatNPC->SpellToUse->GetSpellCostType() == ESpellCostType::HEALTH) {
+								CombatNPC->CurrentHP -= CombatNPC->SpellToUse->GetCost();
+								if (CombatNPC->CurrentHP < 0)
+									CombatNPC->CurrentHP = 0;
+							}
+						}
 					}
 }
 
@@ -33,7 +45,7 @@ AActor* UAnimNotify_MagicAttackMiddle::SpawnSpellObject(const ASpellWithSpellObj
 		SpawnedSpellObject->SetSpell(CombatNPC->SpellToUse);
 		SpawnedSpellObject->SetTarget(Cast<ACombatNPC>(CombatNPC->Target));
 		SpawnedSpellObject->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(SpawnedSpellObject->GetActorLocation(), CombatNPC->Target->GetActorLocation()));
-		SpawnedSpellObject->SetAttacker(CombatNPC);
+		SpawnedSpellObject->SetNPCOwner(CombatNPC);
 		if (IsValid(Cast<ACombatAllies>(MeshComp->GetOwner())))
 			SpawnedSpellObject->SetTargetBattleSide(EBattleSide::ENEMIES);
 		else if(IsValid(Cast<ACombatEnemyNPC>(MeshComp->GetOwner())))

@@ -109,6 +109,7 @@ public:
 	UButton* GetDefendButton() const;
 	UButton* GetItemButton() const;
 	UButton* GetSpellButton() const;
+	UButton* GetTalkButton() const;
 	UButton* GetAttackMenuBackButton() const;
 	UButton* GetAttackTalkInfoActionButton() const;
 	UTextBlock* GetEnemyNameTextBlock() const;

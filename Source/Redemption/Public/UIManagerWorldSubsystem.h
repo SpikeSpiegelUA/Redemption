@@ -24,7 +24,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	class UButton* PickedButton{};
 
-	//Index of the selected button in array of other elements(usually buttons. For example children on a horizontal box
+	//Index of the selected button in array of other elements(usually buttons). For example children on a horizontal box
 	int8 PickedButtonIndex = 0;
 
 	//The widget instances

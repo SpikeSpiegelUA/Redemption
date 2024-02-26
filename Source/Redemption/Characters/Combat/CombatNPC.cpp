@@ -30,11 +30,18 @@ ACombatNPC::ACombatNPC()
 void ACombatNPC::BeginPlay()
 {
 	Super::BeginPlay();
+	//Can put it into the CombatEnemyNPC class, but it doesn't look pretty, so here we are.
+	if (IsValid(Cast<ACombatEnemyNPC>(this))) {
+		MaxHP += GetStat(ECharacterStats::ENDURANCE) * 10;
+		MaxMana += GetStat(ECharacterStats::WILL) * 10;
+		CurrentHP = MaxHP;
+		CurrentMana = MaxMana;
+	}
 	//Set up properties for FloatingHealthBar
 	FloatingHealthBarWidget = Cast<UFloatingHealthBarWidget>(FloatingHealthBarWidgetComponent->GetWidget());
 	if (IsValid(FloatingHealthBarWidget)) {
 		FloatingHealthBarWidget->HP = CurrentHP;
-		FloatingHealthBarWidget->MaxHP = CurrentHP;
+		FloatingHealthBarWidget->MaxHP = MaxHP;
 	}
 	SkillsSpellsAndEffectsActions::InitializeElementalResistances(ElementalResistances);
 	SkillsSpellsAndEffectsActions::InitializePhysicalResistances(PhysicalResistances);
@@ -71,7 +78,7 @@ void ACombatNPC::Tick(float DeltaTime)
 
 }
 
-bool ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements, const ESpellType BuffOrDebuff)
+bool ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements, int ValueOfSkill, int ValueOfStat, const ESpellType BuffOrDebuff)
 {
 	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
  		if (ABattleManager* BattleManager = RedemptionGameModeBase->GetBattleManager(); IsValid(BattleManager)) {
@@ -79,8 +86,8 @@ bool ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffec
 				GetActorLocation(), GetActorRotation());
 			FString TextForCombatFloatingInformationActor = FString();
 			uint8 EvasionRandomNumber = FMath::RandRange(0, 100);
-			int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance + GetStat(ECharacterStats::AGILITY) * 2,
-				Effects, EEffectArea::EVASION), Effects, ElementalResistances, ContainedElements);
+			int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistancesSkillsAndStats(SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance,
+				Effects, EEffectArea::EVASION), Effects, ElementalResistances, ContainedElements, ValueOfSkill, ValueOfStat, GetStat(ECharacterStats::PERCEPTION));
 			if (EvasionRandomNumber <= ChanceOfEvasion) {
 				if(BuffOrDebuff == ESpellType::BUFF)
 					TextForCombatFloatingInformationActor.Append("Buff missed!");
@@ -107,23 +114,33 @@ bool ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffec
 	return false;
 }
 
-bool ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, const EPhysicalType ContainedPhysicalType, bool ForcedMiss)
+bool ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, const EPhysicalType ContainedPhysicalType, int ValueOfSkill, int ValueOfStat, bool ForcedMiss)
 {
 	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 		if (ABattleManager* BattleManager = RedemptionGameModeBase->GetBattleManager(); IsValid(BattleManager)) {
 			ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), GetActorLocation(), GetActorRotation());
 			FString TextForCombatFloatingInformationActor = FString();
 			uint8 EvasionRandomNumber = FMath::RandRange(0, 100);
-			int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance + GetStat(ECharacterStats::AGILITY) * 2, Effects, EEffectArea::EVASION);
+			int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance + GetStat(ECharacterStats::PERCEPTION) * 2, Effects, EEffectArea::EVASION);
 			if (EvasionRandomNumber <= ChanceOfEvasion || ForcedMiss) {
 				TextForCombatFloatingInformationActor.Append("Miss!");
 				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 				return false;
 			}
 			else {
-				int ValueOfArmor = SkillsSpellsAndEffectsActions::GetValueAfterEffects(ArmorValue, Effects, EEffectArea::ARMOR);
-				int ValueOfAttackWithResistances = SkillsSpellsAndEffectsActions::GetAttackValueAfterResistances(ValueOfAttack, Effects, ElementalResistances, ContainedElements,  ContainedPhysicalType, PhysicalResistances);
-				if (CurrentHP - (ValueOfAttackWithResistances - ValueOfArmor / 10) < 0) {
+				int ValueOfArmor = SkillsSpellsAndEffectsActions::GetValueAfterEffects(ArmorValue + GetStat(ECharacterStats::ENDURANCE) * 10,
+					Effects, EEffectArea::ARMOR);
+				int ValueOfAttackWithResistances = SkillsSpellsAndEffectsActions::GetAttackValueAfterResistancesSkillsAndStats(ValueOfAttack, Effects, ElementalResistances, 
+					ContainedElements,  ContainedPhysicalType, PhysicalResistances, ValueOfSkill, ValueOfStat);
+				int FinalValueOfAttack{};
+				if (ValueOfAttackWithResistances <= 0)
+					FinalValueOfAttack = ValueOfAttackWithResistances;
+				else {
+					FinalValueOfAttack = ValueOfAttackWithResistances - ValueOfArmor / 10;
+					if (FinalValueOfAttack < 0)
+						FinalValueOfAttack = 0;
+				}
+				if (CurrentHP - FinalValueOfAttack < 0) {
 					CurrentHP = 0;
 					if (IsValid(DizzyEmitterComponent)) {
 						DizzyEmitterComponent->DeactivateSystem();

@@ -12,6 +12,10 @@ bool UPartyMenuGeneralCharacterInfo::Initialize()
 		CharacterNameButton->OnClicked.AddDynamic(this, &UPartyMenuGeneralCharacterInfo::CharacterNameButtonOnClicked);
 		CharacterNameButton->OnHovered.AddDynamic(this, &UPartyMenuGeneralCharacterInfo::CharacterNameButtonOnHovered);
 	}
+	if (IsValid(PerksLevelingUpButton)) {
+		PerksLevelingUpButton->OnClicked.AddDynamic(this, &UPartyMenuGeneralCharacterInfo::PerksLevelingUpButtonOnClicked);
+		PerksLevelingUpButton->OnHovered.AddDynamic(this, &UPartyMenuGeneralCharacterInfo::PerksLevelingUpButtonOnHovered);
+	}
 	if (!bSuccess) return false;
 	return bSuccess;
 }
@@ -90,7 +94,7 @@ void UPartyMenuGeneralCharacterInfo::CharacterNameButtonOnClicked()
 						UIManagerWorldSubsystem->DetailedCharacterInfoMenuWidget->SetCharacterInfoForPlayer(PlayerCharacter);
 					}
 					if (IsValid(UIManagerWorldSubsystem->PickedButton))
-						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.5f, 0.5f, 0.5f, 0.5f));
 					UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->DetailedCharacterInfoMenuWidget->GetToggleInfoButton();
 					UIManagerWorldSubsystem->PickedButtonIndex = 0;
 					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
@@ -98,18 +102,42 @@ void UPartyMenuGeneralCharacterInfo::CharacterNameButtonOnClicked()
 			}
 }
 
-void UPartyMenuGeneralCharacterInfo::CharacterNameButtonOnHovered()
+void UPartyMenuGeneralCharacterInfo::PerksLevelingUpButtonOnClicked()
+{
+
+}
+
+void UPartyMenuGeneralCharacterInfo::ButtonOnHoveredActions(UButton* const HoveredButton, const int8 Index)
 {
 	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
 		if (IsValid(UIManagerWorldSubsystem->PickedButton))
-			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
-		UIManagerWorldSubsystem->PickedButton = CharacterNameButton;
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.5f, 0.5f, 0.5f, 1.f));
+		UIManagerWorldSubsystem->PickedButton = HoveredButton;
 		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
-		UIManagerWorldSubsystem->PickedButtonIndex = 0;
-		if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
-			if(IsValid(UIManagerWorldSubsystem->PartyMenuWidget))
-				UIManagerWorldSubsystem->PartyMenuWidget->IsSelectingCharacter = true;
+		UIManagerWorldSubsystem->PickedButtonIndex = Index;
+		if (IsValid(UIManagerWorldSubsystem->PartyMenuWidget)) {
+			for (uint8 LoopIndex = 0; Index < UIManagerWorldSubsystem->PartyMenuWidget->GetCharactersHorizontalBox()->GetAllChildren().Num(); LoopIndex++)
+				if (const auto* const PartyMenuGeneralCharacterInfo = Cast<UPartyMenuGeneralCharacterInfo>(
+					UIManagerWorldSubsystem->PartyMenuWidget->GetCharactersHorizontalBox()->GetChildAt(LoopIndex)); IsValid(PartyMenuGeneralCharacterInfo)) {
+					if (PartyMenuGeneralCharacterInfo->GetPerksLevelingUpButton() == UIManagerWorldSubsystem->PickedButton ||
+						PartyMenuGeneralCharacterInfo->GetCharacterNameButton() == UIManagerWorldSubsystem->PickedButton) {
+						UIManagerWorldSubsystem->PartyMenuWidget->SelectedGeneralCharacterInfoIndex = LoopIndex;
+						break;
+					}
+				}
+			UIManagerWorldSubsystem->PartyMenuWidget->IsSelectingCharacter = true;
+		}
 	}
+}
+
+void UPartyMenuGeneralCharacterInfo::PerksLevelingUpButtonOnHovered()
+{
+	ButtonOnHoveredActions(PerksLevelingUpButton, 1);
+}
+
+void UPartyMenuGeneralCharacterInfo::CharacterNameButtonOnHovered()
+{
+	ButtonOnHoveredActions(CharacterNameButton, 0);
 }
 
 void UPartyMenuGeneralCharacterInfo::SetCharacterNameTextBlockText(const FText& TextToSet)
@@ -132,6 +160,11 @@ void UPartyMenuGeneralCharacterInfo::SetCharacterManaTextBlockText(const FText& 
 	CharacterManaTextBlock->SetText(TextToSet);
 }
 
+void UPartyMenuGeneralCharacterInfo::SetPerksLevelingUpTextBlockText(const FText& TextToSet)
+{
+	PerksLevelingUpTextBlock->SetText(TextToSet);
+}
+
 void UPartyMenuGeneralCharacterInfo::SetCharacterPortraitImage(const UTexture* const ImageToSet)
 {
 	CharacterPortraitImage->Brush.SetResourceObject(const_cast<UTexture*>(ImageToSet));
@@ -141,4 +174,9 @@ void UPartyMenuGeneralCharacterInfo::SetCharacterPortraitImage(const UTexture* c
 UButton* UPartyMenuGeneralCharacterInfo::GetCharacterNameButton() const
 {
 	return CharacterNameButton;
+}
+
+UButton* UPartyMenuGeneralCharacterInfo::GetPerksLevelingUpButton() const
+{
+	return PerksLevelingUpButton;
 }

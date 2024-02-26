@@ -25,6 +25,8 @@ private:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
 	class UButton* CharacterNameButton;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UButton* PerksLevelingUpButton;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
 	class UImage* CharacterPortraitImage;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
 	class UTextBlock* CharacterNameTextBlock;
@@ -34,20 +36,31 @@ private:
 	class UTextBlock* CharacterHPTextBlock;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
 	class UTextBlock* CharacterManaTextBlock;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, AllowPrivateAccess = true))
+	class UTextBlock* PerksLevelingUpTextBlock;
 
 	UFUNCTION()
 	void CharacterNameButtonOnClicked();
 	UFUNCTION()
+	void PerksLevelingUpButtonOnClicked();
+	UFUNCTION()
 	void CharacterNameButtonOnHovered();
+	UFUNCTION()
+	void PerksLevelingUpButtonOnHovered();
+
+	void ButtonOnHoveredActions(UButton* const HoveredButton, const int8 Index);
 public:
 	void SetCharacterPortraitImage(const UTexture* const ImageToSet);
 	void SetCharacterNameTextBlockText(const FText& TextToSet);
 	void SetCharacterLevelTextBlockText(const FText& TextToSet);
 	void SetCharacterHPTextBlockText(const FText& TextToSet);
 	void SetCharacterManaTextBlockText(const FText& TextToSet);
+	void SetPerksLevelingUpTextBlockText(const FText& TextToSet);
+
 	void SetCharacterInfo(const ACombatAllyNPC* const AllyToSet);
 	void SetCharacterInfo(const APlayerCharacter* const PlayerToSet);
 
 	ACombatAllyNPC* Ally{};
 	UButton* GetCharacterNameButton() const;
+	UButton* GetPerksLevelingUpButton() const;
 };

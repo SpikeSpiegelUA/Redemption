@@ -42,6 +42,7 @@ protected:
 public:
 	void SetGoldTextBlock(const FText& TextToSet);
 	void SetCharacterPortraitImage(const UTexture* const ImageToSet);
+	void ButtonOnHoveredActions(UButton* const HoveredButton, const int8 Index);
 
 	UTextBlock* GetGoldTextBlock() const;
 	UButton* GetContinueButton() const;
@@ -61,4 +62,5 @@ public:
 protected:
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
+	int8 CurrentCharacterIndex{};
 };

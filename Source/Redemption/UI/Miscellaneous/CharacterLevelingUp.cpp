@@ -30,6 +30,11 @@ void UCharacterLevelingUp::AddLevelingUpWidgetToLevelingUpScrollBox(ULevelingUpE
 	LevelingUpScrollBox->AddChild(WidgetToAdd);
 }
 
+void UCharacterLevelingUp::ClearLevelingUpScrollBox()
+{
+	LevelingUpScrollBox->ClearChildren();
+}
+
 void UCharacterLevelingUp::SetNextLevelProgressBarValue(const float Value)
 {
 	NextLevelProgressBar->SetPercent(Value);

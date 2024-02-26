@@ -18,18 +18,18 @@ void ACombatAllyNPC::BeginPlay()
 	Super::BeginPlay();
 	if (URedemptionGameInstance* RedemptionGameInstance = GetWorld()->GetGameInstance<URedemptionGameInstance>(); IsValid(RedemptionGameInstance))
 		Execute_LoadObjectFromGameInstance(this, RedemptionGameInstance);
-	if (const auto* const PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter())) {
-		if (const auto* const UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
-			UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesHealthBars()[PlayerCharacter->GetAllies().Num() + 1]->PercentDelegate.Clear();
-			UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesManaBars()[PlayerCharacter->GetAllies().Num() + 1]->PercentDelegate.Clear();
-			UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesInfoVerticalBoxes()[PlayerCharacter->GetAllies().Num() + 1]->SetVisibility(ESlateVisibility::Visible);
-			UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesHealthBars()[PlayerCharacter->GetAllies().Num() + 1]->PercentDelegate.BindUFunction(this, "GetHealthPercentage");
-			UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesManaBars()[PlayerCharacter->GetAllies().Num() + 1]->PercentDelegate.BindUFunction(this, "GetManaPercentage");
-			UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesHealthBars()[PlayerCharacter->GetAllies().Num() + 1]->SynchronizeProperties();
-			UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesManaBars()[PlayerCharacter->GetAllies().Num() + 1]->SynchronizeProperties();
-			UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesNameTextBlockes()[PlayerCharacter->GetAllies().Num() + 1]->SetText(FText::FromName(this->GetCharacterName()));
-		}
-	}
+	if (const auto* const PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()))
+		if (const auto* const UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+			if (UIManagerWorldSubsystem->AlliesInfoBarsWidget->IsInViewport()) {
+				UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesHealthBars()[PlayerCharacter->GetAllies().Num() + 1]->PercentDelegate.Clear();
+				UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesManaBars()[PlayerCharacter->GetAllies().Num() + 1]->PercentDelegate.Clear();
+				UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesInfoVerticalBoxes()[PlayerCharacter->GetAllies().Num() + 1]->SetVisibility(ESlateVisibility::Visible);
+				UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesHealthBars()[PlayerCharacter->GetAllies().Num() + 1]->PercentDelegate.BindUFunction(this, "GetHealthPercentage");
+				UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesManaBars()[PlayerCharacter->GetAllies().Num() + 1]->PercentDelegate.BindUFunction(this, "GetManaPercentage");
+				UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesHealthBars()[PlayerCharacter->GetAllies().Num() + 1]->SynchronizeProperties();
+				UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesManaBars()[PlayerCharacter->GetAllies().Num() + 1]->SynchronizeProperties();
+				UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesNameTextBlockes()[PlayerCharacter->GetAllies().Num() + 1]->SetText(FText::FromName(this->GetCharacterName()));
+			}
 }
 
 // Called every frame

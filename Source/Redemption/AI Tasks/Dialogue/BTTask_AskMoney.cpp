@@ -27,13 +27,15 @@ EBTNodeResult::Type UBTTask_AskMoney::ExecuteTask(UBehaviorTreeComponent& OwnerC
 
 	uint8 RandomNumber = FMath::RandRange(0, 100);
 	uint16 ChanceOfSuccess = CombatEnemyNPC->AskMoneyItemSuccessChance + (PlayerCharacter->GetStat(ECharacterStats::LUCK) - CombatEnemyNPC->GetStat(ECharacterStats::LUCK)) * 2 +
-		(CombatEnemyNPC->MaxHP - CombatEnemyNPC->CurrentHP) / CombatEnemyNPC->MaxHP * 10;
+		(CombatEnemyNPC->MaxHP - CombatEnemyNPC->CurrentHP) / CombatEnemyNPC->MaxHP * 10 + PlayerCharacter->GetStat(ECharacterStats::CHARISMA) / 2 +
+		PlayerCharacter->GetSkill(ECharacterSkills::PERSUASION) / 10;
 
 	UIManagerWorldSubsystem->DialogueBoxWidget->GetContinueButton()->SetVisibility(ESlateVisibility::Visible);
 
 	if (RandomNumber < ChanceOfSuccess) {
 		BlackboardComponent->SetValueAsBool("PassedDialogueCheck", true);
-		uint16 RandomSumOfMoney = FMath::RandRange(1, 10 * PlayerCharacter->Level + PlayerCharacter->GetStat(ECharacterStats::LUCK) * 10);
+		uint16 RandomSumOfMoney = FMath::RandRange(1, 5 * PlayerCharacter->Level + PlayerCharacter->GetStat(ECharacterStats::LUCK) * 5 + 
+			PlayerCharacter->GetSkill(ECharacterSkills::PERSUASION) / 2);
 		FString StringToSet = NPCAgreeText.ToString();
 		StringToSet.Append("(The amount of gold you got: ");
 		StringToSet.AppendInt(RandomSumOfMoney);
@@ -42,7 +44,7 @@ EBTNodeResult::Type UBTTask_AskMoney::ExecuteTask(UBehaviorTreeComponent& OwnerC
 		PlayerCharacter->Gold += RandomSumOfMoney;
 		CombatEnemyNPC->AskMoneyItemSuccessChance -= 10;
 		if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
-			RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->AddSkillsProgress(ECharacterSkills::PERSUASION, 3);
+			RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->AddSkillsProgress(ECharacterSkills::PERSUASION, 100);
 			RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpPersuasion, true);
 		}
 	}

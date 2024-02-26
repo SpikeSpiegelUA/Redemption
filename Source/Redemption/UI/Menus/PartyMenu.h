@@ -34,6 +34,7 @@ private:
 	UFUNCTION()
 	void BackButtonOnHovered();
 public:
+	//Create GeneralCharacterInfo widgets for allies and set information to Player Character's widget.
 	void UpdateCharacterInfo(const TArray<ACombatAllyNPC*>& Allies);
 
 	UFUNCTION()
@@ -44,4 +45,6 @@ public:
 
 	//Need this boolean to control whether the player is selecting one of the character buttons or another button(BackButton, e.g.);
 	bool IsSelectingCharacter = true;
+	//Need this primarily for keyboard control logic. Store an index of the currently selected GeneralCharacterInfo.
+	int8 SelectedGeneralCharacterInfoIndex{};
 };

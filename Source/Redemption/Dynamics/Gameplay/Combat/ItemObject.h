@@ -26,6 +26,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void SetItem(class AGameItem* NewItem);
+	void SetNPCOwner(const class ACombatNPC* const NewNPCOwner);
 	void SetTargetBattleSide(const EBattleSide NewTargetBattleSide);
 private:
 	UFUNCTION()
@@ -35,6 +36,7 @@ private:
 		UBoxComponent* BoxComponent {};
 
 	class AGameItem* Item{};
+	class ACombatNPC* NPCOwner{};
 	EBattleSide TargetBattleSide{};
 	//On overlap with the player or an enemy we need to destroy this object and set timer for turn change
 	void OnOverlapBeginsActions();
