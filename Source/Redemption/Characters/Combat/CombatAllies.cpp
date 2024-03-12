@@ -115,6 +115,16 @@ const TMap<ECharacterSkills, int>& ACombatAllies::GetSkillsProgressMap() const
 	return SkillsProgressMap;
 }
 
+const TArray<FText>& ACombatAllies::GetPerksCategoryNames() const
+{
+	return PerksCategoryNames;
+}
+
+const TArray<TSubclassOf<APerk>>& ACombatAllies::GetAvailablePerks() const
+{
+	return AvailablePerks;
+}
+
 const bool ACombatAllies::GetSkillsLeveledUp(const ESkillsLeveledUp SkillToGet) const
 {
 	return BitmapsActions::TestBit(SkillsLeveledUpBitmaskCode, static_cast<int32>(SkillToGet));

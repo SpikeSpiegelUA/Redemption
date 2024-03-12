@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effects\Effect.h"
 #include "Engine/DataTable.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\Spell.h"
 #include "..\Dynamics\World\Items\GameItem.h"

@@ -30,98 +30,105 @@ class REDEMPTION_API USpellBattleMenu : public UUserWidget
 {
 	GENERATED_BODY()
 	
-private:
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+protected:
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* FireElementButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* WaterElementButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* WindElementButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* EarthElementButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* LightningElementButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* BloodElementButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* HolyElementButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* DarkElementButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* SingleSpellRangeButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* NeighborsSpellRangeButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* EveryoneSpellRangeButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButtonWithNeighbors* RestorationSpellTypeButtonWithNeighbors;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButtonWithNeighbors* AssaultSpellTypeButtonWithNeighbors;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButtonWithNeighbors* BuffSpellTypeButtonWithNeighbors;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButtonWithNeighbors* DebuffSpellTypeButtonWithNeighbors;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* ShowResultSpellButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* BackToSpellCreationButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* UseButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* UseUniqueSpellButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* BackButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* ResetButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* LearnedSpellsJournalButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* ToggleSpellInfoButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UHorizontalBox* SelectedElementsHorizontalBox;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UHorizontalBox* SelectedSpellTypeHorizontalBox;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UHorizontalBox* SelectedSpellRangeHorizontalBox;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* NotificationTextBlock;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* ToggleSpellInfoTextBlock;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* SelectedElementsBorder;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* SelectedSpellTypeBorder;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UBorder* SelectedSpellRangeBorder;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* NotificationBorder;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UScaleBox* HintScaleBox;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 		TSubclassOf<USelectedElementEntryWidget> SelectedElementEntryWidgetClass{};
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 		TSubclassOf<USelectedSpellTypeEntryWidget> SelectedSpellTypeEntryWidgetClass{};
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 		TSubclassOf<USelectedSpellRangeEntryWidget> SelectedSpellRangeEntryWidgetClass{};
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 		TSubclassOf<USimpleTooltip> SimpleTooltipClass{};
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite)
 		USelectedElementEntryWidget* SelectedElementEntryWidget {};
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite)
 		USelectedSpellTypeEntryWidget* SelectedSpellTypeEntryWidget {};
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite)
 		USelectedSpellRangeEntryWidget* SelectedSpellRangeEntryWidget{};
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite)
 		USimpleTooltip* SimpleTooltipWidget{};
 	UPROPERTY()
 		ASpell* CreatedSpell = nullptr;
 	UPROPERTY()
 		class UUIManagerWorldSubsystem* UIManagerWorldSubsystem{};
 
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+		UWidgetAnimation* NotificationShowAndHide;
+
 	TArray<ESpellElements> SelectedSpellElements;
 	ESpellType SelectedSpellType{};
 	ESpellRange SelectedSpellRange{};
+	//If the current character has a "Blood Magic" perk, then this will be Visible, otherwise Hidden.
+	//I created this variable, cause I don't want to use bool or make perks check everytime I need to set BloodElementButton's visibility.
+	ESlateVisibility BloodElementButtonVisibility{};
 
-	FTimerHandle HideNotificationTimerHandle{};
 	FTimerHandle ShowTooltipTimerHandle{};
 
 	UFUNCTION()
@@ -211,9 +218,6 @@ private:
 
 	[[nodiscard]] const bool CheckIfUniqueSpellAlreadyAddedToLearned(const ASpell* const SpellToCheck) const;
 
-	UFUNCTION()
-		void HideNotificationAndClearItsTimer();
-
 	//Elements selection logic. Create widget and add them to a dedicated horizontal box.
 	void CreateSelectedElementWidgetAndAddToHorizontalBox(const UTexture* const Icon, ESpellElements Element);
 	//Spell type selection logic. Create widget and add it to a dedicated border.
@@ -237,7 +241,7 @@ private:
 		class APlayerCharacter* PlayerCharacter{};
 
 	bool UniqueSpellInfoShown = false;
-protected:
+
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
 
@@ -274,7 +278,7 @@ public:
 	[[nodiscard]] ASpell* FindUniqueSpell(const TArray<TSubclassOf<ASpell>>&CorrespondingUniqueSpells, const TArray<ESpellElements>& SpellElements, const ESpellType SpellType);
 	//Set CreatedSpell to found unique spell or nullptr.
 	void SetUniqueCreatedSpell(const TArray<ESpellElements>& SpellElements, ESpellType TypeOfTheSpell);
-	void CreateNotification(const FText& NotificationText);
+	void ActivateNotification(const FText& NotificationText);
 	void ShowSpellTypesButtonsHideElementsAndRangeButtons();
 	void ShowElementsButtonsHideSpellTypesAndRangeButtons();
 	void ShowRangeButtonsHideSpellTypesAndElementsButtons();
@@ -291,7 +295,7 @@ public:
 	void ResetUIKeyboardControlLogic();
 	//Works for standars spells as well as for unique spells.
 	//CreateNotificationIfCreatedSpellIsNotValid - if true, then will create "Unique spell does not exist"  notification if CreatedSpell is not valid.
-	void UseSpell(bool CreateNotificationIfCreatedSpellIsNotValid = false);
+	void UseSpell(const bool UniqueSpell, const bool CreateNotificationIfCreatedSpellIsNotValid = false);
 
 	UFUNCTION()
 	void BackButtonOnClicked();

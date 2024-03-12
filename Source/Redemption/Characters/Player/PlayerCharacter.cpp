@@ -5,17 +5,19 @@
 
 #include "..\UI\Screens\LoadingScreen.h"
 #include "..\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
+#include "..\UI\Miscellaneous\CharacterPerks.h"
+#include "..\UI\Menus\PerksLevelingUpMenu.h"
+#include "..\UI\Menus\MainMenu.h"
 #include "..\Dynamics\World\LootInTheWorld.h"
 #include "..\Dynamics\Logic\Interfaces\DialogueActionsInterface.h"
 #include "..\Characters\NonCombat\TownNPC.h"
-#include "..\Dynamics\World\Items\WeaponItem.h"
-#include "..\Dynamics\World\Items\ArmorItem.h"
-#include "..\Dynamics\Gameplay\Skills and Effects\EffectWithPlainModifier.h"
+#include "..\Dynamics\World\Items\Equipment\WeaponItem.h"
+#include "..\Dynamics\World\Items\Equipment\ArmorItem.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effects\EffectWithPlainModifier.h"
 #include "..\Miscellaneous\ElementsActions.h"
 #include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "..\Characters\Combat\CombatPlayerCharacter.h"
 #include "..\Miscellaneous\SkillsSpellsAndEffectsActions.h"
-#include "..\UI\Menus\MainMenu.h"
 #include "GameFramework/TouchInterface.h"
 #include "Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h"
 #include "Components/StackBox.h"
@@ -422,8 +424,82 @@ void APlayerCharacter::InputScrollLeft()
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 						UIManagerWorldSubsystem->PickedButtonIndex = 0;
 						UIManagerWorldSubsystem->PartyMenuWidget->SelectedGeneralCharacterInfoIndex = UIManagerWorldSubsystem->PartyMenuWidget->SelectedGeneralCharacterInfoIndex - 1;
+					}
+			}
+	}
+	else if (IsValid(UIManagerWorldSubsystem->PerksLevelingUpMenuWidget) && UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->IsInViewport()) {
+		if (UIManagerWorldSubsystem->PickedButton != UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetBackButton() &&
+			UIManagerWorldSubsystem->PickedButton != UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetUnlockButton()) {
+			TArray<UWidget*> Buttons{};
+			bool IsCategory{};
+			for (UWidget* Widget : UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetPerksVerticalBox()->GetAllChildren())
+				if (UIManagerWorldSubsystem->PickedButton == Widget) {
+					Buttons = UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetCategoryVerticalBox()->GetAllChildren();
+					break;
+				}
+			if (Buttons.Num() == 0) {
+				for (UWidget* Widget : UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetCategoryVerticalBox()->GetAllChildren())
+					if (UIManagerWorldSubsystem->PickedButton == Widget) {
+						IsCategory = true;
+						Buttons = UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetPerksVerticalBox()->GetAllChildren();
+						break;
+					}
+			}
+			if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+				if (IsCategory) {
+					if (UIManagerWorldSubsystem->CharacterPerksMenuWidget->CurrentlySelectedCategoryIndex == UIManagerWorldSubsystem->PickedButtonIndex)
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+					else
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+				}
+				else {
+					if (auto* const PickedButtonWithActorClass = Cast<UButtonWithActorClass>(UIManagerWorldSubsystem->PickedButton); IsValid(PickedButtonWithActorClass)) {
+						if (PickedButtonWithActorClass->ActorClass == UIManagerWorldSubsystem->CharacterPerksMenuWidget->CurrentlySelectedPerkClass)
+							PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 0.f, 1.f, 1.f));
+						else {
+							bool IsActivated = false;
+							PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 0.f, 1.f, 1.f));
+							if (IsValid(UIManagerWorldSubsystem->CharacterPerksMenuWidget->PerksOwner)) {
+								for (TSubclassOf<APerk> ActivatedPerkClass : UIManagerWorldSubsystem->CharacterPerksMenuWidget->PerksOwner->ActivatedPerks) {
+									if (ActivatedPerkClass == PickedButtonWithActorClass->ActorClass) {
+										PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+										IsActivated = true;
+										break;
+									}
+								}
+							}
+							else if (const auto* const PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+								for (TSubclassOf<APerk> ActivatedPerkClass : PlayerCharacter->ActivatedPerks) {
+									if (ActivatedPerkClass == PickedButtonWithActorClass->ActorClass) {
+										PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+										IsActivated = true;
+										break;
+									}
+								}
+							}
+							if (!IsActivated)
+								PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+						}
+					}
 				}
 			}
+			UIManagerWorldSubsystem->PickedButton = Cast<UButton>(Buttons[UIManagerWorldSubsystem->PickedButtonIndex]);
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+		}
+		else {
+			if (UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetUnlockButton()->GetVisibility() == ESlateVisibility::Visible) {
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+				if (UIManagerWorldSubsystem->PickedButton == UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetUnlockButton())
+					UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetBackButton();
+				else if (UIManagerWorldSubsystem->PickedButton == UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetBackButton())
+					UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetUnlockButton();
+				else
+					UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetBackButton();
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			}
+		}
 	}
 	if ((IsValid(UIManagerWorldSubsystem->SpellBattleMenuWidget) && UIManagerWorldSubsystem->SpellBattleMenuWidget->IsInViewport()) || 
 		(IsValid(UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget) && UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->IsInViewport())
@@ -530,6 +606,80 @@ void APlayerCharacter::InputScrollRight()
 						UIManagerWorldSubsystem->PartyMenuWidget->SelectedGeneralCharacterInfoIndex = UIManagerWorldSubsystem->PartyMenuWidget->SelectedGeneralCharacterInfoIndex + 1;
 				}
 			}
+	}
+	else if (IsValid(UIManagerWorldSubsystem->PerksLevelingUpMenuWidget) && UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->IsInViewport()) {
+		if (UIManagerWorldSubsystem->PickedButton != UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetBackButton() &&
+			UIManagerWorldSubsystem->PickedButton != UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetUnlockButton()) {
+			TArray<UWidget*> Buttons{};
+			bool IsCategory{};
+			for (UWidget* Widget : UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetPerksVerticalBox()->GetAllChildren())
+				if (UIManagerWorldSubsystem->PickedButton == Widget) {
+					Buttons = UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetCategoryVerticalBox()->GetAllChildren();
+					break;
+				}
+			if (Buttons.Num() == 0) {
+				for (UWidget* Widget : UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetCategoryVerticalBox()->GetAllChildren())
+					if (UIManagerWorldSubsystem->PickedButton == Widget) {
+						IsCategory = true;
+						Buttons = UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetPerksVerticalBox()->GetAllChildren();
+						break;
+					}
+			}
+			if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+				if (IsCategory) {
+					if(UIManagerWorldSubsystem->CharacterPerksMenuWidget->CurrentlySelectedCategoryIndex == UIManagerWorldSubsystem->PickedButtonIndex)
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+					else
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+				}
+				else {
+					if (auto* const PickedButtonWithActorClass = Cast<UButtonWithActorClass>(UIManagerWorldSubsystem->PickedButton); IsValid(PickedButtonWithActorClass)) {
+						if (PickedButtonWithActorClass->ActorClass == UIManagerWorldSubsystem->CharacterPerksMenuWidget->CurrentlySelectedPerkClass)
+							PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 0.f, 1.f, 1.f));
+						else {
+							bool IsActivated = false;
+							PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 0.f, 1.f, 1.f));
+							if (IsValid(UIManagerWorldSubsystem->CharacterPerksMenuWidget->PerksOwner)) {
+								for (TSubclassOf<APerk> ActivatedPerkClass : UIManagerWorldSubsystem->CharacterPerksMenuWidget->PerksOwner->ActivatedPerks) {
+									if (ActivatedPerkClass == PickedButtonWithActorClass->ActorClass) {
+										PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+										IsActivated = true;
+										break;
+									}
+								}
+							}
+							else if (const auto* const PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+								for (TSubclassOf<APerk> ActivatedPerkClass : PlayerCharacter->ActivatedPerks) {
+									if (ActivatedPerkClass == PickedButtonWithActorClass->ActorClass) {
+										PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+										IsActivated = true;
+										break;
+									}
+								}
+							}
+							if (!IsActivated)
+								PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+						}
+					}
+				}
+			}
+			UIManagerWorldSubsystem->PickedButton = Cast<UButton>(Buttons[UIManagerWorldSubsystem->PickedButtonIndex]);
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+		}
+		else {
+			if (UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetUnlockButton()->GetVisibility() == ESlateVisibility::Visible) {
+				if (IsValid(UIManagerWorldSubsystem->PickedButton))
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+				if (UIManagerWorldSubsystem->PickedButton == UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetUnlockButton())
+					UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetBackButton();
+				else if (UIManagerWorldSubsystem->PickedButton == UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetBackButton())
+					UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetUnlockButton();
+				else
+					UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetBackButton();
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+				UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			}
+		}
 	}
 	if ((IsValid(UIManagerWorldSubsystem->SpellBattleMenuWidget) && UIManagerWorldSubsystem->SpellBattleMenuWidget->IsInViewport()) || 
 		(IsValid(UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget) && UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->IsInViewport())
@@ -801,6 +951,102 @@ void APlayerCharacter::InputScrollUp()
 				if(IsValid(UIManagerWorldSubsystem->PickedButton))
 					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 			}
+		}
+	}
+	else if (IsValid(UIManagerWorldSubsystem->PerksLevelingUpMenuWidget) && UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->IsInViewport()) {
+		if (UIManagerWorldSubsystem->PickedButton != UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetBackButton() &&
+			UIManagerWorldSubsystem->PickedButton != UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetUnlockButton()) {
+			TArray<UWidget*> Buttons{};
+			bool IsCategory = false;
+			for (UWidget* Widget : UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetPerksVerticalBox()->GetAllChildren())
+				if (UIManagerWorldSubsystem->PickedButton == Widget) {
+					Buttons = UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetPerksVerticalBox()->GetAllChildren();
+					break;
+				}
+			if (Buttons.Num() == 0) {
+				for (UWidget* Widget : UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetCategoryVerticalBox()->GetAllChildren())
+					if (UIManagerWorldSubsystem->PickedButton == Widget) {
+						IsCategory = true;
+						Buttons = UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetCategoryVerticalBox()->GetAllChildren();
+						break;
+					}
+			}
+			if (Buttons.Num() > 1) {
+				if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+					if (IsCategory) {
+						for (uint8 Index = 0; Index < UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetCategoryVerticalBox()->GetAllChildren().Num(); Index++)
+							if (UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetCategoryVerticalBox()->GetChildAt(Index) == UIManagerWorldSubsystem->PickedButton) {
+								if (Index == UIManagerWorldSubsystem->CharacterPerksMenuWidget->CurrentlySelectedCategoryIndex)
+									UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+								else
+									UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+								break;
+							}
+					}
+					else {
+						if (auto* const PickedButtonWithActorClass = Cast<UButtonWithActorClass>(UIManagerWorldSubsystem->PickedButton); IsValid(PickedButtonWithActorClass)) {
+							if (PickedButtonWithActorClass->ActorClass == UIManagerWorldSubsystem->CharacterPerksMenuWidget->CurrentlySelectedPerkClass)
+								PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 0.f, 1.f, 1.f));
+							else {
+								bool IsActivated = false;
+								PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 0.f, 1.f, 1.f));
+								if (IsValid(UIManagerWorldSubsystem->CharacterPerksMenuWidget->PerksOwner)) {
+									for (TSubclassOf<APerk> ActivatedPerkClass : UIManagerWorldSubsystem->CharacterPerksMenuWidget->PerksOwner->ActivatedPerks) {
+										if (ActivatedPerkClass == PickedButtonWithActorClass->ActorClass) {
+											PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+											IsActivated = true;
+											break;
+										}
+									}
+								}
+								else if (const auto* const PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+									for (TSubclassOf<APerk> ActivatedPerkClass : PlayerCharacter->ActivatedPerks) {
+										if (ActivatedPerkClass == PickedButtonWithActorClass->ActorClass) {
+											PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+											IsActivated = true;
+											break;
+										}
+									}
+								}
+								if (!IsActivated)
+									PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+							}
+						}
+					}
+				}
+				if (UIManagerWorldSubsystem->PickedButtonIndex == 0) {
+					UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetBackButton();
+					UIManagerWorldSubsystem->PickedButtonIndex = 0;
+					if (IsCategory)
+						UIManagerWorldSubsystem->CharacterPerksMenuWidget->ScrolledDownOrUpFromCategories = true;
+					else
+						UIManagerWorldSubsystem->CharacterPerksMenuWidget->ScrolledDownOrUpFromCategories = false;
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+				}
+				else {
+					UIManagerWorldSubsystem->PickedButton = Cast<UButton>(Buttons[UIManagerWorldSubsystem->PickedButtonIndex - 1]);
+					UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex - 1;
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+				}
+			}
+		}
+		else {
+			if (IsValid(UIManagerWorldSubsystem->PickedButton))
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+			if (UIManagerWorldSubsystem->CharacterPerksMenuWidget->ScrolledDownOrUpFromCategories) {
+				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetCategoryVerticalBox()->
+					GetChildAt(UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetCategoryVerticalBox()->GetAllChildren().Num() - 1));
+				UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetCategoryVerticalBox()->GetAllChildren().Num() - 1;
+			}
+			else {
+				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetPerksVerticalBox()->
+					GetChildAt(UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetPerksVerticalBox()->GetAllChildren().Num() - 1));
+				UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetPerksVerticalBox()->GetAllChildren().Num() - 1;
+			}
+			if (IsValid(UIManagerWorldSubsystem->PickedButton))
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 		}
 	}
 	else if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget) && IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->SelectedPanelWidget) && 
@@ -1104,7 +1350,6 @@ void APlayerCharacter::InputScrollDown()
 		if (auto* GeneralCharacterInfoWidget = Cast<UPartyMenuGeneralCharacterInfo>
 			(UIManagerWorldSubsystem->PartyMenuWidget->GetCharactersHorizontalBox()->
 				GetChildAt(UIManagerWorldSubsystem->PartyMenuWidget->SelectedGeneralCharacterInfoIndex)); IsValid(GeneralCharacterInfoWidget)) {
-			UE_LOG(LogTemp, Warning, TEXT("The integer value is: %d"), UIManagerWorldSubsystem->PickedButtonIndex);
 			if (UIManagerWorldSubsystem->PickedButtonIndex == 0) {
 				UIManagerWorldSubsystem->PickedButton = GeneralCharacterInfoWidget->GetPerksLevelingUpButton();
 				UIManagerWorldSubsystem->PickedButtonIndex = 1;
@@ -1134,6 +1379,97 @@ void APlayerCharacter::InputScrollDown()
 				if (IsValid(UIManagerWorldSubsystem->PickedButton))
 					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 			}
+		}
+	}
+	else if (IsValid(UIManagerWorldSubsystem->PerksLevelingUpMenuWidget) && UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->IsInViewport()) {
+		if (UIManagerWorldSubsystem->PickedButton != UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetBackButton() &&
+			UIManagerWorldSubsystem->PickedButton != UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetUnlockButton()) {
+			TArray<UWidget*> Buttons{};
+			bool IsCategory = false;
+			for (UWidget* Widget : UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetPerksVerticalBox()->GetAllChildren())
+				if (UIManagerWorldSubsystem->PickedButton == Widget) {
+					Buttons = UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetPerksVerticalBox()->GetAllChildren();
+					break;
+				}
+			if (Buttons.Num() == 0) {
+				for (UWidget* Widget : UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetCategoryVerticalBox()->GetAllChildren())
+					if (UIManagerWorldSubsystem->PickedButton == Widget) {
+						IsCategory = true;
+						Buttons = UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetCategoryVerticalBox()->GetAllChildren();
+						break;
+					}
+			}
+			if (Buttons.Num() > 1) {
+				if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+					if (IsCategory) {
+						for (uint8 Index = 0; Index < UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetCategoryVerticalBox()->GetAllChildren().Num(); Index++)
+							if (UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetCategoryVerticalBox()->GetChildAt(Index) == UIManagerWorldSubsystem->PickedButton) {
+								if (Index == UIManagerWorldSubsystem->CharacterPerksMenuWidget->CurrentlySelectedCategoryIndex)
+									UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+								else
+									UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+								break;
+							}
+					}
+					else {
+						if (auto* const PickedButtonWithActorClass = Cast<UButtonWithActorClass>(UIManagerWorldSubsystem->PickedButton); IsValid(PickedButtonWithActorClass)) {
+							if (PickedButtonWithActorClass->ActorClass == UIManagerWorldSubsystem->CharacterPerksMenuWidget->CurrentlySelectedPerkClass)
+								PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 0.f, 1.f, 1.f));
+							else {
+								bool IsActivated = false;
+								PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 0.f, 1.f, 1.f));
+								if (IsValid(UIManagerWorldSubsystem->CharacterPerksMenuWidget->PerksOwner)) {
+									for (TSubclassOf<APerk> ActivatedPerkClass : UIManagerWorldSubsystem->CharacterPerksMenuWidget->PerksOwner->ActivatedPerks) {
+										if (ActivatedPerkClass == PickedButtonWithActorClass->ActorClass) {
+											PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+											IsActivated = true;
+											break;
+										}
+									}
+								}
+								else if(const auto* const PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+									for (TSubclassOf<APerk> ActivatedPerkClass : PlayerCharacter->ActivatedPerks) {
+										if (ActivatedPerkClass == PickedButtonWithActorClass->ActorClass) {
+											PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+											IsActivated = true;
+											break;
+										}
+									}
+								}
+								if(!IsActivated)
+									PickedButtonWithActorClass->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+							}
+						}
+					}
+				}
+				if (UIManagerWorldSubsystem->PickedButtonIndex == Buttons.Num() - 1) {
+					UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetBackButton();
+					UIManagerWorldSubsystem->PickedButtonIndex = 0;
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+					if (IsCategory)
+						UIManagerWorldSubsystem->CharacterPerksMenuWidget->ScrolledDownOrUpFromCategories = true;
+					else
+						UIManagerWorldSubsystem->CharacterPerksMenuWidget->ScrolledDownOrUpFromCategories = false;
+				}
+				else {
+					UIManagerWorldSubsystem->PickedButton = Cast<UButton>(Buttons[UIManagerWorldSubsystem->PickedButtonIndex + 1]);
+					UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex + 1;
+					if (IsValid(UIManagerWorldSubsystem->PickedButton))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+				}
+			}
+		}
+		else {
+			if (IsValid(UIManagerWorldSubsystem->PickedButton))
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+			if (UIManagerWorldSubsystem->CharacterPerksMenuWidget->ScrolledDownOrUpFromCategories)
+				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetCategoryVerticalBox()->GetChildAt(0));
+			else
+				UIManagerWorldSubsystem->PickedButton = Cast<UButton>(UIManagerWorldSubsystem->CharacterPerksMenuWidget->GetPerksVerticalBox()->GetChildAt(0));
+			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			if (IsValid(UIManagerWorldSubsystem->PickedButton))
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 		}
 	}
 	else if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget) && IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->SelectedPanelWidget) 
@@ -1262,78 +1598,17 @@ void APlayerCharacter::InputBack()
 				UIManagerWorldSubsystem->InventoryMenuWidget->SelectedPanelWidget = UIManagerWorldSubsystem->InventoryMenuWidget->GetItemTypeStackBox();
 		}
 		else if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget) && UIManagerWorldSubsystem->InventoryMenuWidget->IsInViewport()) {
-			UIManagerWorldSubsystem->InventoryMenuWidget->GetInventoryBorder()->SetVisibility(ESlateVisibility::Visible);
-			UIManagerWorldSubsystem->InventoryMenuWidget->GetLowerArmorInventoryBorder()->SetVisibility(ESlateVisibility::Hidden);
-			UIManagerWorldSubsystem->InventoryMenuWidget->GetHandInventoryBorder()->SetVisibility(ESlateVisibility::Hidden);
-			UIManagerWorldSubsystem->InventoryMenuWidget->GetTorseInventoryBorder()->SetVisibility(ESlateVisibility::Hidden);
-			UIManagerWorldSubsystem->InventoryMenuWidget->GetHeadInventoryBorder()->SetVisibility(ESlateVisibility::Hidden);
-			UIManagerWorldSubsystem->InventoryMenuWidget->GetRangeInventoryBorder()->SetVisibility(ESlateVisibility::Hidden);
-			UIManagerWorldSubsystem->InventoryMenuWidget->GetMeleeInventoryBorder()->SetVisibility(ESlateVisibility::Hidden);
-			UIManagerWorldSubsystem->InventoryMenuWidget->HideNotification();
-			if (IsValid(Cast<UButton>(UIManagerWorldSubsystem->InventoryMenuWidget->GetItemTypeStackBox()->GetAllChildren()[UIManagerWorldSubsystem->InventoryMenuWidget->SelectedTypeButtonIndex])))
-				Cast<UButton>(UIManagerWorldSubsystem->InventoryMenuWidget->GetItemTypeStackBox()->
-					GetAllChildren()[UIManagerWorldSubsystem->InventoryMenuWidget->SelectedTypeButtonIndex])->SetBackgroundColor(FLinearColor(0, 0, 0, 0));
-			if (IsValid(UIManagerWorldSubsystem)) {
-				if (IsValid(UIManagerWorldSubsystem->PickedButton))
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 0.f));
-				UIManagerWorldSubsystem->InventoryMenuWidget->SetPickedItem(nullptr);
-				UIManagerWorldSubsystem->InventoryMenuWidget->RemoveFromParent();
-				if (UIManagerWorldSubsystem->InventoryMenuWidget->GetNotInBattleMenuIncludedCanvasPanel()->GetVisibility() == ESlateVisibility::Visible) {
-					if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
-						if (IsValid(RedemptionGameModeBase->GetPlayerMenuClass()))
-							UIManagerWorldSubsystem->PlayerMenuWidget = CreateWidget<UPlayerMenu>(PlayerController, RedemptionGameModeBase->GetPlayerMenuClass());
-					if (IsValid(UIManagerWorldSubsystem->PlayerMenuWidget)) {
-						UIManagerWorldSubsystem->PlayerMenuWidget->AddToViewport();
-						UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PlayerMenuWidget->GetInventoryButton();
-					}
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
-				}
-				else if (UIManagerWorldSubsystem->InventoryMenuWidget->GetNotInBattleMenuIncludedCanvasPanel()->GetVisibility() == ESlateVisibility::Hidden) {
-					if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
-						if (IsValid(RedemptionGameModeBase->GetBattleMenuClass()))
-							UIManagerWorldSubsystem->BattleMenuWidget = CreateWidget<UBattleMenu>(PlayerController, RedemptionGameModeBase->GetBattleMenuClass());
-					if (IsValid(UIManagerWorldSubsystem->BattleMenuWidget)) {
-						UIManagerWorldSubsystem->BattleMenuWidget->AddToViewport();
-						UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->BattleMenuWidget->GetAttackButton();
-					}
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
-				}
-				UIManagerWorldSubsystem->PickedButtonIndex = 0;
-			}
+			UIManagerWorldSubsystem->InventoryMenuWidget->BackButtonOnClicked();
 		}
 		else if (IsValid(UIManagerWorldSubsystem->PlayerMenuWidget) && UIManagerWorldSubsystem->PlayerMenuWidget->IsInViewport()) {
-			UIManagerWorldSubsystem->PlayerMenuWidget->RemoveFromParent();
-			UIManagerWorldSubsystem->PlayerMenuWidget->ConditionalBeginDestroy();
-			UIManagerWorldSubsystem->PlayerMenuWidget = nullptr;
-			PlayerController->bShowMouseCursor = false;
-			PlayerController->bEnableClickEvents = false;
-			PlayerController->bEnableMouseOverEvents = false;
-			PlayerController->SetPause(false);
-			UWidgetBlueprintLibrary::SetInputMode_GameOnly(PlayerController);
-			//PlayerController->ActivateTouchInterface(EmptyTouchInterface);
-			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
-			UIManagerWorldSubsystem->PickedButton = nullptr;
-			UIManagerWorldSubsystem->PickedButtonIndex = 0;
-			CanOpenOtherMenus = true;
+			UIManagerWorldSubsystem->PlayerMenuWidget->CloseButtonOnClicked();
 		}
 		else if (IsValid(UIManagerWorldSubsystem->BattleMenuWidget) && UIManagerWorldSubsystem->BattleMenuWidget->IsInViewport() 
 			&& UIManagerWorldSubsystem->BattleMenuWidget->GetAttackMenuBorder()->GetVisibility() == ESlateVisibility::Visible) {
 				UIManagerWorldSubsystem->BattleMenuWidget->AttackMenuBackButtonOnClicked();
 		}
 		else if (IsValid(UIManagerWorldSubsystem->PauseMenuWidget) && UIManagerWorldSubsystem->PauseMenuWidget->IsInViewport()) {
-			UIManagerWorldSubsystem->PauseMenuWidget->RemoveFromParent();
-			UIManagerWorldSubsystem->PauseMenuWidget->ConditionalBeginDestroy();
-			UIManagerWorldSubsystem->PauseMenuWidget = nullptr;
-			PlayerController->bShowMouseCursor = false;
-			PlayerController->bEnableClickEvents = false;
-			PlayerController->bEnableMouseOverEvents = false;
-			PlayerController->SetPause(false);
-			UWidgetBlueprintLibrary::SetInputMode_GameOnly(PlayerController);
-			//PlayerController->ActivateTouchInterface(EmptyTouchInterface);
-			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
-			UIManagerWorldSubsystem->PickedButton = nullptr;
-			UIManagerWorldSubsystem->PickedButtonIndex = 0;
-			CanOpenOtherMenus = true;
+			UIManagerWorldSubsystem->PauseMenuWidget->ResumeButtonOnClicked();
 		}
 		else if (IsValid(UIManagerWorldSubsystem->SpellBattleMenuWidget) && IsValid(UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget)) {
 			if (UIManagerWorldSubsystem->SpellBattleMenuWidget->IsInViewport() && !UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->IsInViewport()) {
@@ -1361,33 +1636,8 @@ void APlayerCharacter::InputBack()
 		else if (IsValid(UIManagerWorldSubsystem->DetailedCharacterInfoMenuWidget) && UIManagerWorldSubsystem->DetailedCharacterInfoMenuWidget->IsInViewport()) {
 			UIManagerWorldSubsystem->DetailedCharacterInfoMenuWidget->BackButtonOnClicked();
 		}
-		else if (IsValid(UIManagerWorldSubsystem->SettingsMenuWidget) && UIManagerWorldSubsystem->SettingsMenuWidget->IsInViewport() && MapName != "UEDPIE_0_MainMenu") {
-			UIManagerWorldSubsystem->SettingsMenuWidget->RemoveFromParent();
-			UIManagerWorldSubsystem->SettingsMenuWidget->ConditionalBeginDestroy();
-			UIManagerWorldSubsystem->SettingsMenuWidget = nullptr;
-			if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
-				if (IsValid(RedemptionGameModeBase->GetPauseMenuClass()))
-					UIManagerWorldSubsystem->PauseMenuWidget = CreateWidget<UPauseMenu>(PlayerController, RedemptionGameModeBase->GetPauseMenuClass());
-			if (IsValid(UIManagerWorldSubsystem->PauseMenuWidget)) {
-				UIManagerWorldSubsystem->PauseMenuWidget->AddToViewport();
-				UIManagerWorldSubsystem->PauseMenuWidget->GetResumeButton()->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
-				UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PauseMenuWidget->GetResumeButton();
-			}
-			UIManagerWorldSubsystem->PickedButtonIndex = 0;
-		}
-		if (IsValid(UIManagerWorldSubsystem->SettingsMenuWidget) && UIManagerWorldSubsystem->SettingsMenuWidget->IsInViewport() && MapName == "UEDPIE_0_MainMenu") {
-			UIManagerWorldSubsystem->SettingsMenuWidget->RemoveFromParent();
-			UIManagerWorldSubsystem->SettingsMenuWidget->ConditionalBeginDestroy();
-			UIManagerWorldSubsystem->SettingsMenuWidget = nullptr;
-			if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
-				if (IsValid(RedemptionGameModeBase->GetMainMenuClass()))
-					UIManagerWorldSubsystem->MainMenuWidget = CreateWidget<UMainMenu>(PlayerController, RedemptionGameModeBase->GetMainMenuClass());
-			if (IsValid(UIManagerWorldSubsystem->MainMenuWidget)) {
-				UIManagerWorldSubsystem->MainMenuWidget->AddToViewport();
-				UIManagerWorldSubsystem->MainMenuWidget->GetNewGameButton()->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
-				UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->MainMenuWidget->GetNewGameButton();
-			}
-			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+		else if (IsValid(UIManagerWorldSubsystem->SettingsMenuWidget) && UIManagerWorldSubsystem->SettingsMenuWidget->IsInViewport()) {
+			UIManagerWorldSubsystem->SettingsMenuWidget->BackButtonOnClicked();
 		}
 	}
 }
@@ -1527,6 +1777,7 @@ void APlayerCharacter::CopyInfoFromCombatPlayer(const class ACombatPlayerCharact
 	CurrentMana = CombatPlayerCharacter->CurrentMana;
 	Level = CombatPlayerCharacter->Level;
 	CurrentExperience = CombatPlayerCharacter->CurrentExperience;
+	NumberOfPerkPoints = CombatPlayerCharacter->NumberOfPerkPoints;
 }
 
 void APlayerCharacter::CheckForwardRayHitResult()
@@ -1723,7 +1974,7 @@ UTouchInterface* APlayerCharacter::GetStandardTouchInterface() const
 	return StandardTouchInterface;
 }
 
-const TArray<TSubclassOf<ASpell>> APlayerCharacter::GetAvailableSkills() const
+const TArray<TSubclassOf<ASpell>>& APlayerCharacter::GetAvailableSkills() const
 {
 	return AvailableSkills;
 }
@@ -1756,6 +2007,16 @@ float APlayerCharacter::GetHealthPercentage() const
 float APlayerCharacter::GetManaPercentage() const
 {
 	return CurrentMana / MaxMana;
+}
+
+const TArray<FText>& APlayerCharacter::GetPerksCategoryNames() const
+{
+	return PerksCategoryNames;
+}
+
+const TArray<TSubclassOf<APerk>>& APlayerCharacter::GetAvailablePerks() const
+{
+	return AvailablePerks;
 }
 
 void APlayerCharacter::SetCanInput(bool Value)

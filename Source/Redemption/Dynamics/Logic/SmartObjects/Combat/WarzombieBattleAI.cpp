@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "..\Dynamics\Logic\SmartObjects\WarzombieBattleAI.h"
+#include "..\Dynamics\Logic\SmartObjects\Combat\WarzombieBattleAI.h"
 
 AWarzombieBattleAI::AWarzombieBattleAI()
 {

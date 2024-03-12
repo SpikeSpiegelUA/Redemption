@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "..\Dynamics\World\Items\WeaponItem.h"
+#include "..\Dynamics\World\Items\Equipment\WeaponItem.h"
 
 const EWeaponType AWeaponItem::GetWeaponType() const
 {

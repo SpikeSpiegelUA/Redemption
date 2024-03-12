@@ -25,6 +25,7 @@ enum class EEffectArea :uint8
 	CRUSHINGRESISTANCE UMETA(DisplayName = "Crushing resistance"),
 	SLASHINGRESISTANCE UMETA(DisplayName = "Slashing resistance"),
 	PIERCINGRESISTANCE UMETA(DisplayName = "Piercing resistance"),
+	SPECIAL UMETA(DisplayName = "Special")
 };
 
 UENUM(BlueprintType)
@@ -52,6 +53,8 @@ enum class EEffectType :uint8
 	DEBUFF UMETA(DisplayName = "Debuff"),
 	PLAINBUFF UMETA(DisplayName = "Plain Buff"),
 	PLAINDEBUFF UMETA(DisplayName = "Plain Debuff"),
+	PERCENTBUFF UMETA(DisplayName = "Percent Buff"),
+	PERCENTDEBUFF UMETA(DisplayName = "Percent Debuff"),
 	TURNSKIP UMETA(DisplayName = "Turn skip"),
 	TURNSTARTDAMAGE UMETA(DisplayName = "Turn start damage"),
 	DIZZINESS UMETA(DisplayName = "Dizziness")

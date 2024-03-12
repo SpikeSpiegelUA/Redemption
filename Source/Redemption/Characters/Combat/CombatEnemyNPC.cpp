@@ -3,7 +3,7 @@
 
 #include "CombatEnemyNPC.h"
 #include "..\Characters\Animation\Combat\CombatEnemyNPCAnimInstance.h"
-#include "..\Dynamics\Gameplay\Skills and Effects\EffectWithPlainModifier.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effects\EffectWithPlainModifier.h"
 #include "..\Miscellaneous\ElementsActions.h"
 #include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "..\Characters\Player\PlayerCharacter.h"

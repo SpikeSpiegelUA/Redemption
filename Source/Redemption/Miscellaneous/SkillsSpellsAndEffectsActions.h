@@ -15,14 +15,20 @@
  */
 
 namespace SkillsSpellsAndEffectsActions {
-	int GetValueAfterEffects(int ValueBeforeEffects, const TArray<AEffect*>& Effects, EEffectArea EffectArea);
-	int GetAttackValueAfterResistancesSkillsAndStats(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
-		const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements, EPhysicalType AttackerPhysicalType, const TArray<FPhysicalTypeAndItsPercentageStruct> ReceiverPhysicalResistances,
-		int AttackerSkillValue, int AttackerStatValue);
-	int GetRestorationValueAfterResistancesSkillsAndStats(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
-		const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements, int AttackerSkillValue, int AttackerStatValue);
-	int GetBuffOrDebuffEvasionChanceAfterResistancesSkillsAndStats(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
-		const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements, int DefenderStatValue, int AttackerSkillValue, int AttackerStatValue);
+	//Use this for values that aren't evasion chance, cause they have different formula for stats and skills.
+	int GetNonEvasionValueAfterStatsSkillsPerksAndEffects(int ValueBeforeEffects, int CorrespondingStatValue, int CorrespondingSkillValue, 
+		const TArray<AEffect*>& Effects, EEffectArea EffectArea);
+	//Use this for values that are evasion chance, cause they have different formula for stats and skills.
+	int GetEvasionValueAfterStatsSkillsPerksAndEffects(int ValueBeforeEffects, int CorrespondingAttackerStatValue, int CorrespondingDefenderStatValue, 
+		const TArray<AEffect*>& Effects, EEffectArea EffectArea);
+	//@param Effects - they are here, because we need to calculate effects' influence on the resistances.
+	int GetAttackValueAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects,
+		const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements, const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements, 
+		const TArray<FPhysicalTypeAndItsPercentageStruct>& ReceiverPhysicalResistances, EPhysicalType AttackerPhysicalType);
+	int GetRestorationValueAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
+		const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements);
+	int GetBuffOrDebuffEvasionChanceAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
+		const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements);
 	//In EEffectArea we have different resistance to elements, so we get element corresponding to the area passed by value.
 	ESpellElements GetSpellElementCorrespondingToEffectArea(const EEffectArea EffectArea);
 	//In EEffectArea we have different resistance to physical types, so we get physical type corresponding to the area passed by value.

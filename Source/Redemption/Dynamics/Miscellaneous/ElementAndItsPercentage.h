@@ -2,7 +2,7 @@
 
 #pragma once 
 #include "CoreMinimal.h"
-#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effects\Effect.h"
 #include "ElementAndItsPercentage.generated.h"
 
 USTRUCT(BlueprintType) 
@@ -10,8 +10,8 @@ struct FElementAndItsPercentageStruct
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
 		ESpellElements Element {};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
 		int Percent{};
 };

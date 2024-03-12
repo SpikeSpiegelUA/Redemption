@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "DebuffSpell.h"
-#include "Effect.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effects\Effect.h"
 #include "CreatedDebuffSpell.generated.h"
 
 /**

@@ -9,12 +9,12 @@
 #include "Components/CanvasPanel.h"
 #include "Components/ScrollBox.h"
 #include "Components/VerticalBoxSlot.h"
-#include "..\Dynamics\World\Items\WeaponItem.h"
-#include "..\Dynamics\World\Items\BuffItem.h"
-#include "..\Dynamics\World\Items\RestorationItem.h"
-#include "..\Dynamics\World\Items\AssaultItem.h"
-#include "..\Dynamics\World\Items\DebuffItem.h"
-#include "..\Dynamics\World\Items\ArmorItem.h"
+#include "..\Dynamics\World\Items\Equipment\WeaponItem.h"
+#include "..\Dynamics\World\Items\UseItems\BuffItem.h"
+#include "..\Dynamics\World\Items\UseItems\RestorationItem.h"
+#include "..\Dynamics\World\Items\UseItems\AssaultItem.h"
+#include "..\Dynamics\World\Items\UseItems\DebuffItem.h"
+#include "..\Dynamics\World\Items\Equipment\ArmorItem.h"
 #include "..\Dynamics\World\Items\MiscellaneousItem.h"
 #include "..\UI\Menus\BattleMenu.h"
 #include "..\Characters\Player\PlayerCharacter.h"
@@ -369,7 +369,6 @@ void UInventoryMenu::BackButtonOnClicked()
 	HeadInventoryBorder->SetVisibility(ESlateVisibility::Hidden);
 	RangeInventoryBorder->SetVisibility(ESlateVisibility::Hidden);
 	MeleeInventoryBorder->SetVisibility(ESlateVisibility::Hidden);
-	HideNotification();
 	if (IsValid(Cast<UButton>(ItemTypeStackBox->GetAllChildren()[SelectedTypeButtonIndex])))
 		Cast<UButton>(ItemTypeStackBox->GetAllChildren()[SelectedTypeButtonIndex])->SetBackgroundColor(FLinearColor(0.f, 0.f, 0.f, 0.f));
 	for (int8 Index = TargetsVerticalBox->GetAllChildren().Num() - 1; Index >= 0; Index--) 
@@ -386,6 +385,7 @@ void UInventoryMenu::BackButtonOnClicked()
 		if (IsValid(UIManagerWorldSubsystem->PlayerMenuWidget)) {
 			UIManagerWorldSubsystem->PlayerMenuWidget->AddToViewport();
 			UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PlayerMenuWidget->GetInventoryButton();
+			UIManagerWorldSubsystem->PickedButtonIndex = 0;
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 		}
 	}
@@ -697,15 +697,15 @@ void UInventoryMenu::UseButtonOnClicked()
 			}
 		}
 		else if (Cast<ABuffItem>(PickedItem)) {
-			CreateNotification(FText::FromString("Buff items can be used only in a battle!!!"));
+			ActivateNotification(FText::FromString("Buff items can be used only in a battle!!!"));
 			HideTargetsMenu();
 		}
 		else if (Cast<ADebuffItem>(PickedItem)) {
-			CreateNotification(FText::FromString("Debuff items can be used only in a battle!!!"));
+			ActivateNotification(FText::FromString("Debuff items can be used only in a battle!!!"));
 			HideTargetsMenu();
 		}
 		else if (Cast<AAssaultItem>(PickedItem)) {
-			CreateNotification(FText::FromString("Assault items can be used only in a battle!!!"));
+			ActivateNotification(FText::FromString("Assault items can be used only in a battle!!!"));
 			HideTargetsMenu();
 		}
 	}
@@ -1065,16 +1065,10 @@ void UInventoryMenu::SetItemInfo(const AGameItem* const GameItem)
 	}
 }
 
-void UInventoryMenu::HideNotification()
+void UInventoryMenu::ActivateNotification(const FText& NotificationText)
 {
-	NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
-	NotificationTextBlock->SetText(FText::FromString(""));
-}
-
-void UInventoryMenu::CreateNotification(const FText& NotificationText)
-{
-	NotificationBorder->SetVisibility(ESlateVisibility::Visible);
 	NotificationTextBlock->SetText(NotificationText);
+	PlayAnimation(NotificationShowAndHide);
 }
 
 UScrollBox* UInventoryMenu::GetInventoryScrollBox() const

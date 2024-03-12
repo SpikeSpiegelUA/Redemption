@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "..\Dynamics\World\Items\ArmorItem.h"
+#include "..\Dynamics\World\Items\Equipment\ArmorItem.h"
 
 const EArmorType AArmorItem::GetArmorType() const
 {

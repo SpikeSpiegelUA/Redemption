@@ -248,9 +248,13 @@ UTexture* AEffectsSpellsAndSkillsManager::GetEffectTypeImageTexture(EEffectType 
 		return BuffSpellTypeIcon;
 	case EEffectType::PLAINBUFF:
 		return BuffSpellTypeIcon;
+	case EEffectType::PERCENTBUFF:
+		return BuffSpellTypeIcon;
 	case EEffectType::DEBUFF:
 		return DebuffSpellTypeIcon;
 	case EEffectType::PLAINDEBUFF:
+		return DebuffSpellTypeIcon;
+	case EEffectType::PERCENTDEBUFF:
 		return DebuffSpellTypeIcon;
 	default:
 		return nullptr;

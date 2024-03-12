@@ -72,4 +72,8 @@ public:
 	class UPartyMenu* PartyMenuWidget{};
 	UPROPERTY()
 	class UDetailedCharacterInfoMenu* DetailedCharacterInfoMenuWidget{};
+	UPROPERTY()
+	class UPerksLevelingUpMenu* PerksLevelingUpMenuWidget{};
+	UPROPERTY()
+	class UCharacterPerks* CharacterPerksMenuWidget{};
 };

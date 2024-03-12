@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "..\Dynamics\World\Items\BuffItem.h"
+#include "..\Dynamics\World\Items\UseItems\BuffItem.h"
 #include "BuffItem.h"
 
 EBuffDebuffType ABuffItem::GetTypeOfBuff() const

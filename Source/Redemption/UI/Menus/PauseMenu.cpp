@@ -34,9 +34,6 @@ bool UPauseMenu::Initialize()
 		MainMenuButton->OnClicked.AddDynamic(this, &UPauseMenu::MainMenuButtonOnClicked);
 		MainMenuButton->OnHovered.AddDynamic(this, &UPauseMenu::MainMenuButtonOnHovered);
 	}
-	if (IsValid(GetWorld()))
-		UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
-	verify(UIManagerWorldSubsystem);
 	if (!bSuccess) return false;
 	return bSuccess;
 }
@@ -44,6 +41,9 @@ bool UPauseMenu::Initialize()
 void UPauseMenu::NativeConstruct()
 {
 	Super::NativeConstruct();
+	if (IsValid(GetWorld()))
+		UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
+	verify(UIManagerWorldSubsystem);
 }
 
 void UPauseMenu::ResumeButtonOnClicked()

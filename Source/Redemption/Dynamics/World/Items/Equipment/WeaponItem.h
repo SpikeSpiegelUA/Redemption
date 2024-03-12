@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "..\Dynamics\World\Items\EquipmentItem.h"
-#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\World\Items\Equipment\EquipmentItem.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effects\Effect.h"
 #include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "WeaponItem.generated.h"
 

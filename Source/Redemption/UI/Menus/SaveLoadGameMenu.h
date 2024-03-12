@@ -16,20 +16,20 @@ UCLASS()
 class REDEMPTION_API USaveLoadGameMenu : public UUserWidget
 {
 	GENERATED_BODY()
-private:
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+protected:
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButtonWithNeighbors* SaveLoadButtonWithNeighbors;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButtonWithNeighbors* BackButtonWithNeighbors;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButtonWithNeighbors* DeleteButtonWithNeighbors;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButtonWithNeighbors* OverwriteButtonWithNeighbors;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UScrollBox* SaveSlotsScrollBox;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* SaveLoadTextBlock;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* NotificationBorder;
 
 	UFUNCTION()
@@ -47,7 +47,6 @@ private:
 	bool DeleteHasBeenClicked = false;
 	bool OverwriteHasBeenClicked = false;
 
-protected:
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
 public:

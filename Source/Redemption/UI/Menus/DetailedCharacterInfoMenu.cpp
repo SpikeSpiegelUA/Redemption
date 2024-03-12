@@ -2,7 +2,9 @@
 
 
 #include "DetailedCharacterInfoMenu.h"
-#include <Redemption/Miscellaneous/SkillsSpellsAndEffectsActions.h>
+#include "Redemption/Miscellaneous/SkillsSpellsAndEffectsActions.h"
+#include "Kismet/GameplayStatics.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 
 bool UDetailedCharacterInfoMenu::Initialize()
 {
@@ -588,19 +590,24 @@ void UDetailedCharacterInfoMenu::AbilitiesButtonOnClicked()
 	if(auto* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
 		if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
 			this->RemoveFromParent();
-			UIManagerWorldSubsystem->SkillBattleMenuWidget->ResetSkillsScrollBox();
-			if (Ally != nullptr) {
-				for (TSubclassOf<ASpell> SpellClass : Ally->GetAvailableSpells())
-					UIManagerWorldSubsystem->SkillBattleMenuWidget->AddSkillEntryToSkillsScrollBox(Cast<ASpell>(SpellClass->GetDefaultObject()));
+			if (auto* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()); IsValid(PlayerController))
+				if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+					if (IsValid(RedemptionGameModeBase->GetSkillBattleMenuClass()))
+						UIManagerWorldSubsystem->SkillBattleMenuWidget = CreateWidget<USkillBattleMenu>(PlayerController, RedemptionGameModeBase->GetSkillBattleMenuClass());
+			if (IsValid(UIManagerWorldSubsystem->SkillBattleMenuWidget)) {
+				if (Ally != nullptr) {
+					for (TSubclassOf<ASpell> SpellClass : Ally->GetAvailableSpells())
+						UIManagerWorldSubsystem->SkillBattleMenuWidget->AddSkillEntryToSkillsScrollBox(Cast<ASpell>(SpellClass->GetDefaultObject()));
+				}
+				else {
+					for (TSubclassOf<ASpell> SpellClass : PlayerCharacter->GetAvailableSkills())
+						UIManagerWorldSubsystem->SkillBattleMenuWidget->AddSkillEntryToSkillsScrollBox(Cast<ASpell>(SpellClass->GetDefaultObject()));
+				}
+				UIManagerWorldSubsystem->SkillBattleMenuWidget->AddToViewport();
+				UIManagerWorldSubsystem->SkillBattleMenuWidget->GetUseButtonWithNeighbors()->SetVisibility(ESlateVisibility::Hidden);
+				UIManagerWorldSubsystem->SkillBattleMenuWidget->IsOpenedFromDetailedCharacterInfo = true;
+				AbilitiesButton->SetBackgroundColor(FLinearColor(0.7f, 0.7f, 0.7f, 1.f));
 			}
-			else {
-				for (TSubclassOf<ASpell> SpellClass : PlayerCharacter->GetAvailableSkills())
-					UIManagerWorldSubsystem->SkillBattleMenuWidget->AddSkillEntryToSkillsScrollBox(Cast<ASpell>(SpellClass->GetDefaultObject()));
-			}
-			UIManagerWorldSubsystem->SkillBattleMenuWidget->AddToViewport();
-			UIManagerWorldSubsystem->SkillBattleMenuWidget->GetUseButtonWithNeighbors()->SetVisibility(ESlateVisibility::Hidden);
-			UIManagerWorldSubsystem->SkillBattleMenuWidget->IsOpenedFromDetailedCharacterInfo = true;
-			AbilitiesButton->SetBackgroundColor(FLinearColor(0.7f, 0.7f, 0.7f, 1.f));
 		}
 }
 

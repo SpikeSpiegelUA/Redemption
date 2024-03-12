@@ -37,6 +37,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UDataTable* GetLevelingUpExperienceRequirementsListDataTable() const;
-	//If current experience has reached the point of a new level, then set level to the new level. If changed, return true, else false.
-	bool LevelUp(int& Level, const int CurrentExperiecne, UProgressBar* const NextLevelProgressBar) const;
+	//If current experience has reached the point of a new level, then set level to the new level. If leveled up, return true, else false.
+	//@param Level - pass the level of a NPC. Will be changed by the function.
+	//@param NumberOfPerkPoints - pass the number of perk points that a NPC has. Will be changed by the function.
+	//@param CurrentExperience - pass the current experience of a NPC. Won't be changed by the function.
+	//@param NextLevelProgressBar - pass the NextLevelProgressBar to set the next level progress.
+	bool LevelUp(int& Level, int& NumberOfPerkPoints, const int CurrentExperiecne, UProgressBar* const NextLevelProgressBar) const;
 };

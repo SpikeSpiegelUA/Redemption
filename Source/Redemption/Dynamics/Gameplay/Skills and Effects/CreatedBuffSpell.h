@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\BuffSpell.h"
-#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effects\Effect.h"
 #include "CreatedBuffSpell.generated.h"
 
 /** * 

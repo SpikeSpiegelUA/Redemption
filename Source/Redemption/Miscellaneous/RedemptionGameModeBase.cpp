@@ -241,6 +241,16 @@ TSubclassOf<class UDetailedCharacterInfoMenu> ARedemptionGameModeBase::GetDetail
 	return DetailedCharacterInfoMenuClass;
 }
 
+TSubclassOf<class UPerksLevelingUpMenu> ARedemptionGameModeBase::GetPerksLevelingUpMenuClass() const
+{
+	return PerksLevelingUpMenuClass;
+}
+
+TSubclassOf<class UCharacterPerks> ARedemptionGameModeBase::GetStandardCharacterPerksMenuClass() const
+{
+	return StandardCharacterPerksMenuClass;
+}
+
 void ARedemptionGameModeBase::SetBattleManager(const ABattleManager* const NewBattleManager)
 {
 	BattleManager = const_cast<ABattleManager*>(NewBattleManager);

@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
-#include "..\Dynamics\World\Items\AssaultItem.h"
-#include "..\Dynamics\World\Items\DebuffItem.h"
+#include "..\Dynamics\World\Items\UseItems\AssaultItem.h"
+#include "..\Dynamics\World\Items\UseItems\DebuffItem.h"
 #include "..\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "..\Dynamics\World\Items\GameItemWithItemObject.h"
 #include "AnimNotify_ThrowItem.generated.h"

@@ -85,6 +85,10 @@ protected:
 		TSubclassOf<class UPartyMenu> PartyMenuClass{};
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UDetailedCharacterInfoMenu> DetailedCharacterInfoMenuClass{};
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+		TSubclassOf<class UPerksLevelingUpMenu> PerksLevelingUpMenuClass{};
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+		TSubclassOf<class UCharacterPerks> StandardCharacterPerksMenuClass{};
 
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -130,4 +134,6 @@ public:
 	TSubclassOf<class UCombatCharacterInfoMenu> GetCombatCharacterInfoMenuClass() const;
 	TSubclassOf<class UPartyMenu> GetPartyMenuClass() const;
 	TSubclassOf<class UDetailedCharacterInfoMenu> GetDetailedCharacterInfoMenuClass() const;
+	TSubclassOf<class UPerksLevelingUpMenu> GetPerksLevelingUpMenuClass() const;
+	TSubclassOf<class UCharacterPerks> GetStandardCharacterPerksMenuClass() const;
 };
