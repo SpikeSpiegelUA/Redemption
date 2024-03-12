@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "..\Dynamics\World\Items\EquipmentItem.h"
+#include "..\Dynamics\World\Items\Equipment\EquipmentItem.h"
 #include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "Redemption/Dynamics/Miscellaneous/PhysicalTypeAndItsPercentage.h"
 #include "ArmorItem.generated.h"

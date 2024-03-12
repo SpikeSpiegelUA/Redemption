@@ -23,16 +23,18 @@ protected:
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
 
-private:
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+	UWidgetAnimation* NotificationShowAndHide;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		UScrollBox* MainScrollBox{};
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButtonWithNeighbors* BackButtonWithNeighbors{};
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButtonWithNeighbors* UseButtonWithNeighbors{};
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* NotificationTextBlock{};
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* NotificationBorder{};
 
 	UFUNCTION()
@@ -41,19 +43,15 @@ private:
 	void UseButtonOnHovered();
 	UFUNCTION()
 	void BackButtonOnHovered();
-	UFUNCTION()
-	void HideNotificationAndClearItsTimer();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		TSubclassOf<ULearnedSpellEntryWidget> LearnedSpellEntryWidgetClass{};
 	UPROPERTY()
 		ULearnedSpellEntryWidget* LearnedSpellEntryWidget{};
 	UPROPERTY()
 		class APlayerCharacter* PlayerCharacter{};
 
-	FTimerHandle HideNotificationTimerHandle{};
-
-	void CreateNotification(const FText& NotificationText);
+	void ActivateNotification(const FText& NotificationText);
 public:
 	void AddLearnedSpellEntryToMainScrollBox(const class ASpell* const SpellToAdd);
 

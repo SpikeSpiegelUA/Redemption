@@ -6,12 +6,11 @@
 #include "Engine.h"
 #include "..\Characters\Combat\CombatEnemyNPC.h"
 #include "..\Dynamics\Gameplay\Managers\BattleManager.h"
-#include "..\Dynamics\World\Items\AssaultItem.h"
+#include "..\Dynamics\World\Items\UseItems\AssaultItem.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\AssaultSpell.h"
-#include "..\Dynamics\Gameplay\Skills and Effects\EffectWithPlainModifier.h"
-#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effects\EffectWithPlainModifier.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effects\Effect.h"
 #include "..\Miscellaneous\ElementsActions.h"
-#include "..\Miscellaneous\BattleActions.h"
 
 void UAnimNotify_AlliesMAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
@@ -23,9 +22,9 @@ void UAnimNotify_AlliesMAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 		if(IsValid(CombatAllyPlayer) && IsValid(CombatAllyPlayer->Target))
 			TargetEnemy = Cast<ACombatNPC>(CombatAllyPlayer->Target);
 		if (IsValid(TargetEnemy) && IsValid(UIManagerWorldSubsystem)) {
-			bool Hit = TargetEnemy->Execute_GetHit(TargetEnemy, BattleActions::CalculateAttackValueAfterEffects(CombatAllyPlayer->GetMeleeAttackValue(), 
-				CombatAllyPlayer), CombatAllyPlayer->GetMeleeWeaponElements(), EPhysicalType::NONE, 
-				CombatAllyPlayer->GetSkill(ECharacterSkills::MELEE), CombatAllyPlayer->GetStat(ECharacterStats::STRENGTH),  false);
+			bool Hit = TargetEnemy->Execute_GetHit(TargetEnemy, CombatAllyPlayer->GetMeleeAttackValue(), CombatAllyPlayer, 
+				CombatAllyPlayer->GetMeleeWeaponElements(), EPhysicalType::NONE, CombatAllyPlayer->GetSkill(ECharacterSkills::MELEE), 
+				CombatAllyPlayer->GetStat(ECharacterStats::STRENGTH),  false);
 			if (Hit) {
 				CombatAllyPlayer->AddSkillsProgress(ECharacterSkills::MELEE, 50);
 				CombatAllyPlayer->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpMelee, true);

@@ -89,7 +89,7 @@ EBTNodeResult::Type UBTTask_GetTarget::ExecuteTask(UBehaviorTreeComponent& Owner
 	}
 
 	//IMPORTANT!!! If you have selected a target in one of the branches, then set this to false. 
-	//Otherwise your pointer to the selected target will be overrided by pointer to a randomly selected target.
+	//Otherwise your pointer to the selected target will be overwritten by pointer to a randomly selected target.
 	bool SelectRandomTarget = true;
 	if (IsValid(Chr->SpellToUse)) {
 		//Here it gets a bit complex. The Owner needs to know, which target to choose for restoration spell. If there are 3 or 4 targets, then we need
@@ -116,7 +116,6 @@ EBTNodeResult::Type UBTTask_GetTarget::ExecuteTask(UBehaviorTreeComponent& Owner
 				else if (ActorsToTarget.Num() == 3 || ActorsToTarget.Num() == 4) {
 					//Okay, here goes the priority algorithm.
 					if (ARestorationSpell* RestorationSpell = Cast<ARestorationSpell>(Chr->SpellToUse); IsValid(RestorationSpell)) {
-						//uint8* TargetPriorities = new uint8[ActorsToTarget.Num()];
 						auto TargetPriorities = std::make_unique<uint8[]>(ActorsToTarget.Num());
 						for (uint8 Index = 0; Index < ActorsToTarget.Num(); Index++)
 							TargetPriorities[Index] = 0;
@@ -144,9 +143,10 @@ EBTNodeResult::Type UBTTask_GetTarget::ExecuteTask(UBehaviorTreeComponent& Owner
 								float CurrentRestorationAmount = 0.f;
 								if (Index == 0) {
 									if (TargetsWithDeadAlso[Index]->CurrentHP > 0) {
-										int16 IndexZeroAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(TargetsWithDeadAlso[Index]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
-											TargetsWithDeadAlso[Index]->Effects, TargetsWithDeadAlso[Index]->GetElementalResistances(), ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()),
-											Chr->GetSkill(ECharacterSkills::RESTORATIONSPELLS), Chr->GetStat(ECharacterStats::INTELLIGENCE));
+										int16 IndexZeroAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(SkillsSpellsAndEffectsActions::GetNonEvasionValueAfterStatsSkillsPerksAndEffects
+										(TargetsWithDeadAlso[Index]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100, Chr->GetStat(ECharacterStats::INTELLIGENCE),
+											Chr->GetSkill(ECharacterSkills::RESTORATIONSPELLS), TArray<AEffect*>(), EEffectArea::NONE), TargetsWithDeadAlso[Index]->Effects, TargetsWithDeadAlso[Index]->GetElementalResistances(), 
+											ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()));
 										if (TargetsWithDeadAlso[Index]->CurrentHP + IndexZeroAmountToHeal > TargetsWithDeadAlso[Index]->MaxHP)
 											CurrentRestorationAmount += TargetsWithDeadAlso[Index]->MaxHP - TargetsWithDeadAlso[Index]->CurrentHP;
 										else
@@ -154,9 +154,10 @@ EBTNodeResult::Type UBTTask_GetTarget::ExecuteTask(UBehaviorTreeComponent& Owner
 									}
 									if (TargetsWithDeadAlso.Num() > 1) {
 										if (TargetsWithDeadAlso[Index + 1]->CurrentHP > 0) {
-											int16 IndexPlusOneAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(TargetsWithDeadAlso[Index + 1]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
-												TargetsWithDeadAlso[Index + 1]->Effects, TargetsWithDeadAlso[Index + 1]->GetElementalResistances(), ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()), 
-												Chr->GetSkill(ECharacterSkills::RESTORATIONSPELLS), Chr->GetStat(ECharacterStats::INTELLIGENCE));
+											int16 IndexPlusOneAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(SkillsSpellsAndEffectsActions::GetNonEvasionValueAfterStatsSkillsPerksAndEffects
+											(TargetsWithDeadAlso[Index + 1]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100, Chr->GetStat(ECharacterStats::INTELLIGENCE),
+												Chr->GetSkill(ECharacterSkills::RESTORATIONSPELLS), TArray<AEffect*>(), EEffectArea::NONE), TargetsWithDeadAlso[Index + 1]->Effects, TargetsWithDeadAlso[Index + 1]->GetElementalResistances(),
+												ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()));
 											if (TargetsWithDeadAlso[Index + 1]->CurrentHP + IndexPlusOneAmountToHeal > TargetsWithDeadAlso[Index + 1]->MaxHP)
 												CurrentRestorationAmount += TargetsWithDeadAlso[Index + 1]->MaxHP - TargetsWithDeadAlso[Index + 1]->CurrentHP;
 											else
@@ -166,18 +167,20 @@ EBTNodeResult::Type UBTTask_GetTarget::ExecuteTask(UBehaviorTreeComponent& Owner
 								}
 								else if (Index == TargetsWithDeadAlso.Num() - 1) {
 									if (TargetsWithDeadAlso[Index]->CurrentHP > 0) {
-										int16 IndexAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(TargetsWithDeadAlso[Index]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
-											TargetsWithDeadAlso[Index]->Effects, TargetsWithDeadAlso[Index]->GetElementalResistances(), ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()), 
-											Chr->GetSkill(ECharacterSkills::RESTORATIONSPELLS), Chr->GetStat(ECharacterStats::INTELLIGENCE));
+										int16 IndexAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(SkillsSpellsAndEffectsActions::GetNonEvasionValueAfterStatsSkillsPerksAndEffects
+										(TargetsWithDeadAlso[Index]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100, Chr->GetStat(ECharacterStats::INTELLIGENCE),
+											Chr->GetSkill(ECharacterSkills::RESTORATIONSPELLS), TArray<AEffect*>(), EEffectArea::NONE), TargetsWithDeadAlso[Index]->Effects, TargetsWithDeadAlso[Index]->GetElementalResistances(),
+											ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()));
 										if (TargetsWithDeadAlso[Index]->CurrentHP + IndexAmountToHeal > TargetsWithDeadAlso[Index]->MaxHP)
 											CurrentRestorationAmount += TargetsWithDeadAlso[Index]->MaxHP - TargetsWithDeadAlso[Index]->CurrentHP;
 										else
 											CurrentRestorationAmount += IndexAmountToHeal;
 									}
 									if (TargetsWithDeadAlso[Index - 1]->CurrentHP > 0) {
-										int16 IndexMinusOneAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(TargetsWithDeadAlso[Index - 1]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
-											TargetsWithDeadAlso[Index - 1]->Effects, TargetsWithDeadAlso[Index - 1]->GetElementalResistances(), ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()), 
-											Chr->GetSkill(ECharacterSkills::RESTORATIONSPELLS), Chr->GetStat(ECharacterStats::INTELLIGENCE));
+										int16 IndexMinusOneAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(SkillsSpellsAndEffectsActions::GetNonEvasionValueAfterStatsSkillsPerksAndEffects
+										(TargetsWithDeadAlso[Index - 1]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100, Chr->GetStat(ECharacterStats::INTELLIGENCE),
+											Chr->GetSkill(ECharacterSkills::RESTORATIONSPELLS), TArray<AEffect*>(), EEffectArea::NONE), TargetsWithDeadAlso[Index - 1]->Effects, TargetsWithDeadAlso[Index - 1]->GetElementalResistances(),
+											ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()));
 										if (TargetsWithDeadAlso[Index - 1]->CurrentHP + IndexMinusOneAmountToHeal > TargetsWithDeadAlso[Index - 1]->MaxHP)
 											CurrentRestorationAmount += TargetsWithDeadAlso[Index - 1]->MaxHP - TargetsWithDeadAlso[Index - 1]->CurrentHP;
 										else
@@ -186,27 +189,30 @@ EBTNodeResult::Type UBTTask_GetTarget::ExecuteTask(UBehaviorTreeComponent& Owner
 								}
 								else {
 									if (TargetsWithDeadAlso[Index]->CurrentHP > 0) {
-										int16 IndexAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(TargetsWithDeadAlso[Index]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
-											TargetsWithDeadAlso[Index]->Effects, TargetsWithDeadAlso[Index]->GetElementalResistances(), ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()), 
-											Chr->GetSkill(ECharacterSkills::RESTORATIONSPELLS), Chr->GetStat(ECharacterStats::INTELLIGENCE));
+										int16 IndexAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(SkillsSpellsAndEffectsActions::GetNonEvasionValueAfterStatsSkillsPerksAndEffects
+										(TargetsWithDeadAlso[Index]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100, Chr->GetStat(ECharacterStats::INTELLIGENCE),
+											Chr->GetSkill(ECharacterSkills::RESTORATIONSPELLS), TArray<AEffect*>(), EEffectArea::NONE), TargetsWithDeadAlso[Index]->Effects, TargetsWithDeadAlso[Index]->GetElementalResistances(),
+											ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()));
 										if (TargetsWithDeadAlso[Index]->CurrentHP + IndexAmountToHeal > TargetsWithDeadAlso[Index]->MaxHP)
 											CurrentRestorationAmount += TargetsWithDeadAlso[Index]->MaxHP - TargetsWithDeadAlso[Index]->CurrentHP;
 										else
 											CurrentRestorationAmount += IndexAmountToHeal;
 									}
 									if (TargetsWithDeadAlso[Index - 1]->CurrentHP > 0) {
-										int16 IndexMinusOneAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(TargetsWithDeadAlso[Index - 1]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
-											TargetsWithDeadAlso[Index - 1]->Effects, TargetsWithDeadAlso[Index - 1]->GetElementalResistances(), ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()), 
-											Chr->GetSkill(ECharacterSkills::RESTORATIONSPELLS), Chr->GetStat(ECharacterStats::INTELLIGENCE));
+										int16 IndexMinusOneAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(SkillsSpellsAndEffectsActions::GetNonEvasionValueAfterStatsSkillsPerksAndEffects
+										(TargetsWithDeadAlso[Index - 1]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100, Chr->GetStat(ECharacterStats::INTELLIGENCE),
+											Chr->GetSkill(ECharacterSkills::RESTORATIONSPELLS), TArray<AEffect*>(), EEffectArea::NONE), TargetsWithDeadAlso[Index - 1]->Effects, TargetsWithDeadAlso[Index - 1]->GetElementalResistances(),
+											ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()));
 										if (TargetsWithDeadAlso[Index - 1]->CurrentHP + IndexMinusOneAmountToHeal > TargetsWithDeadAlso[Index - 1]->MaxHP)
 											CurrentRestorationAmount += TargetsWithDeadAlso[Index - 1]->MaxHP - TargetsWithDeadAlso[Index - 1]->CurrentHP;
 										else
 											CurrentRestorationAmount += IndexMinusOneAmountToHeal;
 									}
 									if (TargetsWithDeadAlso[Index + 1]->CurrentHP > 0) {
-										int16 IndexPlusOneAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(TargetsWithDeadAlso[Index + 1]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100,
-											TargetsWithDeadAlso[Index + 1]->Effects, TargetsWithDeadAlso[Index + 1]->GetElementalResistances(), ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()), 
-											Chr->GetSkill(ECharacterSkills::RESTORATIONSPELLS), Chr->GetStat(ECharacterStats::INTELLIGENCE));
+										int16 IndexPlusOneAmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(SkillsSpellsAndEffectsActions::GetNonEvasionValueAfterStatsSkillsPerksAndEffects
+										(TargetsWithDeadAlso[Index + 1]->MaxHP * RestorationSpell->GetRestorationValuePercent() / 100, Chr->GetStat(ECharacterStats::INTELLIGENCE),
+											Chr->GetSkill(ECharacterSkills::RESTORATIONSPELLS), TArray<AEffect*>(), EEffectArea::NONE), TargetsWithDeadAlso[Index + 1]->Effects, TargetsWithDeadAlso[Index + 1]->GetElementalResistances(),
+											ElementsActions::FindContainedElements(RestorationSpell->GetSpellElements()));
 										if (TargetsWithDeadAlso[Index + 1]->CurrentHP + IndexPlusOneAmountToHeal > TargetsWithDeadAlso[Index + 1]->MaxHP)
 											CurrentRestorationAmount += TargetsWithDeadAlso[Index + 1]->MaxHP - TargetsWithDeadAlso[Index + 1]->CurrentHP;
 										else

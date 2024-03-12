@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameItem.h"
+#include "..\Dynamics\World\Items\GameItem.h"
 #include "EquipmentItem.generated.h"
 
 /**

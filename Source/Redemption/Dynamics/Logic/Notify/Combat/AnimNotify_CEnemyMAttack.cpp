@@ -2,9 +2,8 @@
 
 
 #include "AnimNotify_CEnemyMAttack.h"
-#include "..\Dynamics\Gameplay\Skills and Effects\EffectWithPlainModifier.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effects\EffectWithPlainModifier.h"
 #include "..\Characters\Player\PlayerCharacter.h"
-#include "..\Miscellaneous\BattleActions.h"
 
 void UAnimNotify_CEnemyMAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
@@ -14,7 +13,7 @@ void UAnimNotify_CEnemyMAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 		if(IsValid(Owner))
 			Enemy = Cast<ACombatNPC>(Owner->Target);
 		if (IsValid(Enemy) && IsValid(Owner))
-			Enemy->Execute_GetHit(Enemy, BattleActions::CalculateAttackValueAfterEffects(Owner->GetMeleeAttackValue(), Owner), Owner->GetMeleeWeaponElements(), 
+			Enemy->Execute_GetHit(Enemy, Owner->GetMeleeAttackValue(), Owner, Owner->GetMeleeWeaponElements(), 
 				EPhysicalType::NONE, Owner->GetSkill(ECharacterSkills::MELEE), Owner->GetStat(ECharacterStats::STRENGTH), false);
 	}
 }

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "..\Dynamics\World\Items\GameItemWithItemObject.h"
-#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effects\Effect.h"
 #include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "Containers/EnumAsByte.h"
 #include "Redemption/Dynamics/Miscellaneous/EffectAndItsChance.h"

@@ -32,6 +32,17 @@ protected:
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
 
+	UFUNCTION()
+	void InventoryButtonOnClicked();
+	UFUNCTION()
+	void InventoryButtonOnHovered();
+	UFUNCTION()
+	void CloseButtonOnHovered();
+	UFUNCTION()
+	void PartyButtonOnClicked();
+	UFUNCTION()
+	void PartyButtonOnHovered();
+
 public:
 	UButton* GetInventoryButton() const;
 	UButton* GetPartyButton() const;
@@ -39,15 +50,5 @@ public:
 	UStackBox* GetButtonsStackBox() const;
 
 	UFUNCTION()
-	void InventoryButtonOnClicked();
-	UFUNCTION()
-	void InventoryButtonOnHovered();
-	UFUNCTION()
 	void CloseButtonOnClicked();
-	UFUNCTION()
-	void CloseButtonOnHovered();
-	UFUNCTION()
-	void PartyButtonOnClicked();
-	UFUNCTION()
-	void PartyButtonOnHovered();
 };

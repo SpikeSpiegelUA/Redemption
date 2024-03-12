@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SmartObject.h"
+#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\Logic\SmartObjects\SmartObject.h"
 #include "RandomPointAndChasing.generated.h"
 
 /**

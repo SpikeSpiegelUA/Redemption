@@ -4,10 +4,10 @@
 #include "ItemObject.h"
 #include "..\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "Kismet/GameplayStatics.h"
-#include "..\Dynamics\World\Items\AssaultItem.h"
-#include "..\Dynamics\World\Items\DebuffItem.h"
+#include "..\Dynamics\World\Items\UseItems\AssaultItem.h"
+#include "..\Dynamics\World\Items\UseItems\DebuffItem.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Redemption/Dynamics/Gameplay/Skills and Effects/TurnStartDamageEffect.h"
+#include "Redemption\Dynamics\Gameplay\Skills and Effects\Effects\TurnStartDamageEffect.h"
 #include "Redemption/Miscellaneous/ElementsActions.h"
 #include "..\Miscellaneous\InventoryActions.h"
 #include "NiagaraFunctionLibrary.h"
@@ -60,8 +60,8 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 			for (ACombatNPC* CombatTarget : InventoryActions::GetTargets(RedemptionGameModeBase->GetBattleManager(), TargetBattleSide, Item->GetItemRange())) {
 				if (AAssaultItem* AssaultItem = Cast<AAssaultItem>(Item); IsValid(AssaultItem)) {
 					//Logic for special effects of the spell(frozen, burn...).
-					if (CombatTarget->Execute_GetHit(CombatTarget, AssaultItem->GetAttackValue(), AssaultItem->GetElementsAndTheirPercentagesStructs(), 
-						EPhysicalType::NONE, 1, 0, false)) {
+					if (CombatTarget->Execute_GetHit(CombatTarget, AssaultItem->GetAttackValue(), NPCOwner, AssaultItem->GetElementsAndTheirPercentagesStructs(), 
+						EPhysicalType::NONE, 0, 0, false)) {
 						if (AssaultItem->GetEffectsAndTheirChances().Num() > 0) {
 							for (uint8 Index = 0; Index < AssaultItem->GetEffectsAndTheirChances().Num(); Index++) {
 								int8 Chance = FMath::RandRange(0, 100);
@@ -131,7 +131,7 @@ void AItemObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 						AEffect* NewEffect = NewObject<AEffect>(this, EffectClass);
 						EffectsArray.Add(NewEffect);
 					}
-					CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, DebuffItem->GetElementsAndTheirPercentagesStructs(), 0, 0, ESpellType::DEBUFF);
+					CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, DebuffItem->GetElementsAndTheirPercentagesStructs(), 0, 0, NPCOwner, ESpellType::DEBUFF);
 					OnOverlapBeginsActions();
 				}
 			}

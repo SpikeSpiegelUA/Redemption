@@ -5,7 +5,7 @@
 #include "..\Characters\Player\PlayerCharacter.h"
 #include "..\Characters\AI Controllers\Combat\CombatPlayerCharacterAIController.h"
 #include "Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h"
-#include "..\Dynamics\World\Items\AssaultItem.h"
+#include "..\Dynamics\World\Items\UseItems\AssaultItem.h"
 #include "..\Dynamics\World\Items\GameItem.h"
 #include "..\Miscellaneous\ElementsActions.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -23,10 +23,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "..\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
 #include "..\Miscellaneous\InventoryActions.h"
-#include "..\Dynamics\World\Items\BuffItem.h"
-#include "..\Dynamics\World\Items\RestorationItem.h"
-#include "..\Dynamics\World\Items\AssaultItem.h"
-#include "..\Dynamics\World\Items\DebuffItem.h"
+#include "..\Dynamics\World\Items\UseItems\BuffItem.h"
+#include "..\Dynamics\World\Items\UseItems\RestorationItem.h"
+#include "..\Dynamics\World\Items\UseItems\AssaultItem.h"
+#include "..\Dynamics\World\Items\UseItems\DebuffItem.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\CreatedBuffSpell.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\PresetBuffSpell.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\CreatedDebuffSpell.h"
@@ -153,7 +153,7 @@ void UBattleMenu::RangeButtonOnClicked()
 				RangeCrosshairCanvasSlot->SetPosition(FVector2D(FMath::RandRange(-ViewportSize.X / 2 + 250, ViewportSize.X / 2 - 250), FMath::RandRange(-ViewportSize.Y / 2 + 250, ViewportSize.Y / 2 - 250)));
 		}
 		else if (CurrentTurnAlliesNPC->GetRangeAmmo() <= 0)
-			CreateNotification(FText::FromString("You don't have any ammo"));
+			ActivateNotification(FText::FromString("You don't have any ammo"));
 	}
 }
 
@@ -419,8 +419,10 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 				uint8 UsageCount = 0;
 				for (ACombatNPC* UseTarget : UseTargets) {
 					if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH && UseTarget->CurrentHP < UseTarget->MaxHP) {
-						int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(UseTarget->MaxHP * RestorationItem->GetRestorationValuePercent() / 100,
-							UseTarget->Effects, UseTarget->GetElementalResistances(), RestorationItem->GetElementsAndTheirPercentagesStructs(), 0, 0);
+						int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(SkillsSpellsAndEffectsActions::GetNonEvasionValueAfterStatsSkillsPerksAndEffects
+						(UseTarget->MaxHP * RestorationItem->GetRestorationValuePercent() / 100, CurrentTurnAlliesNPC->GetStat(ECharacterStats::INTELLIGENCE),
+							CurrentTurnAlliesNPC->GetSkill(ECharacterSkills::RESTORATIONSPELLS), TArray<AEffect*>(), EEffectArea::NONE),
+							UseTarget->Effects, UseTarget->GetElementalResistances(), RestorationItem->GetElementsAndTheirPercentagesStructs());
 						UseTarget->CurrentHP += AmountToHeal;
 						ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
 						FString TextForCombatFloatingInformationActor = FString();
@@ -434,8 +436,10 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 						UsageCount++;
 					}
 					else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA && UseTarget->CurrentMana < UseTarget->MaxMana) {
-						int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(UseTarget->MaxMana * RestorationItem->GetRestorationValuePercent() / 100,
-							UseTarget->Effects, UseTarget->GetElementalResistances(), RestorationItem->GetElementsAndTheirPercentagesStructs(), 0, 0);
+						int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(SkillsSpellsAndEffectsActions::GetNonEvasionValueAfterStatsSkillsPerksAndEffects
+						(UseTarget->MaxMana * RestorationItem->GetRestorationValuePercent() / 100, CurrentTurnAlliesNPC->GetStat(ECharacterStats::INTELLIGENCE),
+							CurrentTurnAlliesNPC->GetSkill(ECharacterSkills::RESTORATIONSPELLS), TArray<AEffect*>(), EEffectArea::NONE),
+							UseTarget->Effects, UseTarget->GetElementalResistances(), RestorationItem->GetElementsAndTheirPercentagesStructs());
 						UseTarget->CurrentMana += AmountToRestore;
 						ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
 						FString TextForCombatFloatingInformationActor = FString();
@@ -450,18 +454,18 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 					}
 					else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA && UseTarget->CurrentMana >= UseTarget->MaxMana) {
 						if (UseTargets.Num() == 1)
-							CreateNotification(FText::FromString("Target's mana is already full!!!"));
+							ActivateNotification(FText::FromString("Target's mana is already full!!!"));
 					}
 					else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH && UseTarget->CurrentHP >= UseTarget->MaxHP) {
 						if (UseTargets.Num() == 1)
-							CreateNotification(FText::FromString("Target's health is already full!!!"));
+							ActivateNotification(FText::FromString("Target's health is already full!!!"));
 					}
 				}
 				if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA && UseTargets.Num() > 1 && UsageCount == 0) {
-					CreateNotification(FText::FromString("Targets' mana is already full!!!"));
+					ActivateNotification(FText::FromString("Targets' mana is already full!!!"));
 				}
 				else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH && UseTargets.Num() > 1 && UsageCount == 0) {
-					CreateNotification(FText::FromString("Targets' health is already full!!!"));
+					ActivateNotification(FText::FromString("Targets' health is already full!!!"));
 				}
 				if (ItemOrSpellHaveBeenUsed) {
 					CurrentTurnAlliesNPC->Target = SelectedCombatNPC;
@@ -545,11 +549,11 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 				CurrentTurnAlliesNPC->Target = SelectedCombatNPC;
 				bool GotHit = false;
 				if ((RangeCrosshairCanvasSlot->GetPosition() - TargetForCenterMark).Length() <= 90.0)
-					GotHit = SelectedCombatNPC->Execute_GetHit(SelectedCombatNPC, CurrentTurnAlliesNPC->GetRangeAttackValue(), 
+					GotHit = SelectedCombatNPC->Execute_GetHit(SelectedCombatNPC, CurrentTurnAlliesNPC->GetRangeAttackValue(), CurrentTurnAlliesNPC,
 						CurrentTurnAlliesNPC->GetRangeWeaponElements(), CurrentTurnAlliesNPC->GetRangePhysicalType(), 
 						CurrentTurnAlliesNPC->GetSkill(ECharacterSkills::RANGE), CurrentTurnAlliesNPC->GetStat(ECharacterStats::AGILITY), false);
 				else
-					GotHit = SelectedCombatNPC->Execute_GetHit(SelectedCombatNPC, CurrentTurnAlliesNPC->GetRangeAttackValue(), 
+					GotHit = SelectedCombatNPC->Execute_GetHit(SelectedCombatNPC, CurrentTurnAlliesNPC->GetRangeAttackValue(), CurrentTurnAlliesNPC,
 						CurrentTurnAlliesNPC->GetRangeWeaponElements(), CurrentTurnAlliesNPC->GetRangePhysicalType(), 
 						CurrentTurnAlliesNPC->GetSkill(ECharacterSkills::RANGE), CurrentTurnAlliesNPC->GetStat(ECharacterStats::AGILITY), true);
 				if (GotHit) {
@@ -663,9 +667,10 @@ bool UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 	uint8 UsageCount = 0;
 	for (ACombatNPC* UseTarget : UseTargets) {
 		if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::HEALTH && UseTarget->CurrentHP < UseTarget->MaxHP && UseTarget->CurrentHP > 0) {
-			int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(UseTarget->MaxHP * SpellToUse->GetRestorationValuePercent() / 100,
-				UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()),
-				CurrentTurnNPC->GetSkill(ECharacterSkills::RESTORATIONSPELLS), CurrentTurnNPC->GetStat(ECharacterStats::INTELLIGENCE));
+			int16 AmountToHeal = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(SkillsSpellsAndEffectsActions::GetNonEvasionValueAfterStatsSkillsPerksAndEffects
+			(UseTarget->MaxHP * SpellToUse->GetRestorationValuePercent() / 100, CurrentTurnNPC->GetStat(ECharacterStats::INTELLIGENCE),
+				CurrentTurnNPC->GetSkill(ECharacterSkills::RESTORATIONSPELLS), TArray<AEffect*>(), EEffectArea::NONE),
+				UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 			UseTarget->CurrentHP += AmountToHeal;
 			ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->
 				SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
@@ -680,9 +685,10 @@ bool UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 			UsageCount++;
 		}
 		else if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::MANA && UseTarget->CurrentMana < UseTarget->MaxMana && UseTarget->CurrentHP > 0) {
-			int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(UseTarget->MaxMana * SpellToUse->GetRestorationValuePercent() / 100,
-				UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()),
-				CurrentTurnNPC->GetSkill(ECharacterSkills::RESTORATIONSPELLS), CurrentTurnNPC->GetStat(ECharacterStats::INTELLIGENCE));
+			int16 AmountToRestore = SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(SkillsSpellsAndEffectsActions::GetNonEvasionValueAfterStatsSkillsPerksAndEffects
+			(UseTarget->MaxMana * SpellToUse->GetRestorationValuePercent() / 100, CurrentTurnNPC->GetStat(ECharacterStats::INTELLIGENCE),
+				CurrentTurnNPC->GetSkill(ECharacterSkills::RESTORATIONSPELLS), TArray<AEffect*>(), EEffectArea::NONE),
+				UseTarget->Effects, UseTarget->GetElementalResistances(), ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()));
 			UseTarget->CurrentMana += AmountToRestore;
 			ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->
 				SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
@@ -699,18 +705,18 @@ bool UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 		}
 		else if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::MANA && UseTarget->CurrentMana >= UseTarget->MaxMana && UseTarget->CurrentHP > 0) {
 			if(UseTargets.Num() == 1)
-				CreateNotification(FText::FromString("Target's mana is already full!!!"));
+				ActivateNotification(FText::FromString("Target's mana is already full!!!"));
 		}
 		else if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::HEALTH && UseTarget->CurrentHP >= UseTarget->MaxHP && UseTarget->CurrentHP > 0) {
 			if (UseTargets.Num() == 1)
-				CreateNotification(FText::FromString("Target's health is already full!!!"));
+				ActivateNotification(FText::FromString("Target's health is already full!!!"));
 		}
 	}
 	if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::MANA && UseTargets.Num() > 1 && UsageCount == 0) {
-		CreateNotification(FText::FromString("Targets' mana is already full!!!"));
+		ActivateNotification(FText::FromString("Targets' mana is already full!!!"));
 	}
 	else if (SpellToUse->GetTypeOfRestoration() == ESpellRestorationType::HEALTH && UseTargets.Num() > 1 && UsageCount == 0) {
-		CreateNotification(FText::FromString("Targets' health is already full!!!"));
+		ActivateNotification(FText::FromString("Targets' health is already full!!!"));
 	}
 	if (SpellHasBeenUsed) {
 		if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
@@ -753,7 +759,7 @@ bool UBattleMenu::BuffSpellUse(const class ACreatedBuffSpell* const SpellToUse, 
 			}
 			if(TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, CreatedEffectsFromEffects, 
 				ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()), CurrentTurnAlliesNPC->GetSkill(ECharacterSkills::BUFFSPELLS), 
-				CurrentTurnAlliesNPC->GetStat(ECharacterStats::INTELLIGENCE), SpellToUse->GetTypeOfSpell()))
+				CurrentTurnAlliesNPC->GetStat(ECharacterStats::INTELLIGENCE), CurrentTurnAlliesNPC, SpellToUse->GetTypeOfSpell()))
 					if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(CurrentTurnNPC); IsValid(CombatAllies)) {
 						CombatAllies->AddSkillsProgress(ECharacterSkills::BUFFSPELLS, 50);
 						CombatAllies->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpBuffSpells, true);
@@ -792,7 +798,7 @@ bool UBattleMenu::BuffSpellUse(const class APresetBuffSpell* const SpellToUse, c
 				CreatedEffectsFromClasses.Add(NewEffect);
 			}
 			TargetActor->Execute_GetHitWithBuffOrDebuff(TargetActor, CreatedEffectsFromClasses, ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()), 
-				CurrentTurnAlliesNPC->GetSkill(ECharacterSkills::BUFFSPELLS), CurrentTurnAlliesNPC->GetStat(ECharacterStats::INTELLIGENCE), SpellToUse->GetTypeOfSpell());
+				CurrentTurnAlliesNPC->GetSkill(ECharacterSkills::BUFFSPELLS), CurrentTurnAlliesNPC->GetStat(ECharacterStats::INTELLIGENCE), CurrentTurnAlliesNPC, SpellToUse->GetTypeOfSpell());
 		}
 	}
 	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
@@ -1014,7 +1020,7 @@ void UBattleMenu::HideAllCrosshairWidgetComponents() const
 		for (ACombatNPC* CombatNPC : BattleManager->BattleEnemies)
 			AllCombatNPCs.Add(CombatNPC);
 		for (ACombatNPC* CombatNPC : AllCombatNPCs)
-			if (IsValid(CombatNPC->GetCrosshairWidgetComponent()))
+			if (IsValid(CombatNPC) && IsValid(CombatNPC->GetCrosshairWidgetComponent()))
 				CombatNPC->GetCrosshairWidgetComponent()->SetVisibility(false);
 	}
 }
@@ -1036,20 +1042,10 @@ void UBattleMenu::HideAllHealthManaFloatingHealthWidgetComponents() const
 	}
 }
 
-void UBattleMenu::HideNotificationAndClearItsTimer()
+void UBattleMenu::ActivateNotification(const FText& NotificationText)
 {
-	NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
-	NotificationTextBlock->SetText(FText::FromString(""));
-	FTimerHandle HideNotificationTimerHandle{};
-	GetWorld()->GetTimerManager().ClearTimer(HideNotificationTimerHandle);
-}
-
-void UBattleMenu::CreateNotification(const FText& NotificationText)
-{
-	NotificationBorder->SetVisibility(ESlateVisibility::Visible);
 	NotificationTextBlock->SetText(NotificationText);
-	FTimerHandle HideNotificationTimerHandle{};
-	GetWorld()->GetTimerManager().SetTimer(HideNotificationTimerHandle, this, &UBattleMenu::HideNotificationAndClearItsTimer, 3.f, false);
+	PlayAnimation(NotificationShowAndHide);
 }
 
 void UBattleMenu::SetTargetName(const FText& Name)

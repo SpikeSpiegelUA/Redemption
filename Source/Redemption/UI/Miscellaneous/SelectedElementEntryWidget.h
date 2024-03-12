@@ -6,7 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/Image.h"
 #include "Components/Button.h"
-#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effects\Effect.h"
 #include "SelectedElementEntryWidget.generated.h"
 
 /**

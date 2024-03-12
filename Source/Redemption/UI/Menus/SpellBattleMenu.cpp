@@ -18,7 +18,7 @@
 #include "UIManagerWorldSubsystem.h"
 #include "Kismet/KismetRenderingLibrary.h"
 #include "..\Characters\Combat\CombatAllyNPC.h"
-#include "..\Dynamics\Gameplay\Skills and Effects\EffectWithPlainModifier.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effects\EffectWithPlainModifier.h"
 #include "..\Characters\Player\PlayerCharacter.h"
 #include "..\UI\HUD\FloatingManaBarWidget.h"
 #include "..\Miscellaneous\ElementsActions.h"
@@ -151,6 +151,21 @@ bool USpellBattleMenu::Initialize()
 void USpellBattleMenu::NativeConstruct()
 {
 	Super::NativeConstruct();
+	if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
+		const ACombatNPC* const CurrentTurnNPC = RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer[RedemptionGameModeBase->GetBattleManager()->CurrentTurnCombatNPCIndex];
+		if (const auto* const CombatAllies = Cast<ACombatAllies>(CurrentTurnNPC); IsValid(CombatAllies)) {
+			bool HasPerk = false;
+			for (const TSubclassOf<APerk> PerkClass : CombatAllies->ActivatedPerks)
+				if (PerkClass->GetDefaultObject<APerk>()->GetPerkName().ToString() == "Blood Magic") {
+					BloodElementButtonVisibility = ESlateVisibility::Visible;
+					BloodElementButton->SetVisibility(BloodElementButtonVisibility);
+					HasPerk = true;
+					break;
+				}
+			if(!HasPerk)
+				BloodElementButtonVisibility = ESlateVisibility::Hidden;
+		}
+	}
 	verify(IsValid(PlayerCharacter));
 	verify(IsValid(UIManagerWorldSubsystem));
 }
@@ -506,6 +521,10 @@ TArray<AEffect*> USpellBattleMenu::CreateEffectForSpell(EEffectType EffectType, 
 			NameOfTheEffect.Append(" Plain Debuff Effect");
 		else if (EffectType == EEffectType::PLAINBUFF)
 			NameOfTheEffect.Append(" Plain Buff Effect");
+		if (EffectType == EEffectType::PERCENTDEBUFF)
+			NameOfTheEffect.Append(" Percentage Debuff Effect");
+		else if (EffectType == EEffectType::PERCENTBUFF)
+			NameOfTheEffect.Append(" Percentage Buff Effect");
 		else if (EffectType == EEffectType::DEBUFF)
 			NameOfTheEffect.Append(" Debuff Effect");
 		else if (EffectType == EEffectType::BUFF)
@@ -521,6 +540,10 @@ TArray<AEffect*> USpellBattleMenu::CreateEffectForSpell(EEffectType EffectType, 
 			EffectDescription.Append("plain debuff effect that debuffs the ");
 		else if (EffectType == EEffectType::PLAINBUFF)
 			EffectDescription.Append("plain buff effect that debuffs the ");
+		if (EffectType == EEffectType::PERCENTDEBUFF)
+			NameOfTheEffect.Append(" percentage debuff effect that debuffs the");
+		else if (EffectType == EEffectType::PERCENTBUFF)
+			NameOfTheEffect.Append(" percentage buff effect that buffs the");
 		else if (EffectType == EEffectType::DEBUFF)
 			EffectDescription.Append("debuff effect that debuffs the ");
 		else if (EffectType == EEffectType::BUFF)
@@ -532,6 +555,8 @@ TArray<AEffect*> USpellBattleMenu::CreateEffectForSpell(EEffectType EffectType, 
 			EffectDescription.Append(" points");
 		else if(EffectType == EEffectType::DEBUFF || EffectType == EEffectType::BUFF)
 			EffectDescription.Append(" times");
+		else if (EffectType == EEffectType::PERCENTDEBUFF || EffectType == EEffectType::PERCENTBUFF)
+			EffectDescription.Append(" percent");
 		NewEffect->SetEffectDescription(FText::FromString(EffectDescription));
 		EffectsToReturn.Add(NewEffect);
 		if (SpellElementsToCount.Num() == 0)
@@ -600,7 +625,8 @@ void USpellBattleMenu::ShowCreatedSpellInformation()
 	EarthElementButton->SetVisibility(ESlateVisibility::Hidden);
 	LightningElementButton->SetVisibility(ESlateVisibility::Hidden);
 	HolyElementButton->SetVisibility(ESlateVisibility::Hidden);
-	BloodElementButton->SetVisibility(ESlateVisibility::Hidden);
+	if (BloodElementButton->GetVisibility() != ESlateVisibility::Hidden)
+		BloodElementButton->SetVisibility(ESlateVisibility::Hidden);
 	DarkElementButton->SetVisibility(ESlateVisibility::Hidden);
 	ShowResultSpellButton->SetVisibility(ESlateVisibility::Hidden);
 	UseButton->SetVisibility(ESlateVisibility::Hidden);
@@ -608,9 +634,11 @@ void USpellBattleMenu::ShowCreatedSpellInformation()
 	ResetButton->SetVisibility(ESlateVisibility::Hidden);
 	SelectedElementsBorder->SetVisibility(ESlateVisibility::Hidden);
 	SelectedSpellTypeBorder->SetVisibility(ESlateVisibility::Hidden);
+	SelectedSpellRangeBorder->SetVisibility(ESlateVisibility::Hidden);
 	LearnedSpellsJournalButton->SetVisibility(ESlateVisibility::Hidden);
 	UseUniqueSpellButton->SetVisibility(ESlateVisibility::Hidden);
 	BackToSpellCreationButton->SetVisibility(ESlateVisibility::Visible);
+	NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
 	if (IsValid(UIManagerWorldSubsystem)) {
 		UIManagerWorldSubsystem->SpellInfoWidget->AddToViewport();
 		UIManagerWorldSubsystem->SpellInfoWidget->SetPositionInViewport(FVector2D(450, 140));
@@ -627,7 +655,7 @@ void USpellBattleMenu::BackToSpellCreationButtonOnClicked()
 	EarthElementButton->SetVisibility(ESlateVisibility::Visible);
 	LightningElementButton->SetVisibility(ESlateVisibility::Visible);
 	HolyElementButton->SetVisibility(ESlateVisibility::Visible);
-	BloodElementButton->SetVisibility(ESlateVisibility::Visible);
+	BloodElementButton->SetVisibility(BloodElementButtonVisibility);
 	DarkElementButton->SetVisibility(ESlateVisibility::Visible);
 	ShowResultSpellButton->SetVisibility(ESlateVisibility::Visible);
 	UseButton->SetVisibility(ESlateVisibility::Visible);
@@ -635,6 +663,7 @@ void USpellBattleMenu::BackToSpellCreationButtonOnClicked()
 	ResetButton->SetVisibility(ESlateVisibility::Visible);
 	SelectedElementsBorder->SetVisibility(ESlateVisibility::Visible);
 	SelectedSpellTypeBorder->SetVisibility(ESlateVisibility::Visible);
+	SelectedSpellRangeBorder->SetVisibility(ESlateVisibility::Visible);
 	BackToSpellCreationButton->SetVisibility(ESlateVisibility::Hidden);
 	if (IsValid(UIManagerWorldSubsystem))
 		UIManagerWorldSubsystem->SpellInfoWidget->RemoveFromParent();
@@ -669,7 +698,6 @@ void USpellBattleMenu::BackButtonOnClicked()
 		BattleMenu->GetMenuBorder()->SetVisibility(ESlateVisibility::Visible);
 		if(auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 			RedemptionGameModeBase->GetBattleManager()->IsSelectingAllyAsTarget = false;
-		HideNotificationAndClearItsTimer();
 		//if(SpellInfoBorder->GetVisibility() == ESlateVisibility::Visible)
 		//	BackPressedFromCreatedSpellInfo();
 	}
@@ -700,6 +728,7 @@ void USpellBattleMenu::LearnedSpellsJournalButtonOnClicked()
 {
 	if (IsValid(UIManagerWorldSubsystem)) {
 		this->RemoveFromParent();
+		NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
 		UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->AddToViewport();
 		UIManagerWorldSubsystem->AlliesInfoBarsWidget->RemoveFromParent();
 		CreatedSpell = nullptr;
@@ -958,8 +987,8 @@ void USpellBattleMenu::Reset(const bool SetCreatedSpellToNullPtr)
 	ShowSpellTypesButtonsHideElementsAndRangeButtons();
 	if (SetCreatedSpellToNullPtr)
 		CreatedSpell = nullptr;
-	HideNotificationAndClearItsTimer();
 	CanUseKeyboardButtonSelection = true;
+	NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void USpellBattleMenu::ResetUIKeyboardControlLogic()
@@ -1047,8 +1076,8 @@ void USpellBattleMenu::CreateSpellAndSetCreatedSpell(const TArray<ESpellElements
 			if (SpellElements[ElementIndex] != Cast<ASpell>(UniqueSpellClass->GetDefaultObject())->GetSpellElements()[ElementIndex]) {
 				SpellFound = false;
 			}
-		if (SpellFound && SpellType == Cast<ASpell>(UniqueSpellClass->GetDefaultObject())->GetTypeOfSpell()) 
-			return Cast<ASpell>(UniqueSpellClass->GetDefaultObject());
+		if (SpellFound && SpellType == UniqueSpellClass->GetDefaultObject<ASpell>()->GetTypeOfSpell()) 
+			return UniqueSpellClass->GetDefaultObject<ASpell>();
 	}
 	return nullptr;
 }
@@ -1084,7 +1113,8 @@ void USpellBattleMenu::ShowSpellTypesButtonsHideElementsAndRangeButtons()
 	WindElementButton->SetVisibility(ESlateVisibility::Hidden);
 	EarthElementButton->SetVisibility(ESlateVisibility::Hidden);
 	LightningElementButton->SetVisibility(ESlateVisibility::Hidden);
-	BloodElementButton->SetVisibility(ESlateVisibility::Hidden);
+	if (BloodElementButton->GetVisibility() != ESlateVisibility::Hidden)
+		BloodElementButton->SetVisibility(ESlateVisibility::Hidden);
 	HolyElementButton->SetVisibility(ESlateVisibility::Hidden);
 	DarkElementButton->SetVisibility(ESlateVisibility::Hidden);
 	SingleSpellRangeButton->SetVisibility(ESlateVisibility::Hidden);
@@ -1099,7 +1129,7 @@ void USpellBattleMenu::ShowElementsButtonsHideSpellTypesAndRangeButtons()
 	WindElementButton->SetVisibility(ESlateVisibility::Visible);
 	EarthElementButton->SetVisibility(ESlateVisibility::Visible);
 	LightningElementButton->SetVisibility(ESlateVisibility::Visible);
-	BloodElementButton->SetVisibility(ESlateVisibility::Visible);
+	BloodElementButton->SetVisibility(BloodElementButtonVisibility);
 	HolyElementButton->SetVisibility(ESlateVisibility::Visible);
 	DarkElementButton->SetVisibility(ESlateVisibility::Visible);
 	AssaultSpellTypeButtonWithNeighbors->SetVisibility(ESlateVisibility::Hidden);
@@ -1125,7 +1155,8 @@ void USpellBattleMenu::ShowRangeButtonsHideSpellTypesAndElementsButtons()
 	WindElementButton->SetVisibility(ESlateVisibility::Hidden);
 	EarthElementButton->SetVisibility(ESlateVisibility::Hidden);
 	LightningElementButton->SetVisibility(ESlateVisibility::Hidden);
-	BloodElementButton->SetVisibility(ESlateVisibility::Hidden);
+	if (BloodElementButton->GetVisibility() != ESlateVisibility::Hidden)
+		BloodElementButton->SetVisibility(ESlateVisibility::Hidden);
 	HolyElementButton->SetVisibility(ESlateVisibility::Hidden);
 	DarkElementButton->SetVisibility(ESlateVisibility::Hidden);
 }
@@ -1167,22 +1198,20 @@ void USpellBattleMenu::ShowSpellRangeButtonsUIManagerLogic()
 void USpellBattleMenu::UseButtonOnClicked()
 {
 	if (SelectedSpellType != ESpellType::NONE && SelectedSpellRange != ESpellRange::NONE && SelectedElementsHorizontalBox->GetAllChildren().Num() > 0) {
-		if(!IsValid(CreatedSpell))
-			CreateSpellAndSetCreatedSpell(SelectedSpellElements, SelectedSpellType);
-		UseSpell();
+		CreateSpellAndSetCreatedSpell(SelectedSpellElements, SelectedSpellType);
+		UseSpell(false);
 	}
 }
 
 void USpellBattleMenu::UseUniqueSpellButtonOnClicked()
 {
 	if (SelectedSpellType != ESpellType::NONE && SelectedSpellRange != ESpellRange::NONE && SelectedElementsHorizontalBox->GetAllChildren().Num() > 0) {
-		if (!IsValid(CreatedSpell))
-			SetUniqueCreatedSpell(SelectedSpellElements, SelectedSpellType);
-		UseSpell(true);
+		SetUniqueCreatedSpell(SelectedSpellElements, SelectedSpellType);
+		UseSpell(false, true);
 	}
 }
 
-void USpellBattleMenu::UseSpell(bool CreateNotificationIfCreatedSpellIsNotValid)
+void USpellBattleMenu::UseSpell(const bool UniqueSpell, const bool CreateNotificationIfCreatedSpellIsNotValid)
 {
 	if(auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 		if (ABattleManager* BManager = RedemptionGameModeBase->GetBattleManager(); IsValid(BManager) && IsValid(PlayerCharacter))
@@ -1216,7 +1245,7 @@ void USpellBattleMenu::UseSpell(bool CreateNotificationIfCreatedSpellIsNotValid)
 									break;
 								}
 						}
-						if (!CheckIfUniqueSpellAlreadyAddedToLearned(CreatedSpell))
+						if (UniqueSpell && !CheckIfUniqueSpellAlreadyAddedToLearned(CreatedSpell))
 							UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->AddLearnedSpellEntryToMainScrollBox(CreatedSpell);
 						if (this->IsInViewport()) {
 							this->RemoveFromParent();
@@ -1244,6 +1273,7 @@ void USpellBattleMenu::UseSpell(bool CreateNotificationIfCreatedSpellIsNotValid)
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 						//Remove menu and turn on target selection
 						BManager->SelectedCombatNPCIndex = 0;
+						NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
 						BMenu->GetAttackMenuBorder()->SetVisibility(ESlateVisibility::Visible);
 						BMenu->GetLeftRightMenuBorder()->SetVisibility(ESlateVisibility::Visible);
 						BMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
@@ -1301,33 +1331,25 @@ void USpellBattleMenu::UseSpell(bool CreateNotificationIfCreatedSpellIsNotValid)
 					}
 					else if (CreatedSpell->GetSpellCostType() == ESpellCostType::HEALTH) {
 						if (UIManagerWorldSubsystem->SkillBattleMenuWidget->IsInViewport())
-							UIManagerWorldSubsystem->SkillBattleMenuWidget->CreateNotification(FText::FromString("Not enough health!!!"));
+							UIManagerWorldSubsystem->SkillBattleMenuWidget->ActivateNotification(FText::FromString("Not enough health!!!"));
 						else
-							CreateNotification(FText::FromString("Not enough health!!!"));
+							ActivateNotification(FText::FromString("Not enough health!!!"));
 					}
 					else if (CreatedSpell->GetSpellCostType() == ESpellCostType::MANA) {
 						if (UIManagerWorldSubsystem->SkillBattleMenuWidget->IsInViewport())
-							UIManagerWorldSubsystem->SkillBattleMenuWidget->CreateNotification(FText::FromString("Not enough mana!!!"));
+							UIManagerWorldSubsystem->SkillBattleMenuWidget->ActivateNotification(FText::FromString("Not enough mana!!!"));
 						else
-							CreateNotification(FText::FromString("Not enough mana!!!"));
+							ActivateNotification(FText::FromString("Not enough mana!!!"));
 					}
 				}
 				else if(!IsValid(CreatedSpell) && CreateNotificationIfCreatedSpellIsNotValid)
-					CreateNotification(FText::FromString("Unique spell does not exist"));
+					ActivateNotification(FText::FromString("Unique spell does not exist"));
 }
 
-void USpellBattleMenu::CreateNotification(const FText& NotificationText)
+void USpellBattleMenu::ActivateNotification(const FText& NotificationText)
 {
-	NotificationBorder->SetVisibility(ESlateVisibility::Visible);
 	NotificationTextBlock->SetText(NotificationText);
-	GetWorld()->GetTimerManager().SetTimer(HideNotificationTimerHandle, this, &USpellBattleMenu::HideNotificationAndClearItsTimer, 3.f, false);
-}
-
-void USpellBattleMenu::HideNotificationAndClearItsTimer()
-{
-	NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
-	NotificationTextBlock->SetText(FText::FromString(""));
-	GetWorld()->GetTimerManager().ClearTimer(HideNotificationTimerHandle);
+	PlayAnimation(NotificationShowAndHide);
 }
 
 void USpellBattleMenu::SelectedSpellElementsRemoveSingleItem(ESpellElements ElementToRemove)

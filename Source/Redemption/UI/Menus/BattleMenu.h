@@ -34,16 +34,6 @@ private:
 	UPROPERTY()
 		UUIManagerWorldSubsystem* UIManagerWorldSubsystem {};
 
-	UFUNCTION()
-		void HideNotificationAndClearItsTimer();
-
-	bool AssaultSpellUse(class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
-	bool RestorationSpellUse(const class ARestorationSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
-	bool BuffSpellUse(const class ACreatedBuffSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
-	bool BuffSpellUse(const class APresetBuffSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
-	bool DebuffSpellUse(class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
-	void RangeAttackUse(UCombatAlliesAnimInstance* CurrentTurnAlliesNPCAnimInstance);
-
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* AttackButton;
@@ -94,6 +84,16 @@ protected:
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+	UWidgetAnimation* NotificationShowAndHide;
+
+	bool AssaultSpellUse(class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
+	bool RestorationSpellUse(const class ARestorationSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
+	bool BuffSpellUse(const class ACreatedBuffSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
+	bool BuffSpellUse(const class APresetBuffSpell* const SpellToUse, class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
+	bool DebuffSpellUse(class UBattleMenu* const BattleMenu, class ACombatNPC* const CurrentTurnNPC);
+	void RangeAttackUse(UCombatAlliesAnimInstance* CurrentTurnAlliesNPCAnimInstance);
 
 public:
 	void SetTargetName(const FText& Name);
@@ -181,5 +181,5 @@ public:
 	void HideAllHealthManaFloatingHealthWidgetComponents() const;
 	//Turn on target selection and AttackMenuBorder.
 	void OpenActionMenu(const FText& NewAttackTalkInfoActionButtonText);
-	void CreateNotification(const FText& NotificationText);
+	void ActivateNotification(const FText& NotificationText);
 };

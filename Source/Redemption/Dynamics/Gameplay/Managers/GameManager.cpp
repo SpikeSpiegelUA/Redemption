@@ -89,6 +89,8 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 					CombatPlayerCharacter->SetActorRotation(FRotator(0, 180, 0));
 					CombatPlayerCharacter->SetStartLocation(AlliesPlayerBattleSpawns[3]);
 					CombatPlayerCharacter->SetStartRotation(CombatPlayerCharacter->GetActorRotation());
+					for (const TSubclassOf<APerk> PerkClass : CombatPlayerCharacter->ActivatedPerks)
+						CombatPlayerCharacter->Effects.Add(CombatPlayerCharacter->ConvertActivatedPerkToEffect(PerkClass->GetDefaultObject<APerk>()));
 					BattleManager->BattleAlliesPlayer.Add(CombatPlayerCharacter);
 					BattleManager->CombatPlayerCharacter = CombatPlayerCharacter;
 					for (ACombatAllyNPC* CombatAllyNPC : PlayerCharacter->GetAllies())
@@ -104,6 +106,8 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 							PlayerCharacter->GetAllies()[i]->SetActorRotation(FRotator(0.0, 180.0, 0.0));
 							PlayerCharacter->GetAllies()[i]->SetStartLocation(AlliesPlayerBattleSpawns[i]);
 							PlayerCharacter->GetAllies()[i]->SetStartRotation(PlayerCharacter->GetAllies()[i]->GetActorRotation());
+							for (const TSubclassOf<APerk> PerkClass : PlayerCharacter->GetAllies()[i]->ActivatedPerks)
+								PlayerCharacter->GetAllies()[i]->Effects.Add(PlayerCharacter->GetAllies()[i]->ConvertActivatedPerkToEffect(PerkClass->GetDefaultObject<APerk>()));
 							if (IsValid(PlayerCharacter->GetAllies()[i]->GetAIClass()))
 								if (ASmartObject* AISmartObject = GetWorld()->SpawnActor<ASmartObject>(PlayerCharacter->GetAllies()[i]->GetAIClass()); IsValid(AISmartObject))
 									PlayerCharacter->GetAllies()[i]->SetSmartObject(AISmartObject);
@@ -204,7 +208,8 @@ void AGameManager::EndBattle()
 				for (int i = BattleManager->BattleEnemies.Num() - 1; i >= 0; i--)
 					BattleManager->BattleEnemies[i]->Destroy();							 
 				PlayerCharacter->CopyInfoFromCombatPlayer(BattleManager->CombatPlayerCharacter);
-				BattleManager->CombatPlayerCharacter = nullptr;
+				BattleManager->BattleAlliesPlayer.Remove(BattleManager->CombatPlayerCharacter);
+				BattleManager->CombatPlayerCharacter->ConditionalBeginDestroy();
 				for (int i = BattleManager->BattleAlliesPlayer.Num() - 1; i >= 0; i--) {
 					if (IsValid(Cast<ACombatPlayerCharacter>(BattleManager->BattleAlliesPlayer[i])))
 						BattleManager->BattleAlliesPlayer[i]->Destroy();

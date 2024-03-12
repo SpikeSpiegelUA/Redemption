@@ -7,9 +7,9 @@
 #include "UIManagerWorldSubsystem.h"
 #include "..\Dynamics\World\Items\GameItem.h"
 #include "..\GameInstance\RedemptionGameInstance.h"
-#include "..\Dynamics\World\Items\WeaponItem.h"
-#include "..\Dynamics\World\Items\ArmorItem.h"
-#include "..\Dynamics\World\Items\RangeWeapon.h"
+#include "..\Dynamics\World\Items\Equipment\WeaponItem.h"
+#include "..\Dynamics\World\Items\Equipment\ArmorItem.h"
+#include "..\Dynamics\World\Items\Equipment\RangeWeapon.h"
 #include "Components/ScrollBox.h"
 #include "Components/VerticalBox.h"
 #include "Redemption/UI/Miscellaneous/InventoryTargetEntry.h"
@@ -177,8 +177,9 @@ protected:
 	//Item currently selected by a player in the inventory
 	UPROPERTY()
 		AGameItem* PickedItem = nullptr;
-	UFUNCTION()
-		void BackButtonOnClicked();
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+		UWidgetAnimation* NotificationShowAndHide;
+
 	UFUNCTION()
 	void EquipItem(const AEquipmentItem* const ItemToEquip, TSubclassOf<class AArmorItem>& GameInstanceVariableToStoreThisEquipmentType,
 		AArmorItem*& InventoryMenuVariableToStoreThisEquipmentType, UInventoryScrollBoxEntryWidget* const ItemWidget, UScrollBox* const ScrollBoxWithWidget,
@@ -255,8 +256,7 @@ public:
 	//Set ItemInfo for ItemInfoBorder. Checks, whether GameItem is valid.
 	void SetItemInfo(const AGameItem* const GameItem);
 
-	void CreateNotification(const FText& NotificationText);
-	void HideNotification();
+	void ActivateNotification(const FText& NotificationText);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
 		AWeaponItem* EquipedMelee {};
@@ -283,6 +283,9 @@ public:
 	void HideTargetsMenu();
 	UFUNCTION()
 	void EquipButtonOnClicked();
+	//Is used for "Back" input in PlayerCharacter, so it is public.
+	UFUNCTION()
+	void BackButtonOnClicked();
 
 	//After we use an item, we need to do some stuff for the game to actually work properly. No shit. Mainly set timer for PlayerTurnController and !!!set PickedItem to nullptr!!!.
 	void BuffOrRestorationItemHasBeenUsedActions(class UBattleMenu* const BattleMenu, class ABattleManager* const BattleManager);

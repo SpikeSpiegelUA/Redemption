@@ -3,7 +3,7 @@
 
 #include "InventoryTargetEntry.h"
 #include "..\Characters\Player\PlayerCharacter.h"
-#include "Redemption/Dynamics/World/Items/RestorationItem.h"
+#include "Redemption\Dynamics\World\Items\UseItems\RestorationItem.h"
 #include "Redemption/Miscellaneous/InventoryActions.h"
 #include "Kismet/GameplayStatics.h"
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
@@ -53,9 +53,9 @@ void UInventoryTargetEntry::NameButtonOnClicked()
                                 Player->CurrentMana = Player->MaxMana;
                         }
                         else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA && Player->CurrentMana >= Player->MaxMana)
-                            InventoryMenuWidget->CreateNotification(FText::FromString("Your mana is already full!!!"));
+                            InventoryMenuWidget->ActivateNotification(FText::FromString("Your mana is already full!!!"));
                         else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH && Player->CurrentHP >= Player->MaxHP)
-                            InventoryMenuWidget->CreateNotification(FText::FromString("Your health is already full!!!"));
+                            InventoryMenuWidget->ActivateNotification(FText::FromString("Your health is already full!!!"));
                     }
                     else if (IsValid(Ally)) {
                         if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH && Ally->CurrentHP < Ally->MaxHP) {
@@ -71,9 +71,9 @@ void UInventoryTargetEntry::NameButtonOnClicked()
                                 Ally->CurrentMana = Ally->MaxMana;
                         }
                         else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::MANA && Ally->CurrentMana >= Ally->MaxMana)
-                            InventoryMenuWidget->CreateNotification(FText::FromString("Your mana is already full!!!"));
+                            InventoryMenuWidget->ActivateNotification(FText::FromString("Your mana is already full!!!"));
                         else if (RestorationItem->GetTypeOfRestoration() == EItemRestorationType::HEALTH && Ally->CurrentHP >= Ally->MaxHP)
-                            InventoryMenuWidget->CreateNotification(FText::FromString("Your health is already full!!!"));
+                            InventoryMenuWidget->ActivateNotification(FText::FromString("Your health is already full!!!"));
                     }
                     if (ItemHasBeenUsed) {
                         InventoryActions::RemoveItemFromGameInstance(GameInstance, InventoryMenuWidget->GetPickedItem());

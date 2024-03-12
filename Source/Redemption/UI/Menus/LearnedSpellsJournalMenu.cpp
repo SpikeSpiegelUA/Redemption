@@ -20,7 +20,10 @@ bool ULearnedSpellsJournalMenu::Initialize()
     }
     if (IsValid(GetWorld()) && IsValid(GetWorld()->GetFirstPlayerController()))
         PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-
+    if (auto* RedemptionGameInstance = GetWorld()->GetGameInstance<URedemptionGameInstance>(); IsValid(RedemptionGameInstance) && IsValid(PlayerCharacter))
+        for (TSubclassOf<ASpell> InstanceSpellClass : RedemptionGameInstance->InstanceLearnedSpells)
+            if (IsValid(Cast<ASpell>(InstanceSpellClass->GetDefaultObject())))
+                AddLearnedSpellEntryToMainScrollBox(Cast<ASpell>(InstanceSpellClass->GetDefaultObject()));
     if (!bSuccess) return false;
     return bSuccess;
 }
@@ -28,10 +31,6 @@ bool ULearnedSpellsJournalMenu::Initialize()
 void ULearnedSpellsJournalMenu::NativeConstruct()
 {
     Super::NativeConstruct();
-    if (auto* RedemptionGameInstance = GetWorld()->GetGameInstance<URedemptionGameInstance>(); IsValid(RedemptionGameInstance) && IsValid(PlayerCharacter))
-        for (TSubclassOf<ASpell> InstanceSpellClass : RedemptionGameInstance->InstanceLearnedSpells)
-            if (IsValid(Cast<ASpell>(InstanceSpellClass->GetDefaultObject())))
-                AddLearnedSpellEntryToMainScrollBox(Cast<ASpell>(InstanceSpellClass->GetDefaultObject()));
 }
 
 void ULearnedSpellsJournalMenu::UseButtonOnClicked()
@@ -47,16 +46,16 @@ void ULearnedSpellsJournalMenu::UseButtonOnClicked()
                         VariableCorrespondingToSpellCostType = BManager->BattleAlliesPlayer[BManager->CurrentTurnCombatNPCIndex]->CurrentHP;
                     if ((CreatedSpell->GetSpellCostType() == ESpellCostType::MANA && VariableCorrespondingToSpellCostType >= CreatedSpell->GetCost()) ||
                         (CreatedSpell->GetSpellCostType() == ESpellCostType::HEALTH && VariableCorrespondingToSpellCostType > CreatedSpell->GetCost())) {
-                        UIManagerWorldSubsystem->SpellBattleMenuWidget->UseSpell();
+                        UIManagerWorldSubsystem->SpellBattleMenuWidget->UseSpell(true);
                         this->RemoveFromParent();
                         if (UIManagerWorldSubsystem->SpellInfoWidget->IsInViewport())
                             UIManagerWorldSubsystem->SpellInfoWidget->RemoveFromParent();
                         UIManagerWorldSubsystem->AlliesInfoBarsWidget->AddToViewport();
                     }
                     else if (CreatedSpell->GetSpellCostType() == ESpellCostType::MANA && VariableCorrespondingToSpellCostType < CreatedSpell->GetCost())
-                        CreateNotification(FText::FromString("Not enough mana!"));
+                        ActivateNotification(FText::FromString("Not enough mana!"));
                     else if(CreatedSpell->GetSpellCostType() == ESpellCostType::HEALTH && VariableCorrespondingToSpellCostType > CreatedSpell->GetCost())
-                        CreateNotification(FText::FromString("Not enough health!"));
+                        ActivateNotification(FText::FromString("Not enough health!"));
                 }
 }
 
@@ -121,18 +120,10 @@ void ULearnedSpellsJournalMenu::AddLearnedSpellEntryToMainScrollBox(const class 
         }
 }
 
-void ULearnedSpellsJournalMenu::CreateNotification(const FText& NotificationText)
+void ULearnedSpellsJournalMenu::ActivateNotification(const FText& NotificationText)
 {
-    NotificationBorder->SetVisibility(ESlateVisibility::Visible);
     NotificationTextBlock->SetText(NotificationText);
-    GetWorld()->GetTimerManager().SetTimer(HideNotificationTimerHandle, this, &ULearnedSpellsJournalMenu::HideNotificationAndClearItsTimer, 3.f, false);
-}
-
-void ULearnedSpellsJournalMenu::HideNotificationAndClearItsTimer()
-{
-    NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
-    NotificationTextBlock->SetText(FText::FromString(""));
-    GetWorld()->GetTimerManager().ClearTimer(HideNotificationTimerHandle);
+    PlayAnimation(NotificationShowAndHide);
 }
 
 const UScrollBox* ULearnedSpellsJournalMenu::GetMainScrollBox() const

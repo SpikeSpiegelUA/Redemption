@@ -1,6 +1,6 @@
 #include "InventoryActions.h"
-#include "..\Dynamics\World\Items\ArmorItem.h"
-#include "..\Dynamics\World\Items\WeaponItem.h"
+#include "..\Dynamics\World\Items\Equipment\ArmorItem.h"
+#include "..\Dynamics\World\Items\Equipment\WeaponItem.h"
 #include "..\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "Engine/World.h"

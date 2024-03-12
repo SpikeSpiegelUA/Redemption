@@ -2,7 +2,7 @@
 
 
 #include "..\Dynamics\Gameplay\Managers\BattleManager.h"
-#include "..\Dynamics\Gameplay\Skills and Effects\TurnStartDamageEffect.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effects\TurnStartDamageEffect.h"
 #include "..\Characters\AI Controllers\Combat\CombatEnemyNPCAIController.h"
 #include "..\UI\Menus\BattleMenu.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -10,14 +10,13 @@
 #include "UIManagerWorldSubsystem.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "..\Miscellaneous\ArrayActions.h"
-#include "..\Miscellaneous\BattleActions.h"
 #include "..\Miscellaneous\ElementsActions.h"
 #include "..\UI\HUD\FloatingManaBarWidget.h"
 #include "..\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Redemption/Characters/AI Controllers/Combat/CombatAlliesAIController.h"
 #include "D:/UE_5.1/Engine/Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
-#include "Redemption/Dynamics/World/Items/RestorationItem.h"
+#include "Redemption\Dynamics\World\Items\UseItems\RestorationItem.h"
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 
 // Sets default values
@@ -226,7 +225,7 @@ void ABattleManager::TurnChange()
 						if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
 							if(const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 								BattleEnemies[NextActor]->Execute_GetHit(RedemptionGameModeBase->GetBattleManager()->BattleEnemies[NextActor],
-									BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleEnemies[NextActor]),
+									TurnStartDamageEffect->GetEffectStat(), TurnStartDamageEffect->GetNPCOwner(),
 									ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, 
 									TurnStartDamageEffect->GetNPCOwner()->GetSkill(ECharacterSkills::ASSAULTSPELLS),
 									TurnStartDamageEffect->GetNPCOwner()->GetStat(ECharacterStats::INTELLIGENCE), false);
@@ -366,8 +365,8 @@ void ABattleManager::TurnChange()
 							if(const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 								if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
 									BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Execute_GetHit(RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer[CurrentTurnCombatNPCIndex],
-										BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleAlliesPlayer[CurrentTurnCombatNPCIndex]),
-										ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, 
+										TurnStartDamageEffect->GetEffectStat(), TurnStartDamageEffect->GetNPCOwner(),
+										ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE,
 										TurnStartDamageEffect->GetNPCOwner()->GetSkill(ECharacterSkills::ASSAULTSPELLS),
 										TurnStartDamageEffect->GetNPCOwner()->GetStat(ECharacterStats::INTELLIGENCE), false);
 									GotHit = true;
@@ -514,9 +513,9 @@ void ABattleManager::PlayerTurnController()
 							if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 								if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
 									BattleAlliesPlayer[CurrentTurnCombatNPCIndex]->Execute_GetHit(RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer[CurrentTurnCombatNPCIndex],
-										BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleAlliesPlayer[CurrentTurnCombatNPCIndex]),
-										ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, 
-										TurnStartDamageEffect->GetNPCOwner()->GetSkill(ECharacterSkills::ASSAULTSPELLS), 
+										TurnStartDamageEffect->GetEffectStat(), TurnStartDamageEffect->GetNPCOwner(),
+										ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE,
+										TurnStartDamageEffect->GetNPCOwner()->GetSkill(ECharacterSkills::ASSAULTSPELLS),
 										TurnStartDamageEffect->GetNPCOwner()->GetStat(ECharacterStats::INTELLIGENCE), false);
 									GotHit = true;
 								}
@@ -608,9 +607,9 @@ void ABattleManager::PlayerAlliesEffectsDurationLogic(const TArray<uint8>& Passe
 						if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 							if (ATurnStartDamageEffect* TurnStartDamageEffect = Cast<ATurnStartDamageEffect>(Effect); IsValid(TurnStartDamageEffect)) {
 								BattleAlliesPlayer[Index]->Execute_GetHit(RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer[Index],
-									BattleActions::CalculateAttackValueAfterEffects(Effect->GetEffectStat(), BattleAlliesPlayer[Index]),
-									ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE, 
-									TurnStartDamageEffect->GetNPCOwner()->GetSkill(ECharacterSkills::ASSAULTSPELLS), 
+									TurnStartDamageEffect->GetEffectStat(), TurnStartDamageEffect->GetNPCOwner(),
+									ElementsActions::FindContainedElements(TurnStartDamageEffect->GetSpellElements()), EPhysicalType::NONE,
+									TurnStartDamageEffect->GetNPCOwner()->GetSkill(ECharacterSkills::ASSAULTSPELLS),
 									TurnStartDamageEffect->GetNPCOwner()->GetStat(ECharacterStats::INTELLIGENCE), false);
 							}
 					}

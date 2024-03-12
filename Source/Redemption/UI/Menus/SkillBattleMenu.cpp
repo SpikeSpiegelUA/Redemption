@@ -43,7 +43,7 @@ void USkillBattleMenu::NativeConstruct()
 void USkillBattleMenu::UseButtonWithNeighborsOnClicked()
 {
 	if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
-		UIManagerWorldSubsystem->SpellBattleMenuWidget->UseSpell();
+		UIManagerWorldSubsystem->SpellBattleMenuWidget->UseSpell(false);
 }
 
 void USkillBattleMenu::BackButtonWithNeighborsOnClicked()
@@ -57,7 +57,6 @@ void USkillBattleMenu::BackButtonWithNeighborsOnClicked()
 			UIManagerWorldSubsystem->BattleMenuWidget->IsChoosingSkill = false;
 			UIManagerWorldSubsystem->BattleMenuWidget->IsChoosingAction = true;
 			UIManagerWorldSubsystem->SpellBattleMenuWidget->SetCreatedSpell(nullptr);
-			HideNotificationAndClearItsTimer();
 			if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 				RedemptionGameModeBase->GetBattleManager()->IsSelectingAllyAsTarget = false;
 		}
@@ -76,6 +75,7 @@ void USkillBattleMenu::BackButtonWithNeighborsOnClicked()
 			UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->BattleMenuWidget->GetAttackButton();
 		if (UIManagerWorldSubsystem->PickedButton)
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+		UIManagerWorldSubsystem->SpellInfoWidget->RemoveFromParent();
 		UIManagerWorldSubsystem->PickedButtonIndex = 0;
 	}
 }
@@ -110,18 +110,10 @@ void USkillBattleMenu::BackButtonWithNeighborsOnHovered()
 	}
 }
 
-void USkillBattleMenu::HideNotificationAndClearItsTimer()
+void USkillBattleMenu::ActivateNotification(const FText& NotificationText)
 {
-	NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
-	NotificationTextBlock->SetText(FText::FromString(""));
-	GetWorld()->GetTimerManager().ClearTimer(HideNotificationTimerHandle);
-}
-
-void USkillBattleMenu::CreateNotification(const FText& NotificationText)
-{
-	NotificationBorder->SetVisibility(ESlateVisibility::Visible);
 	NotificationTextBlock->SetText(NotificationText);
-	GetWorld()->GetTimerManager().SetTimer(HideNotificationTimerHandle, this, &USkillBattleMenu::HideNotificationAndClearItsTimer, 3.f, false);
+	PlayAnimation(NotificationShowAndHide);
 }
 
 const UScrollBox* USkillBattleMenu::GetSkillsScrollBox() const

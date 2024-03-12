@@ -3,25 +3,28 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "..\Dynamics\World\Items\GameItemWithElements.h"
+#include "..\Dynamics\World\Items\GameItemWithItemObject.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\Spell.h"
-#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
-#include "BuffItem.generated.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effects\Effect.h"
+#include "..\Dynamics\World\Items\ItemObject\ItemObject.h"
+#include "DebuffItem.generated.h"
 
 /**
  * 
  */
+
 UCLASS()
-class REDEMPTION_API ABuffItem : public AGameItemWithElements
+class REDEMPTION_API ADebuffItem : public AGameItemWithItemObject
 {
 	GENERATED_BODY()
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		EBuffDebuffType TypeOfBuff {};
+		EBuffDebuffType TypeOfDebuff {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-		TArray<TSubclassOf<AEffect>> EffectsClasses{};
+		TArray<TSubclassOf<AEffect>> EffectsClasses {};
+
 public:
-	EBuffDebuffType GetTypeOfBuff() const;
+	EBuffDebuffType GetTypeOfDebuff() const;
 	TArray<TSubclassOf<AEffect>> GetEffectsClasses() const;
 };

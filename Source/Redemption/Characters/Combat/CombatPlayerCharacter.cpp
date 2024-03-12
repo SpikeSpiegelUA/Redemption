@@ -43,6 +43,10 @@ void ACombatPlayerCharacter::BeginPlay()
 		CharacterName = FName(*PlayerCharacter->CharacterName);
 		Level = PlayerCharacter->Level;
 		CurrentExperience = PlayerCharacter->CurrentExperience;
+		ActivatedPerks = PlayerCharacter->ActivatedPerks;
+		NumberOfPerkPoints = PlayerCharacter->NumberOfPerkPoints;
+		PerksCategoryNames = PlayerCharacter->GetPerksCategoryNames();
+		AvailablePerks = PlayerCharacter->GetAvailablePerks();
 		if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
 			if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget)) {
 				if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->EquipedMelee)) {

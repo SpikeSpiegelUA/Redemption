@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "..\Characters\CharacterInTheWorld.h"
 #include "..\Miscellaneous\MyInputConfigData.h"
-#include "..\Dynamics\World\Items\EquipmentItem.h"
+#include "..\Dynamics\World\Items\Equipment\EquipmentItem.h"
 #include "..\UI\Menus\BattleMenu.h"
 #include "..\UI\Menus\InventoryMenu.h"
 #include "..\UI\Menus\PauseMenu.h"
@@ -27,7 +27,7 @@
 #include "..\UI\HUD\Dialogue\ResponseEntry.h"
 #include "..\UI\HUD\ForwardRayInfo.h"
 #include "..\UI\HUD\Notification.h"
-#include "..\Dynamics\Gameplay\Skills and Effects\Effect.h"
+#include "..\Dynamics\Gameplay\Skills and Effects\Effects\Effect.h"
 #include "..\Dynamics\Gameplay\Managers\EffectsSpellsAndSkillsManager.h"
 #include "..\UI\Menus\DeathMenu.h"
 #include "..\UI\Menus\LearnedSpellsJournalMenu.h"
@@ -96,8 +96,7 @@ public:
 	UTouchInterface* GetEmptyTouchInterface() const;
 	UTouchInterface* GetStandardTouchInterface() const;
 	TArray<ACombatAllyNPC*> GetAllies() const;
-	const TArray<TSubclassOf<ASpell>> GetAvailableSkills() const;
-	const bool GetSkillsLeveledUp(const ESkillsLeveledUp SkillToGet) const;
+	const TArray<TSubclassOf<ASpell>>& GetAvailableSkills() const;
 
 	//Restore widgets to default state
 	void RestartBattleMenuWidget();
@@ -209,6 +208,15 @@ protected:
 	float GetHealthPercentage() const;
 	UFUNCTION()
 	float GetManaPercentage() const;
+
+	//Perks variables.
+#pragma region
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perks", SaveGame)
+	TArray<FText> PerksCategoryNames{};
+	//Currently is limited to 9 perks, 3 per category. Indexes 3,4,5 are in the Second category, etc. There are perks, that the player has to buy.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perks", SaveGame)
+	TArray<TSubclassOf<APerk>> AvailablePerks{};
+#pragma endregion
 public:
 #pragma region
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
@@ -254,4 +262,14 @@ public:
 	void InputScrollRight();
 	//This is used by left button in the battle menu.
 	void InputScrollLeft();
+
+	const TArray<FText>& GetPerksCategoryNames() const;
+	const TArray<TSubclassOf<APerk>>& GetAvailablePerks() const;
+	//Perks variables.
+
+	//Active perks.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perks", SaveGame)
+	TArray<TSubclassOf<APerk>> ActivatedPerks{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perks", SaveGame)
+	int NumberOfPerkPoints = 0;
 };

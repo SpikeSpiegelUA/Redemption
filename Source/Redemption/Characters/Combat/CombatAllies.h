@@ -6,6 +6,7 @@
 #include "CombatNPC.h"
 #include "CombatAllies.generated.h"
 
+
 /**
  * 
  */
@@ -50,6 +51,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Bitmask, BitmaskEnum = "/Script/Redemption.ESkillsLeveledUp"), Category = "Role-playing System")
 		int32 SkillsLeveledUpBitmaskCode{};
 
+	//Perks variables.
+#pragma region
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perks", SaveGame)
+		TArray<FText> PerksCategoryNames{};
+	//Currently is limited to 9 perks, 3 per category. Indexes 3,4,5 are in the Second category, etc. There are perks, that the player has to buy.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perks", SaveGame)
+		TArray<TSubclassOf<APerk>> AvailablePerks{};
+#pragma endregion
 	//Use in constructor only.
 	void InitializeSkillsProgress();
 public:
@@ -71,6 +80,8 @@ public:
 		float CenterMarkMovingSpeed{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
 		int CurrentExperience = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perks", SaveGame)
+		int NumberOfPerkPoints = 0;
 
 	const UTexture* GetCharacterPortrait() const;
 	UFloatingManaBarWidget* GetFloatingManaBarWidget() const;
@@ -86,4 +97,7 @@ public:
 
 	const TMap<ECharacterSkills, int>& GetSkillsMap() const;
 	const TMap<ECharacterSkills, int>& GetSkillsProgressMap() const;
+
+	const TArray<FText>& GetPerksCategoryNames() const;
+	const TArray<TSubclassOf<APerk>>& GetAvailablePerks() const;
 };

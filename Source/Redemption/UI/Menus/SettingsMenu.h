@@ -18,9 +18,7 @@ UCLASS()
 class REDEMPTION_API USettingsMenu : public UUserWidget
 {
 	GENERATED_BODY()
-private:
-	UFUNCTION()
-		void BackButtonOnClicked();
+protected:
 	UFUNCTION()
 		void GraphicsQualityComboBoxStringOnSelectionChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
 	UFUNCTION()
@@ -29,7 +27,7 @@ private:
 		void EffectsSliderOnValueChanged(float Value);
 	UFUNCTION()
 		void BackgroundMusicSliderOnValueChanged(float Value);
-protected:
+
 	//Components
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* BackButton;
@@ -61,6 +59,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
 		USoundClass* EffectsSoundClass {};
 public:
+
+	UFUNCTION()
+	void BackButtonOnClicked();
 
 	UButton* GetBackButton() const;
 	UComboBoxString* GetGraphicsQualityComboBoxString() const;

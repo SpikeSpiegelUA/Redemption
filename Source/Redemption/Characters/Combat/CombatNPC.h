@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "..\Characters\CharacterInTheWorld.h"
 #include "..\UI\HUD\FloatingHealthBarWidget.h"
-#include "..\Dynamics\World\Items\WeaponItem.h"
+#include "..\Dynamics\World\Items\Equipment\WeaponItem.h"
 #include "..\Dynamics\Logic\Interfaces\CombatActionsInterface.h"
 #include "..\Dynamics\Miscellaneous\ElementAndItsPercentage.h"
 #include "..\Dynamics\Gameplay\Skills and Effects\Spell.h"
@@ -13,6 +13,7 @@
 #include "Redemption/Dynamics/Miscellaneous/PhysicalTypeAndItsPercentage.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Niagara/Public/NiagaraComponent.h"
+#include "Redemption\Dynamics\Gameplay\Perks\Perk.h"
 #include "CombatNPC.generated.h"
 
 /**
@@ -88,10 +89,11 @@ public:
 	const EPhysicalType GetMeleePhysicalType() const;
 	const EPhysicalType GetRangePhysicalType() const;
 
-
 	void SetRangeAmmo(int8 NewRangeAmmo);
 	void SetStartLocation(const AActor* const NewLocation);
 	void SetStartRotation(const FRotator& NewStartRotation);
+
+	AEffect* ConvertActivatedPerkToEffect(const APerk* const ActivatedPerk);
 
 	//Combat mode regarding variables
 	UPROPERTY(VisibleAnywhere, Category = "Combat")
@@ -118,17 +120,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
 		int Level = 1;
 
+	//Perks variables.
+
+	//Active perks.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perks", SaveGame)
+		TArray<TSubclassOf<APerk>> ActivatedPerks{};
 	UFUNCTION()
 		float GetHealthPercentage();
 	UFUNCTION()
 		float GetManaPercentage();
 
 	//Function to call, when a NPC got hit. Parameters for a standard attack.
-	bool GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, const EPhysicalType ContainedPhysicalType,int ValueOfSkill, int ValueOfStat, bool ForcedMiss = false) override;
+	bool GetHit_Implementation(int ValueOfAttack, const ACombatNPC* const Attacker, const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements, const EPhysicalType ContainedPhysicalType, int ValueOfSkill, int ValueOfStat, bool ForcedMiss = false) override;
 	//Function to call, when a NPC got hit. Parameters for a buff/debuff attack.
-	bool GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements, int ValueOfSkill, int ValueOfStat, const ESpellType BuffOrDebuff) override;
+	bool GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements, int ValueOfSkill, int ValueOfStat, const ACombatNPC* const Attacker, const ESpellType BuffOrDebuff) override;
 protected:
-
 	virtual void BeginPlay() override;
 
 	//Use in constructor only.

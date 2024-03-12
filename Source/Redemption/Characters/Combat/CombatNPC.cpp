@@ -78,7 +78,7 @@ void ACombatNPC::Tick(float DeltaTime)
 
 }
 
-bool ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements, int ValueOfSkill, int ValueOfStat, const ESpellType BuffOrDebuff)
+bool ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffect*>& HitEffects, const TArray<FElementAndItsPercentageStruct>& ContainedElements, int ValueOfSkill, int ValueOfStat, const ACombatNPC* const Attacker, const ESpellType BuffOrDebuff)
 {
 	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
  		if (ABattleManager* BattleManager = RedemptionGameModeBase->GetBattleManager(); IsValid(BattleManager)) {
@@ -86,8 +86,9 @@ bool ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffec
 				GetActorLocation(), GetActorRotation());
 			FString TextForCombatFloatingInformationActor = FString();
 			uint8 EvasionRandomNumber = FMath::RandRange(0, 100);
-			int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistancesSkillsAndStats(SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance,
-				Effects, EEffectArea::EVASION), Effects, ElementalResistances, ContainedElements, ValueOfSkill, ValueOfStat, GetStat(ECharacterStats::PERCEPTION));
+			int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(SkillsSpellsAndEffectsActions::GetEvasionValueAfterStatsSkillsPerksAndEffects
+			(EvasionChance, Attacker->GetStat(ECharacterStats::PERCEPTION), GetStat(ECharacterStats::PERCEPTION),
+				Effects, EEffectArea::EVASION), Effects, ElementalResistances, ContainedElements);
 			if (EvasionRandomNumber <= ChanceOfEvasion) {
 				if(BuffOrDebuff == ESpellType::BUFF)
 					TextForCombatFloatingInformationActor.Append("Buff missed!");
@@ -114,24 +115,27 @@ bool ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffec
 	return false;
 }
 
-bool ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementAndItsPercentageStruct>& ContainedElements, const EPhysicalType ContainedPhysicalType, int ValueOfSkill, int ValueOfStat, bool ForcedMiss)
+bool ACombatNPC::GetHit_Implementation(int ValueOfAttack, const ACombatNPC* const Attacker, const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements, const EPhysicalType ContainedPhysicalType, int ValueOfSkill, int ValueOfStat, bool ForcedMiss)
 {
 	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 		if (ABattleManager* BattleManager = RedemptionGameModeBase->GetBattleManager(); IsValid(BattleManager)) {
 			ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), GetActorLocation(), GetActorRotation());
 			FString TextForCombatFloatingInformationActor = FString();
 			uint8 EvasionRandomNumber = FMath::RandRange(0, 100);
-			int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetValueAfterEffects(EvasionChance + GetStat(ECharacterStats::PERCEPTION) * 2, Effects, EEffectArea::EVASION);
+			int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetEvasionValueAfterStatsSkillsPerksAndEffects(EvasionChance,
+				Attacker->GetStat(ECharacterStats::PERCEPTION), GetStat(ECharacterStats::PERCEPTION), Effects,
+				EEffectArea::EVASION);
 			if (EvasionRandomNumber <= ChanceOfEvasion || ForcedMiss) {
 				TextForCombatFloatingInformationActor.Append("Miss!");
 				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 				return false;
 			}
 			else {
-				int ValueOfArmor = SkillsSpellsAndEffectsActions::GetValueAfterEffects(ArmorValue + GetStat(ECharacterStats::ENDURANCE) * 10,
-					Effects, EEffectArea::ARMOR);
-				int ValueOfAttackWithResistances = SkillsSpellsAndEffectsActions::GetAttackValueAfterResistancesSkillsAndStats(ValueOfAttack, Effects, ElementalResistances, 
-					ContainedElements,  ContainedPhysicalType, PhysicalResistances, ValueOfSkill, ValueOfStat);
+				int ValueOfArmor = SkillsSpellsAndEffectsActions::GetNonEvasionValueAfterStatsSkillsPerksAndEffects(ArmorValue, GetStat(ECharacterStats::ENDURANCE) * 10,
+				1, Effects, EEffectArea::ARMOR);
+				int ValueOfAttackWithResistances = SkillsSpellsAndEffectsActions::GetAttackValueAfterResistances(SkillsSpellsAndEffectsActions::GetNonEvasionValueAfterStatsSkillsPerksAndEffects(
+					ValueOfAttack, ValueOfStat, ValueOfSkill, Attacker->GetEffects(), EEffectArea::DAMAGE), Effects, ElementalResistances,
+					AttackerContainedElements, PhysicalResistances, ContainedPhysicalType);
 				int FinalValueOfAttack{};
 				if (ValueOfAttackWithResistances <= 0)
 					FinalValueOfAttack = ValueOfAttackWithResistances;
@@ -182,6 +186,28 @@ bool ACombatNPC::GetHit_Implementation(int ValueOfAttack, const TArray<FElementA
 			}
 		}
 	return false;
+}
+
+AEffect* ACombatNPC::ConvertActivatedPerkToEffect(const APerk* const ActivatedPerk)
+{
+	AEffect* NewEffect = NewObject<AEffect>();
+	NewEffect->SetEffectArea(ActivatedPerk->GetEffectArea());
+	switch (ActivatedPerk->GetPerkValueType()) {
+		case EPerkValueType::STANDARD:
+			NewEffect->SetEffectType(EEffectType::BUFF);
+			break;
+		case EPerkValueType::PLAIN:
+			NewEffect->SetEffectType(EEffectType::PLAINBUFF);
+			break;
+		case EPerkValueType::PERCENTAGE:
+			NewEffect->SetEffectType(EEffectType::PERCENTBUFF);
+			break;
+	}
+	NewEffect->SetEffectName(FText::FromName(ActivatedPerk->GetPerkName()));
+	NewEffect->SetEffectStat(ActivatedPerk->GetPerkValue());
+	NewEffect->SetDuration(1000);
+	NewEffect->SetEffectDescription(ActivatedPerk->GetPerkDescription());
+	return NewEffect;
 }
 
 UFloatingHealthBarWidget* ACombatNPC::GetFloatingHealthBarWidget() const

@@ -69,7 +69,7 @@ void UPartyMenu::BackButtonOnHovered()
 {
 	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
 		if (IsValid(UIManagerWorldSubsystem->PickedButton))
-			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.5f, 0.5f, 0.5f, 1.f));
 		UIManagerWorldSubsystem->PickedButton = BackButton;
 		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 		UIManagerWorldSubsystem->PickedButtonIndex = 2;

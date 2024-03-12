@@ -129,8 +129,6 @@ EBTNodeResult::Type UBTTask_ChooseSpell::ExecuteTask(UBehaviorTreeComponent& Own
 		else
 			CombatNPC->SpellToUse = nullptr;
 	}
-	if(IsValid(CombatNPC->SpellToUse))
-		UE_LOG(LogTemp, Warning, TEXT("The Spell's name is %s"), *CombatNPC->SpellToUse->GetSpellName().ToString());
 	return EBTNodeResult::Succeeded;
 }
 

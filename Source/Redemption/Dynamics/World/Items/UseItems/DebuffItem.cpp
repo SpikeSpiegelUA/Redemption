@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "..\Dynamics\World\Items\DebuffItem.h"
+#include "..\Dynamics\World\Items\UseItems\DebuffItem.h"
 
 EBuffDebuffType ADebuffItem::GetTypeOfDebuff() const
 {

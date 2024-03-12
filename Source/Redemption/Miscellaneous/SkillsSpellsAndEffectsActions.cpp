@@ -2,17 +2,22 @@
 
 
 #include "SkillsSpellsAndEffectsActions.h"
-#include "Redemption/Dynamics/Gameplay/Skills and Effects/EffectWithPlainModifier.h"
+#include "Redemption\Dynamics\Gameplay\Skills and Effects\Effects\EffectWithPlainModifier.h"
 
-int SkillsSpellsAndEffectsActions::GetValueAfterEffects(int ValueBeforeEffects, const TArray<AEffect*>& Effects, EEffectArea EffectArea)
+int SkillsSpellsAndEffectsActions::GetNonEvasionValueAfterStatsSkillsPerksAndEffects(int ValueBeforeEffects, int CorrespondingStatValue, 
+	int CorrespondingSkillValue, const TArray<AEffect*>& Effects, EEffectArea EffectArea)
 {
-	int ValueAfterEffects = ValueBeforeEffects;
+	int ValueAfterEffects = ValueBeforeEffects + FMath::Floor(static_cast<double>(CorrespondingSkillValue) / 4.0) + CorrespondingStatValue * 2;
 	for (AEffect* Effect : Effects) {
 		if (IsValid(Effect) && Effect->GetEffectArea() == EffectArea) {
 			if (Effect->GetEffectType() == EEffectType::PLAINBUFF)
 				ValueAfterEffects += Effect->GetEffectStat();
 			else if (Effect->GetEffectType() == EEffectType::PLAINDEBUFF)
 				ValueAfterEffects -= Effect->GetEffectStat();
+			else if (Effect->GetEffectType() == EEffectType::PERCENTBUFF)
+				ValueAfterEffects += ValueAfterEffects * Effect->GetEffectStat() / 100;
+			else if (Effect->GetEffectType() == EEffectType::PERCENTDEBUFF)
+				ValueAfterEffects -= ValueAfterEffects * Effect->GetEffectStat() / 100;
 			else if (Effect->GetEffectType() == EEffectType::BUFF)
 				ValueAfterEffects += ValueBeforeEffects * (Effect->GetEffectStat() - 1);
 			else if (Effect->GetEffectType() == EEffectType::DEBUFF)
@@ -22,9 +27,38 @@ int SkillsSpellsAndEffectsActions::GetValueAfterEffects(int ValueBeforeEffects, 
 	return ValueAfterEffects;
 }
 
-int SkillsSpellsAndEffectsActions::GetAttackValueAfterResistancesSkillsAndStats(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements, 
-	const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements, EPhysicalType AttackerPhysicalType, const TArray<FPhysicalTypeAndItsPercentageStruct> ReceiverPhysicalResistances,
-	int AttackerSkillValue, int AttackerStatValue)
+int SkillsSpellsAndEffectsActions::GetEvasionValueAfterStatsSkillsPerksAndEffects(int ValueBeforeEffects, int CorrespondingAttackerStatValue, int CorrespondingDefenderStatValue,
+	const TArray<AEffect*>& Effects, EEffectArea EffectArea)
+{
+	//If Defender's stat is greater than attacker's, than set this value to defender's stat * 2, else set the value to negative attacker's stat * 2.
+	int StatValueToAdd{};
+	if (CorrespondingDefenderStatValue >= CorrespondingAttackerStatValue)
+		StatValueToAdd = CorrespondingDefenderStatValue * 2;
+	else
+		StatValueToAdd = -CorrespondingAttackerStatValue * 2;
+	int ValueAfterEffects = ValueBeforeEffects + StatValueToAdd;
+	for (AEffect* Effect : Effects) {
+		if (IsValid(Effect) && Effect->GetEffectArea() == EffectArea) {
+			if (Effect->GetEffectType() == EEffectType::PLAINBUFF)
+				ValueAfterEffects += Effect->GetEffectStat();
+			else if (Effect->GetEffectType() == EEffectType::PLAINDEBUFF)
+				ValueAfterEffects -= Effect->GetEffectStat();
+			else if (Effect->GetEffectType() == EEffectType::PERCENTBUFF)
+				ValueAfterEffects += ValueAfterEffects * Effect->GetEffectStat() / 100;
+			else if (Effect->GetEffectType() == EEffectType::PERCENTDEBUFF)
+				ValueAfterEffects -= ValueAfterEffects * Effect->GetEffectStat() / 100;
+			else if (Effect->GetEffectType() == EEffectType::BUFF)
+				ValueAfterEffects += ValueBeforeEffects * (Effect->GetEffectStat() - 1);
+			else if (Effect->GetEffectType() == EEffectType::DEBUFF)
+				ValueAfterEffects -= ValueBeforeEffects / Effect->GetEffectStat();
+		}
+	}
+	return ValueAfterEffects;
+}
+
+int SkillsSpellsAndEffectsActions::GetAttackValueAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects,
+	const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements, const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements,
+	const TArray<FPhysicalTypeAndItsPercentageStruct>& ReceiverPhysicalResistances, EPhysicalType AttackerPhysicalType)
 {
 	TArray<FElementAndItsPercentageStruct> TemporaryReceiverContainedElements{};
 	for (FElementAndItsPercentageStruct ReceiverElementPercent : ReceiverContainedElements) {
@@ -41,10 +75,14 @@ int SkillsSpellsAndEffectsActions::GetAttackValueAfterResistancesSkillsAndStats(
 					NewElementPercent.Percent = ElementPercentBeforeEffects + Effect->GetEffectStat();
 				else if (Effect->GetEffectType() == EEffectType::PLAINDEBUFF)
 					NewElementPercent.Percent = ElementPercentBeforeEffects - Effect->GetEffectStat();
+				else if (Effect->GetEffectType() == EEffectType::PERCENTBUFF)
+					NewElementPercent.Percent = ElementPercentBeforeEffects + NewElementPercent.Percent * Effect->GetEffectStat() / 100;
+				else if (Effect->GetEffectType() == EEffectType::PERCENTDEBUFF)
+					NewElementPercent.Percent = ElementPercentBeforeEffects - NewElementPercent.Percent * Effect->GetEffectStat() / 100;
 				TemporaryReceiverContainedElements.Add(NewElementPercent);
 			}
 	}
-	int ValueOfAttackWithResistances = ValueBeforeResistances + FMath::Floor(static_cast<double>(AttackerSkillValue) / 4.0) + AttackerStatValue * 2;
+	int ValueOfAttackWithResistances = ValueBeforeResistances;
 	if (TemporaryReceiverContainedElements.Num() == 0)
 		TemporaryReceiverContainedElements = ReceiverContainedElements;
 	for (FElementAndItsPercentageStruct AttackerElementPercent : AttackerContainedElements)
@@ -81,6 +119,10 @@ int SkillsSpellsAndEffectsActions::GetAttackValueAfterResistancesSkillsAndStats(
 						NewPhysicalTypePercent.Percent = PhysicalTypePercentBeforeEffects + Effect->GetEffectStat();
 					else if (Effect->GetEffectType() == EEffectType::PLAINDEBUFF)
 						NewPhysicalTypePercent.Percent = PhysicalTypePercentBeforeEffects - Effect->GetEffectStat();
+					else if (Effect->GetEffectType() == EEffectType::PERCENTBUFF)
+						NewPhysicalTypePercent.Percent = PhysicalTypePercentBeforeEffects + NewPhysicalTypePercent.Percent * Effect->GetEffectStat() / 100;
+					else if (Effect->GetEffectType() == EEffectType::PERCENTDEBUFF)
+						NewPhysicalTypePercent.Percent = PhysicalTypePercentBeforeEffects - NewPhysicalTypePercent.Percent * Effect->GetEffectStat() / 100;
 					TemporaryReceiverPhysicalResistances.Add(NewPhysicalTypePercent);
 				}
 		}
@@ -108,9 +150,8 @@ int SkillsSpellsAndEffectsActions::GetAttackValueAfterResistancesSkillsAndStats(
 	return ValueOfAttackWithResistances;
 }
 
-int SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndStats(int ValueBeforeResistances, const TArray<AEffect*>& Effects, 
-	const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements, const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements,
-	int AttackerSkillValue, int AttackerStatValue)
+int SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements,
+	const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements)
 {
 	TArray<FElementAndItsPercentageStruct> TemporaryReceiverContainedElements{};
 	for (FElementAndItsPercentageStruct ReceiverElementPercent : ReceiverContainedElements) {
@@ -127,10 +168,14 @@ int SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndS
 					NewElementPercent.Percent = ElementPercentBeforeEffects + Effect->GetEffectStat();
 				else if (Effect->GetEffectType() == EEffectType::PLAINDEBUFF)
 					NewElementPercent.Percent = ElementPercentBeforeEffects - Effect->GetEffectStat();
+				else if (Effect->GetEffectType() == EEffectType::PERCENTBUFF)
+					NewElementPercent.Percent = ElementPercentBeforeEffects + NewElementPercent.Percent * Effect->GetEffectStat() / 100;
+				else if (Effect->GetEffectType() == EEffectType::PERCENTDEBUFF)
+					NewElementPercent.Percent = ElementPercentBeforeEffects - NewElementPercent.Percent * Effect->GetEffectStat() / 100;
 				TemporaryReceiverContainedElements.Add(NewElementPercent);
 			}
 	}
-	int ValueOfAttackWithResistances = ValueBeforeResistances + FMath::Floor(static_cast<double>(AttackerSkillValue) / 5.0) + AttackerStatValue * 2;
+	int ValueOfAttackWithResistances = ValueBeforeResistances;
 	if (TemporaryReceiverContainedElements.Num() == 0)
 		TemporaryReceiverContainedElements = ReceiverContainedElements;
 	for (FElementAndItsPercentageStruct AttackerElementPercent : AttackerContainedElements)
@@ -153,9 +198,8 @@ int SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistancesSkillsAndS
 	return ValueOfAttackWithResistances;
 }
 
-int SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistancesSkillsAndStats(int ValueBeforeResistances, const TArray<AEffect*>& Effects, 
-	const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements, const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements, 
-	int DefenderStatValue, int AttackerSkillValue, int AttackerStatValue)
+int SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(int ValueBeforeResistances, const TArray<AEffect*>& Effects, 
+	const TArray<FElementAndItsPercentageStruct>& ReceiverContainedElements, const TArray<FElementAndItsPercentageStruct>& AttackerContainedElements)
 {
 	TArray<FElementAndItsPercentageStruct> TemporaryReceiverContainedElements{};
 	for (FElementAndItsPercentageStruct ReceiverElementPercent : ReceiverContainedElements) {
@@ -164,22 +208,22 @@ int SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistancesS
 		for (AEffect* Effect : Effects)
 			if (IsValid(Effect) && GetSpellElementCorrespondingToEffectArea(Effect->GetEffectArea()) == ReceiverElementPercent.Element) {
 				NewElementPercent.Element = ReceiverElementPercent.Element;
-				if (IsValid(Cast<AEffectWithPlainModifier>(Effect)) || ReceiverElementPercent.Percent == 0) {
-					if (Effect->GetEffectType() == EEffectType::PLAINBUFF)
-						NewElementPercent.Percent = ElementPercentBeforeEffects + Effect->GetEffectStat();
-					else if (Effect->GetEffectType() == EEffectType::PLAINDEBUFF)
-						NewElementPercent.Percent = ElementPercentBeforeEffects - Effect->GetEffectStat();
-				}
-				else if(IsValid(Cast<AEffect>(Effect))) {
-					if (Effect->GetEffectType() == EEffectType::BUFF)
+					if (Effect->GetEffectType() == EEffectType::BUFF && ReceiverElementPercent.Percent != 0)
 						NewElementPercent.Percent = ElementPercentBeforeEffects * (Effect->GetEffectStat() - 1);
-					else if (Effect->GetEffectType() == EEffectType::DEBUFF)
+					else if (Effect->GetEffectType() == EEffectType::DEBUFF && ReceiverElementPercent.Percent != 0)
 						NewElementPercent.Percent = ElementPercentBeforeEffects / Effect->GetEffectStat();
-				}
+					else if (Effect->GetEffectType() == EEffectType::PLAINBUFF && ReceiverElementPercent.Percent == 0)
+						NewElementPercent.Percent = ElementPercentBeforeEffects + Effect->GetEffectStat();
+					else if (Effect->GetEffectType() == EEffectType::PLAINDEBUFF && ReceiverElementPercent.Percent == 0)
+						NewElementPercent.Percent = ElementPercentBeforeEffects - Effect->GetEffectStat();
+					else if (Effect->GetEffectType() == EEffectType::PERCENTBUFF && ReceiverElementPercent.Percent != 0)
+						NewElementPercent.Percent = ElementPercentBeforeEffects + NewElementPercent.Percent * Effect->GetEffectStat() / 100;
+					else if (Effect->GetEffectType() == EEffectType::PERCENTDEBUFF && ReceiverElementPercent.Percent != 0)
+						NewElementPercent.Percent = ElementPercentBeforeEffects - NewElementPercent.Percent * Effect->GetEffectStat() / 100;
 				TemporaryReceiverContainedElements.Add(NewElementPercent);
 			}
 	}
-	int EvasionChanceWithResistances = ValueBeforeResistances + DefenderStatValue * 2 - FMath::Floor(static_cast<double>(AttackerSkillValue) / 4.0) - AttackerStatValue * 2;
+	int EvasionChanceWithResistances = ValueBeforeResistances;
 	if (TemporaryReceiverContainedElements.Num() == 0)
 		TemporaryReceiverContainedElements = ReceiverContainedElements;
 	for (FElementAndItsPercentageStruct AttackerElementPercent : AttackerContainedElements) 

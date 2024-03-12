@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "..\Dynamics\World\Items\WeaponItem.h"
+#include "..\Dynamics\World\Items\Equipment\WeaponItem.h"
 #include "PhysicalTypeAndItsPercentage.generated.h"
 /**
  * 
@@ -12,8 +12,8 @@ USTRUCT(BlueprintType) struct FPhysicalTypeAndItsPercentageStruct
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
 		EPhysicalType PhysicalType {};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
 		int Percent{};
 };

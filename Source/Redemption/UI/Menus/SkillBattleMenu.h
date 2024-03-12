@@ -19,32 +19,32 @@ UCLASS()
 class REDEMPTION_API USkillBattleMenu : public UUserWidget
 {
 	GENERATED_BODY()
-private:
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+protected:
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButtonWithNeighbors* UseButtonWithNeighbors;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButtonWithNeighbors* BackButtonWithNeighbors;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UScrollBox* SkillsScrollBox;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* NotificationTextBlock;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBorder* NotificationBorder;
 
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite)
 		ULearnedSpellEntryWidget* LearnedSpellEntryWidget{};
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		TSubclassOf<ULearnedSpellEntryWidget> LearnedSpellEntryClass{};
 	UFUNCTION()
 		void UseButtonWithNeighborsOnHovered();
 	UFUNCTION()
 		void BackButtonWithNeighborsOnHovered();
-	UFUNCTION()
-		void HideNotificationAndClearItsTimer();
-	FTimerHandle HideNotificationTimerHandle{};
-protected:
+
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
+
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+		UWidgetAnimation* NotificationShowAndHide;
 
 public:
 	//Selected skill button in scroll box, whose info is shown. Need this, to control which button to make green.
@@ -57,7 +57,7 @@ public:
 	UButtonWithNeighbors* GetBackButtonWithNeighbors() const;
 	void AddSkillEntryToSkillsScrollBox(const class ASpell* const SpellToAdd);
 	void ResetSkillsScrollBox();
-	void CreateNotification(const FText& NotificationText);
+	void ActivateNotification(const FText& NotificationText);
 
 	UFUNCTION()
 		void UseButtonWithNeighborsOnClicked();

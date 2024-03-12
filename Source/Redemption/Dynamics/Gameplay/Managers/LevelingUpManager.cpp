@@ -32,25 +32,31 @@ UDataTable* ALevelingUpManager::GetLevelingUpExperienceRequirementsListDataTable
 	return LevelingUpExperienceRequirementsListDataTable;
 }
 
-bool ALevelingUpManager::LevelUp(int& Level, const int CurrentExperiecne, UProgressBar* const NextLevelProgressBar) const
+bool ALevelingUpManager::LevelUp(int& Level, int& NumberOfPerkPoints, const int CurrentExperiecne, UProgressBar* const NextLevelProgressBar) const
 {
 	FLevelingUpExperienceRequirementsList* LevelingUpExperienceRequirementsList{};
 	static const FString ContextString(TEXT("Leveling Up Requirements List Context"));
-	FString RowToFind = "Level";
-	RowToFind.AppendInt(Level + 1);
-	LevelingUpExperienceRequirementsList = LevelingUpExperienceRequirementsListDataTable->FindRow<FLevelingUpExperienceRequirementsList>(FName(*RowToFind), ContextString, true);
-	if (LevelingUpExperienceRequirementsList && CurrentExperiecne >= LevelingUpExperienceRequirementsList->Requirement) {
-		Level += 1;
-		//Find next requirement and set percent for NextLevelProgressBar.
-		RowToFind = "Level";
-		RowToFind.AppendInt(Level + 1);
+	int8 NextLevelAfterLevelingUp = Level + 1;
+	bool LeveledUp = false;
+	while (true) {
+		FString RowToFind = "Level";
+		RowToFind.AppendInt(NextLevelAfterLevelingUp);
 		LevelingUpExperienceRequirementsList = LevelingUpExperienceRequirementsListDataTable->FindRow<FLevelingUpExperienceRequirementsList>(FName(*RowToFind), ContextString, true);
-		if(LevelingUpExperienceRequirementsList)
-			NextLevelProgressBar->SetPercent(static_cast<float>(CurrentExperiecne) / LevelingUpExperienceRequirementsList->Requirement);
-		return true;
+		if (LevelingUpExperienceRequirementsList && CurrentExperiecne >= LevelingUpExperienceRequirementsList->Requirement) {
+			NextLevelAfterLevelingUp++;
+			LeveledUp = true;
+			Level++;
+			NumberOfPerkPoints++;
+		}
+		else {
+			if (LevelingUpExperienceRequirementsList)
+				NextLevelProgressBar->SetPercent(static_cast<float>(CurrentExperiecne) / LevelingUpExperienceRequirementsList->Requirement);
+			break;
+		}
 	}
-	if (LevelingUpExperienceRequirementsList)
-		NextLevelProgressBar->SetPercent(static_cast<float>(CurrentExperiecne) / LevelingUpExperienceRequirementsList->Requirement);
-	return false;
+	if(LeveledUp)
+		return true;
+	else
+		return false;
 }
 

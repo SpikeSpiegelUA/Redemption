@@ -30,9 +30,7 @@ void USelectedElementEntryWidget::MainButtonOnClicked()
 				if (USelectedElementEntryWidget* SelectedElementEntryWidget = Cast<USelectedElementEntryWidget>(SpellBattleMenu->GetSelectedElementsHorizontalBox()->GetAllChildren()[Index]); IsValid(SelectedElementEntryWidget))
 					if (SpellBattleMenu->GetSelectedElementsHorizontalBox()->GetAllChildren()[Index] == this) {
 						SpellBattleMenu->SelectedSpellElementsRemoveSingleItem(Element);
-						SpellBattleMenu->GetSelectedElementsHorizontalBox()->RemoveChild(SpellBattleMenu->GetSelectedElementsHorizontalBox()->GetAllChildren()[Index]);
-						if (IsValid(SpellBattleMenu->GetSelectedElementsHorizontalBox()->GetAllChildren()[Index]))
-							SpellBattleMenu->GetSelectedElementsHorizontalBox()->GetChildAt(Index)->RemoveFromParent();
+						SpellBattleMenu->GetSelectedElementsHorizontalBox()->RemoveChildAt(Index);
 						SpellBattleMenu->SetCreatedSpell(nullptr);
 					}
 			if (IsValid(UIManagerWorldSubsystem->PickedButton))

@@ -4,7 +4,7 @@
 #include "BTTask_GetPlayerLocation.h"
 #include "AIController.h"
 #include "..\Characters\CharacterInTheWorld.h"
-#include "..\Dynamics\Logic\SmartObjects\RandomPointAndChasing.h"
+#include "..\Dynamics\Logic\SmartObjects\NonCombat\RandomPointAndChasing.h"
 #include "..\Dynamics\Logic\SmartObjects\SmartObject.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"

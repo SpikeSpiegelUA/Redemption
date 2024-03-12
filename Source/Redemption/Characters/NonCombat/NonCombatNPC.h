@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "..\Characters\CharacterInTheWorld.h"
-#include "..\Dynamics\World\Items\EquipmentItem.h"
+#include "..\Dynamics\World\Items\Equipment\EquipmentItem.h"
 #include "NonCombatNPC.generated.h"
 
 /**

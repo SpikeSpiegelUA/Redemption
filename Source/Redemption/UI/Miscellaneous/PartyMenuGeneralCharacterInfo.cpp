@@ -4,6 +4,9 @@
 #include "PartyMenuGeneralCharacterInfo.h"
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components\CanvasPanelSlot.h"
+#include "Redemption/UI/Menus/PerksLevelingUpMenu.h"
 
 bool UPartyMenuGeneralCharacterInfo::Initialize()
 {
@@ -104,7 +107,37 @@ void UPartyMenuGeneralCharacterInfo::CharacterNameButtonOnClicked()
 
 void UPartyMenuGeneralCharacterInfo::PerksLevelingUpButtonOnClicked()
 {
-
+	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+		if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+			if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+				if (APlayerController* PlayerController = Cast<APlayerController>(PlayerCharacter->GetController()); IsValid(PlayerController)) {
+					UIManagerWorldSubsystem->PerksLevelingUpMenuWidget = CreateWidget<UPerksLevelingUpMenu>(PlayerController, RedemptionGameModeBase->GetPerksLevelingUpMenuClass());
+					UIManagerWorldSubsystem->CharacterPerksMenuWidget = CreateWidget<UCharacterPerks>(PlayerController, RedemptionGameModeBase->GetStandardCharacterPerksMenuClass());
+					UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetMainCanvasPanel()->AddChildToCanvas(UIManagerWorldSubsystem->CharacterPerksMenuWidget);
+					if (UCanvasPanelSlot* CanvasPanelSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(UIManagerWorldSubsystem->CharacterPerksMenuWidget); IsValid(CanvasPanelSlot)) {
+						FAnchors Anchors{};
+						Anchors.Maximum = FVector2D(1.0, 1.0);
+						CanvasPanelSlot->SetAnchors(Anchors);
+						FMargin Offsets{};
+						Offsets.Right = 1000.f;
+						Offsets.Bottom = 130.f;
+						CanvasPanelSlot->SetOffsets(Offsets);
+					}
+				}
+				if (IsValid(UIManagerWorldSubsystem->PartyMenuWidget))
+					UIManagerWorldSubsystem->PartyMenuWidget->RemoveFromParent();
+				if (IsValid(UIManagerWorldSubsystem->PerksLevelingUpMenuWidget))
+					UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->AddToViewport();
+				if (IsValid(UIManagerWorldSubsystem->CharacterPerksMenuWidget)) {
+					UIManagerWorldSubsystem->CharacterPerksMenuWidget->SetCurrentlySelectedCategoryIndex(0);
+					if(IsValid(Ally))
+						UIManagerWorldSubsystem->CharacterPerksMenuWidget->SetPerks(Ally);
+					else
+						UIManagerWorldSubsystem->CharacterPerksMenuWidget->SetPerks(PlayerCharacter);
+				}
+				PerksLevelingUpButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+			}
+		}
 }
 
 void UPartyMenuGeneralCharacterInfo::ButtonOnHoveredActions(UButton* const HoveredButton, const int8 Index)

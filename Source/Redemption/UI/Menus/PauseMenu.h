@@ -48,17 +48,7 @@ protected:
 		TSubclassOf<class USettingsMenu> SettingsMenuClass{};
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class ULoadingScreen> LoadingScreenClass{};
-public:
 
-	UButton* GetResumeButton() const;
-	UButton* GetSaveButton() const;
-	UButton* GetLoadButton() const;
-	UButton* GetSettingsButton() const;
-	UButton* GetMainMenuButton() const;
-	UStackBox* GetButtonsStackBox() const;
-
-	UFUNCTION()
-	void ResumeButtonOnClicked();
 	UFUNCTION()
 	void ResumeButtonOnHovered();
 	UFUNCTION()
@@ -77,5 +67,15 @@ public:
 	void MainMenuButtonOnClicked();
 	UFUNCTION()
 	void MainMenuButtonOnHovered();
+public:
 
+	UButton* GetResumeButton() const;
+	UButton* GetSaveButton() const;
+	UButton* GetLoadButton() const;
+	UButton* GetSettingsButton() const;
+	UButton* GetMainMenuButton() const;
+	UStackBox* GetButtonsStackBox() const;
+
+	UFUNCTION()
+	void ResumeButtonOnClicked();
 };

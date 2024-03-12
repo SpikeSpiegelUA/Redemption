@@ -135,6 +135,12 @@ void UCombatCharacterInfoMenu::SetEffectInfo(const AEffect* const EffectToViewIn
 		case EEffectType::PLAINDEBUFF:
 			StringToSet = "Effect Value: substract ";
 			break;
+		case EEffectType::PERCENTBUFF:
+			StringToSet = "Effect Value: add percentage ";
+			break;
+		case EEffectType::PERCENTDEBUFF:
+			StringToSet = "Effect Value: substract percentage ";
+			break;
 		default: 
 			StringToSet = "Effect Value: ";
 			break;
