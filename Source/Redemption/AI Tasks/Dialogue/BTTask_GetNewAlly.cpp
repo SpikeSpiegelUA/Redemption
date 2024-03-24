@@ -8,7 +8,6 @@
 UBTTask_GetNewAlly::UBTTask_GetNewAlly(const FObjectInitializer& ObjectInitializer)
 {
 	bCreateNodeInstance = true;
-	bNotifyTick = true;
 	NodeName = "Get New Ally";
 }
 
@@ -17,7 +16,7 @@ EBTNodeResult::Type UBTTask_GetNewAlly::ExecuteTask(UBehaviorTreeComponent& Owne
 	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 
-	if (!IsValid(BlackboardComponent) && !IsValid(PlayerCharacter))
+	if (!IsValid(BlackboardComponent) || !IsValid(PlayerCharacter))
 		return EBTNodeResult::Failed;
 
 	if (ACombatAllyNPC* CombatAllyNPC = GetWorld()->SpawnActor<ACombatAllyNPC>(CombatAllyNPCToAdd, FVector(-500.0, -500.0, -500.0), FRotator(0.0)); IsValid(CombatAllyNPC))

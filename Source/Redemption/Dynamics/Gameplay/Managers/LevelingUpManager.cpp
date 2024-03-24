@@ -32,25 +32,26 @@ UDataTable* ALevelingUpManager::GetLevelingUpExperienceRequirementsListDataTable
 	return LevelingUpExperienceRequirementsListDataTable;
 }
 
-bool ALevelingUpManager::LevelUp(int& Level, int& NumberOfPerkPoints, const int CurrentExperiecne, UProgressBar* const NextLevelProgressBar) const
+bool ALevelingUpManager::LevelUp(ACombatAllies* const LevelingUpAlly, UProgressBar* const NextLevelProgressBar) const
 {
 	FLevelingUpExperienceRequirementsList* LevelingUpExperienceRequirementsList{};
 	static const FString ContextString(TEXT("Leveling Up Requirements List Context"));
-	int8 NextLevelAfterLevelingUp = Level + 1;
+	int8 NextLevelAfterLevelingUp = LevelingUpAlly->Level + 1;
 	bool LeveledUp = false;
 	while (true) {
 		FString RowToFind = "Level";
 		RowToFind.AppendInt(NextLevelAfterLevelingUp);
 		LevelingUpExperienceRequirementsList = LevelingUpExperienceRequirementsListDataTable->FindRow<FLevelingUpExperienceRequirementsList>(FName(*RowToFind), ContextString, true);
-		if (LevelingUpExperienceRequirementsList && CurrentExperiecne >= LevelingUpExperienceRequirementsList->Requirement) {
+		if (LevelingUpExperienceRequirementsList && LevelingUpAlly->CurrentExperience >= LevelingUpExperienceRequirementsList->Requirement) {
 			NextLevelAfterLevelingUp++;
 			LeveledUp = true;
-			Level++;
-			NumberOfPerkPoints++;
+			LevelingUpAlly->Level++;
+			LevelingUpAlly->NumberOfPerkPoints++;
+			LevelingUpAlly->LevelingUpCounter++;
 		}
 		else {
 			if (LevelingUpExperienceRequirementsList)
-				NextLevelProgressBar->SetPercent(static_cast<float>(CurrentExperiecne) / LevelingUpExperienceRequirementsList->Requirement);
+				NextLevelProgressBar->SetPercent(static_cast<float>(LevelingUpAlly->CurrentExperience) / LevelingUpExperienceRequirementsList->Requirement);
 			break;
 		}
 	}

@@ -59,6 +59,9 @@ public:
 
 	void SetCharacterInfo(const ACombatAllyNPC* const AllyToSet);
 	void SetCharacterInfo(const APlayerCharacter* const PlayerToSet);
+	//Set PerksLevelingUpTextBlock to "Perks" or "Level up!!!", depending on the leveling up counter.
+	//Use this after Ally variable has been set!!!(or not set, in this case function will get the PlayerCharacter).
+	void PerksLevelingUpTextBlockLogic();
 
 	ACombatAllyNPC* Ally{};
 	UButton* GetCharacterNameButton() const;

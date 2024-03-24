@@ -39,10 +39,13 @@ bool UCharacterPerks::Initialize()
 void UCharacterPerks::NativeConstruct()
 {
 	Super::NativeConstruct();
-	FirstCategoryButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
 		UIManagerWorldSubsystem->PickedButton = FirstCategoryButton;
 		UIManagerWorldSubsystem->PickedButtonIndex = 0;
+		if (UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetStatsLevelingUpScaleBox()->GetVisibility() == ESlateVisibility::Visible)
+			FirstCategoryButton->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+		else
+			FirstCategoryButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 	}
 }
 
@@ -130,6 +133,8 @@ void UCharacterPerks::SetPerks(const APlayerCharacter* const PlayerCharacter)
 	FString AvailablePerksString = "Available perk points: ";
 	AvailablePerksString.AppendInt(PlayerCharacter->NumberOfPerkPoints);
 	AvailablePerksPointsTextBlock->SetText(FText::FromString(AvailablePerksString));
+	//If nullptr, then all the functions that use PerksOwner will use the PlayerCharacter.
+	PerksOwner = nullptr;
 }
 
 void UCharacterPerks::ButtonOnHoveredActions(UButton* const PickedButton, UPanelWidget* const VerticalBox)
@@ -424,6 +429,26 @@ void UCharacterPerks::ThirdPerkButtonWithActorClassOnHovered()
 void UCharacterPerks::SetCurrentlySelectedCategoryIndex(const int8 NewIndex)
 {
 	CurrentlySelectedCategoryIndex = NewIndex;
+}
+
+void UCharacterPerks::DeactivateAllButtons()
+{
+	FirstCategoryButton->SetIsEnabled(false);
+	SecondCategoryButton->SetIsEnabled(false);
+	ThirdCategoryButton->SetIsEnabled(false);
+	FirstPerkButtonWithActorClass->SetIsEnabled(false);
+	SecondPerkButtonWithActorClass->SetIsEnabled(false);
+	ThirdPerkButtonWithActorClass->SetIsEnabled(false);
+}
+
+void UCharacterPerks::ActivateAllButtons()
+{
+	FirstCategoryButton->SetIsEnabled(true);
+	SecondCategoryButton->SetIsEnabled(true);
+	ThirdCategoryButton->SetIsEnabled(true);
+	FirstPerkButtonWithActorClass->SetIsEnabled(true);
+	SecondPerkButtonWithActorClass->SetIsEnabled(true);
+	ThirdPerkButtonWithActorClass->SetIsEnabled(true);
 }
 
 const UButton* UCharacterPerks::GetFirstCategoryButton() const
