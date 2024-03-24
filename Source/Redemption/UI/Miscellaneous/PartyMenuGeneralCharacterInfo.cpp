@@ -49,7 +49,12 @@ void UPartyMenuGeneralCharacterInfo::SetCharacterInfo(const ACombatAllyNPC* cons
 	StringToSet.Append("Level: ");
 	StringToSet.AppendInt(AllyToSet->Level);
 	CharacterLevelTextBlock->SetText(FText::FromString(StringToSet));
+	if (AllyToSet->LevelingUpCounter > 0) {
+		FString LevelingUpString = "Level up!!!";
+		PerksLevelingUpTextBlock->SetText(FText::FromString(LevelingUpString));
+	}
 	this->Ally = const_cast<ACombatAllyNPC*>(AllyToSet);
+	PerksLevelingUpTextBlockLogic();
 }
 
 void UPartyMenuGeneralCharacterInfo::SetCharacterInfo(const APlayerCharacter* const Player)
@@ -74,6 +79,31 @@ void UPartyMenuGeneralCharacterInfo::SetCharacterInfo(const APlayerCharacter* co
 	StringToSet.AppendInt(Player->Level);
 	CharacterLevelTextBlock->SetText(FText::FromString(StringToSet));
 	this->Ally = nullptr;
+	PerksLevelingUpTextBlockLogic();
+}
+
+void UPartyMenuGeneralCharacterInfo::PerksLevelingUpTextBlockLogic()
+{
+	if (IsValid(Ally)) {
+		if (Ally->LevelingUpCounter > 0) {
+			FString LevelingUpString = "Level up!!!";
+			PerksLevelingUpTextBlock->SetText(FText::FromString(LevelingUpString));
+		}
+		else {
+			FString PerksString = "Perks";
+			PerksLevelingUpTextBlock->SetText(FText::FromString(PerksString));
+		}
+	}
+	else if (const auto* const Player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(Player)) {
+		if (Player->LevelingUpCounter > 0) {
+			FString LevelingUpString = "Level up!!!";
+			PerksLevelingUpTextBlock->SetText(FText::FromString(LevelingUpString));
+		}
+		else {
+			FString PerksString = "Perks";
+			PerksLevelingUpTextBlock->SetText(FText::FromString(PerksString));
+		}
+	}
 }
 
 void UPartyMenuGeneralCharacterInfo::CharacterNameButtonOnClicked()
@@ -126,8 +156,6 @@ void UPartyMenuGeneralCharacterInfo::PerksLevelingUpButtonOnClicked()
 				}
 				if (IsValid(UIManagerWorldSubsystem->PartyMenuWidget))
 					UIManagerWorldSubsystem->PartyMenuWidget->RemoveFromParent();
-				if (IsValid(UIManagerWorldSubsystem->PerksLevelingUpMenuWidget))
-					UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->AddToViewport();
 				if (IsValid(UIManagerWorldSubsystem->CharacterPerksMenuWidget)) {
 					UIManagerWorldSubsystem->CharacterPerksMenuWidget->SetCurrentlySelectedCategoryIndex(0);
 					if(IsValid(Ally))
@@ -135,7 +163,12 @@ void UPartyMenuGeneralCharacterInfo::PerksLevelingUpButtonOnClicked()
 					else
 						UIManagerWorldSubsystem->CharacterPerksMenuWidget->SetPerks(PlayerCharacter);
 				}
-				PerksLevelingUpButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+				PerksLevelingUpButton->SetBackgroundColor(FLinearColor(0.5f, 0.5f, 0.5f, 1.f));
+				//Stats leveling up logic.
+				if (PerksLevelingUpTextBlock->GetText().ToString().Equals("Level up!!!")) 
+					UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->StatsLevelingUpLogic();
+				if (IsValid(UIManagerWorldSubsystem->PerksLevelingUpMenuWidget))
+					UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->AddToViewport();
 			}
 		}
 }

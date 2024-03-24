@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Engine/DataTable.h"
 #include "Components/ProgressBar.h"
+#include "Redemption/Characters/Combat/CombatAllies.h"
 #include "LevelingUpManager.generated.h"
 
 USTRUCT(BlueprintType)
@@ -38,9 +39,7 @@ public:
 
 	UDataTable* GetLevelingUpExperienceRequirementsListDataTable() const;
 	//If current experience has reached the point of a new level, then set level to the new level. If leveled up, return true, else false.
-	//@param Level - pass the level of a NPC. Will be changed by the function.
-	//@param NumberOfPerkPoints - pass the number of perk points that a NPC has. Will be changed by the function.
-	//@param CurrentExperience - pass the current experience of a NPC. Won't be changed by the function.
+	//@param LevelingUpAlly - pass the NPC, that is leveling up. It's level, number of perk points and leveling up counter will be changed by the function.
 	//@param NextLevelProgressBar - pass the NextLevelProgressBar to set the next level progress.
-	bool LevelUp(int& Level, int& NumberOfPerkPoints, const int CurrentExperiecne, UProgressBar* const NextLevelProgressBar) const;
+	bool LevelUp(ACombatAllies* const LevelingUpAlly, UProgressBar* const NextLevelProgressBar) const;
 };

@@ -87,6 +87,7 @@ void ACombatPlayerCharacter::BeginPlay()
 		MaxMana = PlayerCharacter->MaxMana;
 		EvasionChance = PlayerCharacter->EvasionChance;
 		TargetingChance = PlayerCharacter->TargetingChance;
+		LevelingUpCounter = PlayerCharacter->LevelingUpCounter;
 	}
 }
 

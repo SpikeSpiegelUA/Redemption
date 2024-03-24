@@ -80,6 +80,9 @@ public:
 		float CenterMarkMovingSpeed{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
 		int CurrentExperience = 0;
+	//Count how many "leveling ups" the character has.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
+		int LevelingUpCounter = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perks", SaveGame)
 		int NumberOfPerkPoints = 0;
 

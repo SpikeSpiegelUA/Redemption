@@ -136,4 +136,9 @@ public:
 	//This is for the keyboard logic. When we scroll down or up to the back button, save whether we scrolled from perks or categories.
 	//Then use this to decide where to scroll up or scroll down(categories or perks).
 	bool ScrolledDownOrUpFromCategories = false;
+
+	//Set for IsEnabled to false for all perks and categories buttons. Is used in stats leveling up logic.
+	void DeactivateAllButtons();
+	//Set for IsEnabled to true for all perks and categories buttons. Is used in stats leveling up logic.
+	void ActivateAllButtons();
 };

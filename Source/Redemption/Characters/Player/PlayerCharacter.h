@@ -101,7 +101,9 @@ public:
 	//Restore widgets to default state
 	void RestartBattleMenuWidget();
 	void RestartBattleResultsScreenWidget();
+
 	void AddNewAllyToAllies(ACombatAllyNPC* const AllyToAdd);
+	void AddNewSkillToAvailableSkills(const TSubclassOf<ASpell> SkillClassToAdd);
 
 	void SetAllies(const TArray<TSubclassOf<ACombatAllies>>& NewAllies);
 	const int8 GetStat(const ECharacterStats StatToGet) const;
@@ -169,7 +171,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "World")
 		TSubclassOf<class ALootInTheWorld> LootInTheWorldClass{};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spells")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spells", SaveGame)
 	TArray<TSubclassOf<ASpell>> AvailableSkills{};
 
 	// Handle move input
@@ -211,10 +213,10 @@ protected:
 
 	//Perks variables.
 #pragma region
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perks", SaveGame)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perks")
 	TArray<FText> PerksCategoryNames{};
 	//Currently is limited to 9 perks, 3 per category. Indexes 3,4,5 are in the Second category, etc. There are perks, that the player has to buy.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perks", SaveGame)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perks")
 	TArray<TSubclassOf<APerk>> AvailablePerks{};
 #pragma endregion
 public:
@@ -252,6 +254,9 @@ public:
 		int Level = 1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
 		int CurrentExperience = 0;
+	//Count how many "leveling ups" the character has.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame)
+		int LevelingUpCounter = 0;
 
 	//General character information.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "General Information")

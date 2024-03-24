@@ -140,7 +140,7 @@ void UBattleResultsScreen::SetCharacterInfo(ACombatAllies* const CombatAllyToSet
 	//Level text.
 	StringToSet = "Level: ";
 	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
-		if (RedemptionGameModeBase->GetLevelingUpManager()->LevelUp(CombatAllyToSetInfo->Level, CombatAllyToSetInfo->NumberOfPerkPoints, CombatAllyToSetInfo->CurrentExperience, CharacterLevelingUpWidget->GetNextLevelProgressBar())) {
+		if (RedemptionGameModeBase->GetLevelingUpManager()->LevelUp(CombatAllyToSetInfo, CharacterLevelingUpWidget->GetNextLevelProgressBar())) {
 			StringToSet.AppendInt(CombatAllyToSetInfo->Level);
 			StringToSet.Append(", ");
 			StringToSet.Append("level up!!! ");

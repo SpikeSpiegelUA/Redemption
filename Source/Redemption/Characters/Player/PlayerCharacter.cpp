@@ -427,7 +427,8 @@ void APlayerCharacter::InputScrollLeft()
 					}
 			}
 	}
-	else if (IsValid(UIManagerWorldSubsystem->PerksLevelingUpMenuWidget) && UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->IsInViewport()) {
+	else if (IsValid(UIManagerWorldSubsystem->PerksLevelingUpMenuWidget) && UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->IsInViewport()
+		&& UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetStatsLevelingUpScaleBox()->GetVisibility() != ESlateVisibility::Visible) {
 		if (UIManagerWorldSubsystem->PickedButton != UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetBackButton() &&
 			UIManagerWorldSubsystem->PickedButton != UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetUnlockButton()) {
 			TArray<UWidget*> Buttons{};
@@ -607,7 +608,8 @@ void APlayerCharacter::InputScrollRight()
 				}
 			}
 	}
-	else if (IsValid(UIManagerWorldSubsystem->PerksLevelingUpMenuWidget) && UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->IsInViewport()) {
+	else if (IsValid(UIManagerWorldSubsystem->PerksLevelingUpMenuWidget) && UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->IsInViewport()
+		&& UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetStatsLevelingUpScaleBox()->GetVisibility() != ESlateVisibility::Visible) {
 		if (UIManagerWorldSubsystem->PickedButton != UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetBackButton() &&
 			UIManagerWorldSubsystem->PickedButton != UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetUnlockButton()) {
 			TArray<UWidget*> Buttons{};
@@ -953,7 +955,8 @@ void APlayerCharacter::InputScrollUp()
 			}
 		}
 	}
-	else if (IsValid(UIManagerWorldSubsystem->PerksLevelingUpMenuWidget) && UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->IsInViewport()) {
+	else if (IsValid(UIManagerWorldSubsystem->PerksLevelingUpMenuWidget) && UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->IsInViewport()
+		&& UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetStatsLevelingUpScaleBox()->GetVisibility() != ESlateVisibility::Visible) {
 		if (UIManagerWorldSubsystem->PickedButton != UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetBackButton() &&
 			UIManagerWorldSubsystem->PickedButton != UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetUnlockButton()) {
 			TArray<UWidget*> Buttons{};
@@ -1381,7 +1384,8 @@ void APlayerCharacter::InputScrollDown()
 			}
 		}
 	}
-	else if (IsValid(UIManagerWorldSubsystem->PerksLevelingUpMenuWidget) && UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->IsInViewport()) {
+	else if (IsValid(UIManagerWorldSubsystem->PerksLevelingUpMenuWidget) && UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->IsInViewport()
+		&& UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetStatsLevelingUpScaleBox()->GetVisibility() != ESlateVisibility::Visible) {
 		if (UIManagerWorldSubsystem->PickedButton != UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetBackButton() &&
 			UIManagerWorldSubsystem->PickedButton != UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->GetUnlockButton()) {
 			TArray<UWidget*> Buttons{};
@@ -1778,6 +1782,7 @@ void APlayerCharacter::CopyInfoFromCombatPlayer(const class ACombatPlayerCharact
 	Level = CombatPlayerCharacter->Level;
 	CurrentExperience = CombatPlayerCharacter->CurrentExperience;
 	NumberOfPerkPoints = CombatPlayerCharacter->NumberOfPerkPoints;
+	LevelingUpCounter = CombatPlayerCharacter->LevelingUpCounter;
 }
 
 void APlayerCharacter::CheckForwardRayHitResult()
@@ -1957,6 +1962,11 @@ void APlayerCharacter::RestartBattleResultsScreenWidget()
 void APlayerCharacter::AddNewAllyToAllies(ACombatAllyNPC* const AllyToAdd)
 {
 	Allies.Add(AllyToAdd);
+}
+
+void APlayerCharacter::AddNewSkillToAvailableSkills(const TSubclassOf<ASpell> SkillClassToAdd)
+{
+	AvailableSkills.Add(SkillClassToAdd);
 }
 
 bool APlayerCharacter::GetCanInput() const
