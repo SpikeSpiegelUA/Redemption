@@ -69,8 +69,6 @@ protected:
 	UComboBoxString* StatNameComboBoxString;
 
 	UFUNCTION()
-	void BackButtonOnClicked();
-	UFUNCTION()
 	void UnlockButtonOnClicked();
 	UFUNCTION()
 	void ConfirmButtonOnClicked();
@@ -144,4 +142,8 @@ public:
 	void StatsLevelingUpLogic();
 
 	void ShowStatsLevelingUp();
+
+	//Use this in keyboard input, so make it public.
+	UFUNCTION()
+	void BackButtonOnClicked();
 };

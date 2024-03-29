@@ -21,12 +21,12 @@ class REDEMPTION_API UPartyMenu : public UUserWidget
 protected:
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
-private:
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* BackButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UHorizontalBox* CharactersHorizontalBox;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Classes", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Classes")
 		TSubclassOf<class UPartyMenuGeneralCharacterInfo> PartyMenuGeneralCharacterInfoClass{};
 	UPROPERTY()
 		UPartyMenuGeneralCharacterInfo* PartyMenuGeneralCharacterInfoWidget{};

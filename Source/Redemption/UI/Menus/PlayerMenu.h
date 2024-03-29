@@ -22,8 +22,10 @@ protected:
 		class UButton* InventoryButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* CloseButton;
-		UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UButton* PartyButton;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UButton* JournalButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UBackgroundBlur* Blur;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -42,6 +44,10 @@ protected:
 	void PartyButtonOnClicked();
 	UFUNCTION()
 	void PartyButtonOnHovered();
+	UFUNCTION()
+	void JournalButtonOnClicked();
+	UFUNCTION()
+	void JournalButtonOnHovered();
 
 public:
 	UButton* GetInventoryButton() const;

@@ -93,6 +93,9 @@ void USaveLoadGameMenu::BackButtonWithNeighborsOnClicked()
 		DeleteHasBeenClicked = false;
 		OverwriteHasBeenClicked = false;
 		NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
+		if (IsValid(SelectedSaveSlotButton))
+			SelectedSaveSlotButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+		SelectedSaveSlotButton = nullptr;
 	}
 }
 

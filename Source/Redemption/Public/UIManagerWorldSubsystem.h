@@ -76,4 +76,6 @@ public:
 	class UPerksLevelingUpMenu* PerksLevelingUpMenuWidget{};
 	UPROPERTY()
 	class UCharacterPerks* CharacterPerksMenuWidget{};
+	UPROPERTY()
+	class UJournalMenu* JournalMenuWidget{};
 };

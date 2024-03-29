@@ -14,6 +14,7 @@
 #include "..\GameInstance\Structs\PlayerCharacterInstanceData.h"
 #include "..\UI\Miscellaneous\SaveSlotEntry.h"
 #include "Structs/CombatAllyNPCGameInstanceData.h"
+#include "Containers/Map.h"
 #include "RedemptionGameInstance.generated.h"
 
 /**
@@ -34,6 +35,14 @@ protected:
 public:
 	URedemptionGameInstance(const FObjectInitializer& ObjectInitializer);
 
+	//JournalMenu variables.
+	UPROPERTY(SaveGame)
+	TArray<uint8> JournalMenuByteData{};
+
+	//QuestManager variables.
+	TArray<uint8> QuestManagerByteData{};
+
+	//Inventory variables.
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory", SaveGame)
 		TArray<TSubclassOf<class AGameItem>> InstanceItemsInTheInventory;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", SaveGame)
@@ -51,6 +60,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", SaveGame)
 		TSubclassOf<class AArmorItem> InstanceEquipedLowerArmor{};
 
+	//NPC variables.
 	UPROPERTY(VisibleAnywhere, SaveGame)
 		FPlayerCharacterInstanceDataStruct PlayerCharacterInstanceDataStruct{};
 	UPROPERTY(VisibleAnywhere, SaveGame)
