@@ -50,10 +50,6 @@ void UPartyMenu::BackButtonOnClicked()
 			this->RemoveFromParent();
 			this->ConditionalBeginDestroy();
 			UIManagerWorldSubsystem->PartyMenuWidget = nullptr;
-			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>(); IsValid(PlayerController))
-				if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
-					if (IsValid(RedemptionGameModeBase->GetPlayerMenuClass()))
-						UIManagerWorldSubsystem->PlayerMenuWidget = CreateWidget<UPlayerMenu>(PlayerController, RedemptionGameModeBase->GetPlayerMenuClass());
 			if (IsValid(UIManagerWorldSubsystem->PlayerMenuWidget)) {
 				UIManagerWorldSubsystem->PlayerMenuWidget->AddToViewport();
 				if (IsValid(UIManagerWorldSubsystem->PickedButton))

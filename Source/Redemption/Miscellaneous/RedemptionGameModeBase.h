@@ -22,6 +22,7 @@ protected:
 	ARedemptionGameModeBase();
 	virtual void BeginPlay() override;
 
+	//Managers.
 	UPROPERTY(BlueprintReadOnly, Category = "Managers")
 		class ABattleManager* BattleManager{};
 	UPROPERTY(BlueprintReadOnly, Category = "Managers")
@@ -34,6 +35,8 @@ protected:
 		class AParticlesManager* ParticlesManager{};
 	UPROPERTY(BlueprintReadOnly, Category = "Managers")
 		class ALevelingUpManager* LevelingUpManager{};
+	UPROPERTY(BlueprintReadOnly, Category = "Managers")
+		class AQuestManager* QuestManager{};
 
 	//Widget classes to spawn widget instances.
 
@@ -89,6 +92,8 @@ protected:
 		TSubclassOf<class UPerksLevelingUpMenu> PerksLevelingUpMenuClass{};
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UCharacterPerks> StandardCharacterPerksMenuClass{};
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+		TSubclassOf<class UJournalMenu> JournalMenuClass{};
 
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -100,6 +105,7 @@ public:
 	void SetParticlesManager(const AParticlesManager* const NewParticlesManager);
 	void SetLevelingUpManager(const ALevelingUpManager* const NewLevelingUpManager);
 	void SetEffectsSpellsAndSkillsManager(const AEffectsSpellsAndSkillsManager* const NewEffectsSpellsAndSkillsManager);
+	void SetQuestManager(const AQuestManager* const NewQuestManager);
 
 	ABattleManager* GetBattleManager() const;
 	class AGameManager* GetGameManager() const;
@@ -107,6 +113,7 @@ public:
 	AParticlesManager* GetParticlesManager() const;
 	ALevelingUpManager* GetLevelingUpManager() const;
 	AEffectsSpellsAndSkillsManager* GetEffectsSpellsAndSkillsManager() const;
+	AQuestManager* GetQuestManager() const;
 
 	//UI classes getters.
 
@@ -136,4 +143,5 @@ public:
 	TSubclassOf<class UDetailedCharacterInfoMenu> GetDetailedCharacterInfoMenuClass() const;
 	TSubclassOf<class UPerksLevelingUpMenu> GetPerksLevelingUpMenuClass() const;
 	TSubclassOf<class UCharacterPerks> GetStandardCharacterPerksMenuClass() const;
+	TSubclassOf<class UJournalMenu> GetJournalMenuClass() const;
 };

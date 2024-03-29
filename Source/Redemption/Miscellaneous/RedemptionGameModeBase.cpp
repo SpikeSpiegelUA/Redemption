@@ -121,6 +121,11 @@ AEffectsSpellsAndSkillsManager* ARedemptionGameModeBase::GetEffectsSpellsAndSkil
 	return EffectsManager;
 }
 
+AQuestManager* ARedemptionGameModeBase::GetQuestManager() const
+{
+	return QuestManager;
+}
+
 TSubclassOf<class UAlliesInfoBars> ARedemptionGameModeBase::GetAlliesInfoBarsClass() const
 {
 	return AlliesInfoBarsClass;
@@ -251,6 +256,11 @@ TSubclassOf<class UCharacterPerks> ARedemptionGameModeBase::GetStandardCharacter
 	return StandardCharacterPerksMenuClass;
 }
 
+TSubclassOf<class UJournalMenu> ARedemptionGameModeBase::GetJournalMenuClass() const
+{
+	return JournalMenuClass;
+}
+
 void ARedemptionGameModeBase::SetBattleManager(const ABattleManager* const NewBattleManager)
 {
 	BattleManager = const_cast<ABattleManager*>(NewBattleManager);
@@ -279,4 +289,9 @@ void ARedemptionGameModeBase::SetLevelingUpManager(const ALevelingUpManager* con
 void ARedemptionGameModeBase::SetEffectsSpellsAndSkillsManager(const AEffectsSpellsAndSkillsManager* const NewEffectsSpellsAndSkillsManager)
 {
 	EffectsManager = const_cast<AEffectsSpellsAndSkillsManager*>(NewEffectsSpellsAndSkillsManager);
+}
+
+void ARedemptionGameModeBase::SetQuestManager(const AQuestManager* const NewQuestManager)
+{
+	QuestManager = const_cast<AQuestManager*>(NewQuestManager);
 }

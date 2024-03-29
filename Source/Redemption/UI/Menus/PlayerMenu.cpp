@@ -7,6 +7,7 @@
 #include "Components/StackBox.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "../UI/Menus/JournalMenu.h"
 #include "Kismet/GameplayStatics.h"
 
 bool UPlayerMenu::Initialize()
@@ -23,6 +24,10 @@ bool UPlayerMenu::Initialize()
 	if (IsValid(PartyButton)) {
 		PartyButton->OnClicked.AddDynamic(this, &UPlayerMenu::PartyButtonOnClicked);
 		PartyButton->OnHovered.AddDynamic(this, &UPlayerMenu::PartyButtonOnHovered);
+	}
+	if (IsValid(JournalButton)) {
+		JournalButton->OnClicked.AddDynamic(this, &UPlayerMenu::JournalButtonOnClicked);
+		JournalButton->OnHovered.AddDynamic(this, &UPlayerMenu::JournalButtonOnHovered);
 	}
 	if (!bSuccess) return false;
 	return bSuccess;
@@ -58,8 +63,6 @@ void UPlayerMenu::InventoryButtonOnClicked()
 {
 	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)){
 		this->RemoveFromParent();
-		this->ConditionalBeginDestroy();
-		UIManagerWorldSubsystem->PlayerMenuWidget = nullptr;
 		UIManagerWorldSubsystem->InventoryMenuWidget->AddToViewport();
 		UIManagerWorldSubsystem->InventoryMenuWidget->GetInventoryBorder()->SetVisibility(ESlateVisibility::Visible);
 		UIManagerWorldSubsystem->InventoryMenuWidget->GetNotInBattleMenuIncludedCanvasPanel()->SetVisibility(ESlateVisibility::Visible);
@@ -83,8 +86,6 @@ void UPlayerMenu::PartyButtonOnClicked()
 					if (APlayerController* PlayerController = Cast<APlayerController>(PlayerCharacter->GetController()); IsValid(PlayerController))
 						UIManagerWorldSubsystem->PartyMenuWidget = CreateWidget<UPartyMenu>(PlayerController, RedemptionGameModeBase->GetPartyMenuClass());
 				this->RemoveFromParent();
-				this->ConditionalBeginDestroy();
-				UIManagerWorldSubsystem->PlayerMenuWidget = nullptr;
 				if (IsValid(UIManagerWorldSubsystem->PartyMenuWidget)) {
 					UIManagerWorldSubsystem->PartyMenuWidget->AddToViewport();
 					UIManagerWorldSubsystem->PartyMenuWidget->UpdateCharacterInfo(PlayerCharacter->GetAllies());
@@ -100,6 +101,19 @@ void UPlayerMenu::PartyButtonOnClicked()
 			}
 }
 
+void UPlayerMenu::JournalButtonOnClicked()
+{
+	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+		if (IsValid(UIManagerWorldSubsystem->JournalMenuWidget)) {
+			this->RemoveFromParent();
+			UIManagerWorldSubsystem->JournalMenuWidget->AddToViewport();
+			JournalButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+			UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->JournalMenuWidget->GetBackButton();
+			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+			UIManagerWorldSubsystem->PickedButtonIndex = 0;
+		}
+}
+
 void UPlayerMenu::InventoryButtonOnHovered()
 {
 	ButtonOnHoveredActions(InventoryButton);
@@ -113,6 +127,11 @@ void UPlayerMenu::CloseButtonOnHovered()
 void UPlayerMenu::PartyButtonOnHovered()
 {
 	ButtonOnHoveredActions(PartyButton);
+}
+
+void UPlayerMenu::JournalButtonOnHovered()
+{
+	ButtonOnHoveredActions(JournalButton);
 }
 
 void UPlayerMenu::ButtonOnHoveredActions(UButton* const PickedButton)

@@ -159,9 +159,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame, meta = (AllowPrivateAccess = true))
 	TMap<ECharacterSkills, int> SkillsProgressMap{};
 
-	// APawn interface
+	// APawn interface.
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	// End of APawn interface
+	// End of APawn interface.
 	
 	void LoadObjectFromGameInstance_Implementation(const URedemptionGameInstance* const GameInstance) override;
 

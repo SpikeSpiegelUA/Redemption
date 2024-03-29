@@ -29,6 +29,7 @@
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "EngineUtils.h"
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "Redemption/UI/Menus/JournalMenu.h"
 
 APlayerCharacter::APlayerCharacter() {
 	// Set size for collision capsule
@@ -107,6 +108,8 @@ void APlayerCharacter::BeginPlay()
 				UIManagerWorldSubsystem->CombatCharacterInfoMenuWidget = CreateWidget<UCombatCharacterInfoMenu>(PlayerController, RedemptionGameModeBase->GetCombatCharacterInfoMenuClass());
 			if (IsValid(RedemptionGameModeBase->GetSaveLoadGameMenuClass()))
 				UIManagerWorldSubsystem->SaveLoadGameMenuWidget = CreateWidget<USaveLoadGameMenu>(PlayerController, RedemptionGameModeBase->GetSaveLoadGameMenuClass());
+			if (IsValid(RedemptionGameModeBase->GetJournalMenuClass()))
+				UIManagerWorldSubsystem->JournalMenuWidget = CreateWidget<UJournalMenu>(PlayerController, RedemptionGameModeBase->GetJournalMenuClass());
 		}
 	UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesHealthBars()[0]->PercentDelegate.Clear();
 	UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesManaBars()[0]->PercentDelegate.Clear();
@@ -1642,6 +1645,12 @@ void APlayerCharacter::InputBack()
 		}
 		else if (IsValid(UIManagerWorldSubsystem->SettingsMenuWidget) && UIManagerWorldSubsystem->SettingsMenuWidget->IsInViewport()) {
 			UIManagerWorldSubsystem->SettingsMenuWidget->BackButtonOnClicked();
+		}
+		else if (IsValid(UIManagerWorldSubsystem->PerksLevelingUpMenuWidget) && UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->IsInViewport()) {
+			UIManagerWorldSubsystem->PerksLevelingUpMenuWidget->BackButtonOnClicked();
+		}
+		else if (IsValid(UIManagerWorldSubsystem->JournalMenuWidget) && UIManagerWorldSubsystem->JournalMenuWidget->IsInViewport()) {
+			UIManagerWorldSubsystem->JournalMenuWidget->BackButtonOnClicked();
 		}
 	}
 }

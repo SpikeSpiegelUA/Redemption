@@ -7,7 +7,10 @@
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "..\SaveSystem\Interfaces\SavableObjectInterface.h"
 #include "..\SaveSystem\RedemptionSaveGameForSaveSlots.h"
+#include "..\Dynamics\Gameplay\Managers\QuestManager.h"
+#include "..\UI\Menus\JournalMenu.h"
 #include "EngineUtils.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 
 URedemptionGameInstance::URedemptionGameInstance(const FObjectInitializer& ObjectInitializer)
 {
@@ -49,6 +52,24 @@ void URedemptionGameInstance::SaveGame(const uint16 SlotIndex, bool IsOverwritin
 					CombatAllyNPC->Serialize(Ar);
 					RedemptionGameInstance->CombatAllyNPCs.Add(CombatAllyNPCGameInstanceData);
 				}
+			}
+		}
+		if (const auto* const UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+			//Save JournalMenu.
+			if (IsValid(UIManagerWorldSubsystem->JournalMenuWidget)) {
+				FMemoryWriter MemWriter(JournalMenuByteData);
+				FObjectAndNameAsStringProxyArchive Ar(MemWriter, true);
+				Ar.ArIsSaveGame = true;
+				UIManagerWorldSubsystem->JournalMenuWidget->Serialize(Ar);
+			}
+		}
+		if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
+			//Save QuestManager.
+			if (IsValid(RedemptionGameModeBase->GetQuestManager())) {
+				FMemoryWriter MemWriter(QuestManagerByteData);
+				FObjectAndNameAsStringProxyArchive Ar(MemWriter, true);
+				Ar.ArIsSaveGame = true;
+				RedemptionGameModeBase->GetQuestManager()->Serialize(Ar);
 			}
 		}
 		if (UGameplayStatics::GetCurrentLevelName(GetWorld()) == "Town")

@@ -118,15 +118,15 @@ void UInventoryMenu::NativeConstruct()
 
 void UInventoryMenu::FillInventory()
 {
-	URedemptionGameInstance* GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
-	for (int i = 0; i < GameInstance->InstanceItemsInTheInventory.Num(); i++) 
-		if (AGameItem* GameItem = NewObject<AGameItem>(this, GameInstance->InstanceItemsInTheInventory[i]); IsValid(GameItem)) {
-			//Get ScrollBox corresponding to the item's type
-			UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(this, GameItem);
-			//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
-			if(IsValid(CurrentScrollBox))
-				InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, GameItem);
-		}
+	if(URedemptionGameInstance* GameInstance = GetWorld()->GetGameInstance<URedemptionGameInstance>(); IsValid(GameInstance))
+		for (int i = 0; i < GameInstance->InstanceItemsInTheInventory.Num(); i++) 
+			if (AGameItem* GameItem = NewObject<AGameItem>(this, GameInstance->InstanceItemsInTheInventory[i]); IsValid(GameItem)) {
+				//Get ScrollBox corresponding to the item's type
+				UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(this, GameItem);
+				//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
+				if(IsValid(CurrentScrollBox))
+					InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, GameItem);
+			}
 }
 
 void UInventoryMenu::SetVisibilityForItemsTypesBorders(const UBorder* const BorderToMakeVisible)
@@ -378,10 +378,6 @@ void UInventoryMenu::BackButtonOnClicked()
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 0.f));
 		PickedItem = nullptr;
 		this->RemoveFromParent();
-		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>(); IsValid(PlayerController))
-			if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
-				if (IsValid(RedemptionGameModeBase->GetPlayerMenuClass()))
-					UIManagerWorldSubsystem->PlayerMenuWidget = CreateWidget<UPlayerMenu>(PlayerController, RedemptionGameModeBase->GetPlayerMenuClass());
 		if (IsValid(UIManagerWorldSubsystem->PlayerMenuWidget)) {
 			UIManagerWorldSubsystem->PlayerMenuWidget->AddToViewport();
 			UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PlayerMenuWidget->GetInventoryButton();
