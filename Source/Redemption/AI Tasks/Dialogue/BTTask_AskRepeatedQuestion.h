@@ -17,6 +17,8 @@ private:
 	UBlackboardComponent* BlackboardComponent{};
 protected:
 	EBTNodeResult::Type PrepareResponses(APlayerController*& PlayerController);
+
+	bool QuestionWasAsked = false;
 public:
 	UBTTask_AskRepeatedQuestion(const FObjectInitializer& ObjectInitializer);
 	UBTTask_AskRepeatedQuestion();

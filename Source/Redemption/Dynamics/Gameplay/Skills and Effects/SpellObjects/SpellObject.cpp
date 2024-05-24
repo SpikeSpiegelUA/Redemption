@@ -8,9 +8,9 @@
 #include "..\Dynamics\Gameplay\Skills and Effects\Effects\TurnStartDamageEffect.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "D:/UE_5.1/Engine/Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
+#include "Niagara/Public/NiagaraComponent.h"
 #include "..\Dynamics\Gameplay\Managers\BattleManager.h"
-#include "D:/UE_5.1/Engine/Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h"
+#include "Niagara/Public/NiagaraFunctionLibrary.h"
 #include "..\Miscellaneous\SkillsSpellsAndEffectsActions.h"
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 

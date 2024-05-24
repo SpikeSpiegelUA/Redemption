@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameItemWithElements.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\Dynamics\World\Items\ItemObject\ItemObject.h"
+#include "..\Dynamics\World\Items\ItemObject\ItemObject.h"
 #include "GameItemWithItemObject.generated.h"
 
 /**

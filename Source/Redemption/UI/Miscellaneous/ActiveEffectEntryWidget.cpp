@@ -54,14 +54,18 @@ void UActiveEffectEntryWidget::MainButtonOnHovered()
 
 void UActiveEffectEntryWidget::SetEffectTypeImage(const UTexture* const ImageTexture)
 {
-    EffectTypeImage->Brush.SetResourceObject(const_cast<UTexture*>(ImageTexture));
-    EffectTypeImage->Brush.SetImageSize(FVector2D(200, 200));
+    FSlateBrush NewSlateBrush{};
+    NewSlateBrush.SetResourceObject(const_cast<UTexture*>(ImageTexture));
+    NewSlateBrush.SetImageSize(FVector2D(200, 200));
+    EffectTypeImage->SetBrush(NewSlateBrush);
 }
 
 void UActiveEffectEntryWidget::SetEffectAreaImage(const UTexture* const ImageTexture)
 {
-    EffectAreaImage->Brush.SetResourceObject(const_cast<UTexture*>(ImageTexture));
-    EffectAreaImage->Brush.SetImageSize(FVector2D(200, 200));
+    FSlateBrush NewSlateBrush{};
+    NewSlateBrush.SetResourceObject(const_cast<UTexture*>(ImageTexture));
+    NewSlateBrush.SetImageSize(FVector2D(200, 200));
+    EffectAreaImage->SetBrush(NewSlateBrush);
 }
 
 void UActiveEffectEntryWidget::SetEffectNameText(const FText& NewText)

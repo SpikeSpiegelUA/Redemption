@@ -32,7 +32,7 @@ void UJournalMenu::LoadWidgetFromGameInstance_Implementation()
 		FMemoryReader MemReader(RedemptionGameInstance->JournalMenuByteData);
 		FObjectAndNameAsStringProxyArchive Ar(MemReader, true);
 		Ar.ArIsSaveGame = true;
-		// Convert binary array back into actor's variables
+		// Convert binary array back into actor's variables.
 		Serialize(Ar);
 	}
 	//We need to start from the null for NextEntryNumber, so create a new variable.
@@ -43,14 +43,20 @@ void UJournalMenu::LoadWidgetFromGameInstance_Implementation()
 
 void UJournalMenu::BackButtonOnClicked()
 {
-	this->RemoveFromParent();
 	if (auto* const UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
 		BackButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
-		UIManagerWorldSubsystem->PlayerMenuWidget->AddToViewport();
+		if (IsValid(SelectedQuestButton))
+			SelectedQuestButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 0.f));
+		SelectedQuestButton = nullptr;
+		SelectedQuestName = FText::FromString("");
 		UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PlayerMenuWidget->GetInventoryButton();
 		UIManagerWorldSubsystem->PickedButtonIndex = 0;
 		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+		for (UWidget* const Widget : EntriesScrollBox->GetAllChildren())
+			Widget->SetVisibility(ESlateVisibility::Visible);
+		UIManagerWorldSubsystem->PlayerMenuWidget->AddToViewport();
 	}
+	this->RemoveFromParent();
 }
 
 bool UJournalMenu::CheckIfJournalEntryWasAlreadyAdded(const FText& EntryToSearch) const
@@ -63,12 +69,25 @@ bool UJournalMenu::CheckIfJournalEntryWasAlreadyAdded(const FText& EntryToSearch
 
 void UJournalMenu::BackButtonOnHovered()
 {
-
-}
-
-UButton* UJournalMenu::GetBackButton() const
-{
-	return BackButton;
+	if (auto* const UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+		if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+			if (UIManagerWorldSubsystem->PickedButton == BackButton)
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+			else if (UJournalQuestEntry* const JournalQuestEntry = Cast<UJournalQuestEntry>(UIManagerWorldSubsystem->PickedButton->GetOuter()->GetOuter()); IsValid(JournalQuestEntry)) {
+				if (JournalQuestEntry->FinishedQuest)
+					JournalQuestEntry->SetMainButtonBackgroundColor(FLinearColor(1.f, 1.f, 0.f, 1.f));
+				else {
+					if (UIManagerWorldSubsystem->JournalMenuWidget->SelectedQuestName.EqualTo(JournalQuestEntry->GetQuestNameTextBlockText()))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+					else
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 0.f));
+				}
+			}
+		}
+		UIManagerWorldSubsystem->PickedButton = BackButton;
+		UIManagerWorldSubsystem->PickedButtonIndex = 0;
+		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+	}
 }
 
 void UJournalMenu::AddNewEntryToJournal(const int EntryNextNumber, const FText& EntryText, const FText& EntryQuestName, const bool IsLoading)
@@ -89,4 +108,60 @@ void UJournalMenu::AddNewEntryToJournal(const int EntryNextNumber, const FText& 
 			}
 		}
 	}
+}
+
+void UJournalMenu::AddNewQuestEntry(const FText& QuestName, const bool QuestIsFinished)
+{
+	if (!QuestName.IsEmpty()) {
+		if (IsValid(JournalQuestEntryClass))
+			if (APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()); IsValid(PlayerController))
+				JournalQuestEntryWidget = CreateWidget<UJournalQuestEntry>(PlayerController, JournalQuestEntryClass);
+		if (IsValid(JournalQuestEntryWidget)) {
+			JournalQuestEntryWidget->SetQuestNameTextBlock(QuestName);
+			QuestsScrollBox->AddChild(JournalQuestEntryWidget);
+			if (QuestIsFinished) {
+				JournalQuestEntryWidget->FinishedQuest = true;
+				JournalQuestEntryWidget->SetMainButtonBackgroundColor(FLinearColor(1.f, 1.f, 0.f, 1.f));
+			}
+		}
+	}
+}
+
+void UJournalMenu::SelectRelatedJournalEntries(const UButton* const QuestButton)
+{
+	if (const UTextBlock* const TextBlock = Cast<UTextBlock>(QuestButton->GetChildAt(0)); IsValid(TextBlock)) {
+		if (IsValid(SelectedQuestButton))
+			SelectedQuestButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 0.f));
+		SelectedQuestButton = const_cast<UButton*>(QuestButton);
+		if(!TextBlock->GetText().EqualTo(SelectedQuestName))
+			SelectedQuestName = TextBlock->GetText();
+		else
+			SelectedQuestName = FText::FromString("");
+		for (UWidget* Widget : EntriesScrollBox->GetAllChildren()) {
+			if (SelectedQuestName.IsEmpty()) {
+				Widget->SetVisibility(ESlateVisibility::Visible);
+			}
+			else {
+				if (UJournalEntry* const JournalEntry = Cast<UJournalEntry>(Widget); IsValid(JournalEntry)) {
+					if (JournalEntry->GetEntryQuest().EqualTo(SelectedQuestName))
+						JournalEntry->SetVisibility(ESlateVisibility::Visible);
+					else
+						JournalEntry->SetVisibility(ESlateVisibility::Collapsed);
+				}
+				else
+					Widget->SetVisibility(ESlateVisibility::Collapsed);
+			}
+		}
+	}
+}
+
+const UScrollBox* const UJournalMenu::GetQuestsScrollBox() const
+{
+	return QuestsScrollBox;
+}
+
+
+UButton* UJournalMenu::GetBackButton() const
+{
+	return BackButton;
 }

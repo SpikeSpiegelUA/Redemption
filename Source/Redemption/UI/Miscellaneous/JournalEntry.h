@@ -26,6 +26,10 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* EntryTextBlock;
 
+	FText EntryQuest{};
+
 public:
 	void SetEntryInfo(const int EntryNumber, const FText& EntryText, const FText& EntryQuestText);
+
+	const FText& GetEntryQuest() const;
 };

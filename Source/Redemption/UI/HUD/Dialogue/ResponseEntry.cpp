@@ -12,7 +12,6 @@ bool UResponseEntry::Initialize()
 		ResponseButton->OnHovered.AddDynamic(this, &UResponseEntry::ResponseButtonOnHovered);
 		ResponseButton->OnUnhovered.AddDynamic(this, &UResponseEntry::ResponseButtonOnUnhovered);
 	}
-
 	if (!bSuccess) return false;
 	return bSuccess;
 }

@@ -12,7 +12,7 @@ bool UDialogueBox::Initialize()
 		SpeakerNameTextBlock->TextDelegate.BindUFunction(this, "GetSpeakerName");
 	if (IsValid(ContinueButton))
 		ContinueButton->OnClicked.AddDynamic(this, &UDialogueBox::ContinueButtonOnClicked);
-	bIsFocusable = false;
+	SetIsFocusable(false);
 	if (!bSuccess) return false;
 	return bSuccess;
 }

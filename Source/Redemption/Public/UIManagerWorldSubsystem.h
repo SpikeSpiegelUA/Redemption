@@ -78,4 +78,6 @@ public:
 	class UCharacterPerks* CharacterPerksMenuWidget{};
 	UPROPERTY()
 	class UJournalMenu* JournalMenuWidget{};
+	UPROPERTY()
+	class UTradingMenu* TradingMenuWidget{};
 };

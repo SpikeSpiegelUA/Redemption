@@ -15,7 +15,6 @@
 #include "..\Characters\Animation\Combat\CombatAlliesAnimInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Redemption/Characters/AI Controllers/Combat/CombatAlliesAIController.h"
-#include "D:/UE_5.1/Engine/Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
 #include "Redemption\Dynamics\World\Items\UseItems\RestorationItem.h"
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 

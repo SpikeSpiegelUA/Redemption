@@ -253,8 +253,10 @@ void UDetailedCharacterInfoMenu::SetCharacterInfoForAlly()
 		}
 	StringToSet.AppendChar('%');
 	PiercingResistanceTextBlock->SetText(FText::FromString(StringToSet));
-	CharacterPortraitImage->Brush.SetResourceObject(const_cast<UTexture*>(Ally->GetCharacterPortrait()));
-	CharacterPortraitImage->Brush.SetImageSize(FVector2D(120, 100));
+	FSlateBrush NewSlateBrush{};
+	NewSlateBrush.SetResourceObject(const_cast<UTexture*>(Ally->GetCharacterPortrait()));
+	NewSlateBrush.SetImageSize(FVector2D(120, 100));
+	CharacterPortraitImage->SetBrush(NewSlateBrush);
 }
 
 void UDetailedCharacterInfoMenu::SetCharacterInfoForPlayer(const APlayerCharacter* const Player)
@@ -550,8 +552,10 @@ void UDetailedCharacterInfoMenu::SetCharacterInfoForPlayer(const APlayerCharacte
 			}
 		StringToSet.AppendChar('%');
 		PiercingResistanceTextBlock->SetText(FText::FromString(StringToSet));
-		CharacterPortraitImage->Brush.SetResourceObject(const_cast<UTexture*>(Player->CharacterPortrait));
-		CharacterPortraitImage->Brush.SetImageSize(FVector2D(120, 100));
+		FSlateBrush NewSlateBrush{};
+		NewSlateBrush.SetResourceObject(const_cast<UTexture*>(Player->CharacterPortrait));
+		NewSlateBrush.SetImageSize(FVector2D(120, 100));
+		CharacterPortraitImage->SetBrush(NewSlateBrush);
 	}
 }
 

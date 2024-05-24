@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Redemption/Dynamics/Gameplay/Quests/Quest.h"
+#include "..\Dynamics\Miscellaneous\QuestAndItsStage.h"
 #include "QuestManager.generated.h"
 
 UCLASS()
@@ -16,24 +17,25 @@ public:
 	// Sets default values for this actor's properties
 	AQuestManager();
 
-	//All classes of quests, that are available in the game.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest Manager")
-	TArray<TSubclassOf<AQuest>> QuestsClasses{};
-
-	//It's a little bulky, but I don't really want to waste a huge amount of RAM. Index of the quest in QuestClasses is also an index of its stage in QuestsStages.
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Quest Manager", SaveGame)
-	TArray<int> QuestsStages{};
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	//We need to initalize QuestStages TArray to number of elements in QuestClasses.
-	void InitializeQuestStages();
-
 	void LoadObjectFromGameInstance();
+
+	//Store all the currently active or already finished quests here. 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Quest Manager", SaveGame)
+	TArray<FQuestAndItsStage> ActiveOrFinishedQuestsAndTheirStages{};
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	const TArray<FQuestAndItsStage>& GetActiveOrFinishedQuestsAndTheirStages() const;
+
+	//Use this function, if you want to start the new quest.
+	//If an quest is active, then it will be added to the top of the QuestsScrollBox, otherwise to the bottom.
+	void ActivateNewQuest(const TSubclassOf<AQuest> NewQuestClass);
+	void AdvanceQuest(const TSubclassOf<AQuest> QuestToAdvance);
+	void FinishQuest(const TSubclassOf<AQuest> QuestToFinish);
 };

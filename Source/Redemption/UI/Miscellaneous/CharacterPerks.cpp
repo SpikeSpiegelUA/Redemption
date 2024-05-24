@@ -286,7 +286,7 @@ void UCharacterPerks::CategoryButtonOnClickedActions(const int8 FirstIndex, cons
 				FirstPerkButtonWithActorClass->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 			for (const TSubclassOf<APerk> ActivatedPerkClass : PerksOwner->ActivatedPerks)
 				if (ActivatedPerkClass->GetDefaultObject<APerk>()->GetPerkName() == PerksOwner->GetAvailablePerks()[FirstIndex]->GetDefaultObject<APerk>()->GetPerkName()) {
-					if (FirstPerkButtonWithActorClass->BackgroundColor != FLinearColor(0.f, 0.f, 1.f, 1.f))
+					if (FirstPerkButtonWithActorClass->GetBackgroundColor() != FLinearColor(0.f, 0.f, 1.f, 1.f))
 						FirstPerkButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
 					break;
 				}
@@ -300,7 +300,7 @@ void UCharacterPerks::CategoryButtonOnClickedActions(const int8 FirstIndex, cons
 				SecondPerkButtonWithActorClass->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 			for (const TSubclassOf<APerk> ActivatedPerkClass : PerksOwner->ActivatedPerks)
 				if (ActivatedPerkClass->GetDefaultObject<APerk>()->GetPerkName() == PerksOwner->GetAvailablePerks()[FirstIndex + 1]->GetDefaultObject<APerk>()->GetPerkName()) {
-					if (SecondPerkButtonWithActorClass->BackgroundColor != FLinearColor(0.f, 0.f, 1.f, 1.f))
+					if (SecondPerkButtonWithActorClass->GetBackgroundColor() != FLinearColor(0.f, 0.f, 1.f, 1.f))
 						SecondPerkButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
 					break;
 				}
@@ -314,7 +314,7 @@ void UCharacterPerks::CategoryButtonOnClickedActions(const int8 FirstIndex, cons
 				ThirdPerkButtonWithActorClass->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 			for (const TSubclassOf<APerk> ActivatedPerkClass : PerksOwner->ActivatedPerks)
 				if (ActivatedPerkClass->GetDefaultObject<APerk>()->GetPerkName() == PerksOwner->GetAvailablePerks()[FirstIndex + 2]->GetDefaultObject<APerk>()->GetPerkName()) {
-					if (ThirdPerkButtonWithActorClass->BackgroundColor != FLinearColor(0.f, 0.f, 1.f, 1.f))
+					if (ThirdPerkButtonWithActorClass->GetBackgroundColor() != FLinearColor(0.f, 0.f, 1.f, 1.f))
 						ThirdPerkButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
 					break;
 				}
@@ -330,7 +330,7 @@ void UCharacterPerks::CategoryButtonOnClickedActions(const int8 FirstIndex, cons
 				FirstPerkButtonWithActorClass->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 			for (const TSubclassOf<APerk> ActivatedPerkClass : PlayerCharacter->ActivatedPerks)
 				if (ActivatedPerkClass->GetDefaultObject<APerk>()->GetPerkName() == PlayerCharacter->GetAvailablePerks()[FirstIndex]->GetDefaultObject<APerk>()->GetPerkName()) {
-					if (FirstPerkButtonWithActorClass->BackgroundColor != FLinearColor(0.f, 0.f, 1.f, 1.f))
+					if (FirstPerkButtonWithActorClass->GetBackgroundColor() != FLinearColor(0.f, 0.f, 1.f, 1.f))
 						FirstPerkButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
 					break;
 				}
@@ -344,7 +344,7 @@ void UCharacterPerks::CategoryButtonOnClickedActions(const int8 FirstIndex, cons
 				SecondPerkButtonWithActorClass->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 			for (const TSubclassOf<APerk> ActivatedPerkClass : PlayerCharacter->ActivatedPerks)
 				if (ActivatedPerkClass->GetDefaultObject<APerk>()->GetPerkName() == PlayerCharacter->GetAvailablePerks()[FirstIndex + 1]->GetDefaultObject<APerk>()->GetPerkName()) {
-					if (SecondPerkButtonWithActorClass->BackgroundColor != FLinearColor(0.f, 0.f, 1.f, 1.f))
+					if (SecondPerkButtonWithActorClass->GetBackgroundColor() != FLinearColor(0.f, 0.f, 1.f, 1.f))
 						SecondPerkButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
 					break;
 				}
@@ -358,7 +358,7 @@ void UCharacterPerks::CategoryButtonOnClickedActions(const int8 FirstIndex, cons
 				ThirdPerkButtonWithActorClass->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 			for (const TSubclassOf<APerk> ActivatedPerkClass : PlayerCharacter->ActivatedPerks)
 				if (ActivatedPerkClass->GetDefaultObject<APerk>()->GetPerkName() == PlayerCharacter->GetAvailablePerks()[FirstIndex + 2]->GetDefaultObject<APerk>()->GetPerkName()) {
-					if(ThirdPerkButtonWithActorClass->BackgroundColor != FLinearColor(0.f, 0.f, 1.f, 1.f))
+					if(ThirdPerkButtonWithActorClass->GetBackgroundColor() != FLinearColor(0.f, 0.f, 1.f, 1.f))
 						ThirdPerkButtonWithActorClass->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
 					break;
 				}

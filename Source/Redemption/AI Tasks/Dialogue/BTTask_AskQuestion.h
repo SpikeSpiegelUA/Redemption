@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"
+#include "Redemption/Dynamics/Miscellaneous/PlayerResponseItsQuestAndStage.h"
 #include "BTTask_AskQuestion.generated.h"
 
 /**
@@ -32,7 +33,9 @@ public:
 	UPROPERTY(EditAnywhere)
 		FText NPCQuestion;
 	UPROPERTY(EditAnywhere)
-		TArray<FText> PlayerResponses;
+		TArray<FText> PlayerResponsesWithoutQuests;
+	UPROPERTY(EditAnywhere)
+		TArray<FPlayerResponseItsQuestAndStage> PlayerResponsesWithQuests;
 
 
 };

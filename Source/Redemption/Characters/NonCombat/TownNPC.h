@@ -30,4 +30,7 @@ public:
 	void StartADialogue_Implementation() override;
 
 	UBehaviorTree* GetDialogueTree();
+
+	UPROPERTY(SaveGame)
+	int DialogueStage = 0;
 };

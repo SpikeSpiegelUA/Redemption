@@ -30,7 +30,7 @@ protected:
 	float PlayerDetection = 0;
 	bool IsAttacking = false;
 	//Blackboard Keys's IDs
-	uint8 CanSeePlayerKeyID {};
+	uint16 CanSeePlayerKeyID {};
 
 	FTimerHandle AddPlayerDetectionHandle {};
 	FTimerHandle DeductPlayerDetectionHandle {};

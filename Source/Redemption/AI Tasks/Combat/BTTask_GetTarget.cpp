@@ -13,6 +13,7 @@
 #include "Redemption/Miscellaneous/ElementsActions.h"
 #include "Kismet/GameplayStatics.h"
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include <memory>
 
 UBTTask_GetTarget::UBTTask_GetTarget(const FObjectInitializer& ObjectInitializer)
 {
@@ -276,6 +277,7 @@ EBTNodeResult::Type UBTTask_GetTarget::ExecuteTask(UBehaviorTreeComponent& Owner
 				break;
 			}
 		}
+		
 	}
 
 	return EBTNodeResult::Succeeded;

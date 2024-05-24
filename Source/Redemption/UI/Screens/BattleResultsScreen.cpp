@@ -218,8 +218,10 @@ void UBattleResultsScreen::SetGoldTextBlock(const FText& TextToSet)
 
 void UBattleResultsScreen::SetCharacterPortraitImage(const UTexture* const ImageToSet)
 {
-	CharacterPortraitImage->Brush.SetResourceObject(const_cast<UTexture*>(ImageToSet));
-	CharacterPortraitImage->Brush.SetImageSize(FVector2D(120, 100));
+	FSlateBrush NewSlateBrush{};
+	NewSlateBrush.SetResourceObject(const_cast<UTexture*>(ImageToSet));
+	NewSlateBrush.SetImageSize(FVector2D(120, 100));
+	CharacterPortraitImage->SetBrush(NewSlateBrush);
 }
 
 UTextBlock* UBattleResultsScreen::GetGoldTextBlock() const
