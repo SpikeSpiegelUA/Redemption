@@ -94,6 +94,10 @@ protected:
 		TSubclassOf<class UCharacterPerks> StandardCharacterPerksMenuClass{};
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UJournalMenu> JournalMenuClass{};
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+		TSubclassOf<class UTradingMenu> TradingMenuClass{};
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+		TSubclassOf<class UTradingMenuItemEntry> TradingMenuItemEntryClass{};
 
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -144,4 +148,6 @@ public:
 	TSubclassOf<class UPerksLevelingUpMenu> GetPerksLevelingUpMenuClass() const;
 	TSubclassOf<class UCharacterPerks> GetStandardCharacterPerksMenuClass() const;
 	TSubclassOf<class UJournalMenu> GetJournalMenuClass() const;
+	TSubclassOf<class UTradingMenu> GetTradingMenuClass() const;
+	TSubclassOf<class UTradingMenuItemEntry> GetTradingMenuItemClass() const;
 };

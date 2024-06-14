@@ -40,6 +40,7 @@ public:
 	TArray<uint8> JournalMenuByteData{};
 
 	//QuestManager variables.
+	UPROPERTY(SaveGame)
 	TArray<uint8> QuestManagerByteData{};
 
 	//Inventory variables.

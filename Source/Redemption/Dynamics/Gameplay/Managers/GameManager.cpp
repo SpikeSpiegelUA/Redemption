@@ -61,7 +61,7 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 					if (IsValid(UIManagerWorldSubsystem->BattleMenuWidget))
 						UIManagerWorldSubsystem->BattleMenuWidget->AddToViewport();
 					ToBattleTransitionScreen->AddToViewport(0);
-					ToBattleTransitionScreen->SetMainTextBlockText(FText::FromString("Initiative!"));
+					ToBattleTransitionScreen->SetMainTextBlockText(FText::FromString("Fight!"));
 					GetWorld()->GetTimerManager().SetTimer(ToBattleTransitionTimerHandle, this, &AGameManager::ToBattleTransition, 2.f, false);
 					//Create enemies and add them to BattleEnemies array in battle manager
 					if (ANonCombatEnemyNPC* NonCombatEnemyNPC = Cast<ANonCombatEnemyNPC>(AttackingNPC); IsValid(NonCombatEnemyNPC)) {
@@ -202,18 +202,15 @@ void AGameManager::EndBattle()
 				UWidgetBlueprintLibrary::SetInputMode_GameOnly(PC);
 				//PC->ActivateTouchInterface(PlayerCharacter->GetStandardTouchInterface());
 				PlayerCharacter->SetCanInput(true);
-				UIManagerWorldSubsystem->BattleResultsScreenWidget->RemoveFromParent();
 				BattleManager->SetCanTurnBehindPlayerCameraToStartPosition(false);
 				BattleManager->SetCanTurnBehindPlayerCameraToTarget(false);
 				for (int i = BattleManager->BattleEnemies.Num() - 1; i >= 0; i--)
 					BattleManager->BattleEnemies[i]->Destroy();							 
 				PlayerCharacter->CopyInfoFromCombatPlayer(BattleManager->CombatPlayerCharacter);
 				BattleManager->BattleAlliesPlayer.Remove(BattleManager->CombatPlayerCharacter);
-				BattleManager->CombatPlayerCharacter->ConditionalBeginDestroy();
+				BattleManager->CombatPlayerCharacter->Destroy();
 				for (int i = BattleManager->BattleAlliesPlayer.Num() - 1; i >= 0; i--) {
-					if (IsValid(Cast<ACombatPlayerCharacter>(BattleManager->BattleAlliesPlayer[i])))
-						BattleManager->BattleAlliesPlayer[i]->Destroy();
-					else if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(BattleManager->BattleAlliesPlayer[i]); IsValid(CombatAllies)) {
+					if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(BattleManager->BattleAlliesPlayer[i]); IsValid(CombatAllies)) {
 						CombatAllies->ResetSkillsLeveledUp();
 						CombatAllies->SetActorLocation(FVector(-500.0, -500.0, -500.0));
 						BattleManager->BattleAlliesPlayer.RemoveAt(i);

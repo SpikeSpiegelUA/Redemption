@@ -2,8 +2,6 @@
 
 
 #include "Quest.h"
-#include "UIManagerWorldSubsystem.h"
-#include "..\UI\Menus\JournalMenu.h"
 
 // Sets default values
 AQuest::AQuest()
@@ -32,6 +30,21 @@ int AQuest::GetExperienceReward() const
 	return ExperienceReward;
 }
 
+int AQuest::GetGoldReward() const
+{
+	return GoldReward;
+}
+
+const TArray<TSubclassOf<AGameItem>>& AQuest::GetItemsRewardClasses() const
+{
+	return ItemsRewardClasses;
+}
+
+int AQuest::GetFinalStage() const
+{
+	return FinalStage;
+}
+
 const TArray<FText>& AQuest::GetJournalEntries() const
 {
 	return JournalEntries;
@@ -40,14 +53,5 @@ const TArray<FText>& AQuest::GetJournalEntries() const
 const FText& AQuest::GetQuestName() const
 {
 	return QuestName;
-}
-
-void AQuest::StartQuest()
-{
-	if (auto* const UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
-		if (IsValid(UIManagerWorldSubsystem->JournalMenuWidget)) {
-
-		}
-	}
 }
 

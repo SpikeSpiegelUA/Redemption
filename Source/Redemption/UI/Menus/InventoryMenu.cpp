@@ -31,6 +31,8 @@
 bool UInventoryMenu::Initialize()
 {
 	const bool bSuccess = Super::Initialize();
+	if (IsValid(GetWorld()))
+		UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
 	//InventoryMenu change level logic
 	if (URedemptionGameInstance* GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(GameInstance)) {
 		FillInventory();
@@ -108,8 +110,6 @@ bool UInventoryMenu::Initialize()
 void UInventoryMenu::NativeConstruct()
 {
 	Super::NativeConstruct();
-	if (IsValid(GetWorld()))
-		UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
 	ItemInfoBorder->SetVisibility(ESlateVisibility::Hidden);
 	ItemEffectValueTextBlock->SetVisibility(ESlateVisibility::Visible);
 	FillTargetsVerticalBox();
@@ -332,6 +332,40 @@ void UInventoryMenu::SetPickedTypeButtonColor(UButton* const SelectedButton)
 		}
 		else
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.f, 0.f, 0.f, 0.f));
+	}
+}
+
+void UInventoryMenu::PickUpItem(const TArray<TSubclassOf<AGameItem>>& ItemsClasses)
+{
+	if (IsValid(UIManagerWorldSubsystem)) {
+		bool IsInInventory = false;
+		for (uint8 i = 0; i < ItemsClasses.Num(); i++) {
+			AGameItem* GameItem = NewObject<AGameItem>(this, ItemsClasses[i]);
+			if (auto* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance))
+				RedemptionGameInstance->InstanceItemsInTheInventory.Add(ItemsClasses[i]);
+			if (IsValid(GameItem)) {
+				//Get ScrollBox corresponding to the item's type
+				UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(UIManagerWorldSubsystem->InventoryMenuWidget, GameItem);
+				//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
+				InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, GameItem);
+			}
+		}
+	}
+}
+
+void UInventoryMenu::PickUpItem(const TSubclassOf<AGameItem> ItemClass)
+{
+	if (IsValid(UIManagerWorldSubsystem)) {
+		bool IsInInventory = false;
+			AGameItem* GameItem = NewObject<AGameItem>(this, ItemClass);
+			if (auto* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance))
+				RedemptionGameInstance->InstanceItemsInTheInventory.Add(ItemClass);
+			if (IsValid(GameItem)) {
+				//Get ScrollBox corresponding to the item's type
+				UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(UIManagerWorldSubsystem->InventoryMenuWidget, GameItem);
+				//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
+				InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, GameItem);
+			}
 	}
 }
 

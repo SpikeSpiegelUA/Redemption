@@ -84,14 +84,18 @@ void ULearnedSpellEntryWidget::MainButtonOnHovered()
 
 void ULearnedSpellEntryWidget::SetSpellTypeImage(const UTexture* const ImageTexture)
 {
-    SpellTypeImage->Brush.SetResourceObject(const_cast<UTexture*>(ImageTexture));
-    SpellTypeImage->Brush.SetImageSize(FVector2D(200, 200));
+    FSlateBrush NewSlateBrush{};
+    NewSlateBrush.SetResourceObject(const_cast<UTexture*>(ImageTexture));
+    NewSlateBrush.SetImageSize(FVector2D(200, 200));
+    SpellTypeImage->SetBrush(NewSlateBrush);
 }
 
 void ULearnedSpellEntryWidget::SetSpellMainElementImage(const UTexture* const ImageTexture)
 {
-    SpellMainElementImage->Brush.SetResourceObject(const_cast<UTexture*>(ImageTexture));
-    SpellMainElementImage->Brush.SetImageSize(FVector2D(200, 200));
+    FSlateBrush NewSlateBrush{};
+    NewSlateBrush.SetResourceObject(const_cast<UTexture*>(ImageTexture));
+    NewSlateBrush.SetImageSize(FVector2D(200, 200));
+    SpellMainElementImage->SetBrush(NewSlateBrush);
 }
 
 void ULearnedSpellEntryWidget::SetSpellNameText(const FText& NewText)

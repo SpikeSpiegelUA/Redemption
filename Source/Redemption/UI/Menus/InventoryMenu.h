@@ -293,4 +293,7 @@ public:
 	void DebuffOrAssaultItemHasBeenUsedActions(UBattleMenu* const& BattleMenu);
 	//So if we picked type, its button has to be green. But when we hover over another button, PickedButton is set opaque. This method checks, if type's border is visible and then set opaque or not.
 	void SetPickedTypeButtonColor(class UButton* const SelectedButton);
+
+	void PickUpItem(const TArray<TSubclassOf<AGameItem>>& ItemsClasses);
+	void PickUpItem(const TSubclassOf<AGameItem> ItemClass);
 };

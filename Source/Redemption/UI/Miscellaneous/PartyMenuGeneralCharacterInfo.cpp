@@ -30,8 +30,10 @@ void UPartyMenuGeneralCharacterInfo::NativeConstruct()
 
 void UPartyMenuGeneralCharacterInfo::SetCharacterInfo(const ACombatAllyNPC* const AllyToSet)
 {
-	CharacterPortraitImage->Brush.SetResourceObject(const_cast<UTexture*>(AllyToSet->GetCharacterPortrait()));
-	CharacterPortraitImage->Brush.SetImageSize(FVector2D(120, 100));
+	FSlateBrush NewSlateBrush{};
+	NewSlateBrush.SetResourceObject(const_cast<UTexture*>(AllyToSet->GetCharacterPortrait()));
+	NewSlateBrush.SetImageSize(FVector2D(120, 100));
+	CharacterPortraitImage->SetBrush(NewSlateBrush);
 	CharacterNameTextBlock->SetText(FText::FromName(AllyToSet->GetCharacterName()));
 	FString StringToSet{};
 	StringToSet.Append("Mana:");
@@ -59,8 +61,10 @@ void UPartyMenuGeneralCharacterInfo::SetCharacterInfo(const ACombatAllyNPC* cons
 
 void UPartyMenuGeneralCharacterInfo::SetCharacterInfo(const APlayerCharacter* const Player)
 {
-	CharacterPortraitImage->Brush.SetResourceObject(const_cast<UTexture*>(Player->CharacterPortrait));
-	CharacterPortraitImage->Brush.SetImageSize(FVector2D(120, 100));
+	FSlateBrush NewSlateBrush{};
+	NewSlateBrush.SetResourceObject(const_cast<UTexture*>(Player->CharacterPortrait));
+	NewSlateBrush.SetImageSize(FVector2D(120, 100));
+	CharacterPortraitImage->SetBrush(NewSlateBrush);
 	CharacterNameTextBlock->SetText(FText::FromString(Player->CharacterName));
 	FString StringToSet{};
 	StringToSet.Append("Mana:");
@@ -233,8 +237,10 @@ void UPartyMenuGeneralCharacterInfo::SetPerksLevelingUpTextBlockText(const FText
 
 void UPartyMenuGeneralCharacterInfo::SetCharacterPortraitImage(const UTexture* const ImageToSet)
 {
-	CharacterPortraitImage->Brush.SetResourceObject(const_cast<UTexture*>(ImageToSet));
-	CharacterPortraitImage->Brush.SetImageSize(FVector2D(120, 100));
+	FSlateBrush NewSlateBrush{};
+	NewSlateBrush.SetResourceObject(const_cast<UTexture*>(ImageToSet));
+	NewSlateBrush.SetImageSize(FVector2D(120, 100));
+	CharacterPortraitImage->SetBrush(NewSlateBrush);
 }
 
 UButton* UPartyMenuGeneralCharacterInfo::GetCharacterNameButton() const

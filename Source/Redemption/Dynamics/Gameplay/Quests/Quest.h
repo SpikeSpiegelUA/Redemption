@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Redemption/Dynamics/World/Items/GameItem.h"
 #include "Quest.generated.h"
 
 UCLASS()
@@ -21,6 +22,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest")
 	int ExperienceReward{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest")
+	int GoldReward{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest")
+	TArray<TSubclassOf<AGameItem>> ItemsRewardClasses{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest")
+	int FinalStage{};
 	//Array index corresponds to an quest stage. If an quest stage doesn't have a journal entry, then put in an empty FText.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest")
 	TArray<FText> JournalEntries{};
@@ -32,8 +39,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	int GetExperienceReward() const;
+	int GetGoldReward() const;
+	const TArray<TSubclassOf<AGameItem>>& GetItemsRewardClasses() const;
+	int GetFinalStage() const;
 	const TArray<FText>& GetJournalEntries() const;
 	const FText& GetQuestName() const;
-
-	void StartQuest();
 };

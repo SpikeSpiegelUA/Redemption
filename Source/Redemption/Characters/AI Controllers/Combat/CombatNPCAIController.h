@@ -31,7 +31,7 @@ public:
 	virtual void SetDynamicSubtree() override;
 
 protected:
-	uint8 ActorsTurnKeyID{};
+	uint16 ActorsTurnKeyID{};
 
 	virtual void BeginPlay() override;
 };

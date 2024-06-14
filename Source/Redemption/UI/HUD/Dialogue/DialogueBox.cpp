@@ -12,7 +12,7 @@ bool UDialogueBox::Initialize()
 		SpeakerNameTextBlock->TextDelegate.BindUFunction(this, "GetSpeakerName");
 	if (IsValid(ContinueButton))
 		ContinueButton->OnClicked.AddDynamic(this, &UDialogueBox::ContinueButtonOnClicked);
-	bIsFocusable = false;
+	SetIsFocusable(false);
 	if (!bSuccess) return false;
 	return bSuccess;
 }
@@ -63,9 +63,9 @@ UTextBlock* UDialogueBox::GetSpeakerNameTextBlock() const
 	return SpeakerNameTextBlock;
 }
 
-UOverlay* UDialogueBox::GetResponseOverlay() const
+UVerticalBox* UDialogueBox::GetResponseVerticalBox() const
 {
-	return ResponseOverlay;
+	return ResponseVerticalBox;
 }
 
 UButton* UDialogueBox::GetContinueButton() const

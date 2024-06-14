@@ -9,7 +9,7 @@
 #include "Components/CanvasPanel.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
-#include "Components/Overlay.h"
+#include "Components/VerticalBox.h"
 #include "DialogueBox.generated.h"
 
 /**
@@ -42,7 +42,7 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		UButton* ContinueButton;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		UOverlay* ResponseOverlay;
+		UVerticalBox* ResponseVerticalBox;
 
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
@@ -54,7 +54,7 @@ public:
 	USizeBox* GetMainSizeBox() const;
 	UTextBlock* GetDialogueTextBlock() const;
 	UTextBlock* GetSpeakerNameTextBlock() const;
-	UOverlay* GetResponseOverlay() const;
+	UVerticalBox* GetResponseVerticalBox() const;
 	UButton* GetContinueButton() const;
 
 	UFUNCTION()

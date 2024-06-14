@@ -131,7 +131,6 @@ void APlayerCharacter::BeginPlay()
 		PlayerController->bShowMouseCursor = true;
 		PlayerController->bEnableClickEvents = true;
 		PlayerController->bEnableMouseOverEvents = true;
-		PlayerController->SetPause(true);
 		//PlayerController->ActivateTouchInterface(PlayerCharacter->GetEmptyTouchInterface());
 		UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->MainMenuWidget->GetNewGameButton();
 		UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
@@ -787,10 +786,7 @@ void APlayerCharacter::InputScrollUp()
 		}
 	}
 	else if (IsValid(UIManagerWorldSubsystem->PlayerMenuWidget) && UIManagerWorldSubsystem->PlayerMenuWidget->IsInViewport()) {
-		TArray<UWidget*> PlayerMenuButtons{};
-		PlayerMenuButtons.Add(UIManagerWorldSubsystem->PlayerMenuWidget->GetInventoryButton());
-		PlayerMenuButtons.Add(UIManagerWorldSubsystem->PlayerMenuWidget->GetPartyButton());
-		PlayerMenuButtons.Add(UIManagerWorldSubsystem->PlayerMenuWidget->GetCloseButton());
+		TArray<UWidget*> PlayerMenuButtons = UIManagerWorldSubsystem->PlayerMenuWidget->GetButtonsStackBox()->GetAllChildren();
 		if (IsValid(UIManagerWorldSubsystem->PickedButton))
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 		if (UIManagerWorldSubsystem->PickedButtonIndex == 0) {
@@ -1214,10 +1210,7 @@ void APlayerCharacter::InputScrollDown()
 		}
 	}
 	else if (IsValid(UIManagerWorldSubsystem->PlayerMenuWidget) && UIManagerWorldSubsystem->PlayerMenuWidget->IsInViewport()) {
-		TArray<UWidget*> PlayerMenuButtons{};
-		PlayerMenuButtons.Add(UIManagerWorldSubsystem->PlayerMenuWidget->GetInventoryButton());
-		PlayerMenuButtons.Add(UIManagerWorldSubsystem->PlayerMenuWidget->GetPartyButton());
-		PlayerMenuButtons.Add(UIManagerWorldSubsystem->PlayerMenuWidget->GetCloseButton());
+		TArray<UWidget*> PlayerMenuButtons = UIManagerWorldSubsystem->PlayerMenuWidget->GetButtonsStackBox()->GetAllChildren();
 		if (IsValid(UIManagerWorldSubsystem->PickedButton))
 			UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 		if (UIManagerWorldSubsystem->PickedButtonIndex == PlayerMenuButtons.Num() - 1) {
@@ -1726,40 +1719,32 @@ void APlayerCharacter::NotificationActions(const AActor* const ActorResult)
 	if (auto* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance)) {
 		if (ActorResult->ActorHasTag(FName(TEXT("FinishGame"))) && IsValid(UIManagerWorldSubsystem->NotificationWidget)) {
 			if (RedemptionGameInstance->InstanceKilledEnemies < 3) {
-				GetWorld()->GetTimerManager().ClearTimer(RemoveNotificationTimerHandle);
-				UIManagerWorldSubsystem->NotificationWidget->AddToViewport();
-				UIManagerWorldSubsystem->NotificationWidget->SetNotificationTextBlockText(FText::FromString("You need to kill all enemies before proceeding!"));
-				GetWorld()->GetTimerManager().SetTimer(RemoveNotificationTimerHandle, this, &APlayerCharacter::RemoveNotification, 3, false);
+				CreateNotification(FText::FromString("You need to kill all enemies before proceeding!"));
 			}
 			else if (RedemptionGameInstance->InstanceKilledEnemies >= 3 && !GetWorld()->GetTimerManager().IsTimerActive(FinishGameTimerHandle)) {
-				UIManagerWorldSubsystem->NotificationWidget->AddToViewport();
-				UIManagerWorldSubsystem->NotificationWidget->SetNotificationTextBlockText(FText::FromString("Congratulations!!!"));
-				GetWorld()->GetTimerManager().SetTimer(FinishGameTimerHandle, this, &APlayerCharacter::FinishGame, 3, false);
+				CreateNotification(FText::FromString("Congratulations!!!"));
 			}
 		}
 	}
 }
 
+void APlayerCharacter::CreateNotification(const FText& NotificationText)
+{
+	if (IsValid(UIManagerWorldSubsystem->NotificationWidget)) {
+		FTimerHandle RemoveNotificationTimerHandle{};
+		UIManagerWorldSubsystem->NotificationWidget->AddToViewport();
+		UIManagerWorldSubsystem->NotificationWidget->SetNotificationTextBlockText(NotificationText);
+		GetWorld()->GetTimerManager().SetTimer(RemoveNotificationTimerHandle, this, &APlayerCharacter::RemoveNotification, 3.f, false);
+	}
+}
+
 void APlayerCharacter::PickUpItem(AActor* const ActorResult)
 {
-		if (ActorResult->ActorHasTag(FName(TEXT("Loot")))) {
-			ALootInTheWorld* LootInTheWorld = Cast<ALootInTheWorld>(ActorResult);
-			bool IsInInventory = false;
-			if (IsValid(LootInTheWorld)) {
-				for (uint8 i = 0; i < LootInTheWorld->GetItemsClasses().Num(); i++) {
-					AGameItem* GameItem = NewObject<AGameItem>(this, LootInTheWorld->GetItemsClasses()[i]);
-					if (auto* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance))
-						RedemptionGameInstance->InstanceItemsInTheInventory.Add(LootInTheWorld->GetItemsClasses()[i]);
-					if (IsValid(GameItem)) {
-						//Get ScrollBox corresponding to the item's type
-						UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(UIManagerWorldSubsystem->InventoryMenuWidget, GameItem);
-						//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
-						InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, GameItem);
-					}
-				}
-				//Destroy container with loot
-				ActorResult->Destroy();
-			}
+	if (ActorResult->ActorHasTag(FName(TEXT("Loot")))) 
+		if (ALootInTheWorld* LootInTheWorld = Cast<ALootInTheWorld>(ActorResult); IsValid(LootInTheWorld)) {
+			UIManagerWorldSubsystem->InventoryMenuWidget->PickUpItem(LootInTheWorld->GetItemsClasses());
+			//Destroy container with loot
+			ActorResult->Destroy();
 		}
 }
 

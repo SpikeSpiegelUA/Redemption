@@ -118,6 +118,8 @@ public:
 
 	//Copy current health, mana, skills and skills' progress.
 	void CopyInfoFromCombatPlayer(const class ACombatPlayerCharacter* const CombatPlayerCharacter);
+
+	void CreateNotification(const FText& NotificationText);
 protected:
 	void CheckForwardRayHitResult();
 	//Use in constructor only.
@@ -149,7 +151,6 @@ protected:
 	UTouchInterface* EmptyTouchInterface{};
 
 	//Timer Handles
-	FTimerHandle RemoveNotificationTimerHandle{};
 	FTimerHandle FinishGameTimerHandle{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Role-playing System", SaveGame, meta = (AllowPrivateAccess = true))
@@ -245,6 +246,8 @@ public:
 		TArray<AEffect*> Effects;
 
 	bool IsInDialogue = false;
+	//Need this to control Tick in dialogue behavior trees.
+	bool IsTrading = false;
 	//When the player wants to check Info of characters, he can select enemies as well as allies.
 	bool CanSelectEveryoneAsATarget = false;
 	//If a player opened an inventory menu, he can't open a pause menu.

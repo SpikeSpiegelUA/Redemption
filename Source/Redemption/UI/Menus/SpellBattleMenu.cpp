@@ -1009,8 +1009,10 @@ void USpellBattleMenu::CreateSelectedElementWidgetAndAddToHorizontalBox(const UT
 			SelectedElementEntryWidget = CreateWidget<USelectedElementEntryWidget>(GetWorld(), SelectedElementEntryWidgetClass);
 		if (IsValid(SelectedElementEntryWidget)) {
 			SelectedElementEntryWidget->SetElement(Element);
-			SelectedElementEntryWidget->GetMainImage()->Brush.SetResourceObject(const_cast<UTexture*>(Icon));
-			SelectedElementEntryWidget->GetMainImage()->Brush.SetImageSize(FVector2D(120, 100));
+			FSlateBrush NewSlateBrush{};
+			NewSlateBrush.SetResourceObject(const_cast<UTexture*>(Icon));
+			NewSlateBrush.SetImageSize(FVector2D(120, 100));
+			SelectedElementEntryWidget->GetMainImage()->SetBrush(NewSlateBrush);
 			SelectedElementEntryWidget->AddToViewport();
 			SelectedElementsHorizontalBox->AddChildToHorizontalBox(SelectedElementEntryWidget);
 			SelectedElementEntryWidget->SetPadding(FMargin(20.f, 0.f, 0.f, 0.f));
@@ -1027,8 +1029,10 @@ void USpellBattleMenu::CreateSelectedSpellTypeWidgetAndAddToHorizontalBox(const 
 			SelectedSpellTypeEntryWidget = CreateWidget<USelectedSpellTypeEntryWidget>(GetWorld(), SelectedSpellTypeEntryWidgetClass);
 		if (IsValid(SelectedSpellTypeEntryWidget)) {
 			SelectedSpellTypeEntryWidget->SetSpellType(SpellType);
-			SelectedSpellTypeEntryWidget->GetMainImage()->Brush.SetResourceObject(const_cast<UTexture*>(Icon));
-			SelectedSpellTypeEntryWidget->GetMainImage()->Brush.SetImageSize(FVector2D(120, 100));
+			FSlateBrush NewSlateBrush{};
+			NewSlateBrush.SetResourceObject(const_cast<UTexture*>(Icon));
+			NewSlateBrush.SetImageSize(FVector2D(120, 100));
+			SelectedSpellTypeEntryWidget->GetMainImage()->SetBrush(NewSlateBrush);
 			SelectedSpellTypeEntryWidget->AddToViewport();
 			SelectedSpellTypeHorizontalBox->AddChildToHorizontalBox(SelectedSpellTypeEntryWidget);
 			SelectedSpellTypeEntryWidget->SetPadding(FMargin(0.f, 0.f, 0.f, 0.f));
@@ -1045,8 +1049,10 @@ void USpellBattleMenu::CreateSelectedSpellRangeWidgetAndAddToHorizontalBox(const
 			SelectedSpellRangeEntryWidget = CreateWidget<USelectedSpellRangeEntryWidget>(GetWorld(), SelectedSpellRangeEntryWidgetClass);
 		if (IsValid(SelectedSpellRangeEntryWidget)) {
 			SelectedSpellRangeEntryWidget->SetSpellRange(SpellRange);
-			SelectedSpellRangeEntryWidget->GetMainImage()->Brush.SetResourceObject(const_cast<UTexture*>(Icon));
-			SelectedSpellRangeEntryWidget->GetMainImage()->Brush.SetImageSize(FVector2D(120, 100));
+			FSlateBrush NewSlateBrush{};
+			NewSlateBrush.SetResourceObject(const_cast<UTexture*>(Icon));
+			NewSlateBrush.SetImageSize(FVector2D(120, 100));
+			SelectedSpellRangeEntryWidget->GetMainImage()->SetBrush(NewSlateBrush);
 			SelectedSpellRangeEntryWidget->AddToViewport();
 			SelectedSpellRangeHorizontalBox->AddChildToHorizontalBox(SelectedSpellRangeEntryWidget);
 			SelectedSpellRangeEntryWidget->SetPadding(FMargin(0.f, 0.f, 0.f, 0.f));

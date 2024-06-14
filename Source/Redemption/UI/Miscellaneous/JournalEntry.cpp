@@ -17,9 +17,15 @@ void UJournalEntry::NativeConstruct()
 
 void UJournalEntry::SetEntryInfo(const int EntryNumber, const FText& EntryText, const FText& EntryQuestText)
 {
+	EntryQuest = EntryQuestText;
 	FString EntryNumberString{};
 	EntryNumberString.AppendInt(EntryNumber);
 	EntryNumberTextBlock->SetText(FText::FromString(EntryNumberString));
 	EntryQuestTextBlock->SetText(EntryQuestText);
 	EntryTextBlock->SetText(EntryText);
+}
+
+const FText& UJournalEntry::GetEntryQuest() const
+{
+	return EntryQuest;
 }

@@ -7,7 +7,7 @@
 #include "Redemption/Miscellaneous/InventoryActions.h"
 #include "Kismet/GameplayStatics.h"
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
-#include "C:\UnrealEngineProjects\Redemption\Source\Redemption\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
+#include "..\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
 
 bool UInventoryTargetEntry::Initialize()
 {
