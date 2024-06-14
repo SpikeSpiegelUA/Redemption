@@ -50,7 +50,7 @@ EBTNodeResult::Type UBTTask_AskRepeatedQuestion::PrepareResponses(APlayerControl
 		return EBTNodeResult::Failed;
 
 
-	UIManagerWorldSubsystem->DialogueBoxWidget->GetResponseOverlay()->AddChildToOverlay(UIManagerWorldSubsystem->ResponsesBoxWidget);
+	UIManagerWorldSubsystem->DialogueBoxWidget->GetResponseVerticalBox()->AddChildToVerticalBox(UIManagerWorldSubsystem->ResponsesBoxWidget);
 	UIManagerWorldSubsystem->DialogueBoxWidget->GetContinueButton()->SetVisibility(ESlateVisibility::Hidden);
 
 	if (!BlackboardComponent->GetValue<UBlackboardKeyType_Bool>("FirstDialoguePassed")) {

@@ -44,8 +44,10 @@ void UBattleResultsScreen::ContinueButtonOnClicked()
 	this->ConditionalBeginDestroy();
 	if (auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 		RedemptionGameModeBase->GetGameManager()->EndBattle();
-	if(auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+	if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+		UIManagerWorldSubsystem->PickedButton = nullptr;
 		UIManagerWorldSubsystem->BattleResultsScreenWidget = nullptr;
+	}
 }
 
 void UBattleResultsScreen::NextCharacterButtonOnClicked()

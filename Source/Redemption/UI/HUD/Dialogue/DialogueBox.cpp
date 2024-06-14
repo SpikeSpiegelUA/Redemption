@@ -63,9 +63,9 @@ UTextBlock* UDialogueBox::GetSpeakerNameTextBlock() const
 	return SpeakerNameTextBlock;
 }
 
-UOverlay* UDialogueBox::GetResponseOverlay() const
+UVerticalBox* UDialogueBox::GetResponseVerticalBox() const
 {
-	return ResponseOverlay;
+	return ResponseVerticalBox;
 }
 
 UButton* UDialogueBox::GetContinueButton() const

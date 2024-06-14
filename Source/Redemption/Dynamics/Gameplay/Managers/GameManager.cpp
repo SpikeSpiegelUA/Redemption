@@ -61,7 +61,7 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 					if (IsValid(UIManagerWorldSubsystem->BattleMenuWidget))
 						UIManagerWorldSubsystem->BattleMenuWidget->AddToViewport();
 					ToBattleTransitionScreen->AddToViewport(0);
-					ToBattleTransitionScreen->SetMainTextBlockText(FText::FromString("Initiative!"));
+					ToBattleTransitionScreen->SetMainTextBlockText(FText::FromString("Fight!"));
 					GetWorld()->GetTimerManager().SetTimer(ToBattleTransitionTimerHandle, this, &AGameManager::ToBattleTransition, 2.f, false);
 					//Create enemies and add them to BattleEnemies array in battle manager
 					if (ANonCombatEnemyNPC* NonCombatEnemyNPC = Cast<ANonCombatEnemyNPC>(AttackingNPC); IsValid(NonCombatEnemyNPC)) {

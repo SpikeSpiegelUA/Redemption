@@ -49,7 +49,7 @@ EBTNodeResult::Type UBTTask_AskQuestion::PrepareResponses(APlayerController*& Pl
 		return EBTNodeResult::Failed;
 
 
-	UIManagerWorldSubsystem->DialogueBoxWidget->GetResponseOverlay()->AddChildToOverlay(UIManagerWorldSubsystem->ResponsesBoxWidget);
+	UIManagerWorldSubsystem->DialogueBoxWidget->GetResponseVerticalBox()->AddChildToVerticalBox(UIManagerWorldSubsystem->ResponsesBoxWidget);
 	UIManagerWorldSubsystem->DialogueBoxWidget->GetContinueButton()->SetVisibility(ESlateVisibility::Hidden);
 	UIManagerWorldSubsystem->DialogueBoxWidget->SetDialogueText(NPCQuestion);
 
