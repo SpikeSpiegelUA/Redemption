@@ -49,9 +49,6 @@ protected:
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
 
-	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class ULoadingScreen> LoadingScreenClass = nullptr;
-
 public:
 
 	UButton* GetNewGameButton() const;

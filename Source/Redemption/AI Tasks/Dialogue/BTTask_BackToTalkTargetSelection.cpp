@@ -63,5 +63,8 @@ EBTNodeResult::Type UBTTask_BackToTalkTargetSelection::ExecuteTask(UBehaviorTree
 	BattleMenuWidget->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
 	BattleMenuWidget->AddToViewport();
 
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()); IsValid(PlayerController))
+		PlayerCharacter->EnableInput(PlayerController);
+
 	return EBTNodeResult::Succeeded;
 }

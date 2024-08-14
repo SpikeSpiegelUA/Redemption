@@ -48,5 +48,7 @@ public:
 
 	uint8 GetCanSeePlayerKeyID() const;
 
+	void SetDynamicSubtree() override;
+
 private:
 };

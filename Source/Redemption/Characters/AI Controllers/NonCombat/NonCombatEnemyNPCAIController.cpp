@@ -109,6 +109,15 @@ void ANonCombatEnemyNPCAIController::DeductPlayerDetection()
 		ThisEnemy->GetNonCombatEnemyDetectionBarWidget()->Detection = PlayerDetection;
 }
 
+void ANonCombatEnemyNPCAIController::SetDynamicSubtree()
+{
+	ACharacterInTheWorld* Chr = Cast<ACharacterInTheWorld>(GetPawn());
+	if (IsValid(Chr->GetSmartObject())) {
+		const FGameplayTag SubTreeTag = FGameplayTag::RequestGameplayTag(FName("SubTreeTag"));
+		BehaviorTreeComponent->SetDynamicSubtree(SubTreeTag, Chr->GetSmartObject()->GetSubTree());
+	}
+}
+
 void ANonCombatEnemyNPCAIController::SetBlackboardDistanceToThePlayer(float Value)
 {
 	BlackboardComponent->SetValue<UBlackboardKeyType_Float>("DistanceToThePlayer", Value);

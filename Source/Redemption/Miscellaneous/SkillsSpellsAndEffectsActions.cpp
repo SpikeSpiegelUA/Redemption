@@ -65,7 +65,8 @@ int SkillsSpellsAndEffectsActions::GetAttackValueAfterResistances(int ValueBefor
 		int ElementPercentBeforeEffects = ReceiverElementPercent.Percent;
 		FElementAndItsPercentageStruct NewElementPercent;
 		for (AEffect* Effect : Effects)
-			if (IsValid(Effect) && GetSpellElementCorrespondingToEffectArea(Effect->GetEffectArea()) == ReceiverElementPercent.Element) {
+			if (IsValid(Effect) && (GetSpellElementCorrespondingToEffectArea(Effect->GetEffectArea()) == ReceiverElementPercent.Element
+				|| Effect->GetEffectArea() == EEffectArea::ALLELEMENTALRESISTANCES)) {
 				NewElementPercent.Element = ReceiverElementPercent.Element;
 				if (Effect->GetEffectType() == EEffectType::BUFF && ReceiverElementPercent.Percent != 0)
 					NewElementPercent.Percent = ElementPercentBeforeEffects * (Effect->GetEffectStat() - 1);
@@ -158,7 +159,8 @@ int SkillsSpellsAndEffectsActions::GetRestorationValueAfterResistances(int Value
 		int ElementPercentBeforeEffects = ReceiverElementPercent.Percent;
 		FElementAndItsPercentageStruct NewElementPercent;
 		for (AEffect* Effect : Effects)
-			if (IsValid(Effect) && GetSpellElementCorrespondingToEffectArea(Effect->GetEffectArea()) == ReceiverElementPercent.Element) {
+			if (IsValid(Effect) && (GetSpellElementCorrespondingToEffectArea(Effect->GetEffectArea()) == ReceiverElementPercent.Element
+				|| Effect->GetEffectArea() == EEffectArea::ALLELEMENTALRESISTANCES)) {
 				NewElementPercent.Element = ReceiverElementPercent.Element;
 				if (Effect->GetEffectType() == EEffectType::BUFF && ReceiverElementPercent.Percent != 0)
 					NewElementPercent.Percent = ElementPercentBeforeEffects * (Effect->GetEffectStat() - 1);
@@ -206,7 +208,8 @@ int SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(
 		int ElementPercentBeforeEffects = ReceiverElementPercent.Percent;
 		FElementAndItsPercentageStruct NewElementPercent;
 		for (AEffect* Effect : Effects)
-			if (IsValid(Effect) && GetSpellElementCorrespondingToEffectArea(Effect->GetEffectArea()) == ReceiverElementPercent.Element) {
+			if (IsValid(Effect) && (GetSpellElementCorrespondingToEffectArea(Effect->GetEffectArea()) == ReceiverElementPercent.Element 
+				|| Effect->GetEffectArea() == EEffectArea::ALLELEMENTALRESISTANCES)) {
 				NewElementPercent.Element = ReceiverElementPercent.Element;
 					if (Effect->GetEffectType() == EEffectType::BUFF && ReceiverElementPercent.Percent != 0)
 						NewElementPercent.Percent = ElementPercentBeforeEffects * (Effect->GetEffectStat() - 1);
@@ -230,8 +233,9 @@ int SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(
 		for (FElementAndItsPercentageStruct ReceiverElementPercent : TemporaryReceiverContainedElements) 
 			if (ReceiverElementPercent.Element == AttackerElementPercent.Element) {
 				int ElementPercentOfEvasionChance = ValueBeforeResistances * AttackerElementPercent.Percent / 100;
-				EvasionChanceWithResistances += ElementPercentOfEvasionChance * ReceiverElementPercent.Percent / 25;
+				EvasionChanceWithResistances += ElementPercentOfEvasionChance * ReceiverElementPercent.Percent / 100;
 			}
+	UE_LOG(LogTemp, Warning, TEXT("The integer value is: %d"), EvasionChanceWithResistances);
 	return EvasionChanceWithResistances;
 }
 

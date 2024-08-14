@@ -7,6 +7,7 @@
 #include "..\Dynamics\Gameplay\Managers\BattleManager.h"
 #include "..\Dynamics\Gameplay\Combat\CombatStartLocation.h"
 #include "..\Characters\Combat\CombatPlayerCharacter.h"
+#include "Redemption/Dynamics/Miscellaneous/CombatEnemiesVariant.h"
 #include "GameManager.generated.h"
 
 UCLASS()
@@ -40,7 +41,10 @@ protected:
 	FTimerHandle ToBattleTransitionTimerHandle{};
 
 	UFUNCTION()
-		void ToBattleTransition();
+	void ToBattleTransition();
+
+	UFUNCTION()
+	void EnemySpawn();
 
 public:	
 	// Called every frame
@@ -54,6 +58,23 @@ public:
 
 	//Restore widgets to default state
 	void RestartBattleTransitionScreenWidget();
+
+	//Enemy spawn system
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Manager")
+	int CurrentNumberOfNonCombatEnemies{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Manager")
+	int MaxNumberOfNonCombatEnemies{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Manager")
+	TArray<AActor*> SpawnBoundingBoxes{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Manager")
+	TArray<TSubclassOf<class ANonCombatEnemyNPC>> NonCombatEnemyNPCClasses{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Manager")
+	TSubclassOf<class ASmartObject> NonCombatEnemyNPCSmartObjectClass{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Manager")
+	int EnemySpawnInterval{};
+	//These arrays will be used as combat enemies in battle. They are chosen randomly in the game manager for every NonCombat enemy spawn.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Manager")
+	TArray<FCombatEnemiesVariant> CombatEnemiesVariants{};
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true))

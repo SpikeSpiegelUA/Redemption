@@ -43,5 +43,8 @@ EBTNodeResult::Type UBTTask_EndCombatDialogue::ExecuteTask(UBehaviorTreeComponen
 	UIManagerWorldSubsystem->DialogueBoxWidget->ConditionalBeginDestroy();
 	UIManagerWorldSubsystem->DialogueBoxWidget = nullptr;
 
+	if(APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()); IsValid(PlayerController))
+		PlayerCharacter->EnableInput(PlayerController);
+
 	return EBTNodeResult::Succeeded;
 }

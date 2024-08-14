@@ -30,16 +30,6 @@ const EEffectArea APerk::GetEffectArea() const
 	return EffectArea;
 }
 
-const EPerkValueType APerk::GetPerkValueType() const
-{
-	return PerkValueType;
-}
-
-const int APerk::GetPerkValue() const
-{
-	return PerkValue;
-}
-
 const FName& APerk::GetPerkName() const
 {
 	return PerkName;

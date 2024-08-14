@@ -32,8 +32,6 @@ void ULearnedSpellEntryWidget::MainButtonOnClicked()
                 if (IsValid(UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->SelectedSpellButton))
                     UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->SelectedSpellButton->SetBackgroundColor(FLinearColor(0.3f, 0.3f, 0.3f, 1.f));
                 UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->SelectedSpellButton = MainButton;
-                if (IsValid(UIManagerWorldSubsystem->SpellBattleMenuWidget))
-                    UIManagerWorldSubsystem->SpellBattleMenuWidget->SetCreatedSpell(EntrySpell);
             }
             else if (UIManagerWorldSubsystem->SkillBattleMenuWidget->IsInViewport()) {
                 UIManagerWorldSubsystem->SpellInfoWidget->SetPositionInViewport(FVector2D(850, 79));
@@ -41,6 +39,8 @@ void ULearnedSpellEntryWidget::MainButtonOnClicked()
                     UIManagerWorldSubsystem->SkillBattleMenuWidget->SelectedSkillButton->SetBackgroundColor(FLinearColor(0.6f, 0.6f, 0.6f, 1.f));
                 UIManagerWorldSubsystem->SkillBattleMenuWidget->SelectedSkillButton = MainButton;
             }
+            if (IsValid(UIManagerWorldSubsystem->SpellBattleMenuWidget))
+                UIManagerWorldSubsystem->SpellBattleMenuWidget->SetCreatedSpell(EntrySpell);
             UIManagerWorldSubsystem->SpellInfoWidget->SetSpellInfo(EntrySpell);
             MainButton->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
         }

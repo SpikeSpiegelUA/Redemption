@@ -25,7 +25,9 @@ enum class EEffectArea :uint8
 	CRUSHINGRESISTANCE UMETA(DisplayName = "Crushing resistance"),
 	SLASHINGRESISTANCE UMETA(DisplayName = "Slashing resistance"),
 	PIERCINGRESISTANCE UMETA(DisplayName = "Piercing resistance"),
-	SPECIAL UMETA(DisplayName = "Special")
+	SPECIAL UMETA(DisplayName = "Special"),
+	SKILLUNLOCK UMETA(DisplayName = "Skill unlock"),
+	ALLELEMENTALRESISTANCES UMETA(DisplayName = "All elemental resistances")
 };
 
 UENUM(BlueprintType)

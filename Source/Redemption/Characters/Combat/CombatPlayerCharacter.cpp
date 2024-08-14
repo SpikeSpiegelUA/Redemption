@@ -55,7 +55,7 @@ void ACombatPlayerCharacter::BeginPlay()
 					MeleePhysicalType = UIManagerWorldSubsystem->InventoryMenuWidget->EquipedMelee->GetPhysicalType();
 				}
 				else {
-					MeleeAttackValue = 5;
+					MeleeAttackValue = 15;
 					MeleePhysicalType = EPhysicalType::CRUSHING;
 				}
 				if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->EquipedRange)) {

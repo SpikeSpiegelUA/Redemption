@@ -1219,6 +1219,8 @@ void USpellBattleMenu::UseUniqueSpellButtonOnClicked()
 
 void USpellBattleMenu::UseSpell(const bool UniqueSpell, const bool CreateNotificationIfCreatedSpellIsNotValid)
 {
+	if (!IsValid(CreatedSpell))
+		UE_LOG(LogTemp, Warning, TEXT("CREATED SPELL IS NOT VALID!!!"));
 	if(auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 		if (ABattleManager* BManager = RedemptionGameModeBase->GetBattleManager(); IsValid(BManager) && IsValid(PlayerCharacter))
 			if (UBattleMenu* BMenu = UIManagerWorldSubsystem->BattleMenuWidget; IsValid(BMenu))

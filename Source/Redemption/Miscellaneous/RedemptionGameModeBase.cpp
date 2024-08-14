@@ -271,6 +271,11 @@ TSubclassOf<class UTradingMenuItemEntry> ARedemptionGameModeBase::GetTradingMenu
 	return TradingMenuItemEntryClass;
 }
 
+TSubclassOf<class UCharacterCreationMenu> ARedemptionGameModeBase::GetCharacterCreationMenuClass() const
+{
+	return CharacterCreationMenuClass;
+}
+
 void ARedemptionGameModeBase::SetBattleManager(const ABattleManager* const NewBattleManager)
 {
 	BattleManager = const_cast<ABattleManager*>(NewBattleManager);

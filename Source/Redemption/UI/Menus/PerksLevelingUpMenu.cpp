@@ -4,6 +4,7 @@
 #include "PerksLevelingUpMenu.h"
 #include "..\Miscellaneous\SkillsSpellsAndEffectsActions.h"
 #include "Redemption/Dynamics/Gameplay/Perks/PerkWithPreviousLevel.h"
+#include "Redemption/Dynamics/Gameplay/Perks/SkillUnlockPerk.h"
 
 bool UPerksLevelingUpMenu::Initialize()
 {
@@ -104,6 +105,9 @@ void UPerksLevelingUpMenu::UnlockButtonOnClicked()
 							AvailablePerkPointsString.AppendInt(UIManagerWorldSubsystem->CharacterPerksMenuWidget->PerksOwner->NumberOfPerkPoints);
 							UIManagerWorldSubsystem->CharacterPerksMenuWidget->SetAvailablePerksPointsTextBlockText(FText::FromString(AvailablePerkPointsString));
 							PerkPriceTextBlock->SetVisibility(ESlateVisibility::Hidden);
+							if (const ASkillUnlockPerk* const SkillUnlockPerk = Cast<ASkillUnlockPerk>(UIManagerWorldSubsystem->CharacterPerksMenuWidget->
+								CurrentlySelectedPerkClass->GetDefaultObject<APerk>()); IsValid(SkillUnlockPerk))
+								UIManagerWorldSubsystem->CharacterPerksMenuWidget->PerksOwner->AddAvailableSpell(SkillUnlockPerk->GetSkillToUnlock());
 						}
 						else {
 							FString NotificationString = "Not enough perk points!";
@@ -154,6 +158,9 @@ void UPerksLevelingUpMenu::UnlockButtonOnClicked()
 							AvailablePerkPointsString.AppendInt(PlayerCharacter->NumberOfPerkPoints);
 							UIManagerWorldSubsystem->CharacterPerksMenuWidget->SetAvailablePerksPointsTextBlockText(FText::FromString(AvailablePerkPointsString));
 							PerkPriceTextBlock->SetVisibility(ESlateVisibility::Hidden);
+							if (const ASkillUnlockPerk* const SkillUnlockPerk = Cast<ASkillUnlockPerk>(UIManagerWorldSubsystem->CharacterPerksMenuWidget->
+								CurrentlySelectedPerkClass->GetDefaultObject<APerk>()); IsValid(SkillUnlockPerk))
+								PlayerCharacter->AddAvailableSkill(SkillUnlockPerk->GetSkillToUnlock());
 						}
 						else {
 							FString NotificationString = "Not enough perk points!";
@@ -505,12 +512,20 @@ void UPerksLevelingUpMenu::SetPerkDescription(const APerk* const PerkObject)
 	StringToSet = "Effect area: ";
 	StringToSet.Append(*SkillsSpellsAndEffectsActions::GetEnumDisplayName<EEffectArea>(PerkObject->GetEffectArea()).ToString());
 	PerkEffectAreaTextBlock->SetText(FText::FromString(StringToSet));
-	StringToSet = "Perk value: ";
-	StringToSet.AppendInt(PerkObject->GetPerkValue());
-	PerkValueTextBlock->SetText(FText::FromString(StringToSet));
-	StringToSet = "Perk value type: ";
-	StringToSet.Append(*SkillsSpellsAndEffectsActions::GetEnumDisplayName<EPerkValueType>(PerkObject->GetPerkValueType()).ToString());
-	PerkValueTypeTextBlock->SetText(FText::FromString(StringToSet));
+	if (ANumericalPerk* const NumericalPerk = Cast<ANumericalPerk>(const_cast<APerk*>(PerkObject)); IsValid(NumericalPerk)) {
+		StringToSet = "Perk value: ";
+		StringToSet.AppendInt(NumericalPerk->GetPerkValue());
+		PerkValueTextBlock->SetText(FText::FromString(StringToSet));
+		StringToSet = "Perk value type: ";
+		StringToSet.Append(*SkillsSpellsAndEffectsActions::GetEnumDisplayName<EPerkValueType>(NumericalPerk->GetPerkValueType()).ToString());
+		PerkValueTypeTextBlock->SetText(FText::FromString(StringToSet));
+		PerkValueTextBlock->SetVisibility(ESlateVisibility::Visible);
+		PerkValueTypeTextBlock->SetVisibility(ESlateVisibility::Visible);
+	}
+	else {
+		PerkValueTextBlock->SetVisibility(ESlateVisibility::Collapsed);
+		PerkValueTypeTextBlock->SetVisibility(ESlateVisibility::Collapsed);
+	}
 	PerkDescriptionTextBlock->SetText(PerkObject->GetPerkDescription());
 }
 
