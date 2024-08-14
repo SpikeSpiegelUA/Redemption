@@ -112,7 +112,7 @@ public:
 	void SetStat(const ECharacterStats StatToSet, const int8 NewValue);
 	void SetSkill(const ECharacterSkills SkillToSet, const int8 NewValue);
 	void SetSkillsProgress(const ECharacterSkills SkillToSet, const int8 NewValue);
-
+	void AddAvailableSkill(const TSubclassOf<ASpell> SkillToAdd);
 	void AddSkillsProgress(const ECharacterSkills SkillToAddTo, const int16 ValueToAdd);
 	void AddSkills(const ECharacterSkills SkillToAddTo, const int16 ValueToAdd);
 
@@ -262,7 +262,7 @@ public:
 		int LevelingUpCounter = 0;
 
 	//General character information.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "General Information")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "General Information")
 		FString CharacterName{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "General Information")
 		UTexture* CharacterPortrait{};

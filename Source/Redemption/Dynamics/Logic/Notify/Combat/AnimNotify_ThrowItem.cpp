@@ -26,10 +26,10 @@ void UAnimNotify_ThrowItem::Notify(USkeletalMeshComponent* MeshComp, UAnimSequen
 	//Spawn Spell Object and rotate it towards the selected enemy
 	if (IsValid(MeshComp->GetWorld()) && IsValid(MeshComp->GetWorld()->GetFirstPlayerController()))
 		if (ACombatNPC* CombatNPC = Cast<ACombatNPC>(MeshComp->GetOwner()); IsValid(CombatNPC))
-			if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
+			if (auto* UIManagerWorldSubsystem = MeshComp->GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
 				if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(MeshComp->GetWorld())); IsValid(RedemptionGameModeBase))
 					if (AGameItemWithItemObject* GameItemWithItemObject = Cast<AGameItemWithItemObject>(UIManagerWorldSubsystem->InventoryMenuWidget->GetPickedItem()); IsValid(GameItemWithItemObject)) {
 						SpawnItemObject(GameItemWithItemObject, MeshComp, CombatNPC);
-						UGameplayStatics::PlaySound2D(GetWorld(), RedemptionGameModeBase->GetAudioManager()->GetUseAssaultSoundCue());
+						UGameplayStatics::PlaySound2D(MeshComp->GetWorld(), RedemptionGameModeBase->GetAudioManager()->GetUseAssaultSoundCue());
 					}
 }

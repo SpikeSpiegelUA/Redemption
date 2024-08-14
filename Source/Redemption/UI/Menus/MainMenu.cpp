@@ -2,8 +2,6 @@
 
 
 #include "..\UI\Menus\MainMenu.h"
-#include "Kismet\GameplayStatics.h"
-#include "Blueprint/WidgetLayoutLibrary.h"
 #include "..\GameInstance\RedemptionGameInstance.h"
 #include "..\UI\Menus\SettingsMenu.h"
 #include "..\UI\Screens\LoadingScreen.h"
@@ -11,9 +9,11 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "..\Characters\Player\PlayerCharacter.h"
 #include "UIManagerWorldSubsystem.h"
-#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "..\UI\Miscellaneous\SaveSlotEntry.h"
+#include "..\UI\Menus\CharacterCreationMenu.h"
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
+
 bool UMainMenu::Initialize()
 {
 	const bool bSuccess = Super::Initialize();
@@ -50,25 +50,14 @@ void UMainMenu::NativeConstruct()
 
 void UMainMenu::NewGameButtonOnClicked()
 {
-	URedemptionGameInstance* GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
-	APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-	if (IsValid(GameInstance) && IsValid(PlayerController)) {
-		UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
-		UWidgetBlueprintLibrary::SetInputMode_GameOnly(PlayerController);
-		GameInstance->InstanceItemsInTheInventory.Empty();
-		GameInstance->InstanceLearnedSpells.Empty();
-		GameInstance->InstanceEquipedMelee = nullptr;
-		GameInstance->InstanceEquipedRange = nullptr;
-		GameInstance->InstanceEquipedHead = nullptr;
-		GameInstance->InstanceEquipedTorse = nullptr;
-		GameInstance->InstanceEquipedHand = nullptr;
-		GameInstance->InstanceEquipedLowerArmor = nullptr;
-		GameInstance->PlayerCharacterInstanceDataStruct.ByteData.Empty();
-		GameInstance->TownActors.Empty();
-		GameInstance->DungeonActors.Empty();
-		ULoadingScreen* LoadingScreen = CreateWidget<ULoadingScreen>(PlayerController, LoadingScreenClass);
-		LoadingScreen->AddToViewport();
-		UGameplayStatics::OpenLevel(GetWorld(), "Town");
+	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+		if(APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()); IsValid(PlayerController))
+			if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+				UIManagerWorldSubsystem->CharacterCreationMenu = CreateWidget<UCharacterCreationMenu>(PlayerController, RedemptionGameModeBase->GetCharacterCreationMenuClass());
+		if(IsValid(UIManagerWorldSubsystem->CharacterCreationMenu)){
+			this->RemoveFromParent();
+			UIManagerWorldSubsystem->CharacterCreationMenu->AddToViewport();
+		}
 	}
 }
 

@@ -7,6 +7,7 @@
 #include "..\UI\Miscellaneous\InventoryScrollBoxEntryWidget.h"
 #include "..\UI\Miscellaneous\CharacterPerks.h"
 #include "..\UI\Menus\PerksLevelingUpMenu.h"
+#include "..\UI\Menus\CharacterCreationMenu.h"
 #include "..\UI\Menus\MainMenu.h"
 #include "..\Dynamics\World\LootInTheWorld.h"
 #include "..\Dynamics\Logic\Interfaces\DialogueActionsInterface.h"
@@ -506,12 +507,20 @@ void APlayerCharacter::InputScrollLeft()
 	}
 	if ((IsValid(UIManagerWorldSubsystem->SpellBattleMenuWidget) && UIManagerWorldSubsystem->SpellBattleMenuWidget->IsInViewport()) || 
 		(IsValid(UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget) && UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->IsInViewport())
-		|| (IsValid(UIManagerWorldSubsystem->SkillBattleMenuWidget) && UIManagerWorldSubsystem->SkillBattleMenuWidget->IsInViewport())) {
+		|| (IsValid(UIManagerWorldSubsystem->SkillBattleMenuWidget) && UIManagerWorldSubsystem->SkillBattleMenuWidget->IsInViewport())
+		|| (IsValid(UIManagerWorldSubsystem->CharacterCreationMenu) && UIManagerWorldSubsystem->CharacterCreationMenu->IsInViewport())) {
 			if (UButtonWithNeighbors* PickedButtonWithNeighbors = Cast<UButtonWithNeighbors>(UIManagerWorldSubsystem->PickedButton); IsValid(PickedButtonWithNeighbors))
 				for (FSideAndItsButton SideAndItsButton : PickedButtonWithNeighbors->SidesAndTheirButtons)
 					if (SideAndItsButton.Side == ESides::LEFT) {
-						if (IsValid(UIManagerWorldSubsystem->PickedButton))
-							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+						if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+							if (IsValid(UIManagerWorldSubsystem->SpellBattleMenuWidget) && UIManagerWorldSubsystem->SpellBattleMenuWidget->IsInViewport())
+								UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
+							else if ((IsValid(UIManagerWorldSubsystem->SkillBattleMenuWidget) && UIManagerWorldSubsystem->SkillBattleMenuWidget->IsInViewport())
+								|| (IsValid(UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget) && UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->IsInViewport()))
+									UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.6, 0.6, 0.6, 1));
+							else if (IsValid(UIManagerWorldSubsystem->CharacterCreationMenu) && UIManagerWorldSubsystem->CharacterCreationMenu->IsInViewport())
+								UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+						}
 						UIManagerWorldSubsystem->PickedButton = SideAndItsButton.NeighborButton;
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
 					}
@@ -687,15 +696,19 @@ void APlayerCharacter::InputScrollRight()
 	}
 	if ((IsValid(UIManagerWorldSubsystem->SpellBattleMenuWidget) && UIManagerWorldSubsystem->SpellBattleMenuWidget->IsInViewport()) || 
 		(IsValid(UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget) && UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->IsInViewport())
-		|| (IsValid(UIManagerWorldSubsystem->SkillBattleMenuWidget) && UIManagerWorldSubsystem->SkillBattleMenuWidget->IsInViewport())) {
+		|| (IsValid(UIManagerWorldSubsystem->SkillBattleMenuWidget) && UIManagerWorldSubsystem->SkillBattleMenuWidget->IsInViewport())
+		|| (IsValid(UIManagerWorldSubsystem->CharacterCreationMenu) && UIManagerWorldSubsystem->CharacterCreationMenu->IsInViewport())) {
 		if (UButtonWithNeighbors* PickedButtonWithNeighbors = Cast<UButtonWithNeighbors>(UIManagerWorldSubsystem->PickedButton); IsValid(PickedButtonWithNeighbors))
 			for (FSideAndItsButton SideAndItsButton : PickedButtonWithNeighbors->SidesAndTheirButtons)
 				if (SideAndItsButton.Side == ESides::RIGHT) {
 					if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
-						if (UIManagerWorldSubsystem->SpellBattleMenuWidget->IsInViewport())
+						if (IsValid(UIManagerWorldSubsystem->SpellBattleMenuWidget) && UIManagerWorldSubsystem->SpellBattleMenuWidget->IsInViewport())
 							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3, 0.3, 0.3, 0.8));
-						else if (UIManagerWorldSubsystem->SkillBattleMenuWidget->IsInViewport())
+						else if ((IsValid(UIManagerWorldSubsystem->SkillBattleMenuWidget) && UIManagerWorldSubsystem->SkillBattleMenuWidget->IsInViewport())
+							|| (IsValid(UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget) && UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->IsInViewport()))
 							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.6, 0.6, 0.6, 1));
+						else if (IsValid(UIManagerWorldSubsystem->CharacterCreationMenu) && UIManagerWorldSubsystem->CharacterCreationMenu->IsInViewport())
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 					}
 					UIManagerWorldSubsystem->PickedButton = SideAndItsButton.NeighborButton;
 					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 0.8));
@@ -717,6 +730,8 @@ void APlayerCharacter::InputScrollUp()
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1));
 					else if (IsValid(UIManagerWorldSubsystem->CombatCharacterInfoMenuWidget) && UIManagerWorldSubsystem->CombatCharacterInfoMenuWidget->IsInViewport())
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3f, 0.3f, 0.3f, 1.f));
+					else if (IsValid(UIManagerWorldSubsystem->CharacterCreationMenu) && UIManagerWorldSubsystem->CharacterCreationMenu->IsInViewport())
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 				}
 				UIManagerWorldSubsystem->PickedButton = SideAndItsButton.NeighborButton;
 				if(IsValid(UIManagerWorldSubsystem->SpellBattleMenuWidget) && UIManagerWorldSubsystem->SpellBattleMenuWidget->IsInViewport())
@@ -1142,6 +1157,8 @@ void APlayerCharacter::InputScrollDown()
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 					else if (IsValid(UIManagerWorldSubsystem->CombatCharacterInfoMenuWidget) && UIManagerWorldSubsystem->CombatCharacterInfoMenuWidget->IsInViewport())
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.3f, 0.3f, 0.3f, 1.f));
+					else if (IsValid(UIManagerWorldSubsystem->CharacterCreationMenu) && UIManagerWorldSubsystem->CharacterCreationMenu->IsInViewport())
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
 				}
 				UIManagerWorldSubsystem->PickedButton = SideAndItsButton.NeighborButton;
 				if (IsValid(UIManagerWorldSubsystem->SpellBattleMenuWidget) && UIManagerWorldSubsystem->SpellBattleMenuWidget->IsInViewport())
@@ -2045,6 +2062,11 @@ void APlayerCharacter::SetSkill(const ECharacterSkills SkillToSet, const int8 Ne
 void APlayerCharacter::SetSkillsProgress(const ECharacterSkills SkillToSet, const int8 NewValue)
 {
 	SkillsProgressMap.Emplace(SkillToSet, NewValue);
+}
+
+void APlayerCharacter::AddAvailableSkill(const TSubclassOf<ASpell> SkillToAdd)
+{
+	AvailableSkills.Add(SkillToAdd);
 }
 
 void APlayerCharacter::AddSkillsProgress(const ECharacterSkills SkillToAddTo, const int16 ValueToAdd)

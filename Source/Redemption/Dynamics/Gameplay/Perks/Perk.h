@@ -35,18 +35,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information")
 	EEffectArea EffectArea{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information")
-	EPerkValueType PerkValueType{};
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information")
-	int PerkValue{};
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "General Information")
 	int PerkPrice{};
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
 	const EEffectArea GetEffectArea() const;
-	const EPerkValueType GetPerkValueType() const;
-	const int GetPerkValue() const;
 	const FName& GetPerkName() const;
 	const FText& GetPerkDescription() const;
 	const int GetPerkPrice() const;

@@ -215,9 +215,9 @@ UTexture* AEffectsSpellsAndSkillsManager::GetEffectAreaImageTexture(EEffectArea 
 		case EEffectArea::DAMAGE:
 			return AssaultSpellTypeIcon;
 		case EEffectArea::ARMOR:
-			return FireElementIcon;
+			return ArmorEffectAreaIcon;
 		case EEffectArea::EVASION:
-			return FireElementIcon;
+			return EvasionEffectAreaIcon;
 		case EEffectArea::FIRERESISTANCE:
 			return FireElementIcon;
 		case EEffectArea::WATERRESISTANCE:

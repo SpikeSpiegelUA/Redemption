@@ -153,7 +153,7 @@ void UPartyMenuGeneralCharacterInfo::PerksLevelingUpButtonOnClicked()
 						Anchors.Maximum = FVector2D(1.0, 1.0);
 						CanvasPanelSlot->SetAnchors(Anchors);
 						FMargin Offsets{};
-						Offsets.Right = 1000.f;
+						Offsets.Right = 1150.f;
 						Offsets.Bottom = 130.f;
 						CanvasPanelSlot->SetOffsets(Offsets);
 					}

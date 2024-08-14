@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "..\Dynamics\Gameplay\Perks\Perk.h"
+#include "..\Dynamics\Gameplay\Perks\NumericalPerk.h"
 #include "PerkWithPreviousLevel.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class REDEMPTION_API APerkWithPreviousLevel : public APerk
+class REDEMPTION_API APerkWithPreviousLevel : public ANumericalPerk
 {
 	GENERATED_BODY()
 protected:

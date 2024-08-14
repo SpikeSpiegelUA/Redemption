@@ -39,6 +39,8 @@ public:
 	UPROPERTY()
 	class UPauseMenu* PauseMenuWidget{};
 	UPROPERTY()
+	class UCharacterCreationMenu* CharacterCreationMenu{};
+	UPROPERTY()
 	class UBattleMenu* BattleMenuWidget{};
 	UPROPERTY()
 	class UBattleResultsScreen* BattleResultsScreenWidget{};

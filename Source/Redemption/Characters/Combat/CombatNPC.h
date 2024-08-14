@@ -84,14 +84,15 @@ public:
 	const TArray<TSubclassOf<ASpell>>& GetAvailableSpells() const;
 	const int8 GetStat(const ECharacterStats StatToGet) const;
 	const int8 GetSkill(const ECharacterSkills SkillToGet) const;
-	void SetStat(const ECharacterStats StatToSet, const int8 NewValue);
-	void SetSkill(const ECharacterSkills SkillToSet, const int8 NewValue);
 	const EPhysicalType GetMeleePhysicalType() const;
 	const EPhysicalType GetRangePhysicalType() const;
 
 	void SetRangeAmmo(int8 NewRangeAmmo);
 	void SetStartLocation(const AActor* const NewLocation);
 	void SetStartRotation(const FRotator& NewStartRotation);
+	void SetStat(const ECharacterStats StatToSet, const int8 NewValue);
+	void SetSkill(const ECharacterSkills SkillToSet, const int8 NewValue);
+	void AddAvailableSpell(const TSubclassOf<ASpell> SkillToAdd);
 
 	AEffect* ConvertActivatedPerkToEffect(const APerk* const ActivatedPerk);
 

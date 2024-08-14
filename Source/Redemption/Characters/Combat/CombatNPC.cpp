@@ -6,6 +6,7 @@
 #include "..\Characters\Player\PlayerCharacter.h"
 #include "..\Miscellaneous\ElementsActions.h"
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "..\Dynamics\Gameplay\Perks\NumericalPerk.h"
 #include "Kismet/GameplayStatics.h"
 
 ACombatNPC::ACombatNPC()
@@ -86,9 +87,15 @@ bool ACombatNPC::GetHitWithBuffOrDebuff_Implementation(const TArray<class AEffec
 				GetActorLocation(), GetActorRotation());
 			FString TextForCombatFloatingInformationActor = FString();
 			uint8 EvasionRandomNumber = FMath::RandRange(0, 100);
-			int ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(SkillsSpellsAndEffectsActions::GetEvasionValueAfterStatsSkillsPerksAndEffects
-			(EvasionChance, Attacker->GetStat(ECharacterStats::PERCEPTION), GetStat(ECharacterStats::PERCEPTION),
+			int ChanceOfEvasion{};
+			if(BuffOrDebuff == ESpellType::DEBUFF)
+				ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(SkillsSpellsAndEffectsActions::GetEvasionValueAfterStatsSkillsPerksAndEffects
+				(EvasionChance, Attacker->GetStat(ECharacterStats::PERCEPTION), GetStat(ECharacterStats::PERCEPTION),
 				Effects, EEffectArea::EVASION), Effects, ElementalResistances, ContainedElements);
+			else
+				ChanceOfEvasion = SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(SkillsSpellsAndEffectsActions::GetEvasionValueAfterStatsSkillsPerksAndEffects
+				(0, Attacker->GetStat(ECharacterStats::PERCEPTION), GetStat(ECharacterStats::PERCEPTION),
+					Effects, EEffectArea::EVASION), Effects, ElementalResistances, ContainedElements);
 			if (EvasionRandomNumber <= ChanceOfEvasion) {
 				if(BuffOrDebuff == ESpellType::BUFF)
 					TextForCombatFloatingInformationActor.Append("Buff missed!");
@@ -156,15 +163,15 @@ bool ACombatNPC::GetHit_Implementation(int ValueOfAttack, const ACombatNPC* cons
 					}
 				}
 				else {
-					CurrentHP -= (ValueOfAttackWithResistances - ValueOfArmor / 10);
+					CurrentHP -= FinalValueOfAttack;
 				}
 				if (IsValid(FloatingHealthBarWidget))
 					FloatingHealthBarWidget->HP = CurrentHP;
-				if((ValueOfAttackWithResistances - ValueOfArmor / 10) < 0)
+				if(FinalValueOfAttack < 0)
 					TextForCombatFloatingInformationActor.Append("+");
 				else
 					TextForCombatFloatingInformationActor.Append("-");
-				TextForCombatFloatingInformationActor.AppendInt(FMath::Abs(ValueOfAttackWithResistances - ValueOfArmor / 10));
+				TextForCombatFloatingInformationActor.AppendInt(FMath::Abs(FinalValueOfAttack));
 				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 				UCombatCharacterAnimInstance* AnimInstance = Cast<UCombatCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 				if (IsValid(AnimInstance)) {
@@ -192,7 +199,8 @@ AEffect* ACombatNPC::ConvertActivatedPerkToEffect(const APerk* const ActivatedPe
 {
 	AEffect* NewEffect = NewObject<AEffect>();
 	NewEffect->SetEffectArea(ActivatedPerk->GetEffectArea());
-	switch (ActivatedPerk->GetPerkValueType()) {
+	if (const ANumericalPerk* const NumericalPerk = Cast<ANumericalPerk>(const_cast<APerk*>(ActivatedPerk)); IsValid(NumericalPerk)) {
+		switch (NumericalPerk->GetPerkValueType()) {
 		case EPerkValueType::STANDARD:
 			NewEffect->SetEffectType(EEffectType::BUFF);
 			break;
@@ -202,9 +210,10 @@ AEffect* ACombatNPC::ConvertActivatedPerkToEffect(const APerk* const ActivatedPe
 		case EPerkValueType::PERCENTAGE:
 			NewEffect->SetEffectType(EEffectType::PERCENTBUFF);
 			break;
+		}
+		NewEffect->SetEffectStat(NumericalPerk->GetPerkValue());
 	}
 	NewEffect->SetEffectName(FText::FromName(ActivatedPerk->GetPerkName()));
-	NewEffect->SetEffectStat(ActivatedPerk->GetPerkValue());
 	NewEffect->SetDuration(1000);
 	NewEffect->SetEffectDescription(ActivatedPerk->GetPerkDescription());
 	return NewEffect;
@@ -305,16 +314,6 @@ const int8 ACombatNPC::GetSkill(const ECharacterSkills SkillToGet) const
 	return *SkillsMap.Find(SkillToGet);
 }
 
-void ACombatNPC::SetStat(const ECharacterStats StatToSet, const int8 NewValue)
-{
-	StatsMap.Emplace(StatToSet, NewValue);
-}
-
-void ACombatNPC::SetSkill(const ECharacterSkills SkillToSet, const int8 NewValue)
-{
-	SkillsMap.Emplace(SkillToSet, NewValue);
-}
-
 const EPhysicalType ACombatNPC::GetMeleePhysicalType() const
 {
 	return MeleePhysicalType;
@@ -348,6 +347,21 @@ void ACombatNPC::SetStartLocation(const AActor* const NewLocation)
 void ACombatNPC::SetStartRotation(const FRotator& NewStartRotation)
 {
 	StartRotation = NewStartRotation;
+}
+
+void ACombatNPC::SetStat(const ECharacterStats StatToSet, const int8 NewValue)
+{
+	StatsMap.Emplace(StatToSet, NewValue);
+}
+
+void ACombatNPC::SetSkill(const ECharacterSkills SkillToSet, const int8 NewValue)
+{
+	SkillsMap.Emplace(SkillToSet, NewValue);
+}
+
+void ACombatNPC::AddAvailableSpell(const TSubclassOf<ASpell> SkillToAdd)
+{
+	AvailableSpells.Add(SkillToAdd);
 }
 
 

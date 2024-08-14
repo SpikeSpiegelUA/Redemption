@@ -17,6 +17,7 @@
 #include "..\Characters\AI Controllers\Combat\CombatAllyNPCAIController.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 AGameManager::AGameManager()
@@ -33,6 +34,10 @@ void AGameManager::BeginPlay()
 	PlayerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	if (auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 		RedemptionGameModeBase->SetGameManager(this);
+	FString MapName = GetWorld()->GetMapName();
+	MapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
+	if (MapName == "Dungeon") 
+		EnemySpawn();
 }
 
 // Called every frame
@@ -243,6 +248,7 @@ void AGameManager::EndBattle()
 					} while (SelectingMusic);
 				}
 				GameInstance->InstanceKilledEnemies++;
+				CurrentNumberOfNonCombatEnemies--;
 			}
 }
 
@@ -257,6 +263,33 @@ void AGameManager::ToBattleTransition()
 			UIManagerWorldSubsystem->BattleMenuWidget->IsChoosingAction = true;
 		}
 	}
+}
+
+void AGameManager::EnemySpawn()
+{
+	if (CurrentNumberOfNonCombatEnemies < MaxNumberOfNonCombatEnemies && SpawnBoundingBoxes.Num() > 0 && NonCombatEnemyNPCClasses.Num() > 0 && CombatEnemiesVariants.Num() > 0) {
+		uint8 RandomSpawnIndex = FMath::RandRange(0, SpawnBoundingBoxes.Num() - 1);
+		uint8 RandomEnemyClassIndex = FMath::RandRange(0, NonCombatEnemyNPCClasses.Num() - 1);
+		FVector BoxCenter{};
+		FVector BoxExtends{};
+		SpawnBoundingBoxes[RandomSpawnIndex]->GetActorBounds(false, BoxCenter, BoxExtends);
+		FVector SpawnLocation = UKismetMathLibrary::RandomPointInBoundingBox(BoxCenter, BoxExtends);
+		FTransform SpawnTransform{};
+		SpawnTransform.SetLocation(SpawnLocation);
+		SpawnTransform.SetRotation(FRotator::ZeroRotator.Quaternion());
+		ANonCombatEnemyNPC* NonCombatEnemyNPC = GetWorld()->SpawnActor<ANonCombatEnemyNPC>(NonCombatEnemyNPCClasses[RandomEnemyClassIndex], SpawnTransform, FActorSpawnParameters::FActorSpawnParameters());
+		if (IsValid(NonCombatEnemyNPC)) {
+			ASmartObject* NonCombatEnemyNPCSmartObject = GetWorld()->SpawnActor<ASmartObject>(NonCombatEnemyNPCSmartObjectClass);
+			NonCombatEnemyNPC->SetSmartObject(NonCombatEnemyNPCSmartObject);
+			if (ANonCombatEnemyNPCAIController* AIController = Cast<ANonCombatEnemyNPCAIController>(NonCombatEnemyNPC->GetController()); IsValid(AIController))
+				AIController->SetDynamicSubtree();
+			uint8 RandomEnemiesVariant = FMath::RandRange(0, CombatEnemiesVariants.Num() - 1);
+			NonCombatEnemyNPC->SetBattleEnemies(CombatEnemiesVariants[RandomEnemiesVariant].CombatEnemiesVariant);
+		}
+		CurrentNumberOfNonCombatEnemies++;
+	}
+	FTimerHandle EnemySpawnTimerHandle{};
+	GetWorld()->GetTimerManager().SetTimer(EnemySpawnTimerHandle, this, &AGameManager::EnemySpawn, EnemySpawnInterval, false);
 }
 
 void AGameManager::RestartBattleTransitionScreenWidget()
