@@ -61,7 +61,7 @@ protected:
 
 	void OnButtonHoveredActions(UButton* const HoveredButton);
 public:
-	void AddNewItemEntryToScrollBox(const TSubclassOf<AGameItem> NewGameItemClass, const EItemOwner NewItemOwner, const bool NewIsInTrading, 
+	void AddNewItemEntryToScrollBox(const TSubclassOf<AGameItem> NewGameItemClass, const int NewAmount, const EItemOwner NewItemOwner, const bool NewIsInTrading, 
 		UScrollBox* const ScrollBoxToAddTo);
 
 	UScrollBox* GetTradingScrollBox() const;

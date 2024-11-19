@@ -4,7 +4,6 @@
 #include "CharacterCreationMenu.h"
 #include "Redemption/GameInstance/RedemptionGameInstance.h"
 #include "Redemption/Characters/Player/PlayerCharacter.h"
-#include "Blueprint/WidgetLayoutLibrary.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "..\UI\Menus\MainMenu.h"
 #include "Kismet\GameplayStatics.h"
@@ -501,7 +500,6 @@ void UCharacterCreationMenu::StartButtonWithNeighborsOnClicked()
 			FObjectAndNameAsStringProxyArchive Ar(MemWriter, true);
 			Ar.ArIsSaveGame = true;
 			PlayerCharacter->Serialize(Ar);
-			UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
 			UWidgetBlueprintLibrary::SetInputMode_GameOnly(PlayerController);
 			GameInstance->InstanceItemsInTheInventory.Empty();
 			GameInstance->InstanceLearnedSpells.Empty();
@@ -513,8 +511,7 @@ void UCharacterCreationMenu::StartButtonWithNeighborsOnClicked()
 			GameInstance->InstanceEquipedLowerArmor = nullptr;
 			GameInstance->TownActors.Empty();
 			GameInstance->DungeonActors.Empty();
-			ULoadingScreen* LoadingScreen = CreateWidget<ULoadingScreen>(PlayerController, LoadingScreenClass);
-			LoadingScreen->AddToViewport(2);
+			GameInstance->StartedNewGame = true;
 			UGameplayStatics::OpenLevel(GetWorld(), "Town");
 		}
 	}

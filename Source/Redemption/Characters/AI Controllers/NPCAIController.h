@@ -34,4 +34,6 @@ public:
 	UBlackboardComponent* GetBlackboardComponent() const;
 	//SmartObject is spawned later than this object, so conditions for Set in BeginPlay won't be met. Use this function
 	virtual void SetDynamicSubtree();
+	//Need this to disable main(non-dialogue) behavior.
+	void DisableMainBehavior() const;
 };

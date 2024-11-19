@@ -27,6 +27,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
 		class ASmartObject* SmartObject{};
 
+
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

@@ -43,10 +43,14 @@ protected:
 	bool IsInTrading{};
 	EItemOwner ItemOwner{};
 public:
-	void SetItemEntryInfo(const TSubclassOf<AGameItem> NewGameItemClass, const EItemOwner NewItemOwner, const bool NewIsInTrading);
+	void SetItemEntryInfo(const TSubclassOf<AGameItem> NewGameItemClass, const int NewAmount, const EItemOwner NewItemOwner, const bool NewIsInTrading);
 	void SetMainButtonBackgroundColor(const FLinearColor& NewBackgroundColor);
+	void SetNameTextBlockText(const FText& NewText);
 
 	bool GetIsInTrading() const;
 	EItemOwner GetItemOwner() const;
 	const TSubclassOf<AGameItem>& GetGameItemClass() const;
+	const FText GetNameTextBlockText() const;
+
+	int Amount{};
 };

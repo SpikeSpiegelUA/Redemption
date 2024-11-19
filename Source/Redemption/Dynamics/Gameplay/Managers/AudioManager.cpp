@@ -80,42 +80,39 @@ void AAudioManager::BeginPlay()
 
 
 		//Turn on background music, depends on the level
-		FString MapName = GetWorld()->GetMapName();
-		bool SelectingMusic = true;
-
 		URedemptionGameInstance* GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
 		if (IsValid(GameInstance)) {
-			do {
-				if (MapName == "UEDPIE_0_MainMenu") {
+				FString MapName = UGameplayStatics::GetCurrentLevelName(GetWorld());
+				if (MapName == "MainMenu") {
 					if (IsValid(MainMenuBackgroundMusicAudioComponent)) {
 						MainMenuBackgroundMusicAudioComponent->Play(0.0f);
 						MainMenuBackgroundMusicAudioComponent->SetPaused(false);
-						SelectingMusic = false;
 					}
 				}
 				//Select background music with the help of random index. Note: do while loop, if selected music is the same that played right before the selected, then generate a new index
 				//until a new music picked.
-				else if (MapName == "UEDPIE_0_Dungeon") {
+				else if (MapName == "Dungeon") {
 					int8 RandomDungeonBGMusicIndex = FMath::RandRange(0, DungeonExplorationBackgroundMusicAudioComponents.Num() - 1);
-					if (RandomDungeonBGMusicIndex != GameInstance->InstancePreviousDungeonBGMusicIndex && IsValid(DungeonExplorationBackgroundMusicAudioComponents[RandomDungeonBGMusicIndex])) {
+					while(RandomDungeonBGMusicIndex == GameInstance->InstancePreviousDungeonBGMusicIndex)
+						RandomDungeonBGMusicIndex = FMath::RandRange(0, DungeonExplorationBackgroundMusicAudioComponents.Num() - 1);
+					if (IsValid(DungeonExplorationBackgroundMusicAudioComponents[RandomDungeonBGMusicIndex])) {
 						DungeonExplorationBackgroundMusicAudioComponents[RandomDungeonBGMusicIndex]->Play(0.0f);
 						DungeonExplorationBackgroundMusicAudioComponents[RandomDungeonBGMusicIndex]->SetPaused(false);
 						IndexInArrayOfCurrentPlayingBGMusic = RandomDungeonBGMusicIndex;
 						GameInstance->InstancePreviousDungeonBGMusicIndex = RandomDungeonBGMusicIndex;
-						SelectingMusic = false;
 					}
 				}
-				else if (MapName == "UEDPIE_0_Town") {
+				else if (MapName == "Town") {
 					int8 RandomTownBGMusicIndex = FMath::RandRange(0, TownExplorationBackgroundMusicAudioComponents.Num() - 1);
-					if (RandomTownBGMusicIndex != GameInstance->InstancePreviousTownBGMusicIndex && IsValid(TownExplorationBackgroundMusicAudioComponents[RandomTownBGMusicIndex])) {
+					while (RandomTownBGMusicIndex == GameInstance->InstancePreviousDungeonBGMusicIndex)
+						RandomTownBGMusicIndex = FMath::RandRange(0, DungeonExplorationBackgroundMusicAudioComponents.Num() - 1);
+					if (IsValid(TownExplorationBackgroundMusicAudioComponents[RandomTownBGMusicIndex])) {
 						TownExplorationBackgroundMusicAudioComponents[RandomTownBGMusicIndex]->Play(0.0f);
 						TownExplorationBackgroundMusicAudioComponents[RandomTownBGMusicIndex]->SetPaused(false);
 						IndexInArrayOfCurrentPlayingBGMusic = RandomTownBGMusicIndex;
 						GameInstance->InstancePreviousTownBGMusicIndex = RandomTownBGMusicIndex;
-						SelectingMusic = false;
 					}
 				}
-			} while (SelectingMusic);
 		}
 	}
 }
@@ -124,6 +121,11 @@ void AAudioManager::BeginPlay()
 void AAudioManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+USoundCue* AAudioManager::GetHitSoundCue() const
+{
+	return HitSoundCue;
 }
 
 USoundCue* AAudioManager::GetUseHealOrBuffSoundCue() const

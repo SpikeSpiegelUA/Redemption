@@ -32,7 +32,7 @@ UDataTable* ALevelingUpManager::GetLevelingUpExperienceRequirementsListDataTable
 	return LevelingUpExperienceRequirementsListDataTable;
 }
 
-bool ALevelingUpManager::LevelUp(ACombatAllies* const LevelingUpAlly, UProgressBar* const NextLevelProgressBar) const
+bool ALevelingUpManager::LevelUp(ACombatAllies* const LevelingUpAlly, UProgressBar* const NextLevelProgressBar, bool CreateNotification) const
 {
 	FLevelingUpExperienceRequirementsList* LevelingUpExperienceRequirementsList{};
 	static const FString ContextString(TEXT("Leveling Up Requirements List Context"));
@@ -48,14 +48,52 @@ bool ALevelingUpManager::LevelUp(ACombatAllies* const LevelingUpAlly, UProgressB
 			LevelingUpAlly->Level++;
 			LevelingUpAlly->NumberOfPerkPoints++;
 			LevelingUpAlly->LevelingUpCounter++;
+			if (CreateNotification)
+				if (auto* const PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+					PlayerCharacter->CreateNotification(FText::FromString("New Level!!!"), 2.f);
+					CreateNotification = false;
+				}
 		}
 		else {
-			if (LevelingUpExperienceRequirementsList)
+			if (LevelingUpExperienceRequirementsList && IsValid(NextLevelProgressBar))
 				NextLevelProgressBar->SetPercent(static_cast<float>(LevelingUpAlly->CurrentExperience) / LevelingUpExperienceRequirementsList->Requirement);
 			break;
 		}
 	}
 	if(LeveledUp)
+		return true;
+	else
+		return false;
+}
+
+bool ALevelingUpManager::LevelUp(APlayerCharacter* const LevelingUpPlayer, UProgressBar* const NextLevelProgressBar, bool CreateNotification) const
+{
+	FLevelingUpExperienceRequirementsList* LevelingUpExperienceRequirementsList{};
+	static const FString ContextString(TEXT("Leveling Up Requirements List Context"));
+	int8 NextLevelAfterLevelingUp = LevelingUpPlayer->Level + 1;
+	bool LeveledUp = false;
+	while (true) {
+		FString RowToFind = "Level";
+		RowToFind.AppendInt(NextLevelAfterLevelingUp);
+		LevelingUpExperienceRequirementsList = LevelingUpExperienceRequirementsListDataTable->FindRow<FLevelingUpExperienceRequirementsList>(FName(*RowToFind), ContextString, true);
+		if (LevelingUpExperienceRequirementsList && LevelingUpPlayer->CurrentExperience >= LevelingUpExperienceRequirementsList->Requirement) {
+			NextLevelAfterLevelingUp++;
+			LeveledUp = true;
+			LevelingUpPlayer->Level++;
+			LevelingUpPlayer->NumberOfPerkPoints++;
+			LevelingUpPlayer->LevelingUpCounter++;
+			if (CreateNotification) {
+				LevelingUpPlayer->CreateNotification(FText::FromString("New Level!!!"), 2.f);
+				CreateNotification = false;
+			}
+		}
+		else {
+			if (LevelingUpExperienceRequirementsList && IsValid(NextLevelProgressBar))
+				NextLevelProgressBar->SetPercent(static_cast<float>(LevelingUpPlayer->CurrentExperience) / LevelingUpExperienceRequirementsList->Requirement);
+			break;
+		}
+	}
+	if (LeveledUp)
 		return true;
 	else
 		return false;

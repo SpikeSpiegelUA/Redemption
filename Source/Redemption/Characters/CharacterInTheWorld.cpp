@@ -5,6 +5,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "..\Characters\NonCombat\NonCombatEnemyNPC.h"
 #include "Engine/TargetPoint.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "Redemption/Dynamics/Miscellaneous/QuestAndItsStage.h"
+#include "Redemption/Dynamics/Gameplay/Managers/QuestManager.h"
 
 // Sets default values
 ACharacterInTheWorld::ACharacterInTheWorld()

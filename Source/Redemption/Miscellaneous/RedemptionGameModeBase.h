@@ -21,6 +21,8 @@ class REDEMPTION_API ARedemptionGameModeBase : public AGameModeBase
 protected:
 	ARedemptionGameModeBase();
 	virtual void BeginPlay() override;
+	UFUNCTION()
+	void PostBeginPlay();
 
 	//Managers.
 	UPROPERTY(BlueprintReadOnly, Category = "Managers")
@@ -61,8 +63,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UDialogueBox> DialogueBoxClass{};
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-		TSubclassOf<class UResponsesBox> ResponsesBoxClass{};
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UResponseEntry> ResponseEntryClass{};
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UNotification> NotificationClass{};
@@ -100,6 +100,10 @@ protected:
 		TSubclassOf<class UTradingMenuItemEntry> TradingMenuItemEntryClass{};
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 		TSubclassOf<class UCharacterCreationMenu> CharacterCreationMenuClass{};
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+		TSubclassOf<class UContainerInventoryMenu> ContainerInventoryMenuClass{};
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+		TSubclassOf<class UStartFinishGameScreen> StartFinishGameScreenClass{};
 
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -121,6 +125,9 @@ public:
 	AEffectsSpellsAndSkillsManager* GetEffectsSpellsAndSkillsManager() const;
 	AQuestManager* GetQuestManager() const;
 
+	//Control, if level is fully loaded.
+	bool Midgame = false;
+
 	//UI classes getters.
 
 	TSubclassOf<class UAlliesInfoBars> GetAlliesInfoBarsClass() const;
@@ -133,7 +140,6 @@ public:
 	TSubclassOf<class UBattleMenu> GetBattleMenuClass() const;
 	TSubclassOf<class UBattleResultsScreen> GetBattleResultsScreenClass() const;
 	TSubclassOf<class UDialogueBox> GetDialogueBoxClass() const;
-	TSubclassOf<class UResponsesBox> GetResponsesBoxClass() const;
 	TSubclassOf<class UResponseEntry> GetResponseEntryClass() const;
 	TSubclassOf<class UNotification> GetNotificationClass() const;
 	TSubclassOf<class UDeathMenu> GetDeathMenuClass() const;
@@ -153,4 +159,6 @@ public:
 	TSubclassOf<class UTradingMenu> GetTradingMenuClass() const;
 	TSubclassOf<class UTradingMenuItemEntry> GetTradingMenuItemClass() const;
 	TSubclassOf<class UCharacterCreationMenu> GetCharacterCreationMenuClass() const;
+	TSubclassOf<class UContainerInventoryMenu> GetContainerInventoryMenuClass() const;
+	TSubclassOf<class UStartFinishGameScreen> GetStartFinishGameScreenClass() const;
 };

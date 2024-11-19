@@ -23,7 +23,6 @@
 #include "..\UI\Menus\CombatCharacterInfoMenu.h"
 #include "..\Public\UIManagerWorldSubsystem.h"
 #include "..\UI\HUD\Dialogue\DialogueBox.h"
-#include "..\UI\HUD\Dialogue\ResponsesBox.h"
 #include "..\UI\HUD\Dialogue\ResponseEntry.h"
 #include "..\UI\HUD\ForwardRayInfo.h"
 #include "..\UI\HUD\Notification.h"
@@ -82,7 +81,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Input)
 		float TurnRateGamepad{};
 	UPROPERTY(EditAnywhere, Category = "Player")
-		int ForwardRayRange = 300;
+		int ForwardRayRange = 250;
 
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
@@ -116,10 +115,15 @@ public:
 	void AddSkillsProgress(const ECharacterSkills SkillToAddTo, const int16 ValueToAdd);
 	void AddSkills(const ECharacterSkills SkillToAddTo, const int16 ValueToAdd);
 
+	void DialogueInteract(const AActor* const ActorResult);
+
 	//Copy current health, mana, skills and skills' progress.
 	void CopyInfoFromCombatPlayer(const class ACombatPlayerCharacter* const CombatPlayerCharacter);
 
-	void CreateNotification(const FText& NotificationText);
+	void CreateNotification(const FText& NotificationText, float NotificationTime);
+
+	//Ray of detecting objects in front of a player
+	FHitResult ForwardRay();
 protected:
 	void CheckForwardRayHitResult();
 	//Use in constructor only.
@@ -130,12 +134,14 @@ protected:
 	void InitializeSkillsProgress();
 
 	UFUNCTION()
-	void RemoveNotification();
+	void RemoveNotification(const float NewNotificationTime);
 	UFUNCTION()
 	void FinishGame();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true))
 	TArray<ACombatAllyNPC*> Allies{};
+
+	TArray<FText> NotificationQueue{};
 
 	UPROPERTY()
 	APlayerController* PlayerController{};
@@ -166,9 +172,6 @@ protected:
 	
 	void LoadObjectFromGameInstance_Implementation(const URedemptionGameInstance* const GameInstance) override;
 
-	//Ray of detecting objects in front of a player
-	FHitResult ForwardRay();
-
 	UPROPERTY(EditAnywhere, Category = "World")
 		TSubclassOf<class ALootInTheWorld> LootInTheWorldClass{};
 
@@ -193,10 +196,11 @@ protected:
 
 	//Action button input for binding
 	void InputAction();
+	void InputAttack();
 	void PickUpItem(AActor* const ActorResult);
-	void DialogueInteract(const AActor* const ActorResult);
 	void ChangeLevel(const AActor* const ActorResult);
-	void NotificationActions(const AActor* const ActorResult);
+	//For example, activate EndGame trigger or other actions, that don't fit a big category.
+	void MiscellaneousActions(const AActor* const ActorResult);
 
 	//Opens player menu
 	void InputOpenPlayerMenu();

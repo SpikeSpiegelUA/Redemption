@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "..\Characters\NonCombat\TownNPC.h"
 #include "Redemption\Dynamics\World\Items\GameItem.h"
+#include "Redemption/Dynamics/Miscellaneous/ItemClassAndAmount.h"
 #include "TraderNPC.generated.h"
+
 
 /**
  * 
@@ -16,15 +18,22 @@ class REDEMPTION_API ATraderNPC : public ATownNPC
 	GENERATED_BODY()
 protected:
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Trader NPC", SaveGame)
-	TArray<TSubclassOf<AGameItem>> TraderInventory{};
+	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trader NPC", SaveGame)
+	TArray<FItemClassAndAmount> TraderInventory{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Trader NPC", SaveGame)
 	int Gold;
+
 public:
 
-	TArray<TSubclassOf<AGameItem>>& GetTraderInventory();
+	TArray<FItemClassAndAmount>& GetTraderInventory();
 	int GetGold() const;
 
 	void SetGold(const int NewGoldValue);
+
+	//I don't know why, but it won't save the array of items classes, if it is empty. So we control that by this bool.
+	UPROPERTY(BlueprintReadOnly, SaveGame)
+	bool IsEmpty{};
 };

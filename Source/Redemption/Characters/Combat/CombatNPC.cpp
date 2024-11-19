@@ -148,8 +148,8 @@ bool ACombatNPC::GetHit_Implementation(int ValueOfAttack, const ACombatNPC* cons
 					FinalValueOfAttack = ValueOfAttackWithResistances;
 				else {
 					FinalValueOfAttack = ValueOfAttackWithResistances - ValueOfArmor / 10;
-					if (FinalValueOfAttack < 0)
-						FinalValueOfAttack = 0;
+					if (FinalValueOfAttack < 5)
+						FinalValueOfAttack = 5;
 				}
 				if (CurrentHP - FinalValueOfAttack < 0) {
 					CurrentHP = 0;

@@ -22,7 +22,7 @@ ANonCombatEnemyNPCAIController::ANonCombatEnemyNPCAIController(const FObjectInit
 void ANonCombatEnemyNPCAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter) && !PlayerCharacter->IsInDialogue) {
 		if (ANonCombatEnemyNPC* ThisEnemy = Cast<ANonCombatEnemyNPC>(GetPawn()); IsValid(ThisEnemy)) {
 			//Get angle between player and enemy's forward vector
 			FVector FromPlayerToEnemy = GetPawn()->GetActorLocation() - PlayerCharacter->GetActorLocation();
@@ -48,9 +48,9 @@ void ANonCombatEnemyNPCAIController::Tick(float DeltaTime)
 				}
 			}
 			else if(AimAtAngle < 100.f || (PlayerCharacter->GetActorLocation() - GetPawn()->GetActorLocation()).Length() > 1600.f) {
-					GetWorld()->GetTimerManager().ClearTimer(AddPlayerDetectionHandle);
-					if (!GetWorld()->GetTimerManager().IsTimerActive(DeductPlayerDetectionHandle))
-						GetWorld()->GetTimerManager().SetTimer(DeductPlayerDetectionHandle, this, &ANonCombatEnemyNPCAIController::DeductPlayerDetection, 0.5f, false);
+				GetWorld()->GetTimerManager().ClearTimer(AddPlayerDetectionHandle);
+				if (!GetWorld()->GetTimerManager().IsTimerActive(DeductPlayerDetectionHandle))
+					GetWorld()->GetTimerManager().SetTimer(DeductPlayerDetectionHandle, this, &ANonCombatEnemyNPCAIController::DeductPlayerDetection, 0.5f, false);
 			}
 			if ((PlayerCharacter->GetActorLocation() - GetPawn()->GetActorLocation()).Length() <= 500.f) {
 				PlayerDetection = 4;
@@ -85,7 +85,7 @@ void ANonCombatEnemyNPCAIController::AddPlayerDetection()
 	if (PlayerDetection >= 4) {
 		PlayerDetection = 4;
 		BlackboardComponent->SetValue<UBlackboardKeyType_Bool>("CanSeePlayer", true);
-		GetCharacter()->GetCharacterMovement()->MaxWalkSpeed = 260.f;
+		GetCharacter()->GetCharacterMovement()->MaxWalkSpeed = 500.f;
 	}
 	if(PlayerDetection < 4)
 	GetWorld()->GetTimerManager().SetTimer(AddPlayerDetectionHandle, this, &ANonCombatEnemyNPCAIController::AddPlayerDetection, 1.f, false);
@@ -102,11 +102,25 @@ void ANonCombatEnemyNPCAIController::DeductPlayerDetection()
 	else if (PlayerDetection <= 0) {
 		PlayerDetection = 0;
 		BlackboardComponent->SetValue<UBlackboardKeyType_Bool>("CanSeePlayer", false);
-		GetCharacter()->GetCharacterMovement()->MaxWalkSpeed = 150.f;
+		GetCharacter()->GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	}
 	ANonCombatEnemyNPC* ThisEnemy = Cast<ANonCombatEnemyNPC>(GetPawn());
 	if(IsValid(ThisEnemy))
 		ThisEnemy->GetNonCombatEnemyDetectionBarWidget()->Detection = PlayerDetection;
+}
+
+void ANonCombatEnemyNPCAIController::ReturnToPatrolling()
+{
+	if (IsValid(BlackboardComponent)) {
+		PlayerDetection = 0;
+		BlackboardComponent->SetValue<UBlackboardKeyType_Bool>("CanSeePlayer", false);
+		GetCharacter()->GetCharacterMovement()->MaxWalkSpeed = 300.f;
+		GetWorld()->GetTimerManager().ClearTimer(DeductPlayerDetectionHandle);
+		GetWorld()->GetTimerManager().ClearTimer(AddPlayerDetectionHandle);
+		ANonCombatEnemyNPC* ThisEnemy = Cast<ANonCombatEnemyNPC>(GetPawn());
+		if (IsValid(ThisEnemy))
+			ThisEnemy->GetNonCombatEnemyDetectionBarWidget()->Detection = PlayerDetection;
+	}
 }
 
 void ANonCombatEnemyNPCAIController::SetDynamicSubtree()
@@ -121,6 +135,11 @@ void ANonCombatEnemyNPCAIController::SetDynamicSubtree()
 void ANonCombatEnemyNPCAIController::SetBlackboardDistanceToThePlayer(float Value)
 {
 	BlackboardComponent->SetValue<UBlackboardKeyType_Float>("DistanceToThePlayer", Value);
+}
+
+void ANonCombatEnemyNPCAIController::SetPlayerDetection(float NewPlayerDetection)
+{
+	PlayerDetection = NewPlayerDetection;
 }
 
 float ANonCombatEnemyNPCAIController::GetPlayerDetection() const

@@ -32,14 +32,11 @@ EBTNodeResult::Type UBTTask_EndCombatDialogue::ExecuteTask(UBehaviorTreeComponen
 		RedemptionGameModeBase->GetAudioManager()->GetDungeonTalkBackgroundMusicAudioComponent_Daat()->SetPaused(true);
 	}
 
-	for (int8 Index = UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
-		UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->GetChildAt(Index)->RemoveFromParent();
+	UIManagerWorldSubsystem->DialogueBoxWidget->GetResponseVerticalBox()->ClearChildren();
 
 	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("FirstDialoguePassed", false);
 	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("IsInDialogue", false);
 
-	UIManagerWorldSubsystem->ResponsesBoxWidget->ConditionalBeginDestroy();
-	UIManagerWorldSubsystem->ResponsesBoxWidget = nullptr;
 	UIManagerWorldSubsystem->DialogueBoxWidget->ConditionalBeginDestroy();
 	UIManagerWorldSubsystem->DialogueBoxWidget = nullptr;
 

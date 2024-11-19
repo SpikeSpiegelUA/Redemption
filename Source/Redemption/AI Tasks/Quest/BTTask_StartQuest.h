@@ -21,4 +21,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<AQuest> QuestClass{};
+
+	UPROPERTY(EditAnywhere)
+		int QuestStageToStart = 0;
 };

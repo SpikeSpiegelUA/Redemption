@@ -7,6 +7,18 @@
 #include "Redemption/Dynamics/World/Items/GameItem.h"
 #include "Quest.generated.h"
 
+USTRUCT(BlueprintType)
+struct FJournalEntryAndItsStage
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int QuestStage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FText JournalEntry;
+};
+
 UCLASS()
 class REDEMPTION_API AQuest : public AActor
 {
@@ -30,7 +42,7 @@ protected:
 	int FinalStage{};
 	//Array index corresponds to an quest stage. If an quest stage doesn't have a journal entry, then put in an empty FText.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest")
-	TArray<FText> JournalEntries{};
+	TArray<FJournalEntryAndItsStage> JournalEntriesAndTheirStages{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest")
 	FText QuestName{};
 
@@ -42,6 +54,6 @@ public:
 	int GetGoldReward() const;
 	const TArray<TSubclassOf<AGameItem>>& GetItemsRewardClasses() const;
 	int GetFinalStage() const;
-	const TArray<FText>& GetJournalEntries() const;
+	const TArray<FJournalEntryAndItsStage>& GetJournalEntriesAndTheirStages() const;
 	const FText& GetQuestName() const;
 };

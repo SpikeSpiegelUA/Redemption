@@ -46,8 +46,6 @@ protected:
 	//For CreateWidget variables
 	UPROPERTY(EditAnywhere, Category = "UI")
 		TSubclassOf<class USettingsMenu> SettingsMenuClass{};
-	UPROPERTY(EditAnywhere, Category = "UI")
-		TSubclassOf<class ULoadingScreen> LoadingScreenClass{};
 
 	UFUNCTION()
 	void ResumeButtonOnHovered();

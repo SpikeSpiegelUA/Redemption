@@ -3,8 +3,9 @@
 
 #include "..\UI\Menus\DeathMenu.h"
 #include "..\UI\Screens\LoadingScreen.h"
-#include "Blueprint/WidgetLayoutLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "UIManagerWorldSubsystem.h"
+#include "Redemption/UI/Menus/SaveLoadGameMenu.h"
 
 bool UDeathMenu::Initialize()
 {
@@ -24,18 +25,22 @@ void UDeathMenu::NativeConstruct()
 
 void UDeathMenu::LoadButtonOnClicked()
 {
-
+	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+		if (IsValid(UIManagerWorldSubsystem->SaveLoadGameMenuWidget)) {
+			this->RemoveFromParent();
+			this->ConditionalBeginDestroy();
+			UIManagerWorldSubsystem->MainMenuWidget = nullptr;
+			UIManagerWorldSubsystem->SaveLoadGameMenuWidget->AddToViewport();
+			UIManagerWorldSubsystem->SaveLoadGameMenuWidget->ToLoadTransition();
+		}
+	}
 }
 
 void UDeathMenu::MainMenuButtonOnClicked()
 {
 	APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 	if (IsValid(LoadingScreenClass) && IsValid(PlayerController)) {
-		UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
-		ULoadingScreen* LoadingScreen = CreateWidget<ULoadingScreen>(PlayerController, LoadingScreenClass);
-		if(IsValid(LoadingScreen))
-		LoadingScreen->AddToViewport();
-			UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
+		UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
 	}
 }
 

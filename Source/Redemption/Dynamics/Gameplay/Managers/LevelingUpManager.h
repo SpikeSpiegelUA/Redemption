@@ -7,6 +7,7 @@
 #include "Engine/DataTable.h"
 #include "Components/ProgressBar.h"
 #include "Redemption/Characters/Combat/CombatAllies.h"
+#include "Redemption/Characters/Player/PlayerCharacter.h"
 #include "LevelingUpManager.generated.h"
 
 USTRUCT(BlueprintType)
@@ -39,7 +40,15 @@ public:
 
 	UDataTable* GetLevelingUpExperienceRequirementsListDataTable() const;
 	//If current experience has reached the point of a new level, then set level to the new level. If leveled up, return true, else false.
+	//Pass nullptr to NextLevelProgressBar, if this function isn't used in BattleResultsScreen and does not modify NextLevel progress bar.
 	//@param LevelingUpAlly - pass the NPC, that is leveling up. It's level, number of perk points and leveling up counter will be changed by the function.
 	//@param NextLevelProgressBar - pass the NextLevelProgressBar to set the next level progress.
-	bool LevelUp(ACombatAllies* const LevelingUpAlly, UProgressBar* const NextLevelProgressBar) const;
+	//@param CreateNotification - if true, then create NotificationWidget with a LevelUp text and add it to the viewport.
+	bool LevelUp(ACombatAllies* const LevelingUpAlly, UProgressBar* const NextLevelProgressBar, bool CreateNotification) const;
+	//If current experience has reached the point of a new level, then set level to the new level. If leveled up, return true, else false.
+	//Pass nullptr to NextLevelProgressBar, if this function isn't used in BattleResultsScreen and does not modify NextLevel progress bar.
+	//@param LevelingUpPlayer - pass the player, that is leveling up. It's level, number of perk points and leveling up counter will be changed by the function.
+	//@param NextLevelProgressBar - pass the NextLevelProgressBar to set the next level progress.
+	//@param CreateNotification - if true, then create NotificationWidget with a LevelUp text and add it to the viewport.
+	bool LevelUp(APlayerCharacter* const LevelingUpPlayer, UProgressBar* const NextLevelProgressBar, bool CreateNotification) const;
 };

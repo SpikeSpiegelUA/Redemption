@@ -114,51 +114,52 @@ void ABattleManager::SelectNewTargetCrosshairLogic(const TArray<ACombatNPC*>& Ta
 				}
 			}
 			if (RangeValue == 1) {
-				SelectNewTargetCrosshairActions(TargetsForSelection, NewIndex, TypeOfBar, true);
-				SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex, TypeOfBar, false);
+				HideTargetCrosshairAndWidgets(TargetsForSelection, NewIndex, TypeOfBar, true);
+				HideTargetCrosshairAndWidgets(TargetsForSelection, CurrentIndex, TypeOfBar, false);
 			}
 			else if (RangeValue == 2) {
 				if (TargetsForSelection.Num() >= 3) {
-					SelectNewTargetCrosshairActions(TargetsForSelection, NewIndex, TypeOfBar, true);
+					HideTargetCrosshairAndWidgets(TargetsForSelection, NewIndex, TypeOfBar, true);
 					if (Direction == "Left") {
 						if (CurrentIndex - 1 >= 0) 
-							SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex - 1, TypeOfBar, false);
+							HideTargetCrosshairAndWidgets(TargetsForSelection, CurrentIndex - 1, TypeOfBar, false);
 						if (CurrentIndex + 1 < TargetsForSelection.Num())
-							SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex + 1, TypeOfBar, true);
+							HideTargetCrosshairAndWidgets(TargetsForSelection, CurrentIndex + 1, TypeOfBar, true);
 						if (CurrentIndex + 2 < TargetsForSelection.Num())
-							SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex + 2, TypeOfBar, true);
+							HideTargetCrosshairAndWidgets(TargetsForSelection, CurrentIndex + 2, TypeOfBar, true);
 					}
 					else if (Direction == "Right") {
 						if (CurrentIndex + 1 < TargetsForSelection.Num())
-							SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex + 1, TypeOfBar, false);
+							HideTargetCrosshairAndWidgets(TargetsForSelection, CurrentIndex + 1, TypeOfBar, false);
 						if (CurrentIndex - 1 >= 0) 
-							SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex - 1, TypeOfBar, true);
+							HideTargetCrosshairAndWidgets(TargetsForSelection, CurrentIndex - 1, TypeOfBar, true);
 						if (CurrentIndex - 2 >= 0) 
-							SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex - 2, TypeOfBar, true);
+							HideTargetCrosshairAndWidgets(TargetsForSelection, CurrentIndex - 2, TypeOfBar, true);
 					}
 					if (NewIndex == 0) {
-						SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex, TypeOfBar, false);
+						HideTargetCrosshairAndWidgets(TargetsForSelection, CurrentIndex, TypeOfBar, false);
 						if (NewIndex + 1 < TargetsForSelection.Num())
-							SelectNewTargetCrosshairActions(TargetsForSelection, NewIndex + 1, TypeOfBar, true);
+							HideTargetCrosshairAndWidgets(TargetsForSelection, NewIndex + 1, TypeOfBar, true);
 					}
 					else if (NewIndex == TargetsForSelection.Num() - 1) {
-						SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex, TypeOfBar, false);
+						HideTargetCrosshairAndWidgets(TargetsForSelection, CurrentIndex, TypeOfBar, false);
 						if (NewIndex - 1 >= 0)
-							SelectNewTargetCrosshairActions(TargetsForSelection, NewIndex - 1, TypeOfBar, true);
+							HideTargetCrosshairAndWidgets(TargetsForSelection, NewIndex - 1, TypeOfBar, true);
 					}
 					else
-						SelectNewTargetCrosshairActions(TargetsForSelection, CurrentIndex, TypeOfBar, true);
+						HideTargetCrosshairAndWidgets(TargetsForSelection, CurrentIndex, TypeOfBar, true);
 				}
 				else if(TargetsForSelection.Num() == 2) {
-					SelectNewTargetCrosshairActions(TargetsForSelection, 0, TypeOfBar, true);
-					SelectNewTargetCrosshairActions(TargetsForSelection, 1, TypeOfBar, true);
+					HideTargetCrosshairAndWidgets(TargetsForSelection, 0, TypeOfBar, true);
+					HideTargetCrosshairAndWidgets(TargetsForSelection, 1, TypeOfBar, true);
 				}
 				else if (TargetsForSelection.Num() == 1) {
-					SelectNewTargetCrosshairActions(TargetsForSelection, 0, TypeOfBar, true);
+					HideTargetCrosshairAndWidgets(TargetsForSelection, 0, TypeOfBar, true);
 				}
 			}
 		}
 		else {
+			UE_LOG(LogTemp, Warning, TEXT("CALLED!!!"));
 			if (!UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithRange)
 				TargetsForSelection[NewIndex]->GetCrosshairWidgetComponent()->SetVisibility(true);
 			TargetsForSelection[NewIndex]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Visible);
@@ -168,19 +169,21 @@ void ABattleManager::SelectNewTargetCrosshairLogic(const TArray<ACombatNPC*>& Ta
 	}
 }
 
-void ABattleManager::SelectNewTargetCrosshairActions(const TArray<ACombatNPC*>& TargetsForSelection, int8 Index, const FString& TypeOfBar, const bool WhetherToShow)
+void ABattleManager::HideTargetCrosshairAndWidgets(const TArray<ACombatNPC*>& TargetsForSelection, int8 Index, const FString& TypeOfBar, const bool WhetherToShow)
 {
-	ESlateVisibility SlateVisibility{};
-	if (WhetherToShow)
-		SlateVisibility = ESlateVisibility::Visible;
-	else
-		SlateVisibility = ESlateVisibility::Hidden;
-	TargetsForSelection[Index]->GetCrosshairWidgetComponent()->SetVisibility(WhetherToShow);
-	if (TypeOfBar == "Health")
-		TargetsForSelection[Index]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(SlateVisibility);
-	else if (TypeOfBar == "Mana")
-		if (ACombatAllies* CombatAlliesNPC = Cast<ACombatAllies>(TargetsForSelection[Index]); IsValid(CombatAlliesNPC))
-			CombatAlliesNPC->GetFloatingManaBarWidget()->GetManaBar()->SetVisibility(SlateVisibility);
+	if (TargetsForSelection[Index]->CurrentHP > 0) {
+		ESlateVisibility SlateVisibility{};
+		if (WhetherToShow)
+			SlateVisibility = ESlateVisibility::Visible;
+		else
+			SlateVisibility = ESlateVisibility::Hidden;
+		TargetsForSelection[Index]->GetCrosshairWidgetComponent()->SetVisibility(WhetherToShow);
+		if (TypeOfBar == "Health")
+			TargetsForSelection[Index]->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(SlateVisibility);
+		else if (TypeOfBar == "Mana")
+			if (ACombatAllies* CombatAlliesNPC = Cast<ACombatAllies>(TargetsForSelection[Index]); IsValid(CombatAlliesNPC))
+				CombatAlliesNPC->GetFloatingManaBarWidget()->GetManaBar()->SetVisibility(SlateVisibility);
+	}
 }
 
 void ABattleManager::TurnChange()
@@ -191,8 +194,8 @@ void ABattleManager::TurnChange()
 			if (CurrentTurnCombatNPCIndex >= 0) {
 				BattleEnemies[CurrentTurnCombatNPCIndex]->SetActorRotation(FRotator(0, 0, 0));
 			}
-			if(IsValid(SelectedCombatNPC))
-				SelectedCombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
+			for(ACombatNPC* CombatNPC : BattleEnemies)
+				CombatNPC->GetFloatingHealthBarWidget()->GetHealthBar()->SetVisibility(ESlateVisibility::Hidden);
 			if (IsValid(Cast<ACombatAllies>(SelectedCombatNPC)))
 				Cast<ACombatAllies>(SelectedCombatNPC)->GetFloatingManaBarWidget()->GetManaBar()->SetVisibility(ESlateVisibility::Hidden);
 			int8 NextActor = EnemyTurnQueue[0];

@@ -301,7 +301,7 @@ void USpellBattleMenu::BuffSpellTypeButtonOnClicked()
 void USpellBattleMenu::ShowResultSpellButtonOnClicked()
 {
 	if (SelectedSpellType != ESpellType::NONE && SelectedSpellRange != ESpellRange::NONE && SelectedElementsHorizontalBox->GetAllChildren().Num() > 0) {
-		SetUniqueCreatedSpell(SelectedSpellElements, SelectedSpellType);
+		SetUniqueCreatedSpell(SelectedSpellElements, SelectedSpellType, SelectedSpellRange);
 		if (!IsValid(CreatedSpell)) {
 			CreateSpellAndSetCreatedSpell(SelectedSpellElements, SelectedSpellType);
 			UniqueSpellInfoShown = false;
@@ -765,7 +765,7 @@ void USpellBattleMenu::ToggleSpellInfoButtonOnClicked()
 		ToggleSpellInfoTextBlock->SetText(FText::FromString("Show unique spell info"));
 	}
 	else {
-		SetUniqueCreatedSpell(SelectedSpellElements, SelectedSpellType);
+		SetUniqueCreatedSpell(SelectedSpellElements, SelectedSpellType, SelectedSpellRange);
 		UIManagerWorldSubsystem->SpellInfoWidget->SetSpellInfo(CreatedSpell);
 		UniqueSpellInfoShown = true;
 		ToggleSpellInfoTextBlock->SetText(FText::FromString("Show common spell info"));
@@ -864,7 +864,7 @@ void USpellBattleMenu::BackButtonOnHovered()
 
 UWidget* USpellBattleMenu::TooltipBinding()
 {
-	GetWorld()->GetTimerManager().SetTimer(ShowTooltipTimerHandle, this, &USpellBattleMenu::TooltipLogic, 0.000001f, false);
+	GetWorld()->GetTimerManager().SetTimerForNextTick(this, &USpellBattleMenu::TooltipLogic);
 	return SimpleTooltipWidget;
 }
 
@@ -1074,33 +1074,34 @@ void USpellBattleMenu::CreateSpellAndSetCreatedSpell(const TArray<ESpellElements
 		CreatedSpell = CreateBuffSpell(SpellElements);
 }
 
-[[nodiscard]] ASpell* USpellBattleMenu::FindUniqueSpell(const TArray<TSubclassOf<ASpell>>& CorrespondingUniqueSpells, const TArray<ESpellElements>& SpellElements, const ESpellType SpellType)
+[[nodiscard]] ASpell* USpellBattleMenu::FindUniqueSpell(const TArray<TSubclassOf<ASpell>>& CorrespondingUniqueSpells, const TArray<ESpellElements>& SpellElements, const ESpellType SpellType, const ESpellRange SpellRange)
 {
 	for (TSubclassOf<ASpell> UniqueSpellClass : CorrespondingUniqueSpells) {
 		bool SpellFound = true;
 		for (int8 ElementIndex = 0; ElementIndex < SpellElements.Num(); ElementIndex++) 
-			if (SpellElements[ElementIndex] != Cast<ASpell>(UniqueSpellClass->GetDefaultObject())->GetSpellElements()[ElementIndex]) {
+			if (SpellElements[ElementIndex] != UniqueSpellClass->GetDefaultObject<ASpell>()->GetSpellElements()[ElementIndex]) {
 				SpellFound = false;
 			}
-		if (SpellFound && SpellType == UniqueSpellClass->GetDefaultObject<ASpell>()->GetTypeOfSpell()) 
+		if (SpellFound && SpellType == UniqueSpellClass->GetDefaultObject<ASpell>()->GetTypeOfSpell() &&
+			SpellRange == UniqueSpellClass->GetDefaultObject<ASpell>()->GetSpellRange())
 			return UniqueSpellClass->GetDefaultObject<ASpell>();
 	}
 	return nullptr;
 }
 
-void USpellBattleMenu::SetUniqueCreatedSpell(const TArray<ESpellElements>& SpellElements, ESpellType TypeOfTheSpell)
+void USpellBattleMenu::SetUniqueCreatedSpell(const TArray<ESpellElements>& SpellElements, const ESpellType TypeOfTheSpell, const ESpellRange SpellRange)
 {
 	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 		if (AEffectsSpellsAndSkillsManager* EffectsSpellsAndSkillsManager = RedemptionGameModeBase->GetEffectsSpellsAndSkillsManager(); IsValid(EffectsSpellsAndSkillsManager))
 			switch (SpellElements.Num()) {
 			case 3:
-				CreatedSpell = FindUniqueSpell(EffectsSpellsAndSkillsManager->ThreeElementsUniqueSpellsClasses, SpellElements, TypeOfTheSpell);
+				CreatedSpell = FindUniqueSpell(EffectsSpellsAndSkillsManager->ThreeElementsUniqueSpellsClasses, SpellElements, TypeOfTheSpell, SpellRange);
 				break;
 			case 4:
-				CreatedSpell = FindUniqueSpell(EffectsSpellsAndSkillsManager->FourElementsUniqueSpellsClasses, SpellElements, TypeOfTheSpell);
+				CreatedSpell = FindUniqueSpell(EffectsSpellsAndSkillsManager->FourElementsUniqueSpellsClasses, SpellElements, TypeOfTheSpell, SpellRange);
 				break;
 			case 5:
-				CreatedSpell = FindUniqueSpell(EffectsSpellsAndSkillsManager->FiveElementsUniqueSpellsClasses, SpellElements, TypeOfTheSpell);
+				CreatedSpell = FindUniqueSpell(EffectsSpellsAndSkillsManager->FiveElementsUniqueSpellsClasses, SpellElements, TypeOfTheSpell, SpellRange);
 				break;
 			default:
 				CreatedSpell = nullptr;
@@ -1212,15 +1213,13 @@ void USpellBattleMenu::UseButtonOnClicked()
 void USpellBattleMenu::UseUniqueSpellButtonOnClicked()
 {
 	if (SelectedSpellType != ESpellType::NONE && SelectedSpellRange != ESpellRange::NONE && SelectedElementsHorizontalBox->GetAllChildren().Num() > 0) {
-		SetUniqueCreatedSpell(SelectedSpellElements, SelectedSpellType);
+		SetUniqueCreatedSpell(SelectedSpellElements, SelectedSpellType, SelectedSpellRange);
 		UseSpell(false, true);
 	}
 }
 
 void USpellBattleMenu::UseSpell(const bool UniqueSpell, const bool CreateNotificationIfCreatedSpellIsNotValid)
 {
-	if (!IsValid(CreatedSpell))
-		UE_LOG(LogTemp, Warning, TEXT("CREATED SPELL IS NOT VALID!!!"));
 	if(auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 		if (ABattleManager* BManager = RedemptionGameModeBase->GetBattleManager(); IsValid(BManager) && IsValid(PlayerCharacter))
 			if (UBattleMenu* BMenu = UIManagerWorldSubsystem->BattleMenuWidget; IsValid(BMenu))
@@ -1235,21 +1234,22 @@ void USpellBattleMenu::UseSpell(const bool UniqueSpell, const bool CreateNotific
 						BManager->BattleAlliesPlayer[BManager->CurrentTurnCombatNPCIndex]->SpellToUse = CreatedSpell;
 						if (IsValid(Cast<ARestorationSpell>(CreatedSpell)) || IsValid(Cast<ABuffSpell>(CreatedSpell))) {
 							BManager->IsSelectingAllyAsTarget = true;
-							for(ACombatNPC* AllyPlayerNPC : BManager->BattleAlliesPlayer)
-								if (AllyPlayerNPC->CurrentHP > 0) {
-									BManager->SelectedCombatNPC = AllyPlayerNPC;
-									BMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(AllyPlayerNPC->GetCharacterName()));
+							for (int8 Index = 0; Index < BManager->BattleAlliesPlayer.Num(); Index++)
+								if (BManager->BattleAlliesPlayer[Index]->CurrentHP > 0) {
+									BManager->SelectedCombatNPC = BManager->BattleAlliesPlayer[Index];
+									BMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(BManager->BattleAlliesPlayer[Index]->GetCharacterName()));
 									BManager->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
-
+									BManager->SelectedCombatNPCIndex = Index;
 									break;
 								}
 						}
 						else if (IsValid(Cast<AAssaultSpell>(CreatedSpell)) || IsValid(Cast<ADebuffSpell>(CreatedSpell))) {
 							BManager->IsSelectingAllyAsTarget = false;
-							for(ACombatNPC* EnemyNPC : BManager->BattleEnemies)
-								if (EnemyNPC->CurrentHP > 0) {
-									BManager->SelectedCombatNPC = EnemyNPC;
-									BMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(EnemyNPC->GetCharacterName()));
+							for (int8 Index = 0; Index < BManager->BattleEnemies.Num(); Index++)
+								if (BManager->BattleEnemies[Index]->CurrentHP > 0) {
+									BManager->SelectedCombatNPC = BManager->BattleEnemies[Index];
+									BMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(BManager->BattleEnemies[Index]->GetCharacterName()));
+									BManager->SelectedCombatNPCIndex = Index;
 									break;
 								}
 						}
@@ -1280,7 +1280,6 @@ void USpellBattleMenu::UseSpell(const bool UniqueSpell, const bool CreateNotific
 						UIManagerWorldSubsystem->PickedButtonIndex = 0;
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
 						//Remove menu and turn on target selection
-						BManager->SelectedCombatNPCIndex = 0;
 						NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
 						BMenu->GetAttackMenuBorder()->SetVisibility(ESlateVisibility::Visible);
 						BMenu->GetLeftRightMenuBorder()->SetVisibility(ESlateVisibility::Visible);
@@ -1291,12 +1290,10 @@ void USpellBattleMenu::UseSpell(const bool UniqueSpell, const bool CreateNotific
 						//Add BattleEnemies in a loop, cause we need to convert them to the ACombatNPC.
 						if (BManager->IsSelectingAllyAsTarget) {
 							for (ACombatNPC* CombatNPC : BManager->BattleAlliesPlayer)
-								if (CombatNPC->CurrentHP > 0)
 									TargetsForSelection.Add(CombatNPC);
 						}
 						else if (!BManager->IsSelectingAllyAsTarget)
 							for (ACombatNPC* CombatNPC : BManager->BattleEnemies)
-								if(CombatNPC->CurrentHP > 0)
 									TargetsForSelection.Add(CombatNPC);
 						//We can restore mana to allies or hp or deal damage, so we need to decide whether show the mana or the health bar.
 						FString BarToShow{};
@@ -1317,9 +1314,9 @@ void USpellBattleMenu::UseSpell(const bool UniqueSpell, const bool CreateNotific
 								if (TargetsForSelection.Num() > 1) {
 									if (IsValid(BManager->SelectedCombatNPC))
 										UIActions::SetCrosshairAndManaHealthBarsVisibility(BManager->SelectedCombatNPC, BarToShow);
-									if (BManager->SelectedCombatNPCIndex - 1 >= 0)
+									if (BManager->SelectedCombatNPCIndex - 1 >= 0 && TargetsForSelection[BManager->SelectedCombatNPCIndex - 1]->CurrentHP > 0)
 										UIActions::SetCrosshairAndManaHealthBarsVisibility(TargetsForSelection[BManager->SelectedCombatNPCIndex - 1], BarToShow);
-									if (BManager->SelectedCombatNPCIndex + 1 < TargetsForSelection.Num()) 
+									if (BManager->SelectedCombatNPCIndex + 1 < TargetsForSelection.Num() && TargetsForSelection[BManager->SelectedCombatNPCIndex + 1]->CurrentHP > 0)
 										UIActions::SetCrosshairAndManaHealthBarsVisibility(TargetsForSelection[BManager->SelectedCombatNPCIndex + 1], BarToShow);
 								}
 								else {
@@ -1330,7 +1327,8 @@ void USpellBattleMenu::UseSpell(const bool UniqueSpell, const bool CreateNotific
 								break;
 							case ESpellRange::EVERYONE:
 								for (ACombatNPC* Target : TargetsForSelection)
-									UIActions::SetCrosshairAndManaHealthBarsVisibility(Target, BarToShow);
+									if(Target->CurrentHP > 0)
+										UIActions::SetCrosshairAndManaHealthBarsVisibility(Target, BarToShow);
 						}
 						if (UTextBlock* AttackTalkInfoTextBlock = Cast<UTextBlock>(BMenu->GetAttackTalkInfoActionButton()->GetChildAt(0)); IsValid(AttackTalkInfoTextBlock))
 							AttackTalkInfoTextBlock->SetText(FText::FromString("Attack"));

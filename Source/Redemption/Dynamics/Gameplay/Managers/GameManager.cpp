@@ -18,6 +18,8 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "QuestManager.h"
+#include <Redemption/Characters/NonCombat/TownNPCWithBattleEnemies.h>
 
 // Sets default values
 AGameManager::AGameManager()
@@ -34,8 +36,7 @@ void AGameManager::BeginPlay()
 	PlayerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	if (auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 		RedemptionGameModeBase->SetGameManager(this);
-	FString MapName = GetWorld()->GetMapName();
-	MapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
+	FString MapName = UGameplayStatics::GetCurrentLevelName(GetWorld());
 	if (MapName == "Dungeon") 
 		EnemySpawn();
 }
@@ -48,34 +49,40 @@ void AGameManager::Tick(float DeltaTime)
 }
 
 //Set up battle stage
-void AGameManager::StartBattle(AActor* const AttackingNPC)
+void AGameManager::StartBattle(AActor* const AttackingNPC, const EBattleSide& FirstTurnBattleSide)
 {
-	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
-		if (ABattleManager* BattleManager = RedemptionGameModeBase->GetBattleManager(); IsValid(PlayerCharacter) && IsValid(BattleManager)) {
-			PlayerLastLocation = PlayerCharacter->GetActorLocation();
-			//Set player's last rotation and location, teleport player to battle scene, destroy roaming NPC, disable input and battle UI widgets
-			if (APlayerController* PC = Cast<APlayerController>(PlayerCharacter->GetController()); IsValid(PC))
-				if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
-					if (IsValid(RedemptionGameModeBase->GetBattleMenuClass()))
-						UIManagerWorldSubsystem->BattleMenuWidget = CreateWidget<UBattleMenu>(Cast<APlayerController>(PlayerCharacter->GetController())
-							, RedemptionGameModeBase->GetBattleMenuClass());
-					if (IsValid(RedemptionGameModeBase->GetSpellBattleMenuClass()))
-						UIManagerWorldSubsystem->SpellBattleMenuWidget = CreateWidget<USpellBattleMenu>(Cast<APlayerController>(PlayerCharacter->GetController()), RedemptionGameModeBase->GetSpellBattleMenuClass());
-					if (IsValid(RedemptionGameModeBase->GetSkillBattleMenuClass()))
-						UIManagerWorldSubsystem->SkillBattleMenuWidget = CreateWidget<USkillBattleMenu>(Cast<APlayerController>(PlayerCharacter->GetController()), RedemptionGameModeBase->GetSkillBattleMenuClass());
-					if (IsValid(UIManagerWorldSubsystem->BattleMenuWidget))
-						UIManagerWorldSubsystem->BattleMenuWidget->AddToViewport();
-					ToBattleTransitionScreen->AddToViewport(0);
-					ToBattleTransitionScreen->SetMainTextBlockText(FText::FromString("Fight!"));
-					GetWorld()->GetTimerManager().SetTimer(ToBattleTransitionTimerHandle, this, &AGameManager::ToBattleTransition, 2.f, false);
-					//Create enemies and add them to BattleEnemies array in battle manager
-					if (ANonCombatEnemyNPC* NonCombatEnemyNPC = Cast<ANonCombatEnemyNPC>(AttackingNPC); IsValid(NonCombatEnemyNPC)) {
-						TArray<TSubclassOf<ACombatEnemyNPC>> ShuffledNPCBattleEnemies = NonCombatEnemyNPC->GetBattleEnemies();
-						ArrayActions::ShuffleArray(ShuffledNPCBattleEnemies);
-						NonCombatEnemyNPC->SetBattleEnemies(ShuffledNPCBattleEnemies);
-						for (uint8 i = 0; i < NonCombatEnemyNPC->GetBattleEnemies().Num() && i < 4; i++) {
+	if (!ToBattleTransitionScreen->IsInViewport()) {
+		if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+			if (ABattleManager* BattleManager = RedemptionGameModeBase->GetBattleManager(); IsValid(PlayerCharacter) && IsValid(BattleManager)) {
+				PlayerLastLocation = PlayerCharacter->GetActorLocation();
+				//Set player's last rotation and location, teleport player to battle scene, destroy roaming NPC, disable input and battle UI widgets
+				if (APlayerController* PC = Cast<APlayerController>(PlayerCharacter->GetController()); IsValid(PC))
+					if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+						if (IsValid(RedemptionGameModeBase->GetBattleMenuClass()))
+							UIManagerWorldSubsystem->BattleMenuWidget = CreateWidget<UBattleMenu>(Cast<APlayerController>(PlayerCharacter->GetController())
+								, RedemptionGameModeBase->GetBattleMenuClass());
+						if (IsValid(RedemptionGameModeBase->GetSpellBattleMenuClass()))
+							UIManagerWorldSubsystem->SpellBattleMenuWidget = CreateWidget<USpellBattleMenu>(Cast<APlayerController>(PlayerCharacter->GetController()), RedemptionGameModeBase->GetSpellBattleMenuClass());
+						if (IsValid(RedemptionGameModeBase->GetSkillBattleMenuClass()))
+							UIManagerWorldSubsystem->SkillBattleMenuWidget = CreateWidget<USkillBattleMenu>(Cast<APlayerController>(PlayerCharacter->GetController()), RedemptionGameModeBase->GetSkillBattleMenuClass());
+						ToBattleTransitionScreen->AddToViewport(0);
+						if (FirstTurnBattleSide == EBattleSide::ALLIES)
+							ToBattleTransitionScreen->SetMainTextBlockText(FText::FromString("Initiative!"));
+						else
+							ToBattleTransitionScreen->SetMainTextBlockText(FText::FromString("Ambush!"));
+						FTimerDelegate ToBattleTransitionTimerDelegate = FTimerDelegate::CreateUObject(this, &AGameManager::ToBattleTransition, FirstTurnBattleSide);
+						FTimerHandle ToBattleTransitionTimerHandle{};
+						GetWorld()->GetTimerManager().SetTimer(ToBattleTransitionTimerHandle, ToBattleTransitionTimerDelegate, 2.f, false);
+						//Create enemies and add them to BattleEnemies array in battle manager
+						TArray<TSubclassOf<ACombatEnemyNPC>> BattleEnemies{};
+						if (ANonCombatEnemyNPC* NonCombatEnemyNPC = Cast<ANonCombatEnemyNPC>(AttackingNPC); IsValid(NonCombatEnemyNPC))
+							BattleEnemies = NonCombatEnemyNPC->GetBattleEnemies();
+						else if (ATownNPCWithBattleEnemies* TownNPCWithBattleEnemies = Cast<ATownNPCWithBattleEnemies>(AttackingNPC); IsValid(TownNPCWithBattleEnemies))
+							BattleEnemies = TownNPCWithBattleEnemies->GetBattleEnemies();
+						ArrayActions::ShuffleArray(BattleEnemies);
+						for (uint8 i = 0; i < BattleEnemies.Num() && i < 4; i++) {
 							const FVector Location = EnemyBattleSpawns[i]->GetActorLocation();
-							ACombatEnemyNPC* SpawnedEnemy = GetWorld()->SpawnActor<ACombatEnemyNPC>(NonCombatEnemyNPC->GetBattleEnemies()[i], Location, EnemyBattleSpawns[i]->GetActorRotation());
+							ACombatEnemyNPC* SpawnedEnemy = GetWorld()->SpawnActor<ACombatEnemyNPC>(BattleEnemies[i], Location, EnemyBattleSpawns[i]->GetActorRotation());
 							ASmartObject* AISmartObject = GetWorld()->SpawnActor<ASmartObject>(SpawnedEnemy->GetAIClass());
 							if (IsValid(SpawnedEnemy) && IsValid(AISmartObject))
 								SpawnedEnemy->SetSmartObject(AISmartObject);
@@ -85,71 +92,105 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 								AIController->SetDynamicSubtree();
 							BattleManager->BattleEnemies.Add(SpawnedEnemy);
 						}
-					}
-					//Shuffle Allies and create combat player character
-					//But firstly enable gravity for Allies. Yeah, I spent quite a lot of time on this, idiot.
-					TArray<ACombatAllies*> ShuffledCombatAllies{};
-					ACombatPlayerCharacter* CombatPlayerCharacter = GetWorld()->SpawnActor<ACombatPlayerCharacter>(CombatPlayerCharacterClass);
-					CombatPlayerCharacter->SetActorLocation(AlliesPlayerBattleSpawns[3]->GetActorLocation());
-					CombatPlayerCharacter->SetActorRotation(FRotator(0, 180, 0));
-					CombatPlayerCharacter->SetStartLocation(AlliesPlayerBattleSpawns[3]);
-					CombatPlayerCharacter->SetStartRotation(CombatPlayerCharacter->GetActorRotation());
-					for (const TSubclassOf<APerk> PerkClass : CombatPlayerCharacter->ActivatedPerks)
-						CombatPlayerCharacter->Effects.Add(CombatPlayerCharacter->ConvertActivatedPerkToEffect(PerkClass->GetDefaultObject<APerk>()));
-					BattleManager->BattleAlliesPlayer.Add(CombatPlayerCharacter);
-					BattleManager->CombatPlayerCharacter = CombatPlayerCharacter;
-					for (ACombatAllyNPC* CombatAllyNPC : PlayerCharacter->GetAllies())
-						ShuffledCombatAllies.Add(CombatAllyNPC);
-					ArrayActions::ShuffleArray(ShuffledCombatAllies);
-					PlayerCharacter->GetAllies().Empty();
-					for (ACombatAllies* CombatAllies : ShuffledCombatAllies)
-						PlayerCharacter->GetAllies().Add(Cast<ACombatAllyNPC>(CombatAllies));
-					for (uint8 i = 0; i < PlayerCharacter->GetAllies().Num() && i < 4; i++) {
-						if (IsValid(PlayerCharacter->GetAllies()[i])) {
-							const FVector Location = AlliesPlayerBattleSpawns[i]->GetActorLocation();
-							PlayerCharacter->GetAllies()[i]->SetActorLocation(Location);
-							PlayerCharacter->GetAllies()[i]->SetActorRotation(FRotator(0.0, 180.0, 0.0));
-							PlayerCharacter->GetAllies()[i]->SetStartLocation(AlliesPlayerBattleSpawns[i]);
-							PlayerCharacter->GetAllies()[i]->SetStartRotation(PlayerCharacter->GetAllies()[i]->GetActorRotation());
-							for (const TSubclassOf<APerk> PerkClass : PlayerCharacter->GetAllies()[i]->ActivatedPerks)
-								PlayerCharacter->GetAllies()[i]->Effects.Add(PlayerCharacter->GetAllies()[i]->ConvertActivatedPerkToEffect(PerkClass->GetDefaultObject<APerk>()));
-							if (IsValid(PlayerCharacter->GetAllies()[i]->GetAIClass()))
-								if (ASmartObject* AISmartObject = GetWorld()->SpawnActor<ASmartObject>(PlayerCharacter->GetAllies()[i]->GetAIClass()); IsValid(AISmartObject))
-									PlayerCharacter->GetAllies()[i]->SetSmartObject(AISmartObject);
-							ACombatAllyNPCAIController* AIController = Cast<ACombatAllyNPCAIController>(PlayerCharacter->GetAllies()[i]->GetController());
-							if (IsValid(AIController))
-								AIController->SetDynamicSubtree();
-							if (IsValid(BattleManager)) {
-								BattleManager->BattleAlliesPlayer.Add(PlayerCharacter->GetAllies()[i]);
-								BattleManager->AlliesPlayerTurnQueue.Add(i);
+						//Shuffle Allies and create combat player character
+						//But firstly enable gravity for Allies. Yeah, I spent quite a lot of time on this, idiot.
+						TArray<ACombatAllies*> ShuffledCombatAllies{};
+						ACombatPlayerCharacter* CombatPlayerCharacter = GetWorld()->SpawnActor<ACombatPlayerCharacter>(CombatPlayerCharacterClass);
+						CombatPlayerCharacter->SetActorLocation(AlliesPlayerBattleSpawns[3]->GetActorLocation());
+						CombatPlayerCharacter->SetActorRotation(FRotator(0, 180, 0));
+						CombatPlayerCharacter->SetStartLocation(AlliesPlayerBattleSpawns[3]);
+						CombatPlayerCharacter->SetStartRotation(CombatPlayerCharacter->GetActorRotation());
+						for (const TSubclassOf<APerk> PerkClass : CombatPlayerCharacter->ActivatedPerks)
+							CombatPlayerCharacter->Effects.Add(CombatPlayerCharacter->ConvertActivatedPerkToEffect(PerkClass->GetDefaultObject<APerk>()));
+						BattleManager->BattleAlliesPlayer.Add(CombatPlayerCharacter);
+						BattleManager->CombatPlayerCharacter = CombatPlayerCharacter;
+						for (ACombatAllyNPC* CombatAllyNPC : PlayerCharacter->GetAllies())
+							ShuffledCombatAllies.Add(CombatAllyNPC);
+						ArrayActions::ShuffleArray(ShuffledCombatAllies);
+						PlayerCharacter->GetAllies().Empty();
+						for (ACombatAllies* CombatAllies : ShuffledCombatAllies)
+							PlayerCharacter->GetAllies().Add(Cast<ACombatAllyNPC>(CombatAllies));
+						for (uint8 i = 0; i < PlayerCharacter->GetAllies().Num() && i < 4; i++) {
+							if (IsValid(PlayerCharacter->GetAllies()[i])) {
+								const FVector Location = AlliesPlayerBattleSpawns[i]->GetActorLocation();
+								PlayerCharacter->GetAllies()[i]->SetActorLocation(Location);
+								PlayerCharacter->GetAllies()[i]->SetActorRotation(FRotator(0.0, 180.0, 0.0));
+								PlayerCharacter->GetAllies()[i]->SetStartLocation(AlliesPlayerBattleSpawns[i]);
+								PlayerCharacter->GetAllies()[i]->SetStartRotation(PlayerCharacter->GetAllies()[i]->GetActorRotation());
+								for (const TSubclassOf<APerk> PerkClass : PlayerCharacter->GetAllies()[i]->ActivatedPerks)
+									PlayerCharacter->GetAllies()[i]->Effects.Add(PlayerCharacter->GetAllies()[i]->ConvertActivatedPerkToEffect(PerkClass->GetDefaultObject<APerk>()));
+								if (IsValid(PlayerCharacter->GetAllies()[i]->GetAIClass()))
+									if (ASmartObject* AISmartObject = GetWorld()->SpawnActor<ASmartObject>(PlayerCharacter->GetAllies()[i]->GetAIClass()); IsValid(AISmartObject))
+										PlayerCharacter->GetAllies()[i]->SetSmartObject(AISmartObject);
+								ACombatAllyNPCAIController* AIController = Cast<ACombatAllyNPCAIController>(PlayerCharacter->GetAllies()[i]->GetController());
+								if (IsValid(AIController))
+									AIController->SetDynamicSubtree();
+								if (IsValid(BattleManager)) {
+									BattleManager->BattleAlliesPlayer.Add(PlayerCharacter->GetAllies()[i]);
+								}
 							}
 						}
+						//Player Character Index.
+						UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesHealthBars()[0]->PercentDelegate.Clear();
+						UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesManaBars()[0]->PercentDelegate.Clear();
+						UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesInfoVerticalBoxes()[0]->SetVisibility(ESlateVisibility::Visible);
+						UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesHealthBars()[0]->PercentDelegate.BindUFunction(CombatPlayerCharacter, "GetHealthPercentage");
+						UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesManaBars()[0]->PercentDelegate.BindUFunction(CombatPlayerCharacter, "GetManaPercentage");
+						UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesHealthBars()[0]->SynchronizeProperties();
+						UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesManaBars()[0]->SynchronizeProperties();
+						UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesNameTextBlockes()[0]->SetText(FText::FromName(CombatPlayerCharacter->GetCharacterName()));
+						//Set camera position and set non combat player position to PlayerPlane's position
+						BattleManager->CurrentTurnCombatNPCIndex = BattleManager->BattleAlliesPlayer.Num() - 1;
+						BattleManager->SetBehindPlayerCameraLocation(Cast<ACombatStartLocation>(BattleManager->BattleAlliesPlayer
+							[BattleManager->BattleAlliesPlayer.Num() - 1]->GetStartLocation())->CombatCameraLocation);
+						PlayerCharacter->SetCanInput(false);
+						PlayerCharacter->SetActorLocation(FVector(1350, 5610, -960));
+						//PC->ActivateTouchInterface(PlayerCharacter->GetEmptyTouchInterface());
+						FViewTargetTransitionParams Params;
+						PC->SetViewTarget(RedemptionGameModeBase->GetBattleManager()->GetBehindPlayerCamera(), Params);
+						UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(PC, UIManagerWorldSubsystem->BattleMenuWidget, EMouseLockMode::DoNotLock);
+						//Background Music set
+						RedemptionGameModeBase->GetAudioManager()->DungeonExplorationBackgroundMusicAudioComponents[RedemptionGameModeBase->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(true);
+						URedemptionGameInstance* GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
+						if (IsValid(GameInstance)) {
+							bool SelectingMusic = true;
+							do {
+								int8 RandomBGMusicIndex = FMath::RandRange(0, RedemptionGameModeBase->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents.Num() - 1);
+								if (RandomBGMusicIndex != GameInstance->InstancePreviousCombatBGMusicIndex) {
+									RedemptionGameModeBase->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[RandomBGMusicIndex]->Play();
+									RedemptionGameModeBase->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[RandomBGMusicIndex]->SetPaused(false);
+									RedemptionGameModeBase->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic = RandomBGMusicIndex;
+									GameInstance->InstancePreviousCombatBGMusicIndex = RandomBGMusicIndex;
+									SelectingMusic = false;
+								}
+							} while (SelectingMusic);
+						}
+						AttackingCharacterNPC = Cast<ACharacterInTheWorld>(AttackingNPC);
 					}
-					//Player Character Index.
-					BattleManager->AlliesPlayerTurnQueue.Add(BattleManager->BattleAlliesPlayer.Num() - 1);
-					UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesHealthBars()[0]->PercentDelegate.Clear();
-					UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesManaBars()[0]->PercentDelegate.Clear();
-					UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesInfoVerticalBoxes()[0]->SetVisibility(ESlateVisibility::Visible);
-					UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesHealthBars()[0]->PercentDelegate.BindUFunction(CombatPlayerCharacter, "GetHealthPercentage");
-					UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesManaBars()[0]->PercentDelegate.BindUFunction(CombatPlayerCharacter, "GetManaPercentage");
-					UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesHealthBars()[0]->SynchronizeProperties();
-					UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesManaBars()[0]->SynchronizeProperties();
-					UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesNameTextBlockes()[0]->SetText(FText::FromName(CombatPlayerCharacter->GetCharacterName()));
-					ArrayActions::ShuffleArray<uint8>(BattleManager->AlliesPlayerTurnQueue);
-					//Set camera position and set non combat player position to PlayerPlane's position
-					BattleManager->CurrentTurnCombatNPCIndex = BattleManager->AlliesPlayerTurnQueue[0];
-					BattleManager->SetBehindPlayerCameraLocation(Cast<ACombatStartLocation>(BattleManager->BattleAlliesPlayer[BattleManager->AlliesPlayerTurnQueue[0]]->GetStartLocation())->CombatCameraLocation);
-					PlayerCharacter->SetCanInput(false);
-					PlayerCharacter->SetActorLocation(FVector(1350, 5610, -960));
-					if (BattleManager->BattleAlliesPlayer[BattleManager->AlliesPlayerTurnQueue[0]] == CombatPlayerCharacter) {
-						UIManagerWorldSubsystem->BattleMenuWidget->GetItemButton()->SetVisibility(ESlateVisibility::Visible);
-						UIManagerWorldSubsystem->BattleMenuWidget->GetTalkButton()->SetVisibility(ESlateVisibility::Visible);
-						UIManagerWorldSubsystem->BattleMenuWidget->GetSpellButton()->SetVisibility(ESlateVisibility::Visible);
-					}
-					else {
-						UIManagerWorldSubsystem->BattleMenuWidget->GetItemButton()->SetVisibility(ESlateVisibility::Collapsed);
-						UIManagerWorldSubsystem->BattleMenuWidget->GetTalkButton()->SetVisibility(ESlateVisibility::Collapsed);
-						UIManagerWorldSubsystem->BattleMenuWidget->GetSpellButton()->SetVisibility(ESlateVisibility::Collapsed);
+			}
+	}
+}
+
+void AGameManager::ToBattleTransition(const EBattleSide FirstTurnBattleSide)
+{
+	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+		if (ABattleManager* BattleManager = RedemptionGameModeBase->GetBattleManager(); IsValid(PlayerCharacter) && IsValid(BattleManager)) {
+			if (FirstTurnBattleSide == EBattleSide::ALLIES) {
+				for (uint8 Index = 0; Index < BattleManager->BattleAlliesPlayer.Num(); Index++)
+					BattleManager->AlliesPlayerTurnQueue.Add(Index);
+				ArrayActions::ShuffleArray<uint8>(BattleManager->AlliesPlayerTurnQueue);
+				BattleManager->CurrentTurnCombatNPCIndex = BattleManager->AlliesPlayerTurnQueue[0];
+				BattleManager->SetBehindPlayerCameraLocation(Cast<ACombatStartLocation>(BattleManager->BattleAlliesPlayer
+					[BattleManager->AlliesPlayerTurnQueue[0]]->GetStartLocation())->CombatCameraLocation);
+				if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
+					if (IsValid(UIManagerWorldSubsystem->BattleMenuWidget)) {
+						if (IsValid(UIManagerWorldSubsystem->BattleMenuWidget)) {
+							UIManagerWorldSubsystem->BattleMenuWidget->AddToViewport();
+							UIManagerWorldSubsystem->BattleMenuWidget->GetAttackButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+							UIManagerWorldSubsystem->BattleMenuWidget->IsChoosingAction = true;
+						}
+						UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->BattleMenuWidget->GetAttackButton();
+						UIManagerWorldSubsystem->PickedButtonIndex = 0;
 					}
 					UIManagerWorldSubsystem->SkillBattleMenuWidget->ResetSkillsScrollBox();
 					for (TSubclassOf<ASpell> SpellClass : BattleManager->BattleAlliesPlayer[BattleManager->CurrentTurnCombatNPCIndex]->GetAvailableSpells())
@@ -160,32 +201,28 @@ void AGameManager::StartBattle(AActor* const AttackingNPC)
 						AlliesInfoBarsWidget->GetAlliesNameBorders()[BattleManager->CurrentTurnCombatNPCIndex]->SetBrushColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
 						AlliesInfoBarsWidget->IndexOfCurrentTurnCharacterNameBorder = BattleManager->CurrentTurnCombatNPCIndex;
 					}
-					BattleManager->AlliesPlayerTurnQueue.RemoveAt(0);
-					PC->bShowMouseCursor = true;
-					PC->bEnableClickEvents = true;
-					PC->bEnableMouseOverEvents = true;
-					//PC->ActivateTouchInterface(PlayerCharacter->GetEmptyTouchInterface());
-					FViewTargetTransitionParams Params;
-					PC->SetViewTarget(RedemptionGameModeBase->GetBattleManager()->GetBehindPlayerCamera(), Params);
-					UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(PC, UIManagerWorldSubsystem->BattleMenuWidget, EMouseLockMode::DoNotLock);
-					//Background Music set
-					RedemptionGameModeBase->GetAudioManager()->DungeonExplorationBackgroundMusicAudioComponents[RedemptionGameModeBase->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(true);
-					URedemptionGameInstance* GameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance());
-					if (IsValid(GameInstance)) {
-						bool SelectingMusic = true;
-						do {
-							int8 RandomBGMusicIndex = FMath::RandRange(0, RedemptionGameModeBase->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents.Num() - 1);
-							if (RandomBGMusicIndex != GameInstance->InstancePreviousCombatBGMusicIndex) {
-								RedemptionGameModeBase->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[RandomBGMusicIndex]->Play();
-								RedemptionGameModeBase->GetAudioManager()->DungeonCombatBackgroundMusicAudioComponents[RandomBGMusicIndex]->SetPaused(false);
-								RedemptionGameModeBase->GetAudioManager()->IndexInArrayOfCurrentPlayingBGMusic = RandomBGMusicIndex;
-								GameInstance->InstancePreviousCombatBGMusicIndex = RandomBGMusicIndex;
-								SelectingMusic = false;
-							}
-						} while (SelectingMusic);
+					if (BattleManager->BattleAlliesPlayer[BattleManager->AlliesPlayerTurnQueue[0]] == BattleManager->CombatPlayerCharacter) {
+						UIManagerWorldSubsystem->BattleMenuWidget->GetItemButton()->SetVisibility(ESlateVisibility::Visible);
+						UIManagerWorldSubsystem->BattleMenuWidget->GetTalkButton()->SetVisibility(ESlateVisibility::Visible);
+						UIManagerWorldSubsystem->BattleMenuWidget->GetSpellButton()->SetVisibility(ESlateVisibility::Visible);
 					}
-					AttackingNPC->Destroy();
+					else {
+						UIManagerWorldSubsystem->BattleMenuWidget->GetItemButton()->SetVisibility(ESlateVisibility::Collapsed);
+						UIManagerWorldSubsystem->BattleMenuWidget->GetTalkButton()->SetVisibility(ESlateVisibility::Collapsed);
+						UIManagerWorldSubsystem->BattleMenuWidget->GetSpellButton()->SetVisibility(ESlateVisibility::Collapsed);
+					}
 				}
+				BattleManager->AlliesPlayerTurnQueue.RemoveAt(0);
+			}
+			else {
+				BattleManager->PlayerTurnController();
+			}
+			ToBattleTransitionScreen->RemoveFromParent();
+			if (APlayerController* PC = Cast<APlayerController>(PlayerCharacter->GetController()); IsValid(PC)) {
+				PC->bShowMouseCursor = true;
+				PC->bEnableClickEvents = true;
+				PC->bEnableMouseOverEvents = true;
+			}
 		}
 }
 
@@ -249,20 +286,40 @@ void AGameManager::EndBattle()
 				}
 				GameInstance->InstanceKilledEnemies++;
 				CurrentNumberOfNonCombatEnemies--;
+				static const FString ContextString(TEXT("Characters And Related Quests List Context"));
+				if (IsValid(CharactersAndRelatedQuestsDataTable)) {
+					FCharactersAndRelatedQuests CharacterAndRelatedQuest{};
+					TArray<FCharactersAndRelatedQuests*> CharactersAndQuestsRowsArray{};
+					CharactersAndRelatedQuestsDataTable->GetAllRows<FCharactersAndRelatedQuests>(ContextString, CharactersAndQuestsRowsArray);
+					for (FCharactersAndRelatedQuests* CharacterAndRelatedQuestRow : CharactersAndQuestsRowsArray)
+						if (CharacterAndRelatedQuestRow->CharacterName.IsEqual(AttackingCharacterNPC->GetCharacterName())) {
+							CharacterAndRelatedQuest = *CharacterAndRelatedQuestRow;
+							break;
+						}
+					if (IsValid(CharacterAndRelatedQuest.QuestClass))
+						if (auto* const QuestManager = RedemptionGameModeBase->GetQuestManager(); IsValid(QuestManager)) {
+							bool QuestFound = false;
+							for (const auto QuestAndItsStage : QuestManager->GetActiveOrFinishedQuestsAndTheirStages())
+								if (QuestAndItsStage.QuestClass == CharacterAndRelatedQuest.QuestClass) {
+									QuestManager->AdvanceQuest(CharacterAndRelatedQuest.QuestClass, CharacterAndRelatedQuest.QuestStageIfQuestAlreadyAccepted);
+									QuestFound = true;
+									break;
+								}
+							if (!QuestFound)
+								QuestManager->ActivateNewQuest(CharacterAndRelatedQuest.QuestClass, CharacterAndRelatedQuest.QuestStageIfQuestIsNotAccepted);
+						}
+				}
+				if (auto* AttackingTownNPCWithBattleEnemies = Cast<ATownNPCWithBattleEnemies>(AttackingCharacterNPC); IsValid(AttackingTownNPCWithBattleEnemies)) {
+					if(AttackingTownNPCWithBattleEnemies->GetDestroyAfterBattle())
+						AttackingCharacterNPC->Destroy();
+				}
+				else
+					AttackingCharacterNPC->Destroy();
+				if (IsValid(ActorToRestoreDialogueWith)){
+					PlayerCharacter->DialogueInteract(ActorToRestoreDialogueWith); 
+					ActorToRestoreDialogueWith = false;
+				}
 			}
-}
-
-void AGameManager::ToBattleTransition() 
-{
-	if (UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
-		ToBattleTransitionScreen->RemoveFromParent();
-		if (IsValid(UIManagerWorldSubsystem->BattleMenuWidget)) {
-			UIManagerWorldSubsystem->BattleMenuWidget->GetAttackButton()->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-			UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->BattleMenuWidget->GetAttackButton();
-			UIManagerWorldSubsystem->PickedButtonIndex = 0;
-			UIManagerWorldSubsystem->BattleMenuWidget->IsChoosingAction = true;
-		}
-	}
 }
 
 void AGameManager::EnemySpawn()

@@ -33,5 +33,5 @@ public:
 	void SetTypeOfRestoration(ESpellRestorationType NewSpellRestorationType);
 	void SetRestorationValuePercent(int NewRestorationValuePercent);
 
-	ARestorationSpell& ARestorationSpell::operator =(const ASpell& Spell);
+	ARestorationSpell& operator =(const ASpell& Spell);
 };

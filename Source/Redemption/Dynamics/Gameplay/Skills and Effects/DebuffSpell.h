@@ -22,5 +22,5 @@ private:
 public:
 	EBuffDebuffType GetTypeOfDebuff() const;
 	void SetTypeOfDebuff(EBuffDebuffType NewTypeOfDebuff);
-	ADebuffSpell& ADebuffSpell::operator =(const ASpell& Spell);
+	ADebuffSpell& operator =(const ASpell& Spell);
 };

@@ -8,7 +8,10 @@
 #include "..\Dynamics\Gameplay\Combat\CombatStartLocation.h"
 #include "..\Characters\Combat\CombatPlayerCharacter.h"
 #include "Redemption/Dynamics/Miscellaneous/CombatEnemiesVariant.h"
+#include "Engine/DataTable.h"
 #include "GameManager.generated.h"
+
+
 
 UCLASS()
 class AGameManager : public AActor
@@ -38,10 +41,13 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "UI")
 		class UToBattleTransitionScreen* ToBattleTransitionScreen{};
 
-	FTimerHandle ToBattleTransitionTimerHandle{};
+	UPROPERTY()
+	class ACharacterInTheWorld* AttackingCharacterNPC{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Manager")
+	UDataTable* CharactersAndRelatedQuestsDataTable{};
 
 	UFUNCTION()
-	void ToBattleTransition();
+	void ToBattleTransition(const EBattleSide FirstTurnBattleSide);
 
 	UFUNCTION()
 	void EnemySpawn();
@@ -50,7 +56,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void StartBattle(AActor* const AttackingNPC);
+	void StartBattle(AActor* const AttackingNPC, const EBattleSide& FirstTurnBattleSide);
 	void EndBattle();
 
 	TArray<AActor*> GetEnemyBattleSpawns() const;
@@ -75,6 +81,10 @@ public:
 	//These arrays will be used as combat enemies in battle. They are chosen randomly in the game manager for every NonCombat enemy spawn.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Manager")
 	TArray<FCombatEnemiesVariant> CombatEnemiesVariants{};
+
+	//If the player starts a combat from a dialogue, then set this pointer to an Actor, with whom the player has a dialogue.
+	//Set this to nullptr after a dialogue has been started again after a combat.
+	AActor* ActorToRestoreDialogueWith{};
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = true))

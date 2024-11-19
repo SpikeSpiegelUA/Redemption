@@ -31,13 +31,13 @@ EBTNodeResult::Type UBTTask_AddJournalEntryWithQuest::ExecuteTask(UBehaviorTreeC
 		//Find an quest from EntryQuestClass in ActiveOrFinishedQuests in the QuestManager.
 		if (QuestManager->GetActiveOrFinishedQuestsAndTheirStages()[Index].QuestClass == EntryQuestClass) {
 			const AQuest* const QuestDefaultObject = QuestManager->GetActiveOrFinishedQuestsAndTheirStages()[Index].QuestClass->GetDefaultObject<AQuest>();
-			if (QuestManager->GetActiveOrFinishedQuestsAndTheirStages()[Index].QuestStage < QuestDefaultObject->GetJournalEntries().Num()) {
-				if (!QuestDefaultObject->GetJournalEntries()[QuestManager->GetActiveOrFinishedQuestsAndTheirStages()[Index].QuestStage].IsEmpty())
-					if (!UIManagerWorldSubsystem->JournalMenuWidget->CheckIfJournalEntryWasAlreadyAdded(QuestDefaultObject->GetJournalEntries()[QuestManager->GetActiveOrFinishedQuestsAndTheirStages()[Index].QuestStage]))
-						UIManagerWorldSubsystem->JournalMenuWidget->AddNewEntryToJournal(UIManagerWorldSubsystem->JournalMenuWidget->JournalEntryNextNumber,
-							QuestDefaultObject->GetJournalEntries()[QuestManager->GetActiveOrFinishedQuestsAndTheirStages()[Index].QuestStage], 
-							QuestDefaultObject->GetQuestName(), false);
-			}
+			for(const FJournalEntryAndItsStage JournalEntryAndItsStage : QuestDefaultObject->GetJournalEntriesAndTheirStages())
+				if(JournalEntryAndItsStage.QuestStage == QuestManager->GetActiveOrFinishedQuestsAndTheirStages()[Index].QuestStage)
+					if (!QuestDefaultObject->GetJournalEntriesAndTheirStages()[QuestManager->GetActiveOrFinishedQuestsAndTheirStages()[Index].QuestStage].JournalEntry.IsEmpty())
+						if (!UIManagerWorldSubsystem->JournalMenuWidget->CheckIfJournalEntryWasAlreadyAdded(QuestDefaultObject->GetJournalEntriesAndTheirStages()[QuestManager->GetActiveOrFinishedQuestsAndTheirStages()[Index].QuestStage].JournalEntry))
+							UIManagerWorldSubsystem->JournalMenuWidget->AddNewEntryToJournal(UIManagerWorldSubsystem->JournalMenuWidget->JournalEntryNextNumber,
+								QuestDefaultObject->GetJournalEntriesAndTheirStages()[QuestManager->GetActiveOrFinishedQuestsAndTheirStages()[Index].QuestStage].JournalEntry,
+								QuestDefaultObject->GetQuestName(), false);
 		}
 	}
 	return EBTNodeResult::Succeeded;

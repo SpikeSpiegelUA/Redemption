@@ -10,6 +10,8 @@
 #include "EngineUtils.h"
 #include "Redemption/SaveSystem/Interfaces/SavableObjectInterface.h"
 #include "Redemption/Characters/Player/PlayerCharacter.h"
+#include "Redemption/UI/Screens/StartFinishGameScreen.h"
+#include "Redemption/Dynamics/Gameplay/Managers/QuestManager.h"
 
 ARedemptionGameModeBase::ARedemptionGameModeBase()
 {
@@ -39,8 +41,36 @@ void ARedemptionGameModeBase::InitGame(const FString& MapName, const FString& Op
 void ARedemptionGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
-	FTimerHandle SpawnSavedObjectsAndSaveSlotsTimerHandle{};
-	GetWorld()->GetTimerManager().SetTimer(SpawnSavedObjectsAndSaveSlotsTimerHandle, this, &ARedemptionGameModeBase::SpawnSavedObjectsAndSaveSlots, 0.0000001f, false);
+	FTimerHandle PostBeginPlayTimerHandle{};
+	GetWorld()->GetTimerManager().SetTimerForNextTick(this, &ARedemptionGameModeBase::PostBeginPlay);
+}
+
+void ARedemptionGameModeBase::PostBeginPlay()
+{
+	SpawnSavedObjectsAndSaveSlots();
+	Midgame = true;
+	if (URedemptionGameInstance* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance)) {
+		if (auto* const UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); RedemptionGameInstance->StartedNewGame &&
+		IsValid(UIManagerWorldSubsystem)) {
+			UIManagerWorldSubsystem->StartFinishGameScreenWidget = CreateWidget<UStartFinishGameScreen>(GetWorld()->GetFirstPlayerController(), StartFinishGameScreenClass);
+			if (IsValid(UIManagerWorldSubsystem->StartFinishGameScreenWidget))
+				UIManagerWorldSubsystem->StartFinishGameScreenWidget->AddToViewport();
+		}
+		RedemptionGameInstance->StartedNewGame = false;
+	}
+	FString MapName = UGameplayStatics::GetCurrentLevelName(GetWorld());
+	if (MapName.Equals("Town")) {
+		for (FQuestAndItsStage QuestAndItsStage : QuestManager->GetActiveOrFinishedQuestsAndTheirStages())
+			if (QuestAndItsStage.QuestClass->GetDefaultObject<AQuest>()->GetQuestName().EqualTo(FText::FromString("Destroy the Undead")) &&
+				QuestAndItsStage.QuestStage == QuestAndItsStage.QuestClass->GetDefaultObject<AQuest>()->GetFinalStage()) {
+				TArray<AActor*> EndGameActors{};
+				UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld(), AActor::StaticClass(), FName("EndGameActor"), EndGameActors);
+				for (AActor* EndGameActor : EndGameActors) {
+					EndGameActor->SetActorHiddenInGame(false);
+				}
+				break;
+			}
+	}
 }
 
 void ARedemptionGameModeBase::Tick(float DeltaTime)
@@ -176,11 +206,6 @@ TSubclassOf<class UDialogueBox> ARedemptionGameModeBase::GetDialogueBoxClass() c
 	return DialogueBoxClass;
 }
 
-TSubclassOf<class UResponsesBox> ARedemptionGameModeBase::GetResponsesBoxClass() const
-{
-	return ResponsesBoxClass;
-}
-
 TSubclassOf<class UResponseEntry> ARedemptionGameModeBase::GetResponseEntryClass() const
 {
 	return ResponseEntryClass;
@@ -274,6 +299,16 @@ TSubclassOf<class UTradingMenuItemEntry> ARedemptionGameModeBase::GetTradingMenu
 TSubclassOf<class UCharacterCreationMenu> ARedemptionGameModeBase::GetCharacterCreationMenuClass() const
 {
 	return CharacterCreationMenuClass;
+}
+
+TSubclassOf<class UContainerInventoryMenu> ARedemptionGameModeBase::GetContainerInventoryMenuClass() const
+{
+	return ContainerInventoryMenuClass;
+}
+
+TSubclassOf<class UStartFinishGameScreen> ARedemptionGameModeBase::GetStartFinishGameScreenClass() const
+{
+	return StartFinishGameScreenClass;
 }
 
 void ARedemptionGameModeBase::SetBattleManager(const ABattleManager* const NewBattleManager)

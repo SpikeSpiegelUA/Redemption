@@ -8,6 +8,7 @@
 #include "..\UI\Miscellaneous\CharacterPerks.h"
 #include "..\UI\Menus\PerksLevelingUpMenu.h"
 #include "..\UI\Menus\CharacterCreationMenu.h"
+#include "..\UI\Menus\ContainerInventoryMenu.h"
 #include "..\UI\Menus\MainMenu.h"
 #include "..\Dynamics\World\LootInTheWorld.h"
 #include "..\Dynamics\Logic\Interfaces\DialogueActionsInterface.h"
@@ -22,15 +23,17 @@
 #include "GameFramework/TouchInterface.h"
 #include "Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h"
 #include "Components/StackBox.h"
+#include "Components/VerticalBox.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "..\Miscellaneous\InventoryActions.h"
-#include "Blueprint/WidgetLayoutLibrary.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "EngineUtils.h"
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 #include "Redemption/UI/Menus/JournalMenu.h"
+#include "Redemption/Characters/NonCombat/NonCombatEnemyNPC.h"
+#include "Redemption/UI/Screens/StartFinishGameScreen.h"
 
 APlayerCharacter::APlayerCharacter() {
 	// Set size for collision capsule
@@ -119,11 +122,12 @@ void APlayerCharacter::BeginPlay()
 	UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesManaBars()[0]->PercentDelegate.BindUFunction(this, "GetManaPercentage");
 	UIManagerWorldSubsystem->AlliesInfoBarsWidget->GetAlliesNameTextBlockes()[0]->SetText(FText::FromString(CharacterName));
 	//Level change logic
-	if (auto* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance))
-		Execute_LoadObjectFromGameInstance(this, RedemptionGameInstance); 
+	if (auto* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance)) {
+		Execute_LoadObjectFromGameInstance(this, RedemptionGameInstance);
+		RedemptionGameInstance->IsChangingLevel = true;
+	}
 	//Main Menu Turn On Logic
-	FString MapName = GetWorld()->GetMapName();
-	MapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
+	FString MapName = UGameplayStatics::GetCurrentLevelName(GetWorld());
 	if (MapName == "MainMenu") {
 		if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 			if (IsValid(RedemptionGameModeBase->GetMainMenuClass()))
@@ -271,7 +275,7 @@ void APlayerCharacter::InputOpenPlayerMenu()
 
 void APlayerCharacter::InputOpenPauseMenu()
 {
-	FString MapName = GetWorld()->GetMapName();
+	FString MapName = UGameplayStatics::GetCurrentLevelName(GetWorld());
 	if(!IsValid(UIManagerWorldSubsystem->PauseMenuWidget))
 		if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 			if (IsValid(RedemptionGameModeBase->GetPauseMenuClass()))
@@ -307,7 +311,7 @@ void APlayerCharacter::InputOpenPauseMenu()
 		}
 	}
 	if (IsValid(UIManagerWorldSubsystem->SettingsMenuWidget)) {
-		if (UIManagerWorldSubsystem->SettingsMenuWidget->IsInViewport() && MapName != "UEDPIE_0_MainMenu") {
+		if (UIManagerWorldSubsystem->SettingsMenuWidget->IsInViewport() && MapName != "MainMenu") {
 			UIManagerWorldSubsystem->SettingsMenuWidget->RemoveFromParent();
 			UIManagerWorldSubsystem->SettingsMenuWidget->ConditionalBeginDestroy();
 			UIManagerWorldSubsystem->SettingsMenuWidget = nullptr;
@@ -321,7 +325,7 @@ void APlayerCharacter::InputOpenPauseMenu()
 				UIManagerWorldSubsystem->PickedButtonIndex = 0;
 			}
 		}
-		else if (UIManagerWorldSubsystem->SettingsMenuWidget->IsInViewport() && MapName == "UEDPIE_0_MainMenu") {
+		else if (UIManagerWorldSubsystem->SettingsMenuWidget->IsInViewport() && MapName == "MainMenu") {
 			UIManagerWorldSubsystem->SettingsMenuWidget->RemoveFromParent();
 			UIManagerWorldSubsystem->SettingsMenuWidget->ConditionalBeginDestroy();
 			UIManagerWorldSubsystem->SettingsMenuWidget = nullptr;
@@ -348,20 +352,16 @@ void APlayerCharacter::InputScrollLeft()
 					//Add BattleEnemies in a loop, cause we need to convert them to the ACombatNPC.
 					if (UIManagerWorldSubsystem->BattleMenuWidget->IsPreparingToViewInfo) {
 						for (ACombatNPC* CombatNPC : RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer)
-							if (CombatNPC->CurrentHP > 0)
 								TargetsForSelection.Add(CombatNPC);
 						for (ACombatNPC* CombatNPC : RedemptionGameModeBase->GetBattleManager()->BattleEnemies)
-							if (CombatNPC->CurrentHP > 0)
 								TargetsForSelection.Add(CombatNPC);
 					}
 					else if (RedemptionGameModeBase->GetBattleManager()->IsSelectingAllyAsTarget) {
 						for (ACombatNPC* CombatNPC : RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer)
-							if (CombatNPC->CurrentHP > 0)
 								TargetsForSelection.Add(CombatNPC);
 					}
 					else if (!RedemptionGameModeBase->GetBattleManager()->IsSelectingAllyAsTarget)
 						for (ACombatNPC* CombatNPC : RedemptionGameModeBase->GetBattleManager()->BattleEnemies)
-							if (CombatNPC->CurrentHP > 0)
 								TargetsForSelection.Add(CombatNPC);
 					//Choose Target with scroll
 					if (TargetsForSelection.Num() > 1) {
@@ -375,8 +375,9 @@ void APlayerCharacter::InputScrollLeft()
 									break;
 								}
 								else {
+									RedemptionGameModeBase->GetBattleManager()->HideTargetCrosshairAndWidgets(TargetsForSelection, CurrentIndex, "Health", false);
 									CurrentIndex++;
-									if (CurrentIndex == StartIndex)
+									if (CurrentIndex == StartIndex) 
 										break;
 								}
 							}
@@ -387,6 +388,7 @@ void APlayerCharacter::InputScrollLeft()
 									break;
 								}
 								else {
+									RedemptionGameModeBase->GetBattleManager()->HideTargetCrosshairAndWidgets(TargetsForSelection, CurrentIndex, "Health", false);
 									CurrentIndex = 0;
 									if (CurrentIndex == StartIndex)
 										break;
@@ -505,6 +507,25 @@ void APlayerCharacter::InputScrollLeft()
 			}
 		}
 	}
+	else if (IsValid(UIManagerWorldSubsystem->ContainerInventoryMenu) && UIManagerWorldSubsystem->ContainerInventoryMenu->IsInViewport()) {
+		if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+			if (IsValid(UIManagerWorldSubsystem->ContainerInventoryMenu->SelectedItemEntryWidget) &&
+				UIManagerWorldSubsystem->PickedButton == UIManagerWorldSubsystem->ContainerInventoryMenu->SelectedItemEntryWidget->GetMainButton())
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+			else if (IsValid(Cast<UInventoryScrollBoxEntryWidget>(UIManagerWorldSubsystem->PickedButton->GetOuter()->GetOuter())))
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 0.f));
+			else
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+		}
+		if (UIManagerWorldSubsystem->ContainerInventoryMenu->CurrentlySelectedVerticalBox == UIManagerWorldSubsystem->ContainerInventoryMenu->GetItemsVerticalBox()) {
+			UIManagerWorldSubsystem->ContainerInventoryMenu->CurrentlySelectedVerticalBox = const_cast<UVerticalBox*>(UIManagerWorldSubsystem->ContainerInventoryMenu->GetButtonsVerticalBox());
+			UIManagerWorldSubsystem->ContainerInventoryMenu->SetPickedButtonToTakeButton();
+		}
+		else if (UIManagerWorldSubsystem->ContainerInventoryMenu->CurrentlySelectedVerticalBox == UIManagerWorldSubsystem->ContainerInventoryMenu->GetButtonsVerticalBox()) {
+			UIManagerWorldSubsystem->ContainerInventoryMenu->CurrentlySelectedVerticalBox = const_cast<UVerticalBox*>(UIManagerWorldSubsystem->ContainerInventoryMenu->GetItemsVerticalBox());
+			UIManagerWorldSubsystem->ContainerInventoryMenu->SetPickedButtonToFirstItemEntry();
+		}
+	}
 	if ((IsValid(UIManagerWorldSubsystem->SpellBattleMenuWidget) && UIManagerWorldSubsystem->SpellBattleMenuWidget->IsInViewport()) || 
 		(IsValid(UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget) && UIManagerWorldSubsystem->LearnedSpellsJournalMenuWidget->IsInViewport())
 		|| (IsValid(UIManagerWorldSubsystem->SkillBattleMenuWidget) && UIManagerWorldSubsystem->SkillBattleMenuWidget->IsInViewport())
@@ -536,20 +557,16 @@ void APlayerCharacter::InputScrollRight()
 				//Add BattleEnemies in a loop, cause we need to convert them to the ACombatNPC.
 				if (UIManagerWorldSubsystem->BattleMenuWidget->IsPreparingToViewInfo) {
 					for (ACombatNPC* CombatNPC : RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer)
-						if (CombatNPC->CurrentHP > 0)
 							TargetsForSelection.Add(CombatNPC);
 					for (ACombatNPC* CombatNPC : RedemptionGameModeBase->GetBattleManager()->BattleEnemies)
-						if (CombatNPC->CurrentHP > 0)
 							TargetsForSelection.Add(CombatNPC);
 				}
 				else if (RedemptionGameModeBase->GetBattleManager()->IsSelectingAllyAsTarget) {
 					for (ACombatNPC* CombatNPC : RedemptionGameModeBase->GetBattleManager()->BattleAlliesPlayer)
-						if (CombatNPC->CurrentHP > 0)
 							TargetsForSelection.Add(CombatNPC);
 				}
 				else if (!RedemptionGameModeBase->GetBattleManager()->IsSelectingAllyAsTarget)
 					for (ACombatNPC* CombatNPC : RedemptionGameModeBase->GetBattleManager()->BattleEnemies)
-						if (CombatNPC->CurrentHP > 0)
 							TargetsForSelection.Add(CombatNPC);
 				if (TargetsForSelection.Num() > 1) {
 					//Choose target with scroll
@@ -564,6 +581,7 @@ void APlayerCharacter::InputScrollRight()
 								break;
 							}
 							else {
+								RedemptionGameModeBase->GetBattleManager()->HideTargetCrosshairAndWidgets(TargetsForSelection, CurrentIndex, "Health", false);
 								CurrentIndex--;
 								if (CurrentIndex == StartIndex)
 									break;
@@ -576,6 +594,7 @@ void APlayerCharacter::InputScrollRight()
 								break;
 							}
 							else {
+								RedemptionGameModeBase->GetBattleManager()->HideTargetCrosshairAndWidgets(TargetsForSelection, CurrentIndex, "Health", false);
 								CurrentIndex = TargetsForSelection.Num() - 1;
 								if (CurrentIndex == StartIndex)
 									break;
@@ -692,6 +711,25 @@ void APlayerCharacter::InputScrollRight()
 				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 				UIManagerWorldSubsystem->PickedButtonIndex = 0;
 			}
+		}
+	}
+	else if (IsValid(UIManagerWorldSubsystem->ContainerInventoryMenu) && UIManagerWorldSubsystem->ContainerInventoryMenu->IsInViewport()){
+		if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+			if (IsValid(UIManagerWorldSubsystem->ContainerInventoryMenu->SelectedItemEntryWidget) &&
+				UIManagerWorldSubsystem->PickedButton == UIManagerWorldSubsystem->ContainerInventoryMenu->SelectedItemEntryWidget->GetMainButton())
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+			else if (IsValid(Cast<UInventoryScrollBoxEntryWidget>(UIManagerWorldSubsystem->PickedButton->GetOuter()->GetOuter())))
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 0.f));
+			else
+				UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+		}
+		if (UIManagerWorldSubsystem->ContainerInventoryMenu->CurrentlySelectedVerticalBox == UIManagerWorldSubsystem->ContainerInventoryMenu->GetItemsVerticalBox()) {
+			UIManagerWorldSubsystem->ContainerInventoryMenu->CurrentlySelectedVerticalBox = const_cast<UVerticalBox*>(UIManagerWorldSubsystem->ContainerInventoryMenu->GetButtonsVerticalBox());
+			UIManagerWorldSubsystem->ContainerInventoryMenu->SetPickedButtonToTakeButton();
+		}
+		else if (UIManagerWorldSubsystem->ContainerInventoryMenu->CurrentlySelectedVerticalBox == UIManagerWorldSubsystem->ContainerInventoryMenu->GetButtonsVerticalBox()) {
+			UIManagerWorldSubsystem->ContainerInventoryMenu->CurrentlySelectedVerticalBox = const_cast<UVerticalBox*>(UIManagerWorldSubsystem->ContainerInventoryMenu->GetItemsVerticalBox());
+			UIManagerWorldSubsystem->ContainerInventoryMenu->SetPickedButtonToFirstItemEntry();
 		}
 	}
 	if ((IsValid(UIManagerWorldSubsystem->SpellBattleMenuWidget) && UIManagerWorldSubsystem->SpellBattleMenuWidget->IsInViewport()) || 
@@ -1140,7 +1178,38 @@ void APlayerCharacter::InputScrollUp()
 						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
 				}
 			}
-	}
+		 }
+	else if (IsValid(UIManagerWorldSubsystem->ContainerInventoryMenu) && IsValid(UIManagerWorldSubsystem->ContainerInventoryMenu->CurrentlySelectedVerticalBox) &&
+		UIManagerWorldSubsystem->ContainerInventoryMenu->IsInViewport()) {
+			TArray<UWidget*> SelectedVerticalBoxChildren = UIManagerWorldSubsystem->ContainerInventoryMenu->CurrentlySelectedVerticalBox->GetAllChildren();
+			if (SelectedVerticalBoxChildren.Num() > 0) {
+				if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+					if (IsValid(UIManagerWorldSubsystem->ContainerInventoryMenu->SelectedItemEntryWidget) &&
+						UIManagerWorldSubsystem->PickedButton == UIManagerWorldSubsystem->ContainerInventoryMenu->SelectedItemEntryWidget->GetMainButton())
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+					else if(IsValid(Cast<UInventoryScrollBoxEntryWidget>(UIManagerWorldSubsystem->PickedButton->GetOuter()->GetOuter())))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 0.f));
+					else
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+				}
+				if (UIManagerWorldSubsystem->PickedButtonIndex == 0) {
+					if (UInventoryScrollBoxEntryWidget* SelectedEntryWidget = Cast<UInventoryScrollBoxEntryWidget>(SelectedVerticalBoxChildren[SelectedVerticalBoxChildren.Num() - 1]); IsValid(SelectedEntryWidget))
+						UIManagerWorldSubsystem->PickedButton = SelectedEntryWidget->GetMainButton();
+					else
+						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SelectedVerticalBoxChildren[SelectedVerticalBoxChildren.Num() - 1]);
+					UIManagerWorldSubsystem->PickedButtonIndex = SelectedVerticalBoxChildren.Num() - 1;
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+				}
+				else {
+					if (auto* SelectedEntryWidget = Cast<UInventoryScrollBoxEntryWidget>(SelectedVerticalBoxChildren[UIManagerWorldSubsystem->PickedButtonIndex - 1]); IsValid(SelectedEntryWidget))
+						UIManagerWorldSubsystem->PickedButton = SelectedEntryWidget->GetMainButton();
+					else
+						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SelectedVerticalBoxChildren[UIManagerWorldSubsystem->PickedButtonIndex - 1]);
+					UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex - 1;
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+				}
+			}
+		 }
 }
 
 void APlayerCharacter::InputScrollDown()
@@ -1565,6 +1634,37 @@ void APlayerCharacter::InputScrollDown()
 				}
 			}
 		 }
+	else if (IsValid(UIManagerWorldSubsystem->ContainerInventoryMenu) && IsValid(UIManagerWorldSubsystem->ContainerInventoryMenu->CurrentlySelectedVerticalBox) &&
+		UIManagerWorldSubsystem->ContainerInventoryMenu->IsInViewport()) {
+			TArray<UWidget*> SelectedVerticalBoxChildren = UIManagerWorldSubsystem->ContainerInventoryMenu->CurrentlySelectedVerticalBox->GetAllChildren();
+			if (SelectedVerticalBoxChildren.Num() > 0) {
+				if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+					if (IsValid(UIManagerWorldSubsystem->ContainerInventoryMenu->SelectedItemEntryWidget) &&
+						UIManagerWorldSubsystem->PickedButton == UIManagerWorldSubsystem->ContainerInventoryMenu->SelectedItemEntryWidget->GetMainButton())
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+					else if (IsValid(Cast<UInventoryScrollBoxEntryWidget>(UIManagerWorldSubsystem->PickedButton->GetOuter()->GetOuter())))
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 0.f));
+					else
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+				}
+				if (UIManagerWorldSubsystem->PickedButtonIndex == SelectedVerticalBoxChildren.Num() - 1) {
+					if (UInventoryScrollBoxEntryWidget* SelectedEntryWidget = Cast<UInventoryScrollBoxEntryWidget>(SelectedVerticalBoxChildren[0]); IsValid(SelectedEntryWidget))
+						UIManagerWorldSubsystem->PickedButton = SelectedEntryWidget->GetMainButton();
+					else
+						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SelectedVerticalBoxChildren[0]);
+					UIManagerWorldSubsystem->PickedButtonIndex = 0;
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+				}
+				else {
+					if (auto* SelectedEntryWidget = Cast<UInventoryScrollBoxEntryWidget>(SelectedVerticalBoxChildren[UIManagerWorldSubsystem->PickedButtonIndex + 1]); IsValid(SelectedEntryWidget))
+						UIManagerWorldSubsystem->PickedButton = SelectedEntryWidget->GetMainButton();
+					else
+						UIManagerWorldSubsystem->PickedButton = Cast<UButton>(SelectedVerticalBoxChildren[UIManagerWorldSubsystem->PickedButtonIndex + 1]);
+					UIManagerWorldSubsystem->PickedButtonIndex = UIManagerWorldSubsystem->PickedButtonIndex + 1;
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+				}
+			}
+		}
 }
 
 void APlayerCharacter::InputAction()
@@ -1575,16 +1675,22 @@ void APlayerCharacter::InputAction()
 			ChangeLevel(ActorResult);
 			PickUpItem(ActorResult);
 			DialogueInteract(ActorResult);
-			NotificationActions(ActorResult);
+			MiscellaneousActions(ActorResult);
 		}
 	}
 	if (IsValid(UIManagerWorldSubsystem) && IsValid(UIManagerWorldSubsystem->PickedButton))
 		UIManagerWorldSubsystem->PickedButton->OnClicked.Broadcast();
 }
 
+void APlayerCharacter::InputAttack()
+{
+	PlayerAnimInstance->SetPlayerIsAttacking(true);
+	CanOpenOtherMenus = false;
+}
+
 void APlayerCharacter::InputBack()
 {
-	FString MapName = GetWorld()->GetMapName();
+	FString MapName = UGameplayStatics::GetCurrentLevelName(GetWorld());
 	if (IsValid(Controller) && IsValid(UIManagerWorldSubsystem)) {
 		if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget) && UIManagerWorldSubsystem->InventoryMenuWidget->IsInViewport() 
 			&& UIManagerWorldSubsystem->InventoryMenuWidget->GetBattleMenuButtonsForItemsBorder()->GetVisibility() == ESlateVisibility::Visible) {
@@ -1670,98 +1776,79 @@ void APlayerCharacter::ChangeLevel(const AActor* const ActorResult)
 	//If ray result isn't null and is level change trigger,loading screen is set, then load level and save a data into the GameInstance. 
 	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 		if (auto* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance)) {
-			if (IsValid(RedemptionGameModeBase->GetLoadingScreenClass()) && IsValid(PlayerController))
+			if (IsValid(PlayerController))
 				if (ActorResult->ActorHasTag(FName(TEXT("ChangeLevelToDungeon"))) || ActorResult->ActorHasTag(FName(TEXT("ChangeLevelToTown")))) {
-					UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
-					ULoadingScreen* LoadingScreen = CreateWidget<ULoadingScreen>(PlayerController, RedemptionGameModeBase->GetLoadingScreenClass());
-					LoadingScreen->AddToViewport();
 					if (ActorResult->ActorHasTag(FName(TEXT("ChangeLevelToDungeon"))))
 						UGameplayStatics::OpenLevel(GetWorld(), "Dungeon");
 					else if (ActorResult->ActorHasTag(FName(TEXT("ChangeLevelToTown"))))
 						UGameplayStatics::OpenLevel(GetWorld(), "Town");
-					//Save PlayerCharacter into the GameInstance.
-					{
-						RedemptionGameInstance->PlayerCharacterInstanceDataStruct.PlayerTransform.SetLocation(FVector(-1488.0, 1488.0, -1488.0));
-						FMemoryWriter MemWriter(RedemptionGameInstance->PlayerCharacterInstanceDataStruct.ByteData);
-						FObjectAndNameAsStringProxyArchive Ar(MemWriter, true);
-						Ar.ArIsSaveGame = true;
-						Serialize(Ar);
-					}
-					//Save Allies into the GameInstance.
-					RedemptionGameInstance->CombatAllyNPCs.Empty();
-					for (ACombatAllyNPC* CombatAllyNPC : Allies) {
-						FCombatAllyNPCGameInstanceData CombatAllyNPCGameInstanceData{};
-						CombatAllyNPCGameInstanceData.ActorClass = CombatAllyNPC->GetClass();
-						CombatAllyNPCGameInstanceData.ActorName = CombatAllyNPC->GetFName();
-						FMemoryWriter MemWriter(CombatAllyNPCGameInstanceData.ByteData);
-						FObjectAndNameAsStringProxyArchive Ar(MemWriter, true);
-						Ar.ArIsSaveGame = true;
-						CombatAllyNPC->Serialize(Ar);
-						RedemptionGameInstance->CombatAllyNPCs.Add(CombatAllyNPCGameInstanceData);
-					}
-					//Save level actors into the GameInstance.
-					if (UGameplayStatics::GetCurrentLevelName(GetWorld()) == "Town")
-						RedemptionGameInstance->TownActors.Empty();
-					else if (UGameplayStatics::GetCurrentLevelName(GetWorld()) == "Dungeon")
-						RedemptionGameInstance->DungeonActors.Empty();
-					for (FActorIterator It(GetWorld()); It; ++It)
-					{
-						AActor* Actor = *It;
-						if (!IsValid(Actor) || !Actor->Implements<USavableObjectInterface>() || IsValid(Cast<APlayerCharacter>(Actor))
-							|| IsValid(Cast<ACombatAllyNPC>(Actor)))
-						{
-							continue;
-						}
-						if (Actor->Implements<USavableObjectInterface>()) {
-							FActorGameInstanceData ActorGameInstanceData{};
-							ActorGameInstanceData.ActorName = Actor->GetFName();
-							ActorGameInstanceData.ActorTransform = Actor->GetTransform();
-							ActorGameInstanceData.ActorClass = Actor->GetClass();
-							FMemoryWriter MemWriter(ActorGameInstanceData.ByteData);
-							FObjectAndNameAsStringProxyArchive Ar(MemWriter, true);
-							Ar.ArIsSaveGame = true;
-							Actor->Serialize(Ar);
-							if (UGameplayStatics::GetCurrentLevelName(GetWorld()) == "Town")
-								RedemptionGameInstance->TownActors.Add(ActorGameInstanceData);
-							else if (UGameplayStatics::GetCurrentLevelName(GetWorld()) == "Dungeon")
-								RedemptionGameInstance->DungeonActors.Add(ActorGameInstanceData);
-						}
-					}
+					RedemptionGameInstance->SaveGameIntoGameInstance();
+					RedemptionGameInstance->IsChangingLevel = true;
 				}
 		}
 }
 
-void APlayerCharacter::NotificationActions(const AActor* const ActorResult)
+void APlayerCharacter::MiscellaneousActions(const AActor* const ActorResult)
 {
-	if (auto* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance)) {
-		if (ActorResult->ActorHasTag(FName(TEXT("FinishGame"))) && IsValid(UIManagerWorldSubsystem->NotificationWidget)) {
-			if (RedemptionGameInstance->InstanceKilledEnemies < 3) {
-				CreateNotification(FText::FromString("You need to kill all enemies before proceeding!"));
-			}
-			else if (RedemptionGameInstance->InstanceKilledEnemies >= 3 && !GetWorld()->GetTimerManager().IsTimerActive(FinishGameTimerHandle)) {
-				CreateNotification(FText::FromString("Congratulations!!!"));
+	if (ActorResult->ActorHasTag(FName(TEXT("EndGameActor")))) {
+		if(const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)){
+			UIManagerWorldSubsystem->StartFinishGameScreenWidget = CreateWidget<UStartFinishGameScreen>(PlayerController,
+				RedemptionGameModeBase->GetStartFinishGameScreenClass());
+			if (IsValid(UIManagerWorldSubsystem->StartFinishGameScreenWidget)) {
+				UIManagerWorldSubsystem->StartFinishGameScreenWidget->AddToViewport(0);
 			}
 		}
 	}
 }
 
-void APlayerCharacter::CreateNotification(const FText& NotificationText)
+void APlayerCharacter::CreateNotification(const FText& NotificationText, float NotificationTime)
 {
 	if (IsValid(UIManagerWorldSubsystem->NotificationWidget)) {
-		FTimerHandle RemoveNotificationTimerHandle{};
-		UIManagerWorldSubsystem->NotificationWidget->AddToViewport();
-		UIManagerWorldSubsystem->NotificationWidget->SetNotificationTextBlockText(NotificationText);
-		GetWorld()->GetTimerManager().SetTimer(RemoveNotificationTimerHandle, this, &APlayerCharacter::RemoveNotification, 3.f, false);
+		if (NotificationQueue.IsEmpty() && !UIManagerWorldSubsystem->NotificationWidget->IsInViewport()) {
+			FTimerHandle RemoveNotificationTimerHandle{};
+			UIManagerWorldSubsystem->NotificationWidget->AddToViewport();
+			UIManagerWorldSubsystem->NotificationWidget->SetNotificationTextBlockText(NotificationText);
+			FTimerDelegate RemoveNotificationTimerDelegate = FTimerDelegate::CreateUObject(this, &APlayerCharacter::RemoveNotification, NotificationTime);
+			GetWorld()->GetTimerManager().SetTimer(RemoveNotificationTimerHandle, RemoveNotificationTimerDelegate, NotificationTime, false);
+		}
+		else
+			NotificationQueue.Add(NotificationText);
 	}
 }
+
+void APlayerCharacter::RemoveNotification(const float NewNotificationTime)
+{
+	if (IsValid(UIManagerWorldSubsystem->NotificationWidget)) {
+		if (NotificationQueue.IsEmpty())
+			UIManagerWorldSubsystem->NotificationWidget->RemoveFromParent();
+		else {
+			FTimerHandle RemoveNotificationTimerHandle{};
+			UIManagerWorldSubsystem->NotificationWidget->SetNotificationTextBlockText(NotificationQueue.Pop());
+			FTimerDelegate RemoveNotificationTimerDelegate = FTimerDelegate::CreateUObject(this, &APlayerCharacter::RemoveNotification, NewNotificationTime);
+			GetWorld()->GetTimerManager().SetTimer(RemoveNotificationTimerHandle, RemoveNotificationTimerDelegate, NewNotificationTime, false);
+		}
+	}
+}
+
 
 void APlayerCharacter::PickUpItem(AActor* const ActorResult)
 {
 	if (ActorResult->ActorHasTag(FName(TEXT("Loot")))) 
 		if (ALootInTheWorld* LootInTheWorld = Cast<ALootInTheWorld>(ActorResult); IsValid(LootInTheWorld)) {
-			UIManagerWorldSubsystem->InventoryMenuWidget->PickUpItem(LootInTheWorld->GetItemsClasses());
-			//Destroy container with loot
-			ActorResult->Destroy();
+			if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+				UIManagerWorldSubsystem->ContainerInventoryMenu = CreateWidget<UContainerInventoryMenu>(PlayerController, RedemptionGameModeBase->GetContainerInventoryMenuClass());
+			if (IsValid(UIManagerWorldSubsystem->ContainerInventoryMenu)) {
+				UIManagerWorldSubsystem->ContainerInventoryMenu->ContainerObject = Cast<ALootInTheWorld>(ActorResult);
+				UIManagerWorldSubsystem->ContainerInventoryMenu->FillContainerInventory(LootInTheWorld->GetItemsClasses());
+				UIManagerWorldSubsystem->ContainerInventoryMenu->AddToViewport();
+				PlayerController->SetPause(true);
+				PlayerController->bShowMouseCursor = true;
+				PlayerController->bEnableClickEvents = true;
+				PlayerController->bEnableMouseOverEvents = true;
+				UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(PlayerController, UIManagerWorldSubsystem->PauseMenuWidget, EMouseLockMode::DoNotLock);
+				//PlayerController->ActivateTouchInterface(EmptyTouchInterface);
+				CanOpenOtherMenus = false;
+			}
 		}
 }
 
@@ -1774,9 +1861,16 @@ void APlayerCharacter::DialogueInteract(const AActor* const ActorResult)
 				if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
 					if (IsValid(RedemptionGameModeBase->GetDialogueBoxClass()))
 						UIManagerWorldSubsystem->DialogueBoxWidget = CreateWidget<UDialogueBox>(Cast<APlayerController>(this->GetController()), RedemptionGameModeBase->GetDialogueBoxClass());
-					if (IsValid(RedemptionGameModeBase->GetResponsesBoxClass()))
-						UIManagerWorldSubsystem->ResponsesBoxWidget = CreateWidget<UResponsesBox>(Cast<APlayerController>(this->GetController()), RedemptionGameModeBase->GetResponsesBoxClass());
 					TownNPC->Execute_StartADialogue(TownNPC);
+					IsInDialogue = true;
+					FString MapName = UGameplayStatics::GetCurrentLevelName(GetWorld());
+					//Set non combat enemies' detection to 0, so they won't attack during a dialogue.
+					if (MapName == "Dungeon")
+						for (TActorIterator<ANonCombatEnemyNPC> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+						{
+							if (auto* const NonCombatEnemyNPCAIController = ActorItr->GetController<ANonCombatEnemyNPCAIController>(); IsValid(NonCombatEnemyNPCAIController))
+								NonCombatEnemyNPCAIController->ReturnToPatrolling();
+						}
 				}
 			}
 			//if(IsValid(PlayerController))
@@ -1827,6 +1921,12 @@ void APlayerCharacter::CheckForwardRayHitResult()
 					UIManagerWorldSubsystem->ForwardRayInfoWidget->SetMainTextBlockText(FText::FromName(LootInTheWorld->GetName()));
 			}
 		}
+		else if (ActorResult->ActorHasTag(FName(TEXT("EndGameActor")))) {
+			if (!UIManagerWorldSubsystem->ForwardRayInfoWidget->IsInViewport()) {
+				UIManagerWorldSubsystem->ForwardRayInfoWidget->AddToViewport(0);
+				UIManagerWorldSubsystem->ForwardRayInfoWidget->SetMainTextBlockText(FText::FromString("Hit the road"));
+			}
+		}
 		//Remove from viewport, if ray didn't hit NPC or interactive object
 		else if(UIManagerWorldSubsystem->ForwardRayInfoWidget->IsInViewport())
 			UIManagerWorldSubsystem->ForwardRayInfoWidget->RemoveFromParent();
@@ -1840,9 +1940,20 @@ void APlayerCharacter::CheckForwardRayHitResult()
 
 void APlayerCharacter::LoadObjectFromGameInstance_Implementation(const URedemptionGameInstance* const GameInstance)
 {
-	if (GameInstance->PlayerCharacterInstanceDataStruct.PlayerTransform.GetLocation() != FVector(0.0, 0.0, 0.0) &&
-		GameInstance->PlayerCharacterInstanceDataStruct.PlayerTransform.GetLocation() != FVector(-1488.0, 1488.0, -1488.0))
-			SetActorTransform(GameInstance->PlayerCharacterInstanceDataStruct.PlayerTransform);
+	if (!GameInstance->IsChangingLevel) {
+		//Need this, cause character is floating in the air after a spawn.
+		FTransform NewPlayerTransform = GameInstance->PlayerCharacterInstanceDataStruct.PlayerTransform;
+		FVector NewLocationVector = NewPlayerTransform.GetLocation();
+		NewLocationVector.Z = NewLocationVector.Z - 5;
+		NewPlayerTransform.SetLocation(NewLocationVector);
+		SetActorTransform(NewPlayerTransform);
+	}
+	else if (GameInstance->IsChangingLevel && !GameInstance->StartedNewGame) {
+		if (UGameplayStatics::GetCurrentLevelName(GetWorld()) == "Town") {
+			SetActorLocation(FVector(-2600.0, -230.0, 525.0));
+			SetActorRotation(FRotator(0.0, -180.0, 0.0));
+		}
+	}
 	FMemoryReader MemReader(GameInstance->PlayerCharacterInstanceDataStruct.ByteData);
 	FObjectAndNameAsStringProxyArchive Ar(MemReader, true);
 	Ar.ArIsSaveGame = true;
@@ -1886,6 +1997,7 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 		PEI->BindAction(InputActions->InputSpellReset, ETriggerEvent::Started, this, &APlayerCharacter::InputSpellReset);
 		PEI->BindAction(InputActions->InputOpenLearnedSpells, ETriggerEvent::Started, this, &APlayerCharacter::InputOpenLearnedSpells);
 		PEI->BindAction(InputActions->InputOpenSpellInfo, ETriggerEvent::Started, this, &APlayerCharacter::InputOpenSpellInfo);
+		PEI->BindAction(InputActions->InputAttack, ETriggerEvent::Started, this, &APlayerCharacter::InputAttack);
 	}
 }
 //Ray of detecting objects in front of a player
@@ -1937,22 +2049,11 @@ void APlayerCharacter::InitializeSkillsProgress()
 	SkillsProgressMap.Add(ECharacterSkills::PERSUASION, 0);
 }
 
-void APlayerCharacter::RemoveNotification()
-{
-	if(IsValid(UIManagerWorldSubsystem->NotificationWidget))
-		UIManagerWorldSubsystem->NotificationWidget->RemoveFromParent();
-}
-
 void APlayerCharacter::FinishGame()
 {
-	if (const auto* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
-		if (IsValid(PlayerController) && IsValid(RedemptionGameModeBase->GetLoadingScreenClass())) {
-			UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
-			ULoadingScreen* LoadingScreen = CreateWidget<ULoadingScreen>(PlayerController, RedemptionGameModeBase->GetLoadingScreenClass());
-			if(IsValid(LoadingScreen))
-				LoadingScreen->AddToViewport();
-			UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
-		}
+	if (IsValid(PlayerController)) {
+		UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
+	}
 }
 
 void APlayerCharacter::RestartBattleMenuWidget()

@@ -10,6 +10,7 @@
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 #include "..\Dynamics\Gameplay\Managers\QuestManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/CanvasPanelSlot.h"
 
 UBTTask_AskRepeatedQuestion::UBTTask_AskRepeatedQuestion()
 {
@@ -49,8 +50,6 @@ EBTNodeResult::Type UBTTask_AskRepeatedQuestion::PrepareResponses(APlayerControl
 	if (!IsValid(UIManagerWorldSubsystem->DialogueBoxWidget))
 		return EBTNodeResult::Failed;
 
-
-	UIManagerWorldSubsystem->DialogueBoxWidget->GetResponseVerticalBox()->AddChildToVerticalBox(UIManagerWorldSubsystem->ResponsesBoxWidget);
 	UIManagerWorldSubsystem->DialogueBoxWidget->GetContinueButton()->SetVisibility(ESlateVisibility::Hidden);
 
 	if (!BlackboardComponent->GetValue<UBlackboardKeyType_Bool>("FirstDialoguePassed")) {
@@ -61,25 +60,17 @@ EBTNodeResult::Type UBTTask_AskRepeatedQuestion::PrepareResponses(APlayerControl
 		UIManagerWorldSubsystem->DialogueBoxWidget->SetDialogueText(NPCRepeatedQuestion);
 	}
 
-	for (int8 Index = UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
-		UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->GetChildAt(Index)->RemoveFromParent();
-
-	for (auto Response : PlayerResponsesWithoutQuests) {
-		UResponseEntry* ResponseEntry = CreateWidget<UResponseEntry>(PlayerController, RedemptionGameModeBase->GetResponseEntryClass());
-		ResponseEntry->SetResponseText(Response);
-		UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->AddChildToVerticalBox(ResponseEntry);
-		ResponseEntry->OnResponseClicked.AddDynamic(this, &UBTTask_AskQuestion::ResponseReceived);
-	}
+	UIManagerWorldSubsystem->DialogueBoxWidget->GetResponseVerticalBox()->ClearChildren();
 
 	if (IsValid(RedemptionGameModeBase->GetQuestManager()))
 		for (auto ResponseWithQuest : PlayerResponsesWithQuests) {
 			bool ShowEntry = false;
-			if(RedemptionGameModeBase->GetQuestManager()->GetActiveOrFinishedQuestsAndTheirStages().Num() == 0 && ResponseWithQuest.QuestStage < 0)
+			if (RedemptionGameModeBase->GetQuestManager()->GetActiveOrFinishedQuestsAndTheirStages().Num() == 0 && ResponseWithQuest.QuestStage < 0)
 				ShowEntry = true;
 			for (uint16 Index = 0; Index < RedemptionGameModeBase->GetQuestManager()->GetActiveOrFinishedQuestsAndTheirStages().Num(); Index++) {
 				auto QuestAndStage = RedemptionGameModeBase->GetQuestManager()->GetActiveOrFinishedQuestsAndTheirStages()[Index];
 				if (ResponseWithQuest.QuestClass == QuestAndStage.QuestClass) {
-					if (ResponseWithQuest.QuestStage == QuestAndStage.QuestStage) 
+					if (ResponseWithQuest.QuestStage == QuestAndStage.QuestStage)
 						ShowEntry = true;
 					break;
 				}
@@ -89,10 +80,17 @@ EBTNodeResult::Type UBTTask_AskRepeatedQuestion::PrepareResponses(APlayerControl
 			if (ShowEntry) {
 				UResponseEntry* ResponseEntry = CreateWidget<UResponseEntry>(PlayerController, RedemptionGameModeBase->GetResponseEntryClass());
 				ResponseEntry->SetResponseText(ResponseWithQuest.PlayerResponse);
-				UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->AddChildToVerticalBox(ResponseEntry);
+				UIManagerWorldSubsystem->DialogueBoxWidget->GetResponseVerticalBox()->AddChildToVerticalBox(ResponseEntry);
 				ResponseEntry->OnResponseClicked.AddDynamic(this, &UBTTask_AskQuestion::ResponseReceived);
 			}
 		}
+
+	for (auto Response : PlayerResponsesWithoutQuests) {
+		UResponseEntry* ResponseEntry = CreateWidget<UResponseEntry>(PlayerController, RedemptionGameModeBase->GetResponseEntryClass());
+		ResponseEntry->SetResponseText(Response);
+		UIManagerWorldSubsystem->DialogueBoxWidget->GetResponseVerticalBox()->AddChildToVerticalBox(ResponseEntry);
+		ResponseEntry->OnResponseClicked.AddDynamic(this, &UBTTask_AskQuestion::ResponseReceived);
+	}
 
 	return EBTNodeResult::InProgress;
 }

@@ -7,7 +7,8 @@
 #include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 #include "..\UI\Menus\PlayerMenu.h"
 #include "Kismet/GameplayStatics.h"
-#include <Serialization/ObjectAndNameAsStringProxyArchive.h>
+#include "Serialization/ObjectAndNameAsStringProxyArchive.h"
+#include "Redemption/Characters/Player/PlayerCharacter.h"
 
 bool UJournalMenu::Initialize()
 {
@@ -105,6 +106,8 @@ void UJournalMenu::AddNewEntryToJournal(const int EntryNextNumber, const FText& 
 				JournalEntryAndItsQuest.JournalQuest = EntryQuestName;
 				JournalEntriesAndTheirQuests.Add(JournalEntryAndItsQuest);
 				JournalEntryNextNumber++;
+				if (auto* const PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter))
+					PlayerCharacter->CreateNotification(FText::FromString("New journal entry"), 1.5f);
 			}
 		}
 	}

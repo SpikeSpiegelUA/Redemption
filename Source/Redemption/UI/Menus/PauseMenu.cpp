@@ -2,7 +2,6 @@
 
 
 #include "..\UI\Menus\PauseMenu.h"
-#include "Blueprint/WidgetLayoutLibrary.h"
 #include "..\Characters\Player\PlayerCharacter.h"
 #include "Components/Button.h"
 #include "Components/StackBox.h"
@@ -111,10 +110,7 @@ void UPauseMenu::SettingsButtonOnHovered()
 void UPauseMenu::MainMenuButtonOnClicked()
 {
 	APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-	if (LoadingScreenClass && IsValid(PlayerController)) {
-		UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
-		ULoadingScreen* LoadingScreen = CreateWidget<ULoadingScreen>(PlayerController, LoadingScreenClass);
-		LoadingScreen->AddToViewport();
+	if (IsValid(PlayerController)) {
 		UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
 	}
 }

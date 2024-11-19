@@ -129,8 +129,6 @@ protected:
 	//I created this variable, cause I don't want to use bool or make perks check everytime I need to set BloodElementButton's visibility.
 	ESlateVisibility BloodElementButtonVisibility{};
 
-	FTimerHandle ShowTooltipTimerHandle{};
-
 	UFUNCTION()
 		void FireElementButtonOnClicked();
 	UFUNCTION()
@@ -275,9 +273,9 @@ public:
 	void SetCreatedSpell(const ASpell* const NewSpell);
 	//Create spell from elements and set CreatedSpell to it
 	void CreateSpellAndSetCreatedSpell(const TArray<ESpellElements>& SpellElements, ESpellType TypeOfTheSpell);
-	[[nodiscard]] ASpell* FindUniqueSpell(const TArray<TSubclassOf<ASpell>>&CorrespondingUniqueSpells, const TArray<ESpellElements>& SpellElements, const ESpellType SpellType);
+	[[nodiscard]] ASpell* FindUniqueSpell(const TArray<TSubclassOf<ASpell>>&CorrespondingUniqueSpells, const TArray<ESpellElements>& SpellElements, const ESpellType SpellType, const ESpellRange SpellRange);
 	//Set CreatedSpell to found unique spell or nullptr.
-	void SetUniqueCreatedSpell(const TArray<ESpellElements>& SpellElements, ESpellType TypeOfTheSpell);
+	void SetUniqueCreatedSpell(const TArray<ESpellElements>& SpellElements, const ESpellType TypeOfTheSpell, const ESpellRange SpellRange);
 	void ActivateNotification(const FText& NotificationText);
 	void ShowSpellTypesButtonsHideElementsAndRangeButtons();
 	void ShowElementsButtonsHideSpellTypesAndRangeButtons();

@@ -42,6 +42,12 @@ void ANPCAIController::OnPossess(APawn* InPawn)
 	}
 }
 
+void ANPCAIController::DisableMainBehavior() const
+{
+	const FGameplayTag SubTreeTag = FGameplayTag::RequestGameplayTag(FName("SubTreeTag"));
+	BehaviorTreeComponent->SetDynamicSubtree(SubTreeTag, nullptr);
+}
+
 UBehaviorTreeComponent* ANPCAIController::GetBehaviorTreeComponent() const
 {
 	return BehaviorTreeComponent;

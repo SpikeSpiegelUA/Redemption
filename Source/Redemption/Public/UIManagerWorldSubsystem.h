@@ -49,8 +49,6 @@ public:
 	UPROPERTY()
 	class UDialogueBox* DialogueBoxWidget{};
 	UPROPERTY()
-	class UResponsesBox* ResponsesBoxWidget{};
-	UPROPERTY()
 	class UNotification* NotificationWidget{};
 	UPROPERTY()
 	class UDeathMenu* DeathMenuWidget{};
@@ -82,4 +80,8 @@ public:
 	class UJournalMenu* JournalMenuWidget{};
 	UPROPERTY()
 	class UTradingMenu* TradingMenuWidget{};
+	UPROPERTY()
+	class UContainerInventoryMenu* ContainerInventoryMenu{};
+	UPROPERTY()
+	class UStartFinishGameScreen* StartFinishGameScreenWidget{};
 };

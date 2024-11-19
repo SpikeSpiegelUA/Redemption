@@ -52,8 +52,7 @@ EBTNodeResult::Type UBTTask_BackToTalkTargetSelection::ExecuteTask(UBehaviorTree
 	AudioManager->DungeonCombatBackgroundMusicAudioComponents[AudioManager->IndexInArrayOfCurrentPlayingBGMusic]->SetPaused(false);
 	AudioManager->GetDungeonTalkBackgroundMusicAudioComponent_Daat()->SetPaused(true);
 
-	for (int8 Index = UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
-		UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->GetChildAt(Index)->RemoveFromParent();
+	UIManagerWorldSubsystem->DialogueBoxWidget->GetResponseVerticalBox()->ClearChildren();
 
 	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("IsInDialogue", false);
 	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Bool>("FirstDialoguePassed", false);

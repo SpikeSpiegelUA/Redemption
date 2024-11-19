@@ -8,14 +8,14 @@
 #include "Kismet/GameplayStatics.h"
 #include "RedemptionGameModeBase.h"
 
-void InventoryActions::IfItemAlreadyIsInInventory(UWorld* const World, UScrollBox* ItemScrollBox, const AGameItem* const Item)
+void InventoryActions::IfItemAlreadyIsInInventory(UWorld* const World, UScrollBox* ItemScrollBox, const AGameItem* const Item, const int Amount)
 {
 	bool IsInInventory = false;
 	for (UWidget* ScrollBoxWidget : ItemScrollBox->GetAllChildren()) {
 		if (UInventoryScrollBoxEntryWidget* CurrentWidget = Cast<UInventoryScrollBoxEntryWidget>(ScrollBoxWidget); IsValid(CurrentWidget))
 			if (CurrentWidget->GetItem()->GetItemName() == Item->GetItemName()) {
 				IsInInventory = true;
-				CurrentWidget->AmountOfItems += 1;
+				CurrentWidget->AmountOfItems += Amount;
 				FString NameString = Item->GetItemName().ToString() + FString("(" + FString::FromInt(CurrentWidget->AmountOfItems) + ")");
 				CurrentWidget->GetMainTextBlock()->SetText(FText::FromString(NameString));
 				break;
@@ -26,9 +26,15 @@ void InventoryActions::IfItemAlreadyIsInInventory(UWorld* const World, UScrollBo
 		if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(World)); IsValid(RedemptionGameModeBase))
 			InventoryScrollBoxEntryWidget = CreateWidget<UInventoryScrollBoxEntryWidget>(World, RedemptionGameModeBase->GetInventoryScrollBoxEntryClass());
 		if (IsValid(InventoryScrollBoxEntryWidget)) {
-			InventoryScrollBoxEntryWidget->GetMainTextBlock()->SetText(FText::FromName(Item->GetItemName()));
+
 			InventoryScrollBoxEntryWidget->SetItem(const_cast<AGameItem*>(Item));
-			InventoryScrollBoxEntryWidget->AmountOfItems = 1;
+			InventoryScrollBoxEntryWidget->AmountOfItems = Amount;
+			FString NameString{};
+			if(InventoryScrollBoxEntryWidget->AmountOfItems > 1)
+				NameString = Item->GetItemName().ToString() + FString("(" + FString::FromInt(InventoryScrollBoxEntryWidget->AmountOfItems) + ")");
+			else
+				NameString = Item->GetItemName().ToString();
+			InventoryScrollBoxEntryWidget->GetMainTextBlock()->SetText(FText::FromString(NameString));
 			InventoryScrollBoxEntryWidget->AddToViewport();
 			ItemScrollBox->AddChild(InventoryScrollBoxEntryWidget);
 		}
@@ -58,10 +64,13 @@ void InventoryActions::ItemAmountInInventoryLogic(UInventoryScrollBoxEntryWidget
 
 void InventoryActions::RemoveItemFromGameInstance(URedemptionGameInstance* const GameInstance, const AGameItem* const UsedOrEquipedItem)
 {
-	for (TSubclassOf<AGameItem> InstanceItemsInTheInventoryGameItem : GameInstance->InstanceItemsInTheInventory) {
-		if (AGameItem* GameItem = Cast<AGameItem>(InstanceItemsInTheInventoryGameItem->GetDefaultObject()); IsValid(GameItem))
+	for (int Index = 0; Index < GameInstance->InstanceItemsInTheInventory.Num(); Index++) {
+		if (AGameItem* GameItem = Cast<AGameItem>(GameInstance->InstanceItemsInTheInventory[Index].ItemClass->GetDefaultObject()); IsValid(GameItem))
 			if (GameItem->GetItemName() == UsedOrEquipedItem->GetItemName()) {
-				GameInstance->InstanceItemsInTheInventory.RemoveSingle(InstanceItemsInTheInventoryGameItem);
+				if (GameInstance->InstanceItemsInTheInventory[Index].Amount > 1)
+					GameInstance->InstanceItemsInTheInventory[Index].Amount -= 1;
+				else
+					GameInstance->InstanceItemsInTheInventory.RemoveAt(Index);
 				break;
 			}
 	}

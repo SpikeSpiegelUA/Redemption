@@ -12,9 +12,11 @@
 #include "..\SaveSystem\RedemptionSaveGame.h"
 #include "..\GameInstance\Structs\ActorGameInstanceData.h"
 #include "..\GameInstance\Structs\PlayerCharacterInstanceData.h"
+#include "..\GameInstance\Structs\LootInTheWorldGameInstanceData.h"
 #include "..\UI\Miscellaneous\SaveSlotEntry.h"
 #include "Structs/CombatAllyNPCGameInstanceData.h"
 #include "Containers/Map.h"
+#include "Redemption/Dynamics/Miscellaneous/ItemClassAndAmount.h"
 #include "RedemptionGameInstance.generated.h"
 
 /**
@@ -28,6 +30,7 @@ class REDEMPTION_API URedemptionGameInstance : public UGameInstance
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	TSubclassOf<USaveSlotEntry> SaveSlotEntryClass;
+
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	USaveSlotEntry* SaveSlotEntryWidget;
 protected:
@@ -35,9 +38,16 @@ protected:
 public:
 	URedemptionGameInstance(const FObjectInitializer& ObjectInitializer);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loading Screen")
+	TSubclassOf<class UUserWidget> LoadingScreenClass;
+
 	//JournalMenu variables.
 	UPROPERTY(SaveGame)
 	TArray<uint8> JournalMenuByteData{};
+
+	//World state variables.
+	UPROPERTY(SaveGame)
+	TArray<uint8> WorldStateSubsystemByteData{};
 
 	//QuestManager variables.
 	UPROPERTY(SaveGame)
@@ -45,7 +55,7 @@ public:
 
 	//Inventory variables.
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory", SaveGame)
-		TArray<TSubclassOf<class AGameItem>> InstanceItemsInTheInventory;
+		TArray<FItemClassAndAmount> InstanceItemsInTheInventory;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", SaveGame)
 		TArray<TSubclassOf<class ASpell>> InstanceLearnedSpells{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", SaveGame)
@@ -71,6 +81,9 @@ public:
 	//Combat Allies variables
 	UPROPERTY(VisibleAnywhere, SaveGame)
 		TArray<FCombatAllyNPCGameInstanceData> CombatAllyNPCs{};
+	//Loot in the world variables.
+	UPROPERTY(VisibleAnywhere, SaveGame)
+		TArray<FLootInTheWorldGameInstanceData> LootsInTheWorld{};
 
 
 	//Settings variables.
@@ -101,12 +114,26 @@ public:
 	uint16 SaveFileIndex = 0;
 
 	//Just saves the game into a file.
-	void SaveGame(const uint16 SlotIndex, bool IsOverwriting);
+	void SaveGameAndCreateAFile(const uint16 SlotIndex, bool IsOverwriting);
 	//Saves the game and creates a save slot in SaveLoadGameMenu.
 	void SaveGameAndCreateSlot(const uint16 SlotIndex);
+	//Saves the game in the GameInstance(doesn't create a file with a data).
+	void SaveGameIntoGameInstance();
 	//Just creates a save slot
 	void CreateSaveSlot(const uint16 SlotIndex);
 	//Load a map from the selected save slot.
 	void LoadSavedGameMap(const FString& SaveName);
+
+	//Loading Screen functions and variables.
+	virtual void Init() override;
+	UFUNCTION()
+	virtual void BeginLoadingScreen(const FString& MapName);
+	UFUNCTION()
+	virtual void EndLoadingScreen(UWorld* InLoadedWorld);
+
+	//Control, if we are loading the game or changing a level.
+	bool IsChangingLevel = true;
+	//Control, if a player started a new game from the main menu.
+	bool StartedNewGame = false;
 };
 

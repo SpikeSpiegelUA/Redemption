@@ -38,6 +38,9 @@ protected:
 public:
 
 	void SetBlackboardDistanceToThePlayer(float Value);
+	void SetPlayerDetection(float NewPlayerDetection);
+	//Return the character to patrolling mode(stop chasing). I need this to disable a chasing behavior during a dialogue.
+	void ReturnToPatrolling();
 
 	ANonCombatEnemyNPCAIController(const FObjectInitializer& ObjectInitializer);
 	virtual void Tick(float DeltaTime) override;

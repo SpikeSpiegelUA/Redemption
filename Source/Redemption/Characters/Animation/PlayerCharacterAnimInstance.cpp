@@ -108,3 +108,11 @@ void UPlayerCharacterAnimInstance::SetPlayerIsAttackingWithMagic(bool Value)
 	else
 		BitmapsActions::ClearBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsAttackingWithMagic));
 }
+
+void UPlayerCharacterAnimInstance::SetPlayerIsInAir(bool Value)
+{
+	if (Value)
+		BitmapsActions::SetBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsInAir));
+	else
+		BitmapsActions::ClearBit(PlayerCharacterAnimationStateBitmaskCode, static_cast<int32>(EPlayerCharacterAnimationState::PlayerIsInAir));
+}

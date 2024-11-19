@@ -21,7 +21,7 @@ private:
 
 public:
 	TArray<class AEffect*> GetEffects() const;
-	ACreatedDebuffSpell& ACreatedDebuffSpell::operator =(const ASpell& Spell);
+	ACreatedDebuffSpell& operator =(const ASpell& Spell);
 	void AddObjectToEffects(const class AEffect* const EffectToAdd);
 	void AddObjectsToEffects(const TArray<class AEffect*>& EffectsToAdd);
 };

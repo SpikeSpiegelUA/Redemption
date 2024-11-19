@@ -31,7 +31,6 @@ EBTNodeResult::Type UBTTask_StartADialogue::ExecuteTask(UBehaviorTreeComponent& 
 
 	if (!UIManagerWorldSubsystem->DialogueBoxWidget->IsInViewport()) {
 		UIManagerWorldSubsystem->DialogueBoxWidget->AddToViewport();
-		PlayerCharacter->IsInDialogue = true;
 		UIManagerWorldSubsystem->ForwardRayInfoWidget->RemoveFromParent();
 		ACharacterInTheWorld* Speaker = Cast<ACharacterInTheWorld>(MyController->GetPawn());
 		UIManagerWorldSubsystem->DialogueBoxWidget->SetSpeakerName(FText::FromName(Speaker->GetCharacterName()));

@@ -25,6 +25,6 @@ public:
 	int GetAttackValue() const;
 	void SetAttackValue(int NewAttackValue);
 
-	AAssaultSpell& AAssaultSpell::operator =(const ASpell& Spell);
+	AAssaultSpell& operator =(const ASpell& Spell);
 	TArray<FEffectAndItsChanceStruct> GetEffectsAndTheirChances() const;
 };

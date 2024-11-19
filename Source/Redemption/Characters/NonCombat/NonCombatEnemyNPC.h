@@ -42,7 +42,7 @@ protected:
 	//Called every tick
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", SaveGame)
 	TArray<TSubclassOf<ACombatEnemyNPC>> BattleEnemies;
 
 	void LoadObjectFromGameInstance_Implementation(const URedemptionGameInstance* const GameInstance) override;
