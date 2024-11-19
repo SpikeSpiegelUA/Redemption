@@ -37,12 +37,15 @@ Some screenshots from the game:
 ![image](https://github.com/user-attachments/assets/acd125b2-145f-4f6a-874d-54ad9ef6c32b)
 
 Dialogue example:
-https://youtu.be/RCmHkCcNjsc.
+https://youtu.be/RCmHkCcNjsc;
+
 Combat Example:
-https://youtu.be/1yxNQm81iSc
+https://youtu.be/1yxNQm81iSc;
+
 Leveling up Example:
-https://youtu.be/oUPmaxusAVA
+https://youtu.be/oUPmaxusAVA;
+
 Save system example:
-https://youtu.be/i5_PuohnwuI
+https://youtu.be/i5_PuohnwuI;
 
 
