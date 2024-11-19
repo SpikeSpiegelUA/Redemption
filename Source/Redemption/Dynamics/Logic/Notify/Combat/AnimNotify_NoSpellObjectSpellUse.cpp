@@ -39,7 +39,8 @@ void UAnimNotify_NoSpellObjectSpellUse::Notify(USkeletalMeshComponent* MeshComp,
 					SpawnActor<ACombatFloatingInformationActor>(RedemptionGameModeBase->GetBattleManager()->GetCombatFloatingInformationActorClass(),
 						UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
 				FString TextForCombatFloatingInformationActor = FString();
-				TextForCombatFloatingInformationActor.Append("+");
+				if(AmountToHeal > 0)
+					TextForCombatFloatingInformationActor.Append("+");
 				TextForCombatFloatingInformationActor.AppendInt(AmountToHeal);
 				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 				UseTarget->GetFloatingHealthBarWidget()->HP = UseTarget->CurrentHP;
@@ -55,7 +56,8 @@ void UAnimNotify_NoSpellObjectSpellUse::Notify(USkeletalMeshComponent* MeshComp,
 				ACombatFloatingInformationActor* CombatFloatingInformationActor = MeshComp->GetWorld()->
 					SpawnActor<ACombatFloatingInformationActor>(RedemptionGameModeBase->GetBattleManager()->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
 				FString TextForCombatFloatingInformationActor = FString();
-				TextForCombatFloatingInformationActor.Append("+");
+				if (AmountToRestore > 0)
+					TextForCombatFloatingInformationActor.Append("+");
 				TextForCombatFloatingInformationActor.AppendInt(AmountToRestore);
 				CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 				if (ACombatAllies* AllyTarget = Cast<ACombatAllies>(UseTarget); IsValid(AllyTarget))

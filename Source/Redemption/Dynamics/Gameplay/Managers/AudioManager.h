@@ -31,6 +31,8 @@ protected:
 
 	//SoundCues variables
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Cues")
+		USoundCue* HitSoundCue{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Cues")
 		USoundCue* UseHealOrBuffSoundCue {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound Cues")
 		USoundCue* UseDebuffSoundCue {};
@@ -97,6 +99,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	USoundCue* GetHitSoundCue() const;
 	USoundCue* GetUseHealOrBuffSoundCue() const;
 	USoundCue* GetUseDebuffSoundCue() const;
 	USoundCue* GetUseAssaultSoundCue() const;

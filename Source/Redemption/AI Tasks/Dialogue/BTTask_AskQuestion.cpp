@@ -49,20 +49,10 @@ EBTNodeResult::Type UBTTask_AskQuestion::PrepareResponses(APlayerController*& Pl
 		return EBTNodeResult::Failed;
 
 
-	UIManagerWorldSubsystem->DialogueBoxWidget->GetResponseVerticalBox()->AddChildToVerticalBox(UIManagerWorldSubsystem->ResponsesBoxWidget);
+	UIManagerWorldSubsystem->DialogueBoxWidget->GetResponseVerticalBox()->ClearChildren();
 	UIManagerWorldSubsystem->DialogueBoxWidget->GetContinueButton()->SetVisibility(ESlateVisibility::Hidden);
 	UIManagerWorldSubsystem->DialogueBoxWidget->SetDialogueText(NPCQuestion);
-
-	for (int8 Index = UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
-		UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->GetChildAt(Index)->RemoveFromParent();
 	
-	for (auto Response : PlayerResponsesWithoutQuests) {
-		UResponseEntry* ResponseEntry = CreateWidget<UResponseEntry>(PlayerController, RedemptionGameModeBase->GetResponseEntryClass());
-		ResponseEntry->SetResponseText(Response);
-		UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->AddChildToVerticalBox(ResponseEntry);
-		ResponseEntry->OnResponseClicked.AddDynamic(this, &UBTTask_AskQuestion::ResponseReceived);
-	}
-
 	if (IsValid(RedemptionGameModeBase->GetQuestManager()))
 		for (auto ResponseWithQuest : PlayerResponsesWithQuests) {
 			bool ShowEntry = false;
@@ -81,10 +71,17 @@ EBTNodeResult::Type UBTTask_AskQuestion::PrepareResponses(APlayerController*& Pl
 			if (ShowEntry) {
 				UResponseEntry* ResponseEntry = CreateWidget<UResponseEntry>(PlayerController, RedemptionGameModeBase->GetResponseEntryClass());
 				ResponseEntry->SetResponseText(ResponseWithQuest.PlayerResponse);
-				UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->AddChildToVerticalBox(ResponseEntry);
+				UIManagerWorldSubsystem->DialogueBoxWidget->GetResponseVerticalBox()->AddChildToVerticalBox(ResponseEntry);
 				ResponseEntry->OnResponseClicked.AddDynamic(this, &UBTTask_AskQuestion::ResponseReceived);
 			}
 		}
+
+	for (auto Response : PlayerResponsesWithoutQuests) {
+		UResponseEntry* ResponseEntry = CreateWidget<UResponseEntry>(PlayerController, RedemptionGameModeBase->GetResponseEntryClass());
+		ResponseEntry->SetResponseText(Response);
+		UIManagerWorldSubsystem->DialogueBoxWidget->GetResponseVerticalBox()->AddChildToVerticalBox(ResponseEntry);
+		ResponseEntry->OnResponseClicked.AddDynamic(this, &UBTTask_AskQuestion::ResponseReceived);
+	}
 
 	return EBTNodeResult::InProgress;
 }
@@ -92,11 +89,8 @@ EBTNodeResult::Type UBTTask_AskQuestion::PrepareResponses(APlayerController*& Pl
 void UBTTask_AskQuestion::ResponseReceived_Implementation(const FText& ResponseReceived)
 {
 	BehaviorTreeComponent->GetBlackboardComponent()->SetValueAsString(PlayerResponseKeySelector.SelectedKeyName, *ResponseReceived.ToString());
-	APlayerCharacter* PlayerCharacter = nullptr;
-	if(IsValid(GetWorld()))
-		PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	if(UUIManagerWorldSubsystem* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem))
-		UIManagerWorldSubsystem->ResponsesBoxWidget->RemoveFromParent();
+		UIManagerWorldSubsystem->DialogueBoxWidget->GetResponseVerticalBox()->ClearChildren();
 	FinishLatentTask(*BehaviorTreeComponent, EBTNodeResult::Succeeded);
 }
 

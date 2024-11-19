@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Redemption/Dynamics/Gameplay/Quests/Quest.h"
 #include "QuestAndItsStage.generated.h"
+
 
 /**
  * 
@@ -13,10 +15,10 @@ struct FQuestAndItsStage
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, SaveGame)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
 	TSubclassOf<AQuest> QuestClass{};
 
 	//First stage is always 0.
-	UPROPERTY(BlueprintReadWrite, SaveGame)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
 	int QuestStage = 0;
 };

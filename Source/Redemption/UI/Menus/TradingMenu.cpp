@@ -83,22 +83,33 @@ void UTradingMenu::TradeButtonOnClicked()
 				for (UWidget* ItemEntry : TradingScrollBox->GetAllChildren()) {
 					if (UTradingMenuItemEntry* ItemEntryFromTradingMenu = Cast<UTradingMenuItemEntry>(ItemEntry); IsValid(ItemEntryFromTradingMenu)) {
 						if (ItemEntryFromTradingMenu->GetItemOwner() == EItemOwner::TRADER) {
-							InventoryMenuWidget->PickUpItem(ItemEntryFromTradingMenu->GetGameItemClass());
-							TraderNPC->GetTraderInventory().RemoveSingle(ItemEntryFromTradingMenu->GetGameItemClass());
-							AddNewItemEntryToScrollBox(ItemEntryFromTradingMenu->GetGameItemClass(), EItemOwner::PLAYER, false, PlayerInventoryScrollBox);
+							InventoryMenuWidget->PickUpItem(ItemEntryFromTradingMenu->GetGameItemClass(), ItemEntryFromTradingMenu->Amount);
+							for (int Index = 0; Index < TraderNPC->GetTraderInventory().Num(); Index++) {
+								if (TraderNPC->GetTraderInventory()[Index].ItemClass == ItemEntryFromTradingMenu->GetGameItemClass()) {
+									TraderNPC->GetTraderInventory()[Index].Amount -= ItemEntryFromTradingMenu->Amount;
+									if (TraderNPC->GetTraderInventory()[Index].Amount == 0)
+										TraderNPC->GetTraderInventory().RemoveAt(Index);
+									break;
+								}
+							}
+							AddNewItemEntryToScrollBox(ItemEntryFromTradingMenu->GetGameItemClass(), ItemEntryFromTradingMenu->Amount, EItemOwner::PLAYER, false, PlayerInventoryScrollBox);
 						}
 						else if (ItemEntryFromTradingMenu->GetItemOwner() == EItemOwner::PLAYER) {
-							TraderNPC->GetTraderInventory().Add(ItemEntryFromTradingMenu->GetGameItemClass());
-							const AGameItem* const GameItemObject = ItemEntryFromTradingMenu->GetGameItemClass()->GetDefaultObject<AGameItem>();
+							FItemClassAndAmount NewItemClassAndAmount{};
+							NewItemClassAndAmount.ItemClass = ItemEntryFromTradingMenu->GetGameItemClass();
+							NewItemClassAndAmount.Amount = ItemEntryFromTradingMenu->Amount;
+							TraderNPC->GetTraderInventory().Add(NewItemClassAndAmount);
+							const AGameItem* const GameItemObject = NewItemClassAndAmount.ItemClass->GetDefaultObject<AGameItem>();
 							UScrollBox* const CorrespondingScrollBoxToEntryWidget = InventoryActions::FindCorrespondingScrollBox(InventoryMenuWidget, GameItemObject);
 							InventoryActions::ItemAmountInInventoryLogic(InventoryActions::FindItemInventoryEntryWidget(GameItemObject, CorrespondingScrollBoxToEntryWidget),
 								CorrespondingScrollBoxToEntryWidget, GameItemObject);
 							if (auto* const RedemptionGameInstance = Cast<URedemptionGameInstance>(UGameplayStatics::GetGameInstance(GetWorld())); IsValid(RedemptionGameInstance))
 								InventoryActions::RemoveItemFromGameInstance(RedemptionGameInstance, GameItemObject);
-							AddNewItemEntryToScrollBox(ItemEntryFromTradingMenu->GetGameItemClass(), EItemOwner::TRADER, false, TraderInventoryScrollBox);
+							AddNewItemEntryToScrollBox(NewItemClassAndAmount.ItemClass, NewItemClassAndAmount.Amount, EItemOwner::TRADER, false, TraderInventoryScrollBox);
 						}
 					}
 				}
+				TraderNPC->IsEmpty = TraderNPC->GetTraderInventory().IsEmpty();
 				TradingScrollBox->ClearChildren();
 				BalanceString = "Balance: ";
 				BalanceString.AppendInt(0);
@@ -142,22 +153,43 @@ void UTradingMenu::OnButtonHoveredActions(UButton* const HoveredButton)
 	}
 }
 
-void UTradingMenu::AddNewItemEntryToScrollBox(const TSubclassOf<AGameItem> NewGameItemClass, const EItemOwner NewItemOwner, const bool NewIsInTrading,
-	UScrollBox* const ScrollBoxToAddTo)
+void UTradingMenu::AddNewItemEntryToScrollBox(const TSubclassOf<AGameItem> NewGameItemClass, const int NewAmount, 
+	const EItemOwner NewItemOwner, const bool NewIsInTrading, UScrollBox* const ScrollBoxToAddTo)
 {
-	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	ARedemptionGameModeBase* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	if (IsValid(PlayerController) && IsValid(RedemptionGameModeBase)) {
-		TradingMenuItemEntry = CreateWidget<UTradingMenuItemEntry>(PlayerController, RedemptionGameModeBase->GetTradingMenuItemClass());
-	}
-	if (IsValid(TradingMenuItemEntry)) {
-		TradingMenuItemEntry->SetItemEntryInfo(NewGameItemClass, NewItemOwner, NewIsInTrading);
-		ScrollBoxToAddTo->AddChild(TradingMenuItemEntry);
-		if (NewIsInTrading) {
-			if(NewItemOwner == EItemOwner::PLAYER)
-				TradingMenuItemEntry->SetMainButtonBackgroundColor(FColor::Orange);
-			else if(NewItemOwner == EItemOwner::TRADER)
-				TradingMenuItemEntry->SetMainButtonBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+	bool ItemFound = false;
+	for (UWidget* Widget : ScrollBoxToAddTo->GetAllChildren())
+		if (auto* const ItemEntryWidget = Cast<UTradingMenuItemEntry>(Widget); IsValid(ItemEntryWidget))
+			if(ItemEntryWidget->GetGameItemClass() == NewGameItemClass && ItemEntryWidget->GetItemOwner() == NewItemOwner){
+				if(ItemEntryWidget->Amount >= 0)
+					ItemEntryWidget->Amount += NewAmount;
+				ItemFound = true;
+				FString NewNameTextBlockString = *ItemEntryWidget->GetNameTextBlockText().ToString();
+				if (ItemEntryWidget->Amount < 10)
+					NewNameTextBlockString.RemoveAt(NewNameTextBlockString.Len() - 3, 3);
+				else if (ItemEntryWidget->Amount >= 10 && ItemEntryWidget->Amount < 100)
+					NewNameTextBlockString.RemoveAt(NewNameTextBlockString.Len() - 4, 4);
+				else if (ItemEntryWidget->Amount >= 100 && ItemEntryWidget->Amount < 1000)
+					NewNameTextBlockString.RemoveAt(NewNameTextBlockString.Len() - 5, 5);
+				NewNameTextBlockString.AppendChar('(');
+				NewNameTextBlockString.AppendInt(ItemEntryWidget->Amount);
+				NewNameTextBlockString.AppendChar(')');
+				ItemEntryWidget->SetNameTextBlockText(FText::FromString(NewNameTextBlockString));
+			}
+	if (!ItemFound) {
+		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+		ARedemptionGameModeBase* RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+		if (IsValid(PlayerController) && IsValid(RedemptionGameModeBase)) {
+			TradingMenuItemEntry = CreateWidget<UTradingMenuItemEntry>(PlayerController, RedemptionGameModeBase->GetTradingMenuItemClass());
+		}
+		if (IsValid(TradingMenuItemEntry)) {
+			TradingMenuItemEntry->SetItemEntryInfo(NewGameItemClass, NewAmount, NewItemOwner, NewIsInTrading);
+			ScrollBoxToAddTo->AddChild(TradingMenuItemEntry);
+			if (NewIsInTrading) {
+				if (NewItemOwner == EItemOwner::PLAYER)
+					TradingMenuItemEntry->SetMainButtonBackgroundColor(FColor::Orange);
+				else if (NewItemOwner == EItemOwner::TRADER)
+					TradingMenuItemEntry->SetMainButtonBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+			}
 		}
 	}
 }
@@ -202,10 +234,10 @@ void UTradingMenu::InitializeTradingMenu(const ATraderNPC* const NewTraderNPC)
 	if (IsValid(NewTraderNPC)) {
 		TraderNPC = const_cast<ATraderNPC*>(NewTraderNPC);
 		if (const auto* const RedemptionGameInstance = GetWorld()->GetGameInstance<URedemptionGameInstance>(); IsValid(RedemptionGameInstance))
-			for (TSubclassOf<AGameItem> ItemClass : RedemptionGameInstance->InstanceItemsInTheInventory)
-				AddNewItemEntryToScrollBox(ItemClass, EItemOwner::PLAYER, false, PlayerInventoryScrollBox);
-		for (TSubclassOf<AGameItem> ItemClass : TraderNPC->GetTraderInventory()) 
-			AddNewItemEntryToScrollBox(ItemClass, EItemOwner::TRADER, false, TraderInventoryScrollBox);
+			for (FItemClassAndAmount ItemClassAndAmount : RedemptionGameInstance->InstanceItemsInTheInventory)
+				AddNewItemEntryToScrollBox(ItemClassAndAmount.ItemClass, ItemClassAndAmount.Amount, EItemOwner::PLAYER, false, PlayerInventoryScrollBox);
+		for (FItemClassAndAmount ItemClassAndAmount : TraderNPC->GetTraderInventory()) 
+			AddNewItemEntryToScrollBox(ItemClassAndAmount.ItemClass, ItemClassAndAmount.Amount, EItemOwner::TRADER, false, TraderInventoryScrollBox);
 		FString StringToSet = "Trader's gold: ";
 		if(IsValid(TraderNPC))
 			StringToSet.AppendInt(TraderNPC->GetGold());

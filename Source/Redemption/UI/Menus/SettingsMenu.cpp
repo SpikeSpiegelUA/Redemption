@@ -91,10 +91,10 @@ void USettingsMenu::BackButtonOnClicked()
 		this->RemoveFromParent();
 		this->ConditionalBeginDestroy();
 		UIManagerWorldSubsystem->SettingsMenuWidget = nullptr;
-		FString MapName = GetWorld()->GetMapName();
+		FString MapName = UGameplayStatics::GetCurrentLevelName(GetWorld());
 		UMainMenu* MainMenuWidget = nullptr;
 		UPauseMenu* PauseMenuWidget = nullptr;
-		if (MapName == "UEDPIE_0_MainMenu") {
+		if (MapName == "MainMenu") {
 			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>(); IsValid(PlayerController))
 				if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 					if (IsValid(RedemptionGameModeBase->GetMainMenuClass()))
@@ -106,7 +106,7 @@ void USettingsMenu::BackButtonOnClicked()
 				UIManagerWorldSubsystem->PickedButtonIndex = 0;
 			}
 		}
-		else if (MapName == "UEDPIE_0_Town" || MapName == "UEDPIE_0_Dungeon") {
+		else if (MapName == "Town" || MapName == "Dungeon") {
 			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>(); IsValid(PlayerController))
 				if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
 					if (IsValid(RedemptionGameModeBase->GetPauseMenuClass()))

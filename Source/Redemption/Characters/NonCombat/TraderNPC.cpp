@@ -3,7 +3,14 @@
 
 #include "TraderNPC.h"
 
-TArray<TSubclassOf<AGameItem>>& ATraderNPC::GetTraderInventory()
+void ATraderNPC::BeginPlay()
+{
+	Super::BeginPlay();
+	if (IsEmpty)
+		TraderInventory.Empty();
+}
+
+TArray<FItemClassAndAmount>& ATraderNPC::GetTraderInventory()
 {
 	return TraderInventory;
 }

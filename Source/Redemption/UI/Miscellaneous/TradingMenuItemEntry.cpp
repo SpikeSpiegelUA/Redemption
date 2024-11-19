@@ -31,30 +31,49 @@ void UTradingMenuItemEntry::MainButtonOnClicked()
 		int BalanceValue = UKismetStringLibrary::Conv_StringToInt(BalanceValueString);
 		if (IsInTrading) {
 			if (ItemOwner == EItemOwner::TRADER) {
-				UIManagerWorldSubsystem->TradingMenuWidget->AddNewItemEntryToScrollBox(GameItemClass, ItemOwner, false,
+				UIManagerWorldSubsystem->TradingMenuWidget->AddNewItemEntryToScrollBox(GameItemClass, 1, ItemOwner, false,
 					UIManagerWorldSubsystem->TradingMenuWidget->GetTraderInventoryScrollBox());
 				BalanceValue += GameItemClass->GetDefaultObject<AGameItem>()->GetCost() * 2;
+				Amount -= 1;
 			}
 			else if (ItemOwner == EItemOwner::PLAYER) {
-				UIManagerWorldSubsystem->TradingMenuWidget->AddNewItemEntryToScrollBox(GameItemClass, ItemOwner, false,
+				UIManagerWorldSubsystem->TradingMenuWidget->AddNewItemEntryToScrollBox(GameItemClass, 1, ItemOwner, false,
 					UIManagerWorldSubsystem->TradingMenuWidget->GetPlayerInventoryScrollBox());
 				BalanceValue -= GameItemClass->GetDefaultObject<AGameItem>()->GetCost() / 2;
+				Amount -= 1;
 			}
 		}
 		else {
-			UIManagerWorldSubsystem->TradingMenuWidget->AddNewItemEntryToScrollBox(GameItemClass, ItemOwner, true,
+			UIManagerWorldSubsystem->TradingMenuWidget->AddNewItemEntryToScrollBox(GameItemClass, 1, ItemOwner, true,
 				UIManagerWorldSubsystem->TradingMenuWidget->GetTradingScrollBox());
+			if (Amount >= 0)
+				Amount -= 1;
 			if (ItemOwner == EItemOwner::TRADER)
 				BalanceValue -= GameItemClass->GetDefaultObject<AGameItem>()->GetCost() * 2;
 			else if (ItemOwner == EItemOwner::PLAYER)
 				BalanceValue += GameItemClass->GetDefaultObject<AGameItem>()->GetCost() / 2;
 		}
+		if (Amount > 0) {
+			FString NewNameTextBlockString = NameTextBlock->GetText().ToString();
+			if(Amount < 10)
+				NewNameTextBlockString.RemoveAt(NewNameTextBlockString.Len() - 3, 3);
+			else if (Amount >= 10 && Amount < 100)
+				NewNameTextBlockString.RemoveAt(NewNameTextBlockString.Len() - 4, 4);
+			else if (Amount >= 100 && Amount < 1000)
+				NewNameTextBlockString.RemoveAt(NewNameTextBlockString.Len() - 5, 5);
+			NewNameTextBlockString.AppendChar('(');
+			NewNameTextBlockString.AppendInt(Amount);
+			NewNameTextBlockString.AppendChar(')');
+			NameTextBlock->SetText(FText::FromString(NewNameTextBlockString));
+		}
+		else if(Amount == 0) {
+			this->RemoveFromParent();
+			this->ConditionalBeginDestroy();
+		}
 		FString StringToSet = "Balance: ";
 		StringToSet.AppendInt(BalanceValue);
 		UIManagerWorldSubsystem->TradingMenuWidget->SetBalanceTextBlockText(FText::FromString(StringToSet));
 		UIManagerWorldSubsystem->TradingMenuWidget->TradeWasClicked = false;
-		this->RemoveFromParent();
-		this->ConditionalBeginDestroy();
 	}
 }
 
@@ -81,17 +100,29 @@ void UTradingMenuItemEntry::MainButtonOnHovered()
 	}
 }
 
-void UTradingMenuItemEntry::SetItemEntryInfo(const TSubclassOf<AGameItem> NewGameItemClass, const EItemOwner NewItemOwner, const bool NewIsInTrading)
+void UTradingMenuItemEntry::SetItemEntryInfo(const TSubclassOf<AGameItem> NewGameItemClass, const int NewAmount, const EItemOwner NewItemOwner, const bool NewIsInTrading)
 {
 	GameItemClass = NewGameItemClass;
 	ItemOwner = NewItemOwner;
 	IsInTrading = NewIsInTrading;
-	NameTextBlock->SetText(FText::FromName(NewGameItemClass->GetDefaultObject<AGameItem>()->GetItemName()));
+	Amount = NewAmount;
+	FString NewNameTextBlockString = NewGameItemClass->GetDefaultObject<AGameItem>()->GetItemName().ToString();
+	if (NewAmount > 0) {
+		NewNameTextBlockString.AppendChar('(');
+		NewNameTextBlockString.AppendInt(NewAmount);
+		NewNameTextBlockString.AppendChar(')');
+	}
+	NameTextBlock->SetText(FText::FromString(NewNameTextBlockString));
 }
 
 void UTradingMenuItemEntry::SetMainButtonBackgroundColor(const FLinearColor& NewBackgroundColor)
 {
 	MainButton->SetBackgroundColor(NewBackgroundColor);
+}
+
+void UTradingMenuItemEntry::SetNameTextBlockText(const FText& NewText)
+{
+	NameTextBlock->SetText(NewText);
 }
 
 bool UTradingMenuItemEntry::GetIsInTrading() const
@@ -107,4 +138,9 @@ EItemOwner UTradingMenuItemEntry::GetItemOwner() const
 const TSubclassOf<AGameItem>& UTradingMenuItemEntry::GetGameItemClass() const
 {
 	return GameItemClass;
+}
+
+const FText UTradingMenuItemEntry::GetNameTextBlockText() const
+{
+	return NameTextBlock->GetText();
 }

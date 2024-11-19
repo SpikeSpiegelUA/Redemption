@@ -295,5 +295,5 @@ public:
 	void SetPickedTypeButtonColor(class UButton* const SelectedButton);
 
 	void PickUpItem(const TArray<TSubclassOf<AGameItem>>& ItemsClasses);
-	void PickUpItem(const TSubclassOf<AGameItem> ItemClass);
+	void PickUpItem(const TSubclassOf<AGameItem> ItemClass, const int Amount);
 };

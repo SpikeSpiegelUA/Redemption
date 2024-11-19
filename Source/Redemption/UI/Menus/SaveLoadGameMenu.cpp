@@ -41,8 +41,10 @@ void USaveLoadGameMenu::NativeConstruct()
 void USaveLoadGameMenu::SaveLoadButtonWithNeighborsOnClicked()
 {
 	if (SaveLoadTextBlock->GetText().ToString() == "Load") {
-		if (URedemptionGameInstance* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance))
+		if (URedemptionGameInstance* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance)) {
+			RedemptionGameInstance->IsChangingLevel = false;
 			RedemptionGameInstance->LoadSavedGameMap(RedemptionGameInstance->SaveFileName);
+		}
 	} 
 	else if (SaveLoadTextBlock->GetText().ToString() == "Save") {
 		if (URedemptionGameInstance* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance))
@@ -55,36 +57,47 @@ void USaveLoadGameMenu::SaveLoadButtonWithNeighborsOnClicked()
 
 void USaveLoadGameMenu::BackButtonWithNeighborsOnClicked()
 {
-	FString MapName = GetWorld()->GetMapName();
+	FString MapName = UGameplayStatics::GetCurrentLevelName(GetWorld());
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()); IsValid(PlayerCharacter)) {
 		if (auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
 			this->RemoveFromParent();
-			if (MapName == "UEDPIE_0_MainMenu") {
+			if (PlayerCharacter->CurrentHP <= 0) {
 				if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>(); IsValid(PlayerController))
 					if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
-						if (IsValid(RedemptionGameModeBase->GetMainMenuClass()))
-							UIManagerWorldSubsystem->MainMenuWidget = CreateWidget<UMainMenu>(PlayerController, RedemptionGameModeBase->GetMainMenuClass());
-				if (IsValid(UIManagerWorldSubsystem->MainMenuWidget)) {
-					UIManagerWorldSubsystem->MainMenuWidget->AddToViewport();
-					if (IsValid(UIManagerWorldSubsystem->PickedButton))
-						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-					UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->MainMenuWidget->GetNewGameButton();
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-					UIManagerWorldSubsystem->PickedButtonIndex = 0;
+						if (IsValid(RedemptionGameModeBase->GetDeathMenuClass()))
+							UIManagerWorldSubsystem->DeathMenuWidget = CreateWidget<UDeathMenu>(PlayerController, RedemptionGameModeBase->GetDeathMenuClass());
+				if (IsValid(UIManagerWorldSubsystem->DeathMenuWidget)) {
+					UIManagerWorldSubsystem->DeathMenuWidget->AddToViewport();
 				}
 			}
-			else if (MapName == "UEDPIE_0_Dungeon" || MapName == "UEDPIE_0_Town") {
-				if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>(); IsValid(PlayerController))
-					if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
-						if (IsValid(RedemptionGameModeBase->GetPauseMenuClass()))
-							UIManagerWorldSubsystem->PauseMenuWidget = CreateWidget<UPauseMenu>(PlayerController, RedemptionGameModeBase->GetPauseMenuClass());
-				if (IsValid(UIManagerWorldSubsystem->PauseMenuWidget)) {
-					UIManagerWorldSubsystem->PauseMenuWidget->AddToViewport();
-					if (IsValid(UIManagerWorldSubsystem->PickedButton))
-						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
-					UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PauseMenuWidget->GetResumeButton();
-					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
-					UIManagerWorldSubsystem->PickedButtonIndex = 0;
+			else {
+				if (MapName == "MainMenu") {
+					if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>(); IsValid(PlayerController))
+						if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+							if (IsValid(RedemptionGameModeBase->GetMainMenuClass()))
+								UIManagerWorldSubsystem->MainMenuWidget = CreateWidget<UMainMenu>(PlayerController, RedemptionGameModeBase->GetMainMenuClass());
+					if (IsValid(UIManagerWorldSubsystem->MainMenuWidget)) {
+						UIManagerWorldSubsystem->MainMenuWidget->AddToViewport();
+						if (IsValid(UIManagerWorldSubsystem->PickedButton))
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+						UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->MainMenuWidget->GetNewGameButton();
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+						UIManagerWorldSubsystem->PickedButtonIndex = 0;
+					}
+				}
+				else if (MapName == "Dungeon" || MapName == "Town") {
+					if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>(); IsValid(PlayerController))
+						if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase))
+							if (IsValid(RedemptionGameModeBase->GetPauseMenuClass()))
+								UIManagerWorldSubsystem->PauseMenuWidget = CreateWidget<UPauseMenu>(PlayerController, RedemptionGameModeBase->GetPauseMenuClass());
+					if (IsValid(UIManagerWorldSubsystem->PauseMenuWidget)) {
+						UIManagerWorldSubsystem->PauseMenuWidget->AddToViewport();
+						if (IsValid(UIManagerWorldSubsystem->PickedButton))
+							UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
+						UIManagerWorldSubsystem->PickedButton = UIManagerWorldSubsystem->PauseMenuWidget->GetResumeButton();
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
+						UIManagerWorldSubsystem->PickedButtonIndex = 0;
+					}
 				}
 			}
 		}
@@ -142,7 +155,7 @@ void USaveLoadGameMenu::OverwriteButtonWithNeighborsOnClicked()
 		if (URedemptionGameInstance* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance))
 			if (UGameplayStatics::DoesSaveGameExist(RedemptionGameInstance->SaveFileName, 0))
 				if (URedemptionSaveGame* TemporarySaveGame = Cast<URedemptionSaveGame>(UGameplayStatics::LoadGameFromSlot(RedemptionGameInstance->SaveFileName, 0)); IsValid(TemporarySaveGame)) {
-					RedemptionGameInstance->SaveGame(TemporarySaveGame->SaveIndex, true);
+					RedemptionGameInstance->SaveGameAndCreateAFile(TemporarySaveGame->SaveIndex, true);
 					NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
 					OverwriteHasBeenClicked = false;
 				}

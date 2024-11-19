@@ -10,6 +10,7 @@
 #include "..\Characters\Combat\CombatNPC.h"
 #include "Camera/CameraActor.h"
 #include "..\Dynamics\Gameplay\Combat\CombatFloatingInformationActor.h"
+#include <string_view>
 #include "BattleManager.generated.h"
 
 UCLASS()
@@ -52,11 +53,11 @@ public:
 	TSubclassOf<ACombatFloatingInformationActor> GetCombatFloatingInformationActorClass() const;
 
 	void SelectNewTarget(const class ACombatNPC* const Target, int8 Index);
-	//Depending on the range sometimes we need to set visible several crosshairs.
+	//Depending on the range sometimes we jhneed to set visible several crosshairs.
 	//Direction - either "Left" or "Right".
 	void SelectNewTargetCrosshairLogic(const TArray<ACombatNPC*>& TargetsForSelection, int8 NewIndex, int8 CurrentIndex, const std::string_view Direction);
-	//Shows or hides mana/health bars and crosshair components. Used exclusively in SelectNewTargetCrosshairLogic.
-	void SelectNewTargetCrosshairActions(const TArray<ACombatNPC*>& TargetsForSelection, int8 Index, const FString& TypeOfBar, const bool WhetherToShow);
+	//Shows or hides mana/health bars and crosshair components.
+	void HideTargetCrosshairAndWidgets(const TArray<ACombatNPC*>& TargetsForSelection, int8 Index, const FString& TypeOfBar, const bool WhetherToShow);
 
 	//Function, that controls whether player's turn continues or passes to enemies
 	UFUNCTION()

@@ -66,7 +66,7 @@ public:
 	void BackButtonOnClicked();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Journal", SaveGame)
-	int JournalEntryNextNumber{};
+	int JournalEntryNextNumber = 1;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Journal", SaveGame)
 	TArray<FJournalEntryAndItsQuest> JournalEntriesAndTheirQuests{};
 

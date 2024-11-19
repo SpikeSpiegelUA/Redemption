@@ -9,7 +9,7 @@
 
 namespace InventoryActions{
 	//Check if Item is already in the inventory or not and do some logic.  If yes, than add 1 to amount, if not then create item's widget in the inventory.
-	void IfItemAlreadyIsInInventory(UWorld* const World, UScrollBox* const ItemScrollBox, const AGameItem* const Item);
+	void IfItemAlreadyIsInInventory(UWorld* const World, UScrollBox* const ItemScrollBox, const AGameItem* const Item, const int Amount);
 	// After we equip item, if amount is greater than 1, then -1 from amount, else delete widget.
 	void ItemAmountInInventoryLogic(UInventoryScrollBoxEntryWidget* const ItemWidget, UScrollBox* const ScrollBoxWithWidget, const AGameItem* const UsedItem);
 	//Remove used or equiped item from InstanceItemsInTheInventory in RedemptionGameInstance.

@@ -46,6 +46,7 @@ public:
 	void SetPlayerIsThrowing(bool Value);
 	void SetPlayerIsAttackingWithMagic(bool Value);
 	void SetPlayerIsAiming(bool Value);
+	void SetPlayerIsInAir(bool Value);
 
 	//In battle mode to play "Run" animation, Speed must be assigned manually to 300 and not to actual player speed. So we block NativeUpdateAnimation of this variable with this bool
 	bool SetSpeedToActualSpeed = true;

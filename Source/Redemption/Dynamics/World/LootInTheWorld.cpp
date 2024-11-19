@@ -5,6 +5,7 @@
 #include "../GameInstance/RedemptionGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 
 // Sets default values
 ALootInTheWorld::ALootInTheWorld()
@@ -18,8 +19,7 @@ ALootInTheWorld::ALootInTheWorld()
 void ALootInTheWorld::BeginPlay()
 {
 	Super::BeginPlay();
-	if (URedemptionGameInstance* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance))
-		Execute_LoadObjectFromGameInstance(this, RedemptionGameInstance);
+	LoadObjectFromGameInstance();
 }
 
 // Called every frame
@@ -28,31 +28,23 @@ void ALootInTheWorld::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ALootInTheWorld::LoadObjectFromGameInstance_Implementation(const URedemptionGameInstance* const GameInstance)
+void ALootInTheWorld::LoadObjectFromGameInstance()
 {
-	if (IsValid(GameInstance) && !this->GetFName().IsNone()) {
-		TArray<FActorGameInstanceData> ActorGameInstanceDataArray{};
-		if (UGameplayStatics::GetCurrentLevelName(GetWorld()) == "Town")
-			ActorGameInstanceDataArray = GameInstance->TownActors;
-		else if (UGameplayStatics::GetCurrentLevelName(GetWorld()) == "Dungeon")
-			ActorGameInstanceDataArray = GameInstance->DungeonActors;
-		bool ToBeDestroyed = true;
-		for (FActorGameInstanceData ActorGameInstanceData : ActorGameInstanceDataArray) {
-			if (ActorGameInstanceData.ActorName == this->GetFName())
-			{
-				SetActorTransform(ActorGameInstanceData.ActorTransform);
-				FMemoryReader MemReader(ActorGameInstanceData.ByteData);
-				FObjectAndNameAsStringProxyArchive Ar(MemReader, true);
-				Ar.ArIsSaveGame = true;
-				// Convert binary array back into actor's variables
-				Serialize(Ar);
-				ToBeDestroyed = false;
-				break;
-			}
-		}
-		if (ToBeDestroyed && ActorGameInstanceDataArray.Num() > 0)
-			Destroy();
-	}
+	if(const auto* const GameInstance = GetWorld()->GetGameInstance<URedemptionGameInstance>(); IsValid(GameInstance))
+		if (IsValid(GameInstance) && !this->GetFName().IsNone())
+			for (FLootInTheWorldGameInstanceData LootInTheWorldGameInstanceData : GameInstance->LootsInTheWorld)
+				if (LootInTheWorldGameInstanceData.ActorName == this->GetFName())
+				{
+					FMemoryReader MemReader(LootInTheWorldGameInstanceData.ByteData);
+					FObjectAndNameAsStringProxyArchive Ar(MemReader, true);
+					Ar.ArIsSaveGame = true;
+					
+					// Convert binary array back into actor's variables
+					Serialize(Ar);
+					if (IsEmpty)
+						ItemsClasses.Empty();
+					break;
+				}
 }
 
 FName ALootInTheWorld::GetName() const 
@@ -60,8 +52,14 @@ FName ALootInTheWorld::GetName() const
 	return Name;
 }
 
-TArray<TSubclassOf<class AGameItem>> ALootInTheWorld::GetItemsClasses() const
+const TArray<TSubclassOf<class AGameItem>>& ALootInTheWorld::GetItemsClasses() const
 {
 	return ItemsClasses;
+}
+
+void ALootInTheWorld::RemoveSingleItemFromItemsClasses(const TSubclassOf<AGameItem> ItemClass)
+{
+	ItemsClasses.RemoveSingle(ItemClass);
+	IsEmpty = ItemsClasses.IsEmpty();
 }
 

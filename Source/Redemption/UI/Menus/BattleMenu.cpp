@@ -179,23 +179,25 @@ void UBattleMenu::OpenActionMenu(const FText& NewAttackTalkInfoActionButtonText)
 			//Remove menu render and turn on target selection
 			IsChoosingAction = false;
 			if (IsPreparingToViewInfo || BattleManager->IsSelectingAllyAsTarget) {
-				for(ACombatNPC* AllyPlayerNPC : BattleManager->BattleAlliesPlayer)
-					if (AllyPlayerNPC->CurrentHP > 0) {
-						BattleManager->SelectedCombatNPC = AllyPlayerNPC;
-						EnemyNameTextBlock->SetText(FText::FromName(AllyPlayerNPC->GetCharacterName()));
+				for (int8 Index = 0; Index < BattleManager->BattleAlliesPlayer.Num(); Index++)
+					if (BattleManager->BattleAlliesPlayer[Index]->CurrentHP > 0) {
+						BattleManager->SelectedCombatNPC = BattleManager->BattleAlliesPlayer[Index];
+						EnemyNameTextBlock->SetText(FText::FromName(BattleManager->BattleAlliesPlayer[Index]->GetCharacterName()));
+						BattleManager->SelectedCombatNPCIndex = Index;
 						break;
 					}
 			}
 			else if (!BattleManager->IsSelectingAllyAsTarget) {
-				for(ACombatNPC* EnemyNPC : BattleManager->BattleEnemies)
-					if (EnemyNPC->CurrentHP > 0) {
-						BattleManager->SelectedCombatNPC = EnemyNPC;
-						EnemyNameTextBlock->SetText(FText::FromName(EnemyNPC->GetCharacterName()));
+				for(int8 Index = 0; Index < BattleManager->BattleEnemies.Num(); Index++)
+					if (BattleManager->BattleEnemies[Index]->CurrentHP > 0) {
+						BattleManager->SelectedCombatNPC = BattleManager->BattleEnemies[Index];
+						EnemyNameTextBlock->SetText(FText::FromName(BattleManager->BattleEnemies[Index]->GetCharacterName()));
+						BattleManager->SelectedCombatNPCIndex = Index;
 						break;
 					}
 			}
 			CurrentTurnAlliesNPC->Target = BattleManager->SelectedCombatNPC;
-			BattleManager->SelectedCombatNPCIndex = 0;
+
 			if (IsValid(BattleManager->SelectedCombatNPC)) {
 				if(!IsAttackingWithRange)
 					BattleManager->SelectedCombatNPC->GetCrosshairWidgetComponent()->SetVisibility(true);
@@ -281,7 +283,7 @@ void UBattleMenu::DefendButtonOnClicked()
 					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FColor(1, 1, 1, 1));
 				DefendButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 				if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(CurrentTurnAllyPlayer); IsValid(CombatAllies)) {
-					CombatAllies->AddSkillsProgress(ECharacterSkills::DEFEND, 50);
+					CombatAllies->AddSkillsProgress(ECharacterSkills::DEFEND, 1000);
 					CombatAllies->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpDefend, true);
 				}
 			}
@@ -426,7 +428,8 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 						UseTarget->CurrentHP += AmountToHeal;
 						ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
 						FString TextForCombatFloatingInformationActor = FString();
-						TextForCombatFloatingInformationActor.Append("+");
+						if (AmountToHeal > 0)
+							TextForCombatFloatingInformationActor.Append("+");
 						TextForCombatFloatingInformationActor.AppendInt(AmountToHeal);
 						CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 						ItemOrSpellHaveBeenUsed = true;
@@ -443,7 +446,8 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 						UseTarget->CurrentMana += AmountToRestore;
 						ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
 						FString TextForCombatFloatingInformationActor = FString();
-						TextForCombatFloatingInformationActor.Append("+");
+						if (AmountToRestore > 0)
+							TextForCombatFloatingInformationActor.Append("+");
 						TextForCombatFloatingInformationActor.AppendInt(AmountToRestore);
 						ItemOrSpellHaveBeenUsed = true;
 						if (Cast<ACombatAllies>(UseTarget))
@@ -557,7 +561,7 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 						CurrentTurnAlliesNPC->GetRangeWeaponElements(), CurrentTurnAlliesNPC->GetRangePhysicalType(), 
 						CurrentTurnAlliesNPC->GetSkill(ECharacterSkills::RANGE), CurrentTurnAlliesNPC->GetStat(ECharacterStats::AGILITY), true);
 				if (GotHit) {
-					CurrentTurnAlliesNPC->AddSkillsProgress(ECharacterSkills::RANGE, 50);
+					CurrentTurnAlliesNPC->AddSkillsProgress(ECharacterSkills::RANGE, 1000);
 					CurrentTurnAlliesNPC->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpRange, true);
 				}
 				CurrentTurnAlliesNPC->GetRangeAmmo();
@@ -585,8 +589,6 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 						UIManagerWorldSubsystem->AlliesInfoBarsWidget->RemoveFromParent();
 						if (IsValid(RedemptionGameModeBase->GetDialogueBoxClass()))
 							UIManagerWorldSubsystem->DialogueBoxWidget = CreateWidget<UDialogueBox>(Cast<APlayerController>(PlayerCharacter->GetController()), RedemptionGameModeBase->GetDialogueBoxClass());
-						if (IsValid(RedemptionGameModeBase->GetResponsesBoxClass()))
-							UIManagerWorldSubsystem->ResponsesBoxWidget = CreateWidget<UResponsesBox>(Cast<APlayerController>(PlayerCharacter->GetController()), RedemptionGameModeBase->GetResponsesBoxClass());
 						Enemy->Execute_StartADialogue(Enemy);
 					}
 				//if (APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()); IsValid(PlayerController))
@@ -675,7 +677,8 @@ bool UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 			ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->
 				SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
 			FString TextForCombatFloatingInformationActor = FString();
-			TextForCombatFloatingInformationActor.Append("+");
+			if (AmountToHeal > 0)
+				TextForCombatFloatingInformationActor.Append("+");
 			TextForCombatFloatingInformationActor.AppendInt(AmountToHeal);
 			CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 			UseTarget->GetFloatingHealthBarWidget()->HP = UseTarget->CurrentHP;
@@ -693,7 +696,8 @@ bool UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 			ACombatFloatingInformationActor* CombatFloatingInformationActor = GetWorld()->
 				SpawnActor<ACombatFloatingInformationActor>(BattleManager->GetCombatFloatingInformationActorClass(), UseTarget->GetActorLocation(), UseTarget->GetActorRotation());
 			FString TextForCombatFloatingInformationActor = FString();
-			TextForCombatFloatingInformationActor.Append("+");
+			if (AmountToRestore > 0)
+				TextForCombatFloatingInformationActor.Append("+");
 			TextForCombatFloatingInformationActor.AppendInt(AmountToRestore);
 			CombatFloatingInformationActor->SetCombatFloatingInformationText(FText::FromString(TextForCombatFloatingInformationActor));
 			if (ACombatAllies* AllyTarget = Cast<ACombatAllies>(UseTarget); IsValid(AllyTarget))
@@ -736,7 +740,7 @@ bool UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 		}
 		UIManagerWorldSubsystem->SpellBattleMenuWidget->Reset(true);
 		if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(CurrentTurnNPC); IsValid(CombatAllies)) {
-			CombatAllies->AddSkillsProgress(ECharacterSkills::RESTORATIONSPELLS, 50);
+			CombatAllies->AddSkillsProgress(ECharacterSkills::RESTORATIONSPELLS, 1000);
 			CombatAllies->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpRestorationSpells, true);
 		}
 		return true;
@@ -761,7 +765,7 @@ bool UBattleMenu::BuffSpellUse(const class ACreatedBuffSpell* const SpellToUse, 
 				ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()), CurrentTurnAlliesNPC->GetSkill(ECharacterSkills::BUFFSPELLS), 
 				CurrentTurnAlliesNPC->GetStat(ECharacterStats::INTELLIGENCE), CurrentTurnAlliesNPC, SpellToUse->GetTypeOfSpell()))
 					if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(CurrentTurnNPC); IsValid(CombatAllies)) {
-						CombatAllies->AddSkillsProgress(ECharacterSkills::BUFFSPELLS, 50);
+						CombatAllies->AddSkillsProgress(ECharacterSkills::BUFFSPELLS, 1000);
 						CombatAllies->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpBuffSpells, true);
 					}
 		}

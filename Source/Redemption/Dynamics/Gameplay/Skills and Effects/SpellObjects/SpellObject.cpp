@@ -67,7 +67,7 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 						if (CombatTarget->Execute_GetHit(CombatTarget, AssaultSpell->GetAttackValue(), NPCOwner, ElementsActions::FindContainedElements(AssaultSpell->GetSpellElements()), 
 							EPhysicalType::NONE, NPCOwner->GetSkill(ECharacterSkills::ASSAULTSPELLS), NPCOwner->GetStat(ECharacterStats::INTELLIGENCE), false)) {
 							if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(NPCOwner);IsValid(CombatAllies)) {
-								CombatAllies->AddSkillsProgress(ECharacterSkills::ASSAULTSPELLS, 50);
+								CombatAllies->AddSkillsProgress(ECharacterSkills::ASSAULTSPELLS, 1000);
 								CombatAllies->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpAssaultSpells, true);
 							}
 							if (AssaultSpell->GetEffectsAndTheirChances().Num() > 0) {
@@ -161,7 +161,7 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 						bool GotHit = CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, ElementsActions::FindContainedElements(PresetDebuffSpell->GetSpellElements()), 
 							NPCOwner->GetSkill(ECharacterSkills::DEBUFFSPELLS), NPCOwner->GetStat(ECharacterStats::INTELLIGENCE), NPCOwner, PresetDebuffSpell->GetTypeOfSpell());
 						if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(NPCOwner); GotHit && IsValid(CombatAllies)) {
-							CombatAllies->AddSkillsProgress(ECharacterSkills::DEBUFFSPELLS, 50);
+							CombatAllies->AddSkillsProgress(ECharacterSkills::DEBUFFSPELLS, 1000);
 							CombatAllies->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpDebuffSpells, true);
 						}
 						OnOverlapBeginsActions();
@@ -176,7 +176,7 @@ void ASpellObject::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 						bool GotHit = CombatTarget->Execute_GetHitWithBuffOrDebuff(CombatTarget, EffectsArray, ElementsActions::FindContainedElements(CreatedDebuffSpell->GetSpellElements()), 
 							NPCOwner->GetSkill(ECharacterSkills::DEBUFFSPELLS), NPCOwner->GetStat(ECharacterStats::INTELLIGENCE), NPCOwner, CreatedDebuffSpell->GetTypeOfSpell());
 						if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(NPCOwner); GotHit && IsValid(CombatAllies)) {
-							CombatAllies->AddSkillsProgress(ECharacterSkills::DEBUFFSPELLS, 50);
+							CombatAllies->AddSkillsProgress(ECharacterSkills::DEBUFFSPELLS, 1000);
 							CombatAllies->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpDebuffSpells, true);
 						}
 						OnOverlapBeginsActions();

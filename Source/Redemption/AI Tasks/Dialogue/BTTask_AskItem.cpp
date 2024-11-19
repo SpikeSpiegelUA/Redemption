@@ -43,16 +43,19 @@ EBTNodeResult::Type UBTTask_AskItem::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 			StringToSet.Append(CombatEnemyNPC->GetPossibleAskItems()[RandomItem]->GetDefaultObject<AGameItem>()->GetItemName().ToString());
 			StringToSet.Append(")");
 			AGameItem* GameItem = NewObject<AGameItem>(this, CombatEnemyNPC->GetPossibleAskItems()[RandomItem]);
-			RedemptionGameInstance->InstanceItemsInTheInventory.Add(CombatEnemyNPC->GetPossibleAskItems()[RandomItem]);
+			FItemClassAndAmount NewItemClassAndAmount{};
+			NewItemClassAndAmount.ItemClass = CombatEnemyNPC->GetPossibleAskItems()[RandomItem];
+			NewItemClassAndAmount.Amount = 1;
+			RedemptionGameInstance->InstanceItemsInTheInventory.Add(NewItemClassAndAmount);
 			if (IsValid(GameItem)) {
 				//Get ScrollBox corresponding to the item's type
 				UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(UIManagerWorldSubsystem->InventoryMenuWidget, GameItem);
 				//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
-				InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, GameItem);
+				InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, GameItem, 1);
 				CombatEnemyNPC->AskMoneyItemSuccessChance -= 10;
 			}
 			if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
-				RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->AddSkillsProgress(ECharacterSkills::PERSUASION, 100);
+				RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->AddSkillsProgress(ECharacterSkills::PERSUASION, 1000);
 				RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpPersuasion, true);
 			}
 		}

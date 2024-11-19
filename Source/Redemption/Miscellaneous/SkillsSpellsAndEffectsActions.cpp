@@ -235,7 +235,6 @@ int SkillsSpellsAndEffectsActions::GetBuffOrDebuffEvasionChanceAfterResistances(
 				int ElementPercentOfEvasionChance = ValueBeforeResistances * AttackerElementPercent.Percent / 100;
 				EvasionChanceWithResistances += ElementPercentOfEvasionChance * ReceiverElementPercent.Percent / 100;
 			}
-	UE_LOG(LogTemp, Warning, TEXT("The integer value is: %d"), EvasionChanceWithResistances);
 	return EvasionChanceWithResistances;
 }
 

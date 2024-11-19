@@ -25,5 +25,5 @@ public:
 	void GetElementalResistancesFromEquipedItems();
 	void GetPhysicalResistancesFromEquipedItems();
 
-	class ACombatPlayerCharacter& ACombatPlayerCharacter::operator =(const class APlayerCharacter& PlayerCharacter);
+	class ACombatPlayerCharacter& operator =(const class APlayerCharacter& PlayerCharacter);
 };

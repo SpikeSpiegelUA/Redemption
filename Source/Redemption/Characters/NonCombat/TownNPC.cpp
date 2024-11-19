@@ -8,6 +8,7 @@
 #include "..\Characters\AI Controllers\NonCombat\TownNPCAIController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
 
 ATownNPC::ATownNPC()
 {
@@ -42,8 +43,9 @@ void ATownNPC::LoadObjectFromGameInstance_Implementation(const URedemptionGameIn
 				ToBeDestroyed = false;
 				break;
 			}
-		if (ToBeDestroyed && ActorGameInstanceDataArray.Num() > 0)
-			Destroy();
+		if(const auto* const GameMode = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(GameMode))
+			if (ToBeDestroyed && ActorGameInstanceDataArray.Num() > 0 && !GameMode->Midgame)
+				Destroy();
 	}
 }
 

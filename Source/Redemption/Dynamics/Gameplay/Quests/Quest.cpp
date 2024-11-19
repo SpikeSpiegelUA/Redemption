@@ -45,9 +45,9 @@ int AQuest::GetFinalStage() const
 	return FinalStage;
 }
 
-const TArray<FText>& AQuest::GetJournalEntries() const
+const TArray<FJournalEntryAndItsStage>& AQuest::GetJournalEntriesAndTheirStages() const
 {
-	return JournalEntries;
+	return JournalEntriesAndTheirStages;
 }
 
 const FText& AQuest::GetQuestName() const

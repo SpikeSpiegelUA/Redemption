@@ -48,4 +48,6 @@ public:
 		UInputAction* InputOpenLearnedSpells{};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 		UInputAction* InputOpenSpellInfo{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		UInputAction* InputAttack{};
 };

@@ -14,6 +14,7 @@
 #include "..\Characters\Player\PlayerCharacter.h"
 #include "..\Miscellaneous\InventoryActions.h"
 #include "..\UI\Menus\InventoryMenu.h"
+#include "..\UI\Menus\ContainerInventoryMenu.h"
 
 bool UInventoryScrollBoxEntryWidget::Initialize()
 {
@@ -32,16 +33,24 @@ void UInventoryScrollBoxEntryWidget::NativeConstruct()
 void UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnClicked()
 {
 	if(const auto* UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>(); IsValid(UIManagerWorldSubsystem)) {
-		UIManagerWorldSubsystem->InventoryMenuWidget->SetPickedItem(Item);
-		if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->GetPickedItem())) {
-			if (IsValid(Cast<AEquipmentItem>(Item)))
-				UIManagerWorldSubsystem->InventoryMenuWidget->EquipButtonOnClicked();
-			else {
-				if (UIManagerWorldSubsystem->InventoryMenuWidget->GetBattleMenuButtonsForItemsBorder()->GetVisibility() == ESlateVisibility::Visible)
-					UIManagerWorldSubsystem->InventoryMenuWidget->BattleMenuItemsUseButtonOnClicked();
-				else
-					UIManagerWorldSubsystem->InventoryMenuWidget->UseButtonOnClicked();
+		if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget) && UIManagerWorldSubsystem->InventoryMenuWidget->IsInViewport()) {
+			UIManagerWorldSubsystem->InventoryMenuWidget->SetPickedItem(Item);
+			if (IsValid(UIManagerWorldSubsystem->InventoryMenuWidget->GetPickedItem())) {
+				if (IsValid(Cast<AEquipmentItem>(Item)))
+					UIManagerWorldSubsystem->InventoryMenuWidget->EquipButtonOnClicked();
+				else {
+					if (UIManagerWorldSubsystem->InventoryMenuWidget->GetBattleMenuButtonsForItemsBorder()->GetVisibility() == ESlateVisibility::Visible)
+						UIManagerWorldSubsystem->InventoryMenuWidget->BattleMenuItemsUseButtonOnClicked();
+					else
+						UIManagerWorldSubsystem->InventoryMenuWidget->UseButtonOnClicked();
+				}
 			}
+		}
+		else if (IsValid(UIManagerWorldSubsystem->ContainerInventoryMenu) && UIManagerWorldSubsystem->ContainerInventoryMenu->IsInViewport()) {
+			if (IsValid(UIManagerWorldSubsystem->ContainerInventoryMenu->SelectedItemEntryWidget))
+				UIManagerWorldSubsystem->ContainerInventoryMenu->SelectedItemEntryWidget->GetMainButton()->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 0.f));
+			UIManagerWorldSubsystem->ContainerInventoryMenu->SelectedItemEntryWidget = this;
+			UIManagerWorldSubsystem->ContainerInventoryMenu->SetItemInformation(Item->GetClass());
 		}
 	}
 }
@@ -52,7 +61,7 @@ void UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnHovered()
 	if (GetWorld())
 		UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
 	if (IsValid(UIManagerWorldSubsystem) && IsValid(Item)) {
-		if (UInventoryMenu* InventoryMenu = UIManagerWorldSubsystem->InventoryMenuWidget; IsValid(InventoryMenu)) {
+		if (UInventoryMenu* InventoryMenu = UIManagerWorldSubsystem->InventoryMenuWidget; IsValid(InventoryMenu) && UIManagerWorldSubsystem->InventoryMenuWidget->IsInViewport()) {
 			InventoryMenu->GetItemInfoBorder()->SetVisibility(ESlateVisibility::Visible);
 			InventoryMenu->SetItemInfo(Item);
 			MainButton->SetBackgroundColor(FLinearColor(1, 0, 0, 1));
@@ -89,6 +98,27 @@ void UInventoryScrollBoxEntryWidget::InventoryEntryWidgetButtonOnHovered()
 				}
 			InventoryMenu->IsSelectingSpecificItem = true;
 			InventoryMenu->IsSelectingTarget = false;
+		}
+		else if (IsValid(UIManagerWorldSubsystem->ContainerInventoryMenu) && UIManagerWorldSubsystem->ContainerInventoryMenu->IsInViewport()) {
+			if (IsValid(UIManagerWorldSubsystem->PickedButton)) {
+				if (UIManagerWorldSubsystem->ContainerInventoryMenu->CheckIfPickedButtonIsTakeOrCloseButton())
+					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+				else {
+					if(IsValid(UIManagerWorldSubsystem->ContainerInventoryMenu) && IsValid(UIManagerWorldSubsystem->ContainerInventoryMenu->SelectedItemEntryWidget) &&
+						UIManagerWorldSubsystem->PickedButton == UIManagerWorldSubsystem->ContainerInventoryMenu->SelectedItemEntryWidget->GetMainButton())
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(0.f, 1.f, 0.f, 1.f));
+					else
+						UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FLinearColor(1.f, 1.f, 1.f, 0.f));
+				}
+			}
+			UIManagerWorldSubsystem->PickedButton = MainButton;
+			UIManagerWorldSubsystem->ContainerInventoryMenu->CurrentlySelectedVerticalBox = const_cast<UVerticalBox*>(UIManagerWorldSubsystem->ContainerInventoryMenu->GetItemsVerticalBox());
+			MainButton->SetBackgroundColor(FLinearColor(1.f, 0.f, 0.f, 1.f));
+			for (uint8 Index = 0; Index < UIManagerWorldSubsystem->ContainerInventoryMenu->GetItemsVerticalBox()->GetAllChildren().Num(); Index++)
+				if (UIManagerWorldSubsystem->ContainerInventoryMenu->GetItemsVerticalBox()->GetAllChildren()[Index] == MainButton) {
+					UIManagerWorldSubsystem->PickedButtonIndex = Index;
+					break;
+				}
 		}
 	}
 }

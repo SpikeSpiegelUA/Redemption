@@ -120,12 +120,12 @@ void UInventoryMenu::FillInventory()
 {
 	if(URedemptionGameInstance* GameInstance = GetWorld()->GetGameInstance<URedemptionGameInstance>(); IsValid(GameInstance))
 		for (int i = 0; i < GameInstance->InstanceItemsInTheInventory.Num(); i++) 
-			if (AGameItem* GameItem = NewObject<AGameItem>(this, GameInstance->InstanceItemsInTheInventory[i]); IsValid(GameItem)) {
+			if (AGameItem* GameItem = NewObject<AGameItem>(this, GameInstance->InstanceItemsInTheInventory[i].ItemClass); IsValid(GameItem)) {
 				//Get ScrollBox corresponding to the item's type
 				UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(this, GameItem);
 				//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
 				if(IsValid(CurrentScrollBox))
-					InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, GameItem);
+					InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, GameItem, GameInstance->InstanceItemsInTheInventory[i].Amount);
 			}
 }
 
@@ -341,30 +341,57 @@ void UInventoryMenu::PickUpItem(const TArray<TSubclassOf<AGameItem>>& ItemsClass
 		bool IsInInventory = false;
 		for (uint8 i = 0; i < ItemsClasses.Num(); i++) {
 			AGameItem* GameItem = NewObject<AGameItem>(this, ItemsClasses[i]);
-			if (auto* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance))
-				RedemptionGameInstance->InstanceItemsInTheInventory.Add(ItemsClasses[i]);
+			if (auto* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance)) {
+
+				bool ItemFound = false;
+				for(FItemClassAndAmount& InstanceItemClassAndAmount : RedemptionGameInstance->InstanceItemsInTheInventory)
+					if (InstanceItemClassAndAmount.ItemClass == ItemsClasses[i]) {
+						InstanceItemClassAndAmount.Amount += 1;
+						ItemFound = true;
+						break;
+					}
+				if (!ItemFound) {
+					FItemClassAndAmount NewItemClassAndAmount{};
+					NewItemClassAndAmount.ItemClass = ItemsClasses[i];
+					NewItemClassAndAmount.Amount = 1;
+					RedemptionGameInstance->InstanceItemsInTheInventory.Add(NewItemClassAndAmount);
+				}
+			}
 			if (IsValid(GameItem)) {
 				//Get ScrollBox corresponding to the item's type
 				UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(UIManagerWorldSubsystem->InventoryMenuWidget, GameItem);
 				//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
-				InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, GameItem);
+				InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, GameItem, 1);
 			}
 		}
 	}
 }
 
-void UInventoryMenu::PickUpItem(const TSubclassOf<AGameItem> ItemClass)
+void UInventoryMenu::PickUpItem(const TSubclassOf<AGameItem> ItemClass, const int Amount)
 {
 	if (IsValid(UIManagerWorldSubsystem)) {
 		bool IsInInventory = false;
 			AGameItem* GameItem = NewObject<AGameItem>(this, ItemClass);
-			if (auto* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance))
-				RedemptionGameInstance->InstanceItemsInTheInventory.Add(ItemClass);
+			if (auto* RedemptionGameInstance = Cast<URedemptionGameInstance>(GetWorld()->GetGameInstance()); IsValid(RedemptionGameInstance)) {
+				bool ItemFound = false;
+				for(FItemClassAndAmount& ItemClassAndAmount : RedemptionGameInstance->InstanceItemsInTheInventory)
+					if (ItemClassAndAmount.ItemClass == ItemClass) {
+						ItemClassAndAmount.Amount += Amount;
+						ItemFound = true;
+						break;
+					}
+				if (!ItemFound) {
+					FItemClassAndAmount NewItemClassAndAmount{};
+					NewItemClassAndAmount.ItemClass = ItemClass;
+					NewItemClassAndAmount.Amount = Amount;
+					RedemptionGameInstance->InstanceItemsInTheInventory.Add(NewItemClassAndAmount);
+				}
+			}
 			if (IsValid(GameItem)) {
 				//Get ScrollBox corresponding to the item's type
 				UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(UIManagerWorldSubsystem->InventoryMenuWidget, GameItem);
 				//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
-				InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, GameItem);
+				InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, GameItem, Amount);
 			}
 	}
 }
@@ -589,10 +616,13 @@ void UInventoryMenu::EquipItem(const AEquipmentItem* const ItemToEquip, TSubclas
 {
 	//If something is equiped, return it to inventory
 	if (InventoryMenuVariableToStoreThisEquipmentType != nullptr) {
-		GameInstance->InstanceItemsInTheInventory.Add(InventoryMenuVariableToStoreThisEquipmentType->GetClass());
+		FItemClassAndAmount NewItemClassAndAmount{};
+		NewItemClassAndAmount.ItemClass = InventoryMenuVariableToStoreThisEquipmentType->GetClass();
+		NewItemClassAndAmount.Amount = 1;
+		GameInstance->InstanceItemsInTheInventory.Add(NewItemClassAndAmount);
 		//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
 		if (UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(this, InventoryMenuVariableToStoreThisEquipmentType); IsValid(CurrentScrollBox))
-			InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, InventoryMenuVariableToStoreThisEquipmentType);
+			InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, InventoryMenuVariableToStoreThisEquipmentType, 1);
 	}
 	GameInstanceVariableToStoreThisEquipmentType = ItemToEquip->GetClass();
 	InventoryMenuVariableToStoreThisEquipmentType = const_cast<AArmorItem*>(Cast<AArmorItem>(ItemToEquip));
@@ -627,10 +657,13 @@ void UInventoryMenu::EquipItem(const AEquipmentItem* const ItemToEquip, TSubclas
 {
 	//If something is equiped, return it to inventory
 	if (InventoryMenuVariableToStoreThisEquipmentType != nullptr) {
-		GameInstance->InstanceItemsInTheInventory.Add(InventoryMenuVariableToStoreThisEquipmentType->GetClass());
+		FItemClassAndAmount NewItemClassAndAmount{};
+		NewItemClassAndAmount.ItemClass = InventoryMenuVariableToStoreThisEquipmentType->GetClass();
+		NewItemClassAndAmount.Amount = 1;
+		GameInstance->InstanceItemsInTheInventory.Add(NewItemClassAndAmount);
 		//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
 		if (UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(this, InventoryMenuVariableToStoreThisEquipmentType); IsValid(CurrentScrollBox))
-			InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, InventoryMenuVariableToStoreThisEquipmentType);
+			InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, InventoryMenuVariableToStoreThisEquipmentType,1);
 	}
 	GameInstanceVariableToStoreThisEquipmentType = ItemToEquip->GetClass();
 	InventoryMenuVariableToStoreThisEquipmentType = const_cast<AWeaponItem*>(Cast<AWeaponItem>(ItemToEquip));
@@ -665,10 +698,13 @@ void UInventoryMenu::EquipItem(const AEquipmentItem* const ItemToEquip, TSubclas
 {
 	//If something is equiped, return it to inventory
 	if (InventoryMenuVariableToStoreThisEquipmentType != nullptr) {
-		GameInstance->InstanceItemsInTheInventory.Add(InventoryMenuVariableToStoreThisEquipmentType->GetClass());
+		FItemClassAndAmount NewItemClassAndAmount{};
+		NewItemClassAndAmount.ItemClass = InventoryMenuVariableToStoreThisEquipmentType->GetClass();
+		NewItemClassAndAmount.Amount = 1;
+		GameInstance->InstanceItemsInTheInventory.Add(NewItemClassAndAmount);
 		//Check if this item is already in the inventory. If yes, than just add to AmountOfItems and change text, if not, then add new inventory widget
 		if (UScrollBox* CurrentScrollBox = InventoryActions::FindCorrespondingScrollBox(this, InventoryMenuVariableToStoreThisEquipmentType); IsValid(CurrentScrollBox))
-			InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, InventoryMenuVariableToStoreThisEquipmentType);
+			InventoryActions::IfItemAlreadyIsInInventory(GetWorld(), CurrentScrollBox, InventoryMenuVariableToStoreThisEquipmentType, 1);
 	}
 	GameInstanceVariableToStoreThisEquipmentType = ItemToEquip->GetClass();
 	InventoryMenuVariableToStoreThisEquipmentType = const_cast<ARangeWeapon*>(Cast<ARangeWeapon>(ItemToEquip));
@@ -766,19 +802,21 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 			if ((IsValid(Cast<AAssaultItem>(PickedItem)) || IsValid(Cast<ADebuffItem>(PickedItem)) || IsValid(Cast<ARestorationItem>(PickedItem)) || IsValid(Cast<ABuffItem>(PickedItem)))) {
 				if (IsValid(Cast<ARestorationItem>(PickedItem)) || IsValid(Cast<ABuffItem>(PickedItem))) {
 					BattleManager->IsSelectingAllyAsTarget = true;
-					for(ACombatNPC* AllyPlayerNPC : BattleManager->BattleAlliesPlayer)
-						if (AllyPlayerNPC->CurrentHP > 0) {
-							BattleManager->SelectedCombatNPC = AllyPlayerNPC;
-							BattleMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(AllyPlayerNPC->GetCharacterName()));
+					for (int8 Index = 0; Index < BattleManager->BattleAlliesPlayer.Num(); Index++)
+						if (BattleManager->BattleAlliesPlayer[Index]->CurrentHP > 0) {
+							BattleManager->SelectedCombatNPC = BattleManager->BattleAlliesPlayer[Index];
+							BattleMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(BattleManager->BattleAlliesPlayer[Index]->GetCharacterName()));
+							BattleManager->SelectedCombatNPCIndex = Index;
 							break;
 						}
 				}
 				else if (IsValid(Cast<AAssaultItem>(PickedItem)) || IsValid(Cast<ADebuffItem>(PickedItem))) {
 					BattleManager->IsSelectingAllyAsTarget = false;
-					for (ACombatNPC* EnemyNPC : BattleManager->BattleEnemies)
-						if (EnemyNPC->CurrentHP > 0) {
-							BattleManager->SelectedCombatNPC = EnemyNPC;
-							BattleMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(EnemyNPC->GetCharacterName()));
+					for (int8 Index = 0; Index < BattleManager->BattleEnemies.Num(); Index++)
+						if (BattleManager->BattleEnemies[Index]->CurrentHP > 0) {
+							BattleManager->SelectedCombatNPC = BattleManager->BattleEnemies[Index];
+							BattleMenu->GetEnemyNameTextBlock()->SetText(FText::FromName(BattleManager->BattleEnemies[Index]->GetCharacterName()));
+							BattleManager->SelectedCombatNPCIndex = Index;
 							break;
 						}
 				}
@@ -789,7 +827,6 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 				BattleMenu->IsPreparingToAttack = true;
 				BattleMenu->IsChoosingItem = false;
 				BattleMenu->IsAttackingWithItem = true;
-				BattleManager->SelectedCombatNPCIndex = 0;
 				this->RemoveFromParent();
 				BattleMenu->GetEnemyNameBorder()->SetVisibility(ESlateVisibility::Visible);
 				//Depending on the item's range, we need to turn on additional target selection
@@ -798,12 +835,10 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 				//Add BattleEnemies in a loop, cause we need to convert them to the ACombatNPC.
 				if (BattleManager->IsSelectingAllyAsTarget) {
 					for (ACombatNPC* CombatNPC : BattleManager->BattleAlliesPlayer)
-						if (CombatNPC->CurrentHP > 0)
 							TargetsForSelection.Add(CombatNPC);
 				}
 				else if (!BattleManager->IsSelectingAllyAsTarget)
 					for (ACombatNPC* CombatNPC : BattleManager->BattleEnemies)
-						if(CombatNPC->CurrentHP > 0)
 							TargetsForSelection.Add(CombatNPC);
 				//We can restore mana to allies or hp or deal damage, so we need to decide whether show the mana or the health bar.
 				FString BarToShow{};
@@ -824,9 +859,9 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 						if (TargetsForSelection.Num() > 1) {
 							if (IsValid(BattleManager->SelectedCombatNPC)) 
 								UIActions::SetCrosshairAndManaHealthBarsVisibility(BattleManager->SelectedCombatNPC, BarToShow);
-							if (BattleManager->SelectedCombatNPCIndex - 1 >= 0)
+							if (BattleManager->SelectedCombatNPCIndex - 1 >= 0 && TargetsForSelection[BattleManager->SelectedCombatNPCIndex - 1]->CurrentHP > 0)
 								UIActions::SetCrosshairAndManaHealthBarsVisibility(TargetsForSelection[BattleManager->SelectedCombatNPCIndex - 1], BarToShow);
-							if (BattleManager->SelectedCombatNPCIndex + 1 < TargetsForSelection.Num())
+							if (BattleManager->SelectedCombatNPCIndex + 1 < TargetsForSelection.Num() && TargetsForSelection[BattleManager->SelectedCombatNPCIndex + 1]->CurrentHP > 0)
 								UIActions::SetCrosshairAndManaHealthBarsVisibility(TargetsForSelection[BattleManager->SelectedCombatNPCIndex + 1], BarToShow);
 						}
 						else {
@@ -836,7 +871,8 @@ void UInventoryMenu::BattleMenuItemsUseButtonOnClicked()
 						break;
 					case EItemRange::EVERYONE:
 						for (ACombatNPC* Target : TargetsForSelection)
-							UIActions::SetCrosshairAndManaHealthBarsVisibility(Target, BarToShow);
+							if(Target->CurrentHP>0)
+								UIActions::SetCrosshairAndManaHealthBarsVisibility(Target, BarToShow);
 				}
 				BattleMenu->GetAttackMenuBorder()->SetVisibility(ESlateVisibility::Visible);
 				BattleMenu->GetLeftRightMenuBorder()->SetVisibility(ESlateVisibility::Visible);

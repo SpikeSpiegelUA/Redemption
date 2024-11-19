@@ -18,9 +18,8 @@ UBTTask_EndDialogue::UBTTask_EndDialogue(const FObjectInitializer& ObjectInitial
 EBTNodeResult::Type UBTTask_EndDialogue::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	const UBlackboardComponent* MyBlackboard = OwnerComp.GetBlackboardComponent();
-	AAIController* MyController = OwnerComp.GetAIOwner();
 	APlayerController* PlayerController = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
-	if (!IsValid(MyController) || !IsValid(MyBlackboard) || !IsValid(PlayerController))
+	if (!IsValid(MyBlackboard) || !IsValid(PlayerController))
 		return EBTNodeResult::Failed;
 
 	UDialogueBox* DialogueBoxWidget = Cast<UDialogueBox>(MyBlackboard->GetValueAsObject(DialogueBoxWidgetKeySelector.SelectedKeyName));
@@ -31,7 +30,7 @@ EBTNodeResult::Type UBTTask_EndDialogue::ExecuteTask(UBehaviorTreeComponent& Own
 	UUIManagerWorldSubsystem* const UIManagerWorldSubsystem = GetWorld()->GetSubsystem<UUIManagerWorldSubsystem>();
 	APlayerCharacter* PlayerCharacter = nullptr;
 	if (GetWorld())
-		PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+		PlayerCharacter = Cast<APlayerCharacter>(PlayerController->GetCharacter());
 	if (!IsValid(PlayerCharacter) || !IsValid(UIManagerWorldSubsystem))
 		return EBTNodeResult::Failed;
 
@@ -48,11 +47,8 @@ EBTNodeResult::Type UBTTask_EndDialogue::ExecuteTask(UBehaviorTreeComponent& Own
 	PlayerCharacter->EnableInput(PlayerController);
 	//PlayerController->ActivateTouchInterface(PlayerCharacter->GetStandardTouchInterface());
 
-	for (int8 Index = UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->GetAllChildren().Num() - 1; Index >= 0; Index--)
-		UIManagerWorldSubsystem->ResponsesBoxWidget->GetResponseVerticalBox()->GetChildAt(Index)->RemoveFromParent();
+	UIManagerWorldSubsystem->DialogueBoxWidget->GetResponseVerticalBox()->ClearChildren();
 
-	UIManagerWorldSubsystem->ResponsesBoxWidget->ConditionalBeginDestroy();
-	UIManagerWorldSubsystem->ResponsesBoxWidget = nullptr;
 	UIManagerWorldSubsystem->DialogueBoxWidget->ConditionalBeginDestroy();
 	UIManagerWorldSubsystem->DialogueBoxWidget = nullptr;
 

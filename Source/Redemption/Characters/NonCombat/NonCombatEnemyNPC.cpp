@@ -8,6 +8,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "..\GameInstance\RedemptionGameInstance.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
+#include "Redemption/Miscellaneous/RedemptionGameModeBase.h"
+#include "Redemption/Dynamics/Gameplay/Managers/GameManager.h"
 
 ANonCombatEnemyNPC::ANonCombatEnemyNPC()
 {
@@ -23,7 +25,7 @@ void ANonCombatEnemyNPC::BeginPlay()
 	ForwardMarker = Cast<UBoxComponent>(GetComponentByClass(UBoxComponent::StaticClass()));
 	Player = GetWorld()->GetFirstPlayerController()->GetPawn();
 	NonCombatEnemyNPCAIController = Cast<ANonCombatEnemyNPCAIController>(this->GetController());
-
+	ensure(NonCombatEnemyNPCAIController);
 	//Set up properties for NonCombatEnemyDetectionBarWidget
 	NonCombatEnemyDetectionBarComponentWidget->SetWidgetClass(NonCombatEnemyDetectionBarClass);
 	NonCombatEnemyDetectionBarWidget = Cast<UNonCombatEnemyDetectionBarWidget>(NonCombatEnemyDetectionBarComponentWidget->GetWidget());
@@ -71,10 +73,18 @@ void ANonCombatEnemyNPC::LoadObjectFromGameInstance_Implementation(const URedemp
 				// Convert binary array back into actor's variables
 				Serialize(Ar);
 				ToBeDestroyed = false;
+				if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
+					if (const auto* const GameManager = RedemptionGameModeBase->GetGameManager(); IsValid(GameManager)) {
+						FActorSpawnParameters ActorSpawnParameters{};
+						SmartObject = GetWorld()->SpawnActor<ASmartObject>(GameManager->NonCombatEnemyNPCSmartObjectClass, ActorSpawnParameters);
+						NonCombatEnemyNPCAIController->SetDynamicSubtree();
+					}
+				}
 				break;
 			}
-		if (ToBeDestroyed && ActorGameInstanceDataArray.Num() > 0)
-			Destroy();
+		if (const auto* const GameMode = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(GameMode))
+			if (ToBeDestroyed && ActorGameInstanceDataArray.Num() > 0 && !GameMode->Midgame)
+				Destroy();
 	}
 }
 

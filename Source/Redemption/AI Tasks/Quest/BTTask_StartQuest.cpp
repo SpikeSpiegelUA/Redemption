@@ -25,7 +25,7 @@ EBTNodeResult::Type UBTTask_StartQuest::ExecuteTask(UBehaviorTreeComponent& Owne
 	if (!IsValid(QuestManager))
 		return EBTNodeResult::Failed;
 
-	QuestManager->ActivateNewQuest(QuestClass);
+	QuestManager->ActivateNewQuest(QuestClass, QuestStageToStart);
 
 	return EBTNodeResult::Succeeded;
 }

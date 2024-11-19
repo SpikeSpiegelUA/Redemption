@@ -25,5 +25,4 @@ public:
 	ATownNPCAIController(const FObjectInitializer& ObjectInitializer);
 
 	void StartADialogue();
-
 };
