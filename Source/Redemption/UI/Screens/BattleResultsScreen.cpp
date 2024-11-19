@@ -180,7 +180,7 @@ void UBattleResultsScreen::SetCharacterInfo(ACombatAllies* const CombatAllyToSet
 				TotalCharacterSkillsLevelUp += 1;
 				CombatAllyToSetInfo->AddSkills(CharacterSkill, 1);
 			}
-			if (RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->GetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpMelee)) {
+			if (CombatAllyToSetInfo->WasSkillLeveledUp()) {
 				LevelingUpEntryWidget = CreateWidget<ULevelingUpEntry>(Cast<APlayerController>(GetWorld()->GetFirstPlayerController()), LevelingUpEntryClass);
 				if (IsValid(LevelingUpEntryWidget)) {
 					FText EnumDisplayValue{};

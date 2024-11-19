@@ -36,7 +36,7 @@ EBTNodeResult::Type UBTTask_AskToLeave::ExecuteTask(UBehaviorTreeComponent& Owne
 		BlackboardComponent->SetValueAsBool("PassedDialogueCheck", true);
 		UIManagerWorldSubsystem->DialogueBoxWidget->SetDialogueText(NPCAgreeText);
 		if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
-			RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->AddSkillsProgress(ECharacterSkills::PERSUASION, 1000);
+			RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->AddSkillsProgress(ECharacterSkills::PERSUASION, 100);
 			RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpPersuasion, true);
 		}
 	}

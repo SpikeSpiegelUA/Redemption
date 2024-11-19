@@ -130,6 +130,27 @@ const bool ACombatAllies::GetSkillsLeveledUp(const ESkillsLeveledUp SkillToGet) 
 	return BitmapsActions::TestBit(SkillsLeveledUpBitmaskCode, static_cast<int32>(SkillToGet));
 }
 
+const bool ACombatAllies::WasSkillLeveledUp() const
+{
+	if (BitmapsActions::TestBit(SkillsLeveledUpBitmaskCode, static_cast<int32>(ESkillsLeveledUp::SkillsLeveledUpMelee)))
+		return true;
+	if (BitmapsActions::TestBit(SkillsLeveledUpBitmaskCode, static_cast<int32>(ESkillsLeveledUp::SkillsLeveledUpRange)))
+		return true;
+	if (BitmapsActions::TestBit(SkillsLeveledUpBitmaskCode, static_cast<int32>(ESkillsLeveledUp::SkillsLeveledUpDefend)))
+		return true;
+	if (BitmapsActions::TestBit(SkillsLeveledUpBitmaskCode, static_cast<int32>(ESkillsLeveledUp::SkillsLeveledUpAssaultSpells)))
+		return true;
+	if (BitmapsActions::TestBit(SkillsLeveledUpBitmaskCode, static_cast<int32>(ESkillsLeveledUp::SkillsLeveledUpBuffSpells)))
+		return true;
+	if (BitmapsActions::TestBit(SkillsLeveledUpBitmaskCode, static_cast<int32>(ESkillsLeveledUp::SkillsLeveledUpRestorationSpells)))
+		return true;
+	if (BitmapsActions::TestBit(SkillsLeveledUpBitmaskCode, static_cast<int32>(ESkillsLeveledUp::SkillsLeveledUpDebuffSpells)))
+		return true;
+	if (BitmapsActions::TestBit(SkillsLeveledUpBitmaskCode, static_cast<int32>(ESkillsLeveledUp::SkillsLeveledUpPersuasion)))
+		return true;
+	return false;
+}
+
 const UTexture* ACombatAllies::GetCharacterPortrait() const
 {
 	return CharacterPortrait;
