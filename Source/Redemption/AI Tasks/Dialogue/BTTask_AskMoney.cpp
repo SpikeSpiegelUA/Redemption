@@ -44,7 +44,7 @@ EBTNodeResult::Type UBTTask_AskMoney::ExecuteTask(UBehaviorTreeComponent& OwnerC
 		PlayerCharacter->Gold += RandomSumOfMoney;
 		CombatEnemyNPC->AskMoneyItemSuccessChance -= 10;
 		if (const auto* const RedemptionGameModeBase = Cast<ARedemptionGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())); IsValid(RedemptionGameModeBase)) {
-			RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->AddSkillsProgress(ECharacterSkills::PERSUASION, 1000);
+			RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->AddSkillsProgress(ECharacterSkills::PERSUASION, 100);
 			RedemptionGameModeBase->GetBattleManager()->CombatPlayerCharacter->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpPersuasion, true);
 		}
 	}

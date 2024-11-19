@@ -93,6 +93,7 @@ public:
 	void SetSkillsProgress(const ECharacterSkills SkillToGet, const int16 NewValue);
 
 	const bool GetSkillsLeveledUp(const ESkillsLeveledUp SkillToGet) const;
+	const bool WasSkillLeveledUp() const;
 	void SetSkillsLeveledUp(const ESkillsLeveledUp SkillToSet, const bool Value);
 
 	void AddSkillsProgress(const ECharacterSkills SkillToAddTo, const int16 ValueToAdd);

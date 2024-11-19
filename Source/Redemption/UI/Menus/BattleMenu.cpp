@@ -283,7 +283,7 @@ void UBattleMenu::DefendButtonOnClicked()
 					UIManagerWorldSubsystem->PickedButton->SetBackgroundColor(FColor(1, 1, 1, 1));
 				DefendButton->SetBackgroundColor(FLinearColor(1, 1, 1, 1));
 				if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(CurrentTurnAllyPlayer); IsValid(CombatAllies)) {
-					CombatAllies->AddSkillsProgress(ECharacterSkills::DEFEND, 1000);
+					CombatAllies->AddSkillsProgress(ECharacterSkills::DEFEND, 100);
 					CombatAllies->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpDefend, true);
 				}
 			}
@@ -561,7 +561,7 @@ void UBattleMenu::AttackTalkInfoActionButtonOnClicked()
 						CurrentTurnAlliesNPC->GetRangeWeaponElements(), CurrentTurnAlliesNPC->GetRangePhysicalType(), 
 						CurrentTurnAlliesNPC->GetSkill(ECharacterSkills::RANGE), CurrentTurnAlliesNPC->GetStat(ECharacterStats::AGILITY), true);
 				if (GotHit) {
-					CurrentTurnAlliesNPC->AddSkillsProgress(ECharacterSkills::RANGE, 1000);
+					CurrentTurnAlliesNPC->AddSkillsProgress(ECharacterSkills::RANGE, 100);
 					CurrentTurnAlliesNPC->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpRange, true);
 				}
 				CurrentTurnAlliesNPC->GetRangeAmmo();
@@ -740,7 +740,7 @@ bool UBattleMenu::RestorationSpellUse(const class ARestorationSpell* const Spell
 		}
 		UIManagerWorldSubsystem->SpellBattleMenuWidget->Reset(true);
 		if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(CurrentTurnNPC); IsValid(CombatAllies)) {
-			CombatAllies->AddSkillsProgress(ECharacterSkills::RESTORATIONSPELLS, 1000);
+			CombatAllies->AddSkillsProgress(ECharacterSkills::RESTORATIONSPELLS, 100);
 			CombatAllies->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpRestorationSpells, true);
 		}
 		return true;
@@ -765,7 +765,7 @@ bool UBattleMenu::BuffSpellUse(const class ACreatedBuffSpell* const SpellToUse, 
 				ElementsActions::FindContainedElements(SpellToUse->GetSpellElements()), CurrentTurnAlliesNPC->GetSkill(ECharacterSkills::BUFFSPELLS), 
 				CurrentTurnAlliesNPC->GetStat(ECharacterStats::INTELLIGENCE), CurrentTurnAlliesNPC, SpellToUse->GetTypeOfSpell()))
 					if (ACombatAllies* const CombatAllies = Cast<ACombatAllies>(CurrentTurnNPC); IsValid(CombatAllies)) {
-						CombatAllies->AddSkillsProgress(ECharacterSkills::BUFFSPELLS, 1000);
+						CombatAllies->AddSkillsProgress(ECharacterSkills::BUFFSPELLS, 100);
 						CombatAllies->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpBuffSpells, true);
 					}
 		}

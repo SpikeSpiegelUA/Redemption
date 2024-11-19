@@ -26,7 +26,7 @@ void UAnimNotify_AlliesMAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 				CombatAllyPlayer->GetMeleeWeaponElements(), EPhysicalType::NONE, CombatAllyPlayer->GetSkill(ECharacterSkills::MELEE), 
 				CombatAllyPlayer->GetStat(ECharacterStats::STRENGTH),  false);
 			if (Hit) {
-				CombatAllyPlayer->AddSkillsProgress(ECharacterSkills::MELEE, 1000);
+				CombatAllyPlayer->AddSkillsProgress(ECharacterSkills::MELEE, 100);
 				CombatAllyPlayer->SetSkillsLeveledUp(ESkillsLeveledUp::SkillsLeveledUpMelee, true);
 			}
 			UIManagerWorldSubsystem->BattleMenuWidget->IsAttackingWithMelee = false;
