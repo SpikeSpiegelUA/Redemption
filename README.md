@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/b012b2ad-daa6-4835-ad2d-826ca18e0de3)# Redemption
+# Redemption
 Unreal Engine 5 RPG with a turn-based combat
 
 Open the Source->Redemption folder to see the codebase. The entire codebase is written by me. The game was in development for approximately 2 years, from 2023 to 2024.
@@ -12,6 +12,8 @@ Main Features:
 -Сomplex spell crafting system.
 
 Some screenshots from the game:
+![image](https://github.com/user-attachments/assets/b012b2ad-daa6-4835-ad2d-826ca18e0de3)
+
 ![image](https://github.com/user-attachments/assets/9c0ccbdb-0d81-413f-8bcd-9c567b05677a)
 
 ![image](https://github.com/user-attachments/assets/e7287645-bf44-447e-a0ac-815d80788a77)
